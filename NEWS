@@ -1,0 +1,282 @@
+THIS IS THE CHANGELOG OF THE "embryogrowth" PACKAGE
+
+Please note that only the most significant changes are reported here.
+All the changes are indicated inside the R code.
+
+          CHANGES IN VERSION 5.0    (2014-08-15)
+
+* New bibliographic references and first version in CRAN
+* Remove parallel computing option for Windows
+* Remove local update
+
+          CHANGES IN VERSION 4.14    (2014-06-14)
+
+* Correct bug for Richards equation in tsd and predict.tsd() works faster
+
+          CHANGES IN VERSION 4.09-4.13    (2014-06-11)
+
+* New function logLik() applied to NestsResult and tsd
+* New version of STRES_TSD
+* No return line from plot()
+* x-axis is returned correctly after plotR_hist()
+
+          CHANGES IN VERSION 4.05-4.08    (2014-06-03)
+
+* predict.tsd() is more rapid and can be used without CI
+* New version of STRES_TSD
+* remove dependency of many packages
+* new parameter lwd and lwdCI for plotR() and plotR_hist() 
+
+          CHANGES IN VERSION 4.04    (2014-04-14)
+
+* Correct a warning in plotR() when Scale is used
+* Correct a bug in plot.nestresult() when for special length of time series
+
+          CHANGES IN VERSION 4.01-4.03    (2014-03-05)
+
+* 1000 iterations are allowed for tsd() and test if convergence is reached
+* new way to define initial P value for tsd()
+* new automatic xlim for tsd() function to show all TRT 
+* many changes in shiny code. Remove visibility of ShinyEmbryogrowth()
+
+          CHANGES IN VERSION 4.00    (2014-03-02)
+
+* shiny application is included. Call it using ShinyEmbryogrowth()
+
+          CHANGES IN VERSION 3.02    (2014-03-01)
+
+* mcmc results for anchored parameters use 10000 iterations
+* Correct a warning when there is no variability in TSP
+
+          CHANGES IN VERSION 3.01    (2014-02-12)
+
+* Possible to save intermediate results during fitting
+
+          CHANGES IN VERSION 3.00    (2014-02-08)
+
+* Possibility to define R by anchor of loess fitting
+
+          CHANGES IN VERSION 2.30    (2014-02-02)
+
+* New version with corrected rK value
+* weight parameter is store in result of searchR() and used for mcmc
+* Add the function switch.transition()
+* New function merge.mcmcComposite() to merge two objects mcmcComposite
+
+          CHANGES IN VERSION 2.28    (2014-01-24)
+
+* Correct a bug in movingincubation()
+
+          CHANGES IN VERSION 2.27    (2014-01-23)
+
+* Correct a bug in movingincubation()
+* Predict method for tsd
+
+          CHANGES IN VERSION 2.26    (2014-01-22)
+
+* Add SE for weight temperature by growth during TSP and mean temperature during TSP
+* Add SE for borders of TSP
+* Store weighted temperature by growth during TSP for movingincubation()
+
+          CHANGES IN VERSION 2.25    (2014-01-21)
+
+* Calculate mean temperature in middle-third of incubation and weight temperature by growth during TSP
+
+          CHANGES IN VERSION 2.24    (2014-01-16)
+
+* New function to change from 4p to 6p parameters functions and reverse
+
+          CHANGES IN VERSION 2.23    (2014-01-08)
+
+* Correct a bug for linear or exponential derivative and parallel computing
+* Add mar parameter for plot.NestResults()
+
+           CHANGES IN VERSION 2.22    (2013-12-22)
+
+* TRT is calculated for Hill and Richards equations in tsd() function
+* Limits and their standard errors are calculated in tsd()
+
+           CHANGES IN VERSION 2.21    (2013-11-22)
+
+* GSD, Hill and Richards equations are included in tsd() function
+* Many improvments for tsd() function
+
+           CHANGES IN VERSION 2.19-2.20    (2013-09-26)
+
+* In MovingIncubation(), a timesseries at the end of incubation can be provided to model the metabolic heating
+* SE of parameters are used if replicate.CI is different from 0
+
+           CHANGES IN VERSION 2.18    (2013-09-09)
+
+* Correction of bug in generateIL.df and info.nests
+* generateIL.df renamed GenerateConstInc
+* New parameter xlimR to show only part of R function in plotR and plotR_hist
+
+           CHANGES IN VERSION 2.17    (2013-08-20)
+
+* hist.nests and hist.nestsresults return a list with the complete set of temperatures
+
+           CHANGES IN VERSION 2.16    (2013-07-01)
+
+* New function generateIL.df
+
+           CHANGES IN VERSION 2.15    (2013-06-25)
+
+* New parameter OutPlot for plot.NestsResult()
+
+           CHANGES IN VERSION 2.15    (2013-06-24)
+
+* Correct a bug for mean temperature of a nest
+
+           CHANGES IN VERSION 2.14    (2013-06-23)
+
+* New version of uploading to ESE server after building package
+* New parameter col for Entropy
+* Output of tsd() takes into account that the regressor could be not the temperature
+
+           CHANGES IN VERSION 2.11    (2013-06-11)
+
+* Better format for examples
+
+           CHANGES IN VERSION 2.10    (2013-04-08)
+           
+* New parameter for embryogrowth_MHmcmc_p() to automatically accept proposed priors
+* New parameter echo for likelihoodR()
+
+           CHANGES IN VERSION 2.09    (2013-04-04)
+           
+* Correct a bug in mean.temperature and mean.temperature.TSP in info.nest() and plot()
+* Add a parameter to plotR() to manage where to display information "mean" and "confidence interval"
+
+           CHANGES IN VERSION 2.08    (2013-04-04)
+           
+* Correct a bug in plotR_hist() if parameters for plotR() were used
+* Add the progress parameter in info.nests
+* Calculte the mean temperature during all incubation in info.nest() and plot()
+
+           CHANGES IN VERSION 2.07    (2013-02-21)
+           
+* Parameter weight is added in FormatNests(), searchR() and likelihoodR()
+* Correct the test in SearchR() to be sure that fixed and fitted parameters are not duplicated
+* New function weightmaxentropy() which searches for the relative weights for each nest to maximize entropy
+* New database fitted with weight
+
+            CHANGES IN VERSION 2.06    (2013-02-15)
+           
+* Correct Movingincubation() to take into account the _L list return by .SSM()
+* Correct plot.NestsResult() for truncated numbers
+* as.par.mcmcComposite() and as.mcmc.mcmcComposite() are transfered to the package phenology.
+* Loading of package does not failed if the description is not available online.
+* Movingincubation() returns a dataframe with time and length of TSP
+
+            CHANGES IN VERSION 2.05    (2013-01-27)
+           
+* many minor changes in plot.NestsResult for better ylimS managment and to prevent an error when no SD is available
+
+           CHANGES IN VERSION 2.04    (2013-01-09)
+           
+* tsd() show the complete curve depending on xlim parameter
+* plot.NestsResult returns a list with two objects: summary with the summary statistics for each nest and traces with the change of length or mass for each nest
+
+           CHANGES IN VERSION 2.00-2.03    (2013-01-02)
+           
+* Embryo growth can be modeled using two sets of equations, one for early development and one for late development
+* as.mcmc() can be used with mcmcComposite objects
+* library zoo is required to use na.locf()
+* Add the function tsd() to fit data of temperature-dependent sex determination
+* Correction of bug for show.box and ylimH parameters in plotR() and plotR_hist()
+
+           CHANGES IN VERSION 1.23    (2012-11-11)
+
+* New parameter for plot(NestsResult): ref.stage=TRUE ou FALSE
+* Modeled size at the end of incubation and likelihood for each nest are returned by plot()
+
+           CHANGES IN VERSION 1.22    (2012-11-09)
+
+* New function MovingIncubation() to run the model day by day on a timeseries
+* summary() for Nests objects
+* Add simplify=TRUE for FormatNests()
+* mcmc data for 6p: result_mcmc_6p_80
+* Correct scale of x axis for histogram and add legend for Y axis in plotR_hist()
+* Legends are not drawn twice in plotR() with lists
+* Initial point is taken into account for as.par.mcmcComposite()
+
+           CHANGES IN VERSION 1.20-1.21    (2012-11-01)
+
+* Update can use install_url() from package devtools
+* New function GenerateTest(series, size, previous) to generate test parameter for searchR()
+* Color of embryo mass in plot can be changed using a vector of colors
+
+           CHANGES IN VERSION 1.14-1.19    (2012-10-31)
+
+* Remove the use of .EGR.env environment for searchR() in 1.14 and in plot() in 1.17
+* Package can load when no internet connection is available
+* Add a function testParallel() to evaluate if the option parallel is interesting for the running system
+* Add class mcmcComposite to result of embryogrowth_MHmcmc()
+* Add BatchSE and TimeSeriesSE elements of the output of embryogrowth_MHmcmc()
+* New function plotR_hist() to display both RGraph and hist of temperatures
+* Rename as_mcmc() to as.mcmc2.mcmcComposite()
+* New function as.par.mcmcComposite() to get parameters at maximum likelihood from mcmcComposite object
+* Add a parameter force=TRUE or FALSE to force update
+
+           CHANGES IN VERSION 1.11-1.13     (2012-10-23)
+
+* Rename extractMCMC() to as_mcmc()
+* Correct a bias when the temperature reaches a maximum or minimum
+* Allow parallel computing to be disabled
+
+           CHANGES IN VERSION 1.10      (2012-10-21)
+
+* Uses parallel computing for searchR() and embryogrowth_MHmcmc()
+
+           CHANGES IN VERSION 1.09      (2012-10-19)
+
+* New functions: extractMCMC() to be used with mcmcComposite objects to get an object to be use with coda package
+* New functions: embryogrowthUpdate() to update package
+* Package version is checked at package loading
+* Add the defaults plot parameters for plotR()
+* Possible to plot several growth rates using list objects
+* Correct a bias when the temperatures always increase or decrease during incubation
+
+           CHANGES IN VERSION 1.08      (2012-10-07)
+
+* Use mcmc methods from phenology package
+
+           CHANGES IN VERSION 1.07      (2012-10-06)
+
+* Remove plotnest() and plotMHmcmc() function to keep only plot().
+* If optimization is not finished after maxiter, it shows the value of fitted parameters and continues.
+* Change mcmcNests class to mcmcComposite.
+* plot.Nests() returns also the mean temperature within the TSP.
+* The package is renamed embryogrowth
+* The objects wihtin the mcmcComposite object are mcmc and mcmc.list objects
+* Add a method summary of mcmcComposite object
+ 
+ CHANGES IN VERSION 1.04      (2012-05-28 -> 2012-07-28)
+
+* Add the possibility to use fixed parameters
+* Add the three new class: mcmcNests, Nests and NestsResult
+* Add Bayesian MCMC script and plot of MCMC
+* Many minor changes for speed improvment
+* Some bug corrections
+* Change T12H for 6-parameters equation to DT
+* Catch the error of singularity of matrix
+* Better managment of test size if the temperatures are changed
+
+           CHANGES IN VERSION 1.05      (2012-07-30)
+
+* The MHMCMC algorithm can now be used by other packages.
+* hist.NestsResult uses the same script as hist.Nests
+* plot gives information on the position of first and second third and Sum of Square difference between these and the position of stages 21 and 26.
+
+            CHANGES IN VERSION 1.00-1.03 (2012-05-27)
+
+* first versions as a package. New functions added sequentially.
+
+
+
+
+
+
+
+

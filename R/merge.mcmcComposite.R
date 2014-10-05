@@ -9,12 +9,15 @@
 #' @examples
 #' \dontrun{
 #' data(result_mcmc_4p)
-#' # Of course you must do it with two different mcmc objects !
-#' result_mcmc <- merge.mcmcComposite(result_mcmc_4p, result_mcmc_4p)
+#' # Of course, normally you should do it with two different mcmc objects !
+#' result_mcmc <- merge(result_mcmc_4p, result_mcmc_4p)
 #' }
+#' @method merge mcmcComposite
 #' @export
 
 merge.mcmcComposite <- function(x, y, ...) {
+  
+  require("coda")
   
   mcmcComposite1 <- x
   mcmcComposite2 <- y
@@ -26,7 +29,7 @@ merge.mcmcComposite <- function(x, y, ...) {
   
   mcmcComposite <- mcmcComposite1
   for (chain in 1:mcmcComposite1$parametersMCMC$n.chains) {
-  mcmcComposite$resultMCMC[[chain]] <- mcmc(rbind(mcmcComposite1$resultMCMC[[chain]], 
+  mcmcComposite$resultMCMC[[chain]] <- coda::mcmc(rbind(mcmcComposite1$resultMCMC[[chain]], 
                                              mcmcComposite2$resultMCMC[[chain]]), 1, 
                                             mcmcComposite1$parametersMCMC$n.iter+
                                               mcmcComposite2$parametersMCMC$n.iter, 1)
@@ -38,9 +41,9 @@ merge.mcmcComposite <- function(x, y, ...) {
   mcmcComposite$parametersMCMC$n.iter <- mcmcComposite1$parametersMCMC$n.iter+
     mcmcComposite2$parametersMCMC$n.iter
   
-  e <- as.mcmc(mcmcComposite)
+  e <- mcmcComposite$resultMCMC
   
-  mcmcComposite$BatchSE <- batchSE(e)
+  mcmcComposite$BatchSE <- coda::batchSE(e)
   mcmcComposite$TimeSeriesSE <- summary(e)$statistics[,"Time-series SE"]
   return(mcmcComposite)
 }

@@ -1,5 +1,5 @@
 
 
 .hessianRichardson<-function(x, pt) {
-	return(hessian(.fonctionfit, x, method="Richardson", pt=pt))
+	return(numDeriv::hessian(.fonctionfit, x, method="Richardson", pt=pt))
 	}

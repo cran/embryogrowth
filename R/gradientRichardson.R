@@ -1,4 +1,4 @@
 
 .gradientRichardson<-function(x, pt) {
-	return(grad(.fonctionfit, x, method="Richardson", pt=pt))
+	return(numDeriv::grad(.fonctionfit, x, method="Richardson", pt=pt))
 	}

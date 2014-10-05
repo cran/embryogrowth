@@ -8,7 +8,7 @@
 #' @param derivate Function used to fit embryo growth: dydt.Gompertz, dydt.exponential or dydt.linear
 #' @param test Mean and SD of size of hatchlings
 #' @param M0 Measure of hatchling size or mass proxi at laying date
-#' @param method Method uses for searching. Can be "x" then it uses "Nelder-Mead" and "BFGS", or any method from optim function
+#' @param method Method uses for searching. Can be any method from optim function
 #' @param maxiter After maxiter iteration, the value of parameters is displayed but it continues if convergence is not acheived
 #' @param saveAtMaxiter If True, each time number of interation reach maxiter, current data are saved in file with filename name
 #' @param fileName The intermediate results are saved in file with fileName.Rdata name
@@ -80,8 +80,17 @@ function(parameters=stop('Initial set of parameters must be provided'),
 	
 	if (parallel & (.Platform$OS.type!="unix")) {
 		parallel <- FALSE
-		warning("Parallel computing has been disabled for Windows")
+		warning("Parallel computing is not available for Windows")
 	}
+  
+	if (!requireNamespace("numDeriv", quietly = TRUE)) {
+	  warning("numDeriv package is absent; less accurate fitting method will be used and SE of parameters cannot be calculated")
+	  numDeriv <- FALSE
+    hessian <- FALSE
+	} else {
+	  numDeriv <- TRUE
+	}
+	
 	
 NbTS <- temperatures$IndiceT[3]
 	
@@ -142,30 +151,15 @@ ptec <- list(temperatures=temperatures, derivate=derivate, weight=weight,
 
 repeat {
 
-	if (method=="x") {
-    
-	  if (any(installed.packages()[,1]=="optimx")) {
-	    require("optimx") } else {
-	      warning("optimx package is necessary for this function")
-	      return()
-	    }
-    
-	res=optimx(parameters, .fonctionfit, pt=ptec, 
-	gr=.gradientRichardson, hess=.hessianRichardson, method=c("Nelder-Mead","BFGS"), itnmax=maxiter, hessian=FALSE, control=list(trace=2, REPORT=1))
-	resNM<-res[["Nelder-Mead"]]
-	resBFGS<-res[["BFGS"]]
-
-	if (resNM$fvalue < resBFGS$fvalue) {
-			result<-resNM
-		} else {
-			result<-resBFGS
-		}
-
-	} else {
-		result=optim(parameters, .fonctionfit, pt=ptec,
-		gr=.gradientRichardson, method=method, control=list(trace=2, REPORT=1, maxit=maxiter), hessian=FALSE)
-	}
-
+# 30/8/2014 - Je retire optimx
+  if (numDeriv) {
+	result=optim(parameters, .fonctionfit, pt=ptec,
+               gr=.gradientRichardson, method=method, 
+               control=list(trace=2, REPORT=1, maxit=maxiter), hessian=FALSE)
+} else {
+  result=optim(parameters, .fonctionfit, pt=ptec,
+               method=method, control=list(trace=2, REPORT=1, maxit=maxiter), hessian=FALSE)
+}
 	if (result$convergence==0) break
 	parameters<-result$par
 	print("Convergence is not achieved. Optimization continues !")
@@ -198,8 +192,6 @@ if (hessian) {
 		res <- diag(inversemathessian)
 	}
 
-
-	
 	# Je gère plus correctement les erreurs - 17/7/2012
 
 	neg=any(res<0)

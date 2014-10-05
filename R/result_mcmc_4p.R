@@ -4,9 +4,9 @@
 #' @docType data
 #' @name result_mcmc_4p
 #' @description Fit using the nest database
-#' @references Girondot, M. & Kaska, Y. Submitted. A model to predict 
-#'             temperature dependency on embryo growth rate and incubation
-#'             duration from field data.
+#' @references Girondot, M. & Kaska, Y. In press. A model to predict the thermal 
+#'          reaction norm for the embryo growth rate from field data. Journal of
+#'          Thermal Biology. In press
 #' @keywords datasets
 #' @usage result_mcmc_4p
 #' @examples

@@ -1,5 +1,5 @@
-#' embryogrowth_MHmcmc runs the Metropolis-Hastings algorithm for data (Bayesian MCMC)
-#' @title Run the Metropolis-Hastings algorithm for data
+#' tsd_MHmcmc runs the Metropolis-Hastings algorithm for tsd (Bayesian MCMC)
+#' @title Run the Metropolis-Hastings algorithm for tsd
 #' @author Marc Girondot
 #' @return A list with resultMCMC being mcmc.list object, resultLnL being likelihoods and parametersMCMC being the parameters used
 #' @param n.iter Number of iterations for each step
@@ -10,8 +10,7 @@
 #' @param thin Number of iterations between each stored output
 #' @param trace True or False, shows progress
 #' @param batchSize Number of observations to include in each batch fo SE estimation
-#' @param parallel If true, try to use several cores using parallel computing.
-#' @description Run the Metropolis-Hastings algorithm for data.\cr
+#' @description Run the Metropolis-Hastings algorithm for tsd.\cr
 #' Deeply modified from a MCMC script by Olivier Martin (INRA, Paris-Grignon).\cr
 #' The number of iterations is n.iter+n.adapt+1 because the initial likelihood is also displayed.\cr
 #' I recommend that thin=1 because the method to estimate SE uses resampling.\cr
@@ -26,53 +25,36 @@
 #' @examples
 #' \dontrun{
 #' library(embryogrowth)
-#' data(nest)
-#' formated <- FormatNests(nest)
-#' # The initial parameters value can be:
-#' # "T12H", "DHA",  "DHH", "Rho25"
-#' # Or
-#' # "T12L", "T12H", "DHA",  "DHH", "DHL", "Rho25"
-#' x <- structure(c(118.768297442004, 475.750095909406, 306.243694918151, 
-#' 116.055824800264), .Names = c("DHA", "DHH", "T12H", "Rho25"))
-#' # pfixed <- c(K=82.33) or rK=82.33/39.33
-#' pfixed <- c(rK=2.093313)
-#' resultNest_4p <- searchR(parameters=x, fixed.parameters=pfixed,  
-#' 	temperatures=formated, derivate=dydt.Gompertz, M0=1.7,  
-#' 	test=c(Mean=39.33, SD=1.92), method = "BFGS", maxiter = 200)
-#' data(resultNest_4p)
-#' pMCMC <- embryogrowth_MHmcmc_p(resultNest_4p, accept=TRUE)
+#' eo <- subset(STSRE_TSD, Species=="Emys orbicularis", c("Males", "Females", 
+#'                                        "Incubation.temperature"))
+#' eo_logistic <- tsd(eo)
+#' pMCMC <- tsd_MHmcmc_p(eo_logistic, accept=TRUE)
 #' # Take care, it can be very long; several days
-#' result_mcmc_4p <- embryogrowth_MHmcmc(result=resultNest_4p, 
+#' result_mcmc_tsd <- tsd_MHmcmc(result=eo_logistic, 
 #' 		parametersMCMC=pMCMC, n.iter=10000, n.chains = 1,  
 #' 		n.adapt = 0, thin=1, trace=TRUE)
-#' data(result_mcmc_4p)
-#' out <- as.mcmc(result_mcmc_4p)
-#' # This out can be used with coda package
-#' # plot() can use the direct output of embryogrowth_MHmcmc() function.
-#' plot(result_mcmc_4p, parameters=1, xlim=c(0,550))
-#' plot(result_mcmc_4p, parameters=3, xlim=c(290,320))
 #' # summary() permits to get rapidly the standard errors for parameters
-#' summary(result_mcmc_4p)
+#' summary(result_mcmc_tsd)
 #' # They are store in the result also. Two SE are estimated using or 
 #' # batch method or time-series SE:
 #' # The batch standard error procedure is usually thought to be not 
 #' # as accurate as the time series methods.
-#' se1 <- result_mcmc_4p$BatchSE
-#' se2 <- result_mcmc_4p$TimeSeriesSE
+#' se1 <- result_mcmc_tsd$BatchSE
+#' se2 <- result_mcmc_tsd$TimeSeriesSE
+#' plot(result_mcmc_tsd, parameters="S", scale.prior=TRUE, xlim=c(-3, 3), las=1)
+#' plot(result_mcmc_tsd, parameters="P", scale.prior=TRUE, xlim=c(25, 35), las=1)
+#' plot(eo_logistic, se=se2)
 #' }
 #' @export
 
-embryogrowth_MHmcmc <- function(result=stop("An output from searchR must be provided"), n.iter=10000, 
-parametersMCMC=stop("Priors must be given. Use embryogrowth_MHmcmc_p()"), n.chains = 1, n.adapt = 0, 
-thin=1, trace=FALSE, batchSize=sqrt(n.iter), parallel=TRUE)
-{
+tsd_MHmcmc <- function(result=stop("An output from tsd() must be provided"), n.iter=10000, 
+parametersMCMC=stop("Priors must be given. Use tsd_MHmcmc_p()"), n.chains = 1, n.adapt = 0, 
+thin=1, trace=FALSE, batchSize=sqrt(n.iter)) {
 
-  if (any(installed.packages()[,1]=="coda")) {
-    require("coda") } else {
-      warning("coda package is necessary for this function")
-      return()
-    }
-
+# result=eo_logistic; parametersMCMC=pMCMC; n.iter=10000; n.chains = 1;  n.adapt = 0; thin=1; trace=TRUE; batchSize=sqrt(n.iter)
+  
+  require("coda")
+  
 parameters <- parametersMCMC
 
 print(parameters)
@@ -80,9 +62,8 @@ print(parameters)
 # 29/1/2014; Ajout de result$weight
 out <- .MHalgoGen(n.iter=n.iter, parameters=parametersMCMC, 
 n.chains = n.chains, n.adapt = n.adapt, thin=thin, trace=trace, 
-	data=list(temperatures=result$data, derivate=result$derivate, 
-		testuse=result$test, M0=result$M0, fixed.parameters=result$fixed.parameters, 
-		parallel=parallel, weight=result$weight), likelihood=get(".fonctionMCMC"))
+	data=list(males=result$males, N=result$N, temperatures=result$temperatures, 
+            equation=result$equation), likelihood=get(".fonctiontsdMCMC"))
 
 if (batchSize>=n.iter/2) {
   print("batchSize cannot be larger than half the number of iterations.")
@@ -90,7 +71,7 @@ if (batchSize>=n.iter/2) {
   names(rese) <- rownames(parametersMCMC)
   out <- c(out, SE=list(rese))
 } else {
-  out <- c(out, BatchSE=list(batchSE(out$resultMCMC, batchSize=batchSize)))
+  out <- c(out, BatchSE=list(coda::batchSE(out$resultMCMC, batchSize=batchSize)))
 }
 
 class(out) <- "mcmcComposite"

@@ -3,7 +3,7 @@
 #' @author Marc Girondot
 #' @return A named vector of weights
 #' @param temperatures Timeseries of temperatures formated using FormatNests()
-#' @param entropy.method Entropy function, for example entropy.empirical. See package entropy for description
+#' @param entropy.method Entropy function, for example entropy::entropy.empirical. See package entropy for description
 #' @param weight A named vector of the initial weight search for each nest for likelihood estimation
 #' @param control_optim A list with control paramaters for optim function
 #' @param control_plot A list with control paramaters for plot function
@@ -13,8 +13,7 @@
 #' @description Search for the weights of the nests which maximize the entropy of nest temperatures distribution. Entropy is measured by Shanon index.\cr
 #' Entropy method must be entropy.empirical because it is the only method insensitive to scaling.\cr
 #' If no weight is given, the initial weight is uniformly distributed.\cr
-#' Use control_optim=list(trace=0) for not show progress of search report.\cr
-#' entropy package is necessary for this function.\cr
+#' Use control_optim=list(trace=0) for not show progress of search report.
 #' @examples
 #' \dontrun{
 #' library(embryogrowth)
@@ -39,19 +38,18 @@
 
 
 weightmaxentropy <- function(temperatures=stop('Temperature data must be provided !'), 
-	weight= NULL, entropy.method=entropy.empirical, plot=TRUE, 
+	weight= NULL, entropy.method=entropy::entropy.empirical, plot=TRUE, 
 	control_optim=list(trace=0, maxit=500), control_plot=NULL, 
 	control_entropy=NULL, col=c("black", "red")) {
 	
 # 	weight= NULL; entropy.method=entropy.empirical; plot=TRUE; control_optim=list(trace=0, maxit=500); control_plot=NULL; control_entropy=NULL
 
-  if (any(installed.packages()[,1]=="entropy")) {
-    require("entropy") } else {
-      warning("entropy package is necessary for this function")
-      return()
-    }
+  if (!requireNamespace("entropy", quietly = TRUE)) {
+    warning("entropy package is necessary for this function")
+    return()
+  }
   
-	
+  
 if (is.null(control_plot)) control_plot <- list(NULL)
 if (is.null(control_entropy)) control_entropy <- list(NULL)
 if (is.null(control_optim)) control_optim <- list(NULL)

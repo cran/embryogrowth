@@ -3,6 +3,21 @@ THIS IS THE CHANGELOG OF THE "embryogrowth" PACKAGE
 Please note that only the most significant changes are reported here.
 All the changes are indicated inside the R code.
 
+          CHANGES IN VERSION 5.1    (2014-10-05)
+
+* New version of STRES_TSD and help for this database is more clear
+* Future changes in STRES_TSD will not be longer be reported here
+* tsd() can now uses also incubation period
+* Equation Hulin (from Hulin et al 2009) is implemented in tsd()
+* Equation Double-Richards (from Girondot, submited) is implemented in tsd()
+* Packages numDeriv and entropy are now only suggested
+* New parameters lty.temperatures and lwd.temperatures for plot.NestsResult()
+* Predict.tsd() without temperatures or durations uses original temperatures or durations
+* New function plot.tsd() 
+* New possibility to use Bayesian estimate for tsd()
+* Remove parallel computing for windows in MCMC
+* New functions minmax.periodic() and temperature.periodic()
+
           CHANGES IN VERSION 5.0    (2014-08-15)
 
 * New bibliographic references and first version in CRAN

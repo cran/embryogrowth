@@ -44,8 +44,7 @@ function(result=NULL, parameters=NULL, fixed.parameters=NULL, temperatures=NULL,
 	derivate=NULL, test=NULL, M0=NULL, hessian=FALSE, weight= NULL, parallel=TRUE,
 	echo=TRUE) {
 
-  # fixed.parameters=NULL; temperatures=NULL; echo=TRUE
-  # derivate=NULL; test=NULL; M0=NULL; hessian=FALSE; weight= NULL; parallel=TRUE
+  # result=NULL; parameters=NULLfixed.parameters=NULL; temperatures=NULL; echo=TRUE;derivate=NULL; test=NULL; M0=NULL; hessian=FALSE; weight= NULL; parallel=TRUE
   # result=resultNest_4p
   # parameters=structure(c(0.840429263837085, 1.15929190273597, 1.57697305167496, 2.06657337881587, 2.43555105967532, 2.24337041114994, 1.44633577322632), .Names = c("296", "298", "300", "302", "304", "306", "308"))
 
@@ -86,7 +85,7 @@ if (is.null(weight)) {
 	if (length(setdiff(names(weight), names(temperatures)[1:NbTS]))==0) {
 		par <- weight
 	} else {
-		print("Check the weights")
+		warning("Check the weights")
 		return(invisible())
 	}
 	}
@@ -96,8 +95,8 @@ weight <- par
 
 # test si tous sont là
 if (length(setdiff(names(temperatures)[1:temperatures$IndiceT[3]], names(weight)))!=0) {
-	print("The weight parameter must define weight for each nest.")
-	print(paste("check", setdiff(names(temperatures)[1:temperatures$IndiceT[3]], names(weight)), "nests"))
+	warning("The weight parameter must define weight for each nest.")
+	warning(paste("check", setdiff(names(temperatures)[1:temperatures$IndiceT[3]], names(weight)), "nests"))
 	return(invisible())	
 }	
 
@@ -106,12 +105,12 @@ if (length(setdiff(names(temperatures)[1:temperatures$IndiceT[3]], names(weight)
 # test faux, corrigé le 19/2/2013
 
 	if (length(intersect(names(parameters), names(fixed.parameters)))!=0) {
-		print("A parameter cannot be fixed and fitted at the same time !")
+		warning("A parameter cannot be fixed and fitted at the same time !")
 		return(invisible())
 	}
 
 
-for (j in 1:temperatures[["IndiceT"]][3]) temperatures[[names(temperatures)[j]]][1, "Mass"] <- M0
+for (j in 1:NbTS) temperatures[[j]][1, "Mass"] <- M0
 
 
 ptec <- list(temperatures=temperatures, derivate=derivate, 

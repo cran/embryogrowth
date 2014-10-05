@@ -3,8 +3,22 @@
 # Algo Metropolis-Hastings
 # ------------------------
 
-.MHalgoGen<-function(n.iter=10000, parameters=NULL, data=NULL, likelihood=NULL, n.chains = 4, n.adapt = 100, thin=30, trace=FALSE)
+.MHalgoGen<-function(n.iter=10000, parameters=NULL, data=NULL, likelihood=NULL, 
+n.chains = 4, n.adapt = 100, thin=30, trace=FALSE)
 {
+
+  require("coda")
+  
+t <- as.character(trace)
+pt <- NULL
+if (t=="TRUE") {pt <- 1;tf <- TRUE}
+if (t=="FALSE") {pt <- 0;tf <- FALSE}
+if (is.null(pt)) {
+  tf <- TRUE
+  pt <- floor((n.adapt+n.iter)/trace)
+}
+
+cpt_trace <- 0
 
 
 res<-as.list(NULL)
@@ -82,13 +96,17 @@ for (i in 2:(n.adapt+n.iter+1))
 		varp2[cpt, "Ln L"]<-varp[i, "Ln L"]
 		cpt<-cpt+1
 #	}
-	if (trace) {
-	  cat(paste("Chain ", kk, ": [", i, "] ", as.numeric(varp[i, "Ln L"]), "\n", sep=""))
-	}
+	if (tf) {
+    cpt_trace <- cpt_trace+1
+    if (cpt_trace>=pt) {
+	    cat(paste("Chain ", kk, ": [", i, "] ", as.numeric(varp[i, "Ln L"]), "\n", sep=""))
+      cpt_trace <- 0
+    }
+  }
 }
 
-lp <- as.mcmc(varp2[1:(cpt-1), 1:nbvar])
-lp <- mcmc(data=lp, start=n.adapt+1, end=n.iter, thin=thin)
+lp <- coda::as.mcmc(varp2[1:(cpt-1), 1:nbvar])
+lp <- coda::mcmc(data=lp, start=n.adapt+1, end=n.iter, thin=thin)
 
 res<-c(res, list(lp))
 resL <- c(resL, list(varp2[1:(cpt-1), "Ln L"]))
@@ -98,7 +116,7 @@ resL <- c(resL, list(varp2[1:(cpt-1), "Ln L"]))
 
 names(res) <- 1:n.chains
 
-res <- as.mcmc.list(res)
+res <- coda::as.mcmc.list(res)
 
 cat("Best likelihood for: \n")
 for (j in 1:nbvar) {cat(paste(names(MaxL[j]), "=", MaxL[j], "\n"))}

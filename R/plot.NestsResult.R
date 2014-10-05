@@ -19,6 +19,8 @@
 #' @param col.TSP The color of the TSP
 #' @param col.PT The color of the pivotal temperature
 #' @param col.S The color of the size or mass. Can be a vector (useful when series="all" option).
+#' @param lty.temperatures Type of line for temperatures
+#' @param lwd.temperatures Width of line for temperatures
 #' @param ylimT Range of temperatures to be displayed
 #' @param ylimS Range of size to be displayed
 #' @param xlim Range of incubation days to be displayed
@@ -47,7 +49,7 @@
 #' @param progress If FALSE, the progress bar is not shown (useful for use with sweave or knitr)
 #' @description Plot the information about a nest\cr
 #' The embryo.stages is a list with stage numbers and relative size as compared to final size at the beginning of the stage.\cr
-#' For example embryo.stages=list(number=21:30, size=c(8.4, 9.4, 13.6, 13.8, 18.9, 23.5, 32.2, 35.2, 35.5, 38.5)/39.33) indicates that the stages 21 begins at the relative size of 8.4/39.33.\cr
+#' For example for Caretta caretta, embryo.stages=list(number=21:30, size=c(8.4, 9.4, 13.6, 13.8, 18.9, 23.5, 32.2, 35.2, 35.5, 38.5)/39.33) indicates that the stages 21 begins at the relative size of 8.4/39.33.\cr
 #' The default is for the turtle "Caretta caretta".\cr
 #' Series can be indicated as the name of the series, its number or succesion of TRUE or FALSE. "all" indicates that all series must be printed.\cr
 #' The object return is an invisible list composed of two lists: $summary with the summary statistics for each nest and $traces with the change of length or mass for each nest.\cr
@@ -72,7 +74,8 @@
 plot.NestsResult <-
 function(x, ..., OutPlot=NULL, parameters=NULL, fixed.parameters=NULL, SE=NULL, temperatures=NULL, derivate=NULL, 
 	test=NULL, stopattest=FALSE, M0=NULL, series=1, col.stages="blue", col.PT="red", col.TSP="gray", 
-		col.temperatures="green", col.S="black", ylimT=c(25, 35), ylimS=NULL, xlim=NULL, TSP.borders=c(21, 26), 
+		col.temperatures="green", col.S="black", 
+	lty.temperatures=1, lwd.temperatures=2, ylimT=c(25, 35), ylimS=NULL, xlim=NULL, TSP.borders=c(21, 26), 
 			embryo.stages="Caretta caretta", 
 				show.stages=TRUE, show.TSP=TRUE, show.third=TRUE, show.CI=TRUE, replicate.CI=100, ref.stage=TRUE,
 					show.fioritures=TRUE, progress=TRUE,
@@ -529,7 +532,7 @@ if (is.null(meanduree) & stopattest) {
 		y <- nids[,2]
 
 		Lx <- modifyList(list(...), list(x=x, y=y, axes = FALSE, xlab = "", ylab = "", main="")) 
-		L <- modifyList(list(type = "l", bty = "n", xlab = "", ylab = "", xlim=xlim, lwd=2, ylim=ylimT, main="", las=1, col=col.temperatures), Lx) 
+		L <- modifyList(list(type = "l", bty = "n", xlab = "", ylab = "", xlim=xlim, ylim=ylimT, main="", las=1, col=col.temperatures, lty=lty.temperatures, lwd=lwd.temperatures), Lx) 
 
 		do.call(plot, L) 
 

@@ -3,8 +3,8 @@
 #' \tabular{ll}{
 #'  Package: \tab embryogrowth\cr
 #'  Type: \tab Package\cr
-#'  Version: \tab 5.0 - build 396\cr
-#'  Date: \tab 2014-08-15\cr
+#'  Version: \tab 5.1 - build 406\cr
+#'  Date: \tab 2014-10-05\cr
 #'  License: \tab GPL (>= 2)\cr
 #'  LazyLoad: \tab yes\cr
 #'  }
@@ -12,10 +12,10 @@
 #' @author Marc Girondot \email{marc.girondot@@u-psud.fr}
 #' @docType package
 #' @name embryogrowth-package
-#' @description A package to fit growth of embryos
-#' @references Girondot, M. & Kaska, Y. In press. A model to predict the thermal 
+#' @description Tools to Analyze the Thermal Reaction Norm of Embryo Growth
+#' @references Girondot, M. & Kaska, Y. 2014. A model to predict the thermal 
 #'          reaction norm for the embryo growth rate from field data. Journal of
-#'          Thermal Biology. In press
+#'          Thermal Biology. 45, 96-102.
 #' @seealso Delmas, V., Prevot-Julliard, A.-C., Pieau, C. & Girondot, M. 2008. 
 #'          A mechanistic model of temperature-dependent sex determination 
 #'          in a Chelonian, the European pond turtle. Functional 
@@ -27,9 +27,13 @@
 #' @seealso Girondot, M. 1999. Statistical description of temperature-dependent 
 #'          sex determination using maximum likelihood. Evolutionary Ecology 
 #'          Research, 1, 479-486.
-#' @keywords Temperature Embryo Ecology Growth Gompertz
+#' @seealso Girondot M. (Submited) On the concept of embryological thermosensitive 
+#'          period for sex determination in reptiles.
+#' @keywords Temperature Embryo Ecology Growth Gompertz TSD
 #' @examples
 #' \dontrun{
+#' library("embryogrowth")
+#' packageVersion("embryogrowth")
 #' data(nest)
 #' formated <- FormatNests(nest)
 #' # The initial parameters value can be:

@@ -10,33 +10,26 @@
 #' @param df A dataframe with at least two columns named males, females or N and temperatures, Incubation.temperature or durations column
 #' @param l The limit to define TRT (see Girondot, 1999)
 #' @param parameters.initial Initial values for P, S or K search as a vector, ex. c(P=29, S=-0.3)
-#' @param las.x las parameter for x axis
-#' @param las.y las parameter for y axis
-#' @param lab.PT Label to describe pivotal temperature
-#' @param lab.TRT Label to describe transitional range of temperature
-#' @param males.freq Should the graph uses males frequency [TRUE] or females [FALSE]
+#' @param fixed.parameters Parameters that will not be changed
+#' @param SE Standard errors for parameters
+#' @param males.freq If TRUE data are shown as males frequency
 #' @param equation Could be "logistic", "Hill", "Richards", "Hulin", "Double-Richards" or "GSD"
-#' @param replicate Number of replicate to estimate SE of TRT
+#' @param replicates Number of replicates to estimate confidence intervals
 #' @param range.CI The range of confidence interval for estimation, default=0.95
-#' @param col.TRT The color of TRT
-#' @param col.TRT.CI The color of CI of TRT based on range.CI
-#' @param col.PT.CI The color of CI of PT based on range.CI
-#' @param show.CI Do the CI for the curve should be shown
 #' @param limit.low.TRT.minimum Minimum lower limit for TRT
 #' @param limit.high.TRT.maximum Maximum higher limit for TRT
+#' @param temperatures.plot Sequences of temperatures that will be used for plotting. If NULL, does not estimate them
+#' @param durations.plot Sequences of durations that will be used for plotting. If NULL, does not estimate them
 #' @param print Do the results must be printed at screen? TRUE (default) or FALSE
-#' @param show.plot Do the plot must be shown? TRUE (default) or FALSE
-#' @param ... Graphical parameters for plot(), exemple xlab="", ylab="", main=""
 #' @description Estimate the parameters that best describe temperature-dependent sex determination
 #' @references Girondot, M. 1999. Statistical description of temperature-dependent sex determination using maximum likelihood. Evolutionary Ecology Research, 1, 479-486.
 #' @references Godfrey, M.H., Delmas, V., Girondot, M., 2003. Assessment of patterns of temperature-dependent sex determination using maximum likelihood model selection. Ecoscience 10, 265-272.
 #' @references Hulin, V., Delmas, V., Girondot, M., Godfrey, M.H., Guillon, J.-M., 2009. Temperature-dependent sex determination and global change: are some species at greater risk? Oecologia 160, 493-506.
-#' @references Girondot M., Submited. On the concept of embryological thermosensitive period for sex determination in reptiles.
+#' @family Functions for temperature-dependent sex determination
 #' @examples
 #' \dontrun{
 #' CC_AtlanticSW <- subset(STSRE_TSD, RMU=="Atlantic, SW" & 
 #'                           Species=="Caretta caretta" & Sexed!=0)
-#' par(mar=c(4,4,5,1)+0.1)
 #' tsdL <- with (CC_AtlanticSW, tsd(males=Males, females=Females, 
 #'                                  temperatures=Incubation.temperature-Correction.factor, 
 #'                                  equation="logistic"))
@@ -83,35 +76,35 @@
 #'                                  parameters.initial=par,
 #'                                  temperatures=Incubation.temperature,
 #'                                  equation="Double-Richards"))
-#' ### Example with only points and mean curve
-#' eo_Double_Richards <- with(eo, tsd(males=Males, females=Females, 
-#'                                  parameters.initial=par, 
-#'                                  temperatures=Incubation.temperature, 
-#'                                  equation="Double-Richards", 
-#'                                  col.TRT="white", col.TRT.CI="white", col.PT.CI="white"))
 #' compare_AIC(Logistic=eo_logistic, Hill=eo_Hill, Richards=eo_Richards, 
 #'              Hulin=eo_Hulin, Double_Richards=eo_Double_Richards)
 #' ### Note the asymmetry of the Double-Richards model
 #' predict(eo_Double_Richards, 
 #'        temperatures=c(eo_Double_Richards$par["P"]-0.2, eo_Double_Richards$par["P"]+0.2))
 #' predict(eo_Double_Richards)
+#' ### It can be used also for incubation duration
+#' CC_AtlanticSW <- subset(STSRE_TSD, RMU=="Atlantic, SW" & 
+#'                           Species=="Caretta caretta" & Sexed!=0)
+#' tsdL_IP <- with (CC_AtlanticSW, tsd(males=Males, females=Females, 
+#'                                  durations=IP.mean, 
+#'                                  equation="logistic"))
+#' plot(tsdL_IP)
 #' }
 #' @export
 
 
 tsd <- function(df=NULL, males=NULL, females=NULL, N=NULL, temperatures=NULL, durations=NULL,
-	l=0.05, parameters.initial=c(P=NA, S=-0.5, K=0, K1=1, K2=0), males.freq=TRUE, 
-	las.x=1, las.y=1, lab.PT="Pivotal temperature", 
-	lab.TRT=paste0("Transitional range of temperatures l=",l*100,"%"), 
-	col.TRT="gray", col.TRT.CI=rgb(0.8, 0.8, 0.8, 0.5), 
-  col.PT.CI=rgb(0.8, 0.8, 0.8, 0.5), show.CI=TRUE, 
-	equation="logistic", replicate=1000, range.CI=0.95, 
-  limit.low.TRT.minimum=5, limit.high.TRT.maximum=90, print=TRUE, show.plot=TRUE, ...) {
-
-# males=NULL; females=NULL; N=NULL; temperatures=NULL; durations=NULL; df <- NULL; l <- 0.05; parameters.initial=c(P=NA, S=-0.5, K=0, K1=1, K2=0); males.freq <- TRUE; las.x <- 1; las.y <- 1; lab.PT <- "Pivotal temperature"; lab.TRT <- "Transitional range of temperatures l=5%"; equation <- "logistic"; range.CI=0.95; replicate <- 1000; col.TRT="gray"; col.TRT.CI=rgb(0.8, 0.8, 0.8, 0.5); col.PT.CI=rgb(0.8, 0.8, 0.8, 0.5); limit.low.TRT.minimum=5; limit.high.TRT.maximum=90; print=TRUE; plot=TRUE
-# eo <- subset(STSRE_TSD, Species=="Emys orbicularis", c("Males", "Females", "Incubation.temperature"))
-# males=eo$Males; females=eo$Females; N <- males+females; temperatures=eo$Incubation.temperature; equation<- "Double-Richards" 
-
+                l=0.05, parameters.initial=c(P=NA, S=-0.5, K=0, K1=1, K2=0), males.freq=TRUE, 
+                fixed.parameters=NULL, SE=NULL,
+                equation="logistic", replicates=1000, range.CI=0.95, 
+                limit.low.TRT.minimum=5, limit.high.TRT.maximum=90, print=TRUE, 
+                temperatures.plot=seq(from=20, to=40, by=0.1), 
+                durations.plot=seq(from=40, to=100, by=0.1)) {
+  
+  # df=NULL; males=NULL; females=NULL; N=NULL; temperatures=NULL; durations=NULL; l=0.05; parameters.initial=c(P=NA, S=-0.5, K=0, K1=1, K2=0); males.freq=TRUE;  fixed.parameters=NULL; SE=NULL; equation="logistic"; replicates=1000; range.CI=0.95;  limit.low.TRT.minimum=5; limit.high.TRT.maximum=90; print=TRUE; temperatures.plot=seq(from=20, to=40, by=0.1)
+  # eo <- subset(STSRE_TSD, Species=="Emys orbicularis", c("Males", "Females", "Incubation.temperature"))
+  # males=eo$Males; females=eo$Females; N <- males+females; temperatures=eo$Incubation.temperature; equation<- "Double-Richards" 
+  
   # males <- c(10, 14, 7, 4, 3, 0, 0) ; females <- c(0, 1, 2, 4, 15, 10, 13); temperatures <- c(25, 26, 27, 28, 29, 30, 31)
   
   # males <- c(15L, 23L, 16L, 0L); females <- c(0L, 1L, 3L, 19L)
@@ -128,8 +121,7 @@ tsd <- function(df=NULL, males=NULL, females=NULL, N=NULL, temperatures=NULL, du
   
   if (!is.null(df)) {
     if (class(df)!="data.frame" & class(df)!="matrix") {
-      print("df parameter must be a data.frame or a matrix")
-      return(invisible())
+      stop("df parameter must be a data.frame or a matrix")
     }
     
     namesdf <- tolower(colnames(df))
@@ -148,30 +140,31 @@ tsd <- function(df=NULL, males=NULL, females=NULL, N=NULL, temperatures=NULL, du
     if (any(namesdf=="durations")) durations <- df[, which(namesdf=="durations")]
     if (any(namesdf=="duration")) durations <- df[, which(namesdf=="duration")]
   }
-
+  
   if (is.null(durations) & is.null(temperatures)) {
-    warning("Or temperatures or durations must be provided")
-    return()
+    stop("Or temperatures or durations must be provided")
   }
   
   if (!is.null(durations) & !is.null(temperatures)) {
-    warning("Temperatures and durations cannot be both provided")
-    return()
+    stop("Temperatures and durations cannot be both provided")
   }
   
   
   # si je retire des lignes, c'est décalé
-#  if (!is.null(males)) males <- na.omit(males)
-#  if (!is.null(females)) females <- na.omit(females)
-#  if (!is.null(N)) N <- na.omit(N)
+  #  if (!is.null(males)) males <- na.omit(males)
+  #  if (!is.null(females)) females <- na.omit(females)
+  #  if (!is.null(N)) N <- na.omit(N)
   if (is.null(temperatures)) {
+    IP <- TRUE
     temperatures <- durations
+    temperatures.plot <- durations.plot
+  } else {
+    IP <- FALSE
   }
   
   cpt1 <- ifelse(is.null(males), 0, 1)+ifelse(is.null(females), 0, 1)+ifelse(is.null(N), 0, 1)
   if (cpt1<2) {
-    print("At least two informations from males, females or N must be provided")
-    return(invisible())
+    stop("At least two informations from males, females or N must be provided")
   }
   
   if (is.null(males)) males <- N-females
@@ -190,411 +183,131 @@ tsd <- function(df=NULL, males=NULL, females=NULL, N=NULL, temperatures=NULL, du
   
   
   if (equation=="GSD") {
-		result <- list(par = NULL, SE=NULL, hessian=NULL, 
-		TRT=NULL,
-		SE_TRT=NULL,
-		message=NULL,
-		convergence=0,
-		counts=NULL,
-		value=-sum(dbinom(x=males, size=males+females, prob=0.5, log=TRUE)),
-		AIC=-2*sum(dbinom(x=males, size=males+females, prob=0.5, log=TRUE)))
-		limit.low.TRT <- min(temperatures)
-		limit.high.TRT <- max(temperatures)	
-	} else {
+    result <- list(par = NULL, SE=NULL, hessian=NULL, 
+                   TRT=NULL,
+                   SE_TRT=NULL,
+                   message=NULL,
+                   convergence=0,
+                   counts=NULL,
+                   value=-sum(dbinom(x=males, size=males+females, prob=0.5, log=TRUE)),
+                   AIC=-2*sum(dbinom(x=males, size=males+females, prob=0.5, log=TRUE)))
+#    limit.low.TRT <- min(temperatures)
+#    limit.high.TRT <- max(temperatures)	
+  } else {
     par <- parameters.initial
-	
+    if (!is.null(par)) {
     if (is.na(par["P"])) {
       par["P"] <- temperatures[which.min(abs((males/(males+females))-0.5))]
+      if (IP) par["S"] <- abs(par["S"])
     }
-       if (equation!="Richards") par <- par[which(names(par)!="K")]
-       if (equation!="Hulin" & equation!="Double-Richards") par <- par[which(names(par)!="K1")]
-       if (equation!="Hulin" & equation!="Double-Richards") par <- par[which(names(par)!="K2")]
-
+      
+    }
+    if (equation!="Richards") par <- par[which(names(par)!="K")]
+    if (equation!="Hulin" & equation!="Double-Richards") par <- par[which(names(par)!="K1")]
+    if (equation!="Hulin" & equation!="Double-Richards") par <- par[which(names(par)!="K2")]
+    
     repeat {
-      result  <- optim(par, .tsd_fit, males=males, N=N, temperatures=temperatures, equation=equation, method="BFGS", hessian=TRUE, control = list(maxit=1000))
-      # result  <- optim(par, embryogrowth:::.tsd_fit, males=males, N=N, temperatures=temperatures, equation=equation, method="BFGS", hessian=TRUE, control = list(maxit=1000))
+     # result  <- optim(par, embryogrowth:::.tsd_fit, fixed.parameters=fixed.parameters, males=males, N=N, temperatures=temperatures, equation=equation, method="BFGS", hessian=TRUE, control = list(maxit=1000))
+     result  <- optim(par, .tsd_fit, fixed.parameters=fixed.parameters, males=males, N=N, temperatures=temperatures, equation=equation, method="BFGS", hessian=TRUE, control = list(maxit=1000))
 
       if (result$convergence==0) break
       par<-result$par
       if (print) print("Convergence is not acheived. Optimization continues !")
     }
-  
-      par <- result$par
-  
-      mathessian <- result$hessian
-  
-      inversemathessian <- try(solve(mathessian), silent=TRUE)
-  
-  if (inherits(inversemathessian, "try-error")) {
-    res <- rep(NA, length(par))
-    names(res) <- names(par)
-  } else {
-    res <- abs(diag(inversemathessian))
-  }
-  
-  result$SE <- res
-  result$AIC <- 2*result$value+2*length(par)
-  }
-  
-  if (equation!="GSD") {
-	  l.l.TRT.c <- NULL
-	  l.h.TRT.c <- NULL
-	  TRT.c <- NULL
- #   plist <- NULL
-	
-	for (j in 1:replicate) {
+
+    par <- c(result$par, fixed.parameters)
     
-		par.P <- rnorm(1, par["P"], ifelse(j==1, 0, res["P"]))
-    repeat {
-		  par.S <- rnorm(1, par["S"], ifelse(j==1, 0, res["S"]))
-      if (sign(par.S)==sign(par["S"])) break
-    }
-		if (equation=="Richards") {
-      if (res["K"]!=0) {
-		    repeat {
-		      par.K <- rnorm(1, par["K"], ifelse(j==1, 0, res["K"]))
-		      if (sign(par.K)==sign(par["K"])) break
-		    }
-      } else {par.K <- par["K"]}
-		}
- 
-		if (equation=="Double-Richards") {
-		    repeat {
-		      par.K1 <- rnorm(1, par["K1"], ifelse(j==1, 0, res["K1"]))
-		      if (sign(par.K1)==sign(par["K1"])) break
-		    }
-		    repeat {
-		      par.K2 <- rnorm(1, par["K2"], ifelse(j==1, 0, res["K2"]))
-		      if (sign(par.K2)==sign(par["K2"])) break
-		    }		    
-		}
-		
-		if (equation=="Hulin") {
-		  temperatures.se <- seq(from=limit.low.TRT.minimum, to=limit.high.TRT.maximum, length=20)
-      repeat {
-		  repeat {
-		    par.K1 <- rnorm(1, par["K1"], ifelse(j==1, 0, res["K1"]))
-		    if (sign(par.K1)==sign(par["K1"])) break
-		  }
-		  repeat {
-		    par.K2 <- rnorm(1, par["K2"], ifelse(j==1, 0, res["K2"]))
-		    if (sign(par.K2)==sign(par["K2"])) break
-		  }
-      p <- (1+(2^exp(par.K1*temperatures.se+par.K2)-1)*exp((1/par.S)*(par.P-temperatures.se)))^(-1/exp(par.K1*temperatures.se+par.K2))
-		  if (all(is.finite(p)) & max(p)>(1-l) & min(p)<l) break
+    if (!is.null(SE)) {
+      res <- SE
+    } else {
+      mathessian <- result$hessian
+      
+      inversemathessian <- try(solve(mathessian), silent=TRUE)
+      
+      if (inherits(inversemathessian, "try-error")) {
+        res <- rep(NA, length(par))
+        names(res) <- names(par)
+      } else {
+        res <- abs(diag(inversemathessian))
       }
     }
     
- #   plist <- c(plist, list(c(P=par.P, S=par.S, K1=par.K1, K2=par.K2)))
-		
-    # marche en températures mais par en IP - corrigé 9/9/2014
-		limit.low.TRT <- limit.low.TRT.minimum
-		limit.high.TRT <- limit.high.TRT.maximum
-		for (i in 1:5) {
-	  		temperatures.se <- seq(from=limit.low.TRT, to=limit.high.TRT, length=i*20)
-	  		if (equation=="logistic")	p <- 1/(1+exp((1/par.S)*(par.P-temperatures.se)))
- 	  		if (equation=="Richards") p <- ifelse(par.K>3 & sign(par.P-temperatures.se)==sign(par.S), 
-	  		                                      0.5*exp((temperatures.se-par.P)/(par.S*exp(par.K))), 
-	  		                                      (1+(2^exp(par.K)-1)*exp((1/par.S)*(par.P-temperatures.se)))^(-1/exp(par.K)))
-	  		if (equation=="Double-Richards") p <- ifelse(temperatures.se<par.P, 
-	  		                                      ifelse(par.K1>3 & sign(par.P-temperatures.se)==sign(par.S), 
-	  		                                             0.5*exp((temperatures.se-par.P)/(par.S*exp(par.K1))), 
-	  		                                             (1+(2^exp(par.K1)-1)*exp((1/par.S)*(par.P-temperatures.se)))^(-1/exp(par.K1))) ,
-	  		                                     ifelse(par.K2>3 & sign(par.P-temperatures.se)==sign(par.S), 
-	  		                                             0.5*exp((temperatures.se-par.P)/(par.S*exp(par.K2))), 
-	  		                                             (1+(2^exp(par.K2)-1)*exp((1/par.S)*(par.P-temperatures.se)))^(-1/exp(par.K2)))
-                                              )
-        if (equation=="Hill") p <- 1/(1+exp((1/par.S)*(log(par.P)-log(temperatures.se))))
-	  		if (equation=="Hulin") p <- (1+(2^exp(par.K1*temperatures.se+par.K2)-1)*exp((1/par.S)*(par.P-temperatures.se)))^(-1/exp(par.K1*temperatures.se+par.K2))
-			if (sign(par.S)<0) {
-        limit.low.TRT <- temperatures.se[tail(which(p>(1-l)), n=1)]
-			  limit.high.TRT <- temperatures.se[which(p < l)[1]]
-			} else {
-			  limit.low.TRT <- temperatures.se[tail(which(p<l), n=1)]
-			  limit.high.TRT <- temperatures.se[which(p >(1-l))[1]]
-			}
-			limit.low.TRT <- ifelse(identical(limit.low.TRT, numeric(0)), NA, limit.low.TRT)
-			limit.high.TRT <- ifelse(identical(limit.high.TRT, numeric(0)), NA, limit.high.TRT)
-      if (is.na(limit.low.TRT) | is.na(limit.high.TRT)) break
- 		}
- 		l.l.TRT.c <- c(l.l.TRT.c, limit.low.TRT)
- 		l.h.TRT.c <- c(l.h.TRT.c, limit.high.TRT)
- 		TRT.c <- c(TRT.c, limit.high.TRT-limit.low.TRT)
-	}
-  
-	result$TRT <- as.numeric(TRT.c[1])
-	result$TRT_limits <- as.numeric(c(l.l.TRT.c[1], l.h.TRT.c[1]))
-	result$SE_TRT <- as.numeric(sd(TRT.c, na.rm = TRUE))
-	result$SE_TRT_limits <- as.numeric(c(sd(l.l.TRT.c, na.rm = TRUE), sd(l.h.TRT.c, na.rm = TRUE)))
-	limit.low.TRT <- result$TRT_limits[1]-range.CI.qnorm*result$SE_TRT_limits[1]
-	limit.high.TRT <- result$TRT_limits[2]+range.CI.qnorm*result$SE_TRT_limits[2]
-  }
-
-if (show.plot) {
-   L <- list(...)
-
-	if (males.freq) {
-		L1 <- modifyList(list(x=temperatures, y=males/N, bty="n", type="n", xlab=expression("Temperatures in " * degree * "C"), ylab="male frequency"), L)
-	} else {
-		L1 <- modifyList(list(x=temperatures, y=females/N, bty="n", type="n", xlab=expression("Temperatures in " * degree * "C"), ylab="female frequency"), L)	
-	}
-  L1 <- modifyList(L1, list(ylim=c(0,1), xaxt="n", las=las.y))
-  
-  if (is.null(L$xlim)) {
-    L1 <- modifyList(L1, list(xlim=c(floor(min(temperatures, limit.low.TRT)), floor(1+max(temperatures, limit.high.TRT)))))
+    result$SE <- res
+    result$AIC <- 2*result$value+2*length(par)
   }
   
-  a <- do.call(plot, L1) 
+  result$range.CI <- range.CI
+  result$l <- l
   
-  x2 <- (par("usr")[1]+par("usr")[2]*26)/27
-  x1 <- x2*26-par("usr")[2]/0.04
-  
-  axis(1, at=x1:x2, las=las.x)
-  
-  # je trace la TRT centrée sur P
-  
-  
-if (equation!="GSD") {
-  # limites de la TRT
-  polygon(c(result$TRT_limits[1], result$TRT_limits[1], result$TRT_limits[2], result$TRT_limits[2]), c(0,1,1,0), border=NA, col=col.TRT)  
-  # limites de la limite basse de la TRT
-  polygon(c(result$TRT_limits[1]+range.CI.qnorm*result$SE_TRT_limits[1], result$TRT_limits[1]+range.CI.qnorm*result$SE_TRT_limits[1], result$TRT_limits[1]-range.CI.qnorm*result$SE_TRT_limits[1], result$TRT_limits[1]-range.CI.qnorm*result$SE_TRT_limits[1]), c(0,1,1,0), border=NA, col=col.TRT.CI)
-  # limites de la limite haute de la TRT
-  polygon(c(result$TRT_limits[2]+range.CI.qnorm*result$SE_TRT_limits[2], result$TRT_limits[2]+range.CI.qnorm*result$SE_TRT_limits[2], result$TRT_limits[2]-range.CI.qnorm*result$SE_TRT_limits[2], result$TRT_limits[2]-range.CI.qnorm*result$SE_TRT_limits[2]), c(0,1,1,0), border=NA, col=col.TRT.CI)
-  # limites de la PT
-  polygon(c(par["P"]-range.CI.qnorm*res["P"], par["P"]-range.CI.qnorm*res["P"], par["P"]+range.CI.qnorm*res["P"], par["P"]+range.CI.qnorm*res["P"]), c(0,1,1,0), border=NA, col=col.PT.CI)
-  par(xpd=TRUE)
-  segments(par["P"], 0, par["P"], 1.05, lty=4)
-  segments(result$TRT_limits[1], 0, result$TRT_limits[1], 1.15, lty=3)
-  segments(result$TRT_limits[2], 0, result$TRT_limits[2], 1.15, lty=3)
-  text(x=par["P"], y=1.1, lab.PT)
-  text(x=par["P"], y=1.2, lab.TRT)
-  
-}
-
-  
-	if (males.freq) {  
-  		L1 <- modifyList(list(x=temperatures, y=males/N, bty="n", type="p", ylim=c(0,1)), L)
-  	} else {
-  		L1 <- modifyList(list(x=temperatures, y=females/N, bty="n", type="p", ylim=c(0,1)), L)
-  	}
-  L1 <- modifyList(L1, list(ylim=c(0,1), xlab="", ylab="", main="", axes=FALSE, xlim=c(x1, x2)))
-  
-  par(xpd=FALSE)
-
-  par(new=TRUE)
-  
-  a <- do.call(plot, L1) 
-
-	if (males.freq) {  
- 	 	b <- binconf(males,N)
- 	} else {
-  		b <- binconf(females,N) 
-	}
-  # add error bars
-  errbar(temperatures, b[,1], b[,3], b[,2], add=TRUE)
-  
-  
-  mn <- min(temperatures)
-  mx <- max(temperatures)
-  
-  par <- result$par
-  
-  x <- seq(from=x1, to=x2, length.out=100)
-	if (equation=="logistic") {
-		p <-  1/(1+exp((1/par["S"])*(par["P"]-x)))
-		prop.theorique <- 1/(1+exp((1/par["S"])*(par["P"]-temperatures)))
-	}
-	if (equation=="Hill") {
-		p <-  1/(1+exp((1/par["S"])*(log(par["P"])-log(x))))
-		prop.theorique <- 1/(1+exp((1/par["S"])*(log(par["P"])-log(temperatures))))
-	}
-	if (equation=="GSD") {
-		p <-  rep(0.5,length(x))
-		prop.theorique <- rep(0.5,length(temperatures))
-	}
-	if (equation=="Richards") {
-	p <- ifelse(par["K"]>3 & sign(par["P"]-x)==sign(par["S"]), 
-			0.5*exp((x-par["P"])/(par["S"]*exp(par["K"]))), 
-			(1+(2^exp(par["K"])-1)*exp((1/par["S"])*(par["P"]-x)))^(-1/exp(par["K"])))
-	prop.theorique <- ifelse(par["K"]>3 & sign(par["P"]-temperatures)==sign(par["S"]), 
-			0.5*exp((temperatures-par["P"])/(par["S"]*exp(par["K"]))), 
-			(1+(2^exp(par["K"])-1)*exp((1/par["S"])*(par["P"]-temperatures)))^(-1/exp(par["K"])))
-	}
-if (equation=="Double-Richards") {
-
-  p <- ifelse(x<par["P"],
+  if (equation!="GSD") {
+    l.l.TRT.c <- NULL
+    l.h.TRT.c <- NULL
+    TRT.c <- NULL
+    #   plist <- NULL
     
-    ifelse(par["K1"]>3 & sign(par["P"]-x)==sign(par["S"]), 
-              0.5*exp((x-par["P"])/(par["S"]*exp(par["K1"]))), 
-              (1+(2^exp(par["K1"])-1)*exp((1/par["S"])*(par["P"]-x)))^(-1/exp(par["K1"]))) ,
-    ifelse(par["K2"]>3 & sign(par["P"]-x)==sign(par["S"]), 
-           0.5*exp((x-par["P"])/(par["S"]*exp(par["K2"]))), 
-           (1+(2^exp(par["K2"])-1)*exp((1/par["S"])*(par["P"]-x)))^(-1/exp(par["K2"])))    
-  )
+    rep <- replicates-1
+    df_par <- data.frame(P=unname(c(par["P"], rnorm(rep, par["P"], res["P"]))), 
+                         S=unname(c(par["S"], rnorm(rep, par["S"], res["S"]))),
+                         K=unname(ifelse(is.na(par["K"]), rep(NA, replicates), c(par["K"], rnorm(rep, par["K"], ifelse(is.na(res["K"]), 0, res["K"]))))),
+                         K1=unname(ifelse(is.na(par["K1"]), rep(NA, replicates), c(par["K1"], rnorm(rep, par["K1"], ifelse(is.na(res["K1"]), 0, res["K1"]))))),
+                         K2=unname(ifelse(is.na(par["K2"]), rep(NA, replicates), c(par["K2"], rnorm(rep, par["K2"], ifelse(is.na(res["K2"]), 0, res["K2"]))))))
 
-  prop.theorique <- ifelse(temperatures<par["P"],
-                           ifelse(par["K1"]>3 & sign(par["P"]-temperatures)==sign(par["S"]), 
-                           0.5*exp((temperatures-par["P"])/(par["S"]*exp(par["K1"]))), 
-                           (1+(2^exp(par["K1"])-1)*exp((1/par["S"])*(par["P"]-temperatures)))^(-1/exp(par["K1"]))),
-                           ifelse(par["K2"]>3 & sign(par["P"]-temperatures)==sign(par["S"]), 
-                                  0.5*exp((temperatures-par["P"])/(par["S"]*exp(par["K2"]))), 
-                                  (1+(2^exp(par["K2"])-1)*exp((1/par["S"])*(par["P"]-temperatures)))^(-1/exp(par["K2"])))
-                           
-  )
-}
-if (equation=="Hulin") {
-  p <- (1+(2^exp(par["K1"]*x+par["K2"])-1)*exp((1/par["S"])*(par["P"]-x)))^(-1/exp(par["K1"]*x+par["K2"]))
-  prop.theorique <- (1+(2^exp(par["K1"]*temperatures+par["K2"])-1)*exp((1/par["S"])*(par["P"]-temperatures)))^(-1/exp(par["K1"]*temperatures+par["K2"]))
-}
-
- # prop.cumul <- NULL
- # for (i in 1:length(N)) prop.cumul <- c(prop.cumul, binom.test(males[i], N[i], prop.theorique[i])$p.value)
- # 
- # 
- # result$GOF <- combine.test(prop.cumul, method = c("z.transform"))
-
-  
-  par(new=TRUE)
-	if (males.freq) {   
-  L1 <- modifyList(list(x=x, y=p, bty="n"), L)
-  } else {
-  L1 <- modifyList(list(x=x, y=1-p, bty="n"), L)
-  }
-  L1 <- modifyList(L1, list(ylim=c(0,1), axes=FALSE, xlab="", ylab="", type="l", main="", xlim=c(x1, x2)))
-
-  a <- do.call(plot, L1)
-
-if (show.CI) {
-  
-  	pm <- NULL
-		pp <- NULL
-
-  
-	if (equation=="logistic") {
-    # ici je laisse S contrairement à predict.tsd
-    # 19/9/2014 Je ne comprends pas
-	  parameter.expand <- expand.grid(S=c(ifelse(sign(par["S"]-range.CI.qnorm*res["S"])!=sign(par["S"]), sign(par["S"])*1e-5, par["S"]-range.CI.qnorm*res["S"]), 
-	                                      ifelse(sign(par["S"]+range.CI.qnorm*res["S"])!=sign(par["S"]), sign(par["S"])*1e-5, par["S"]+range.CI.qnorm*res["S"])),
-	                                  P=c(par["P"]-range.CI.qnorm*res["P"], par["P"]+range.CI.qnorm*res["P"]), temperatures=x)
-	  y <- as.numeric(with(parameter.expand, 1/(1+exp((1/S)*(P-temperatures)))))
-	  l <- split(y, parameter.expand$temperatures)
-	  
-	  pm <- unlist(lapply(l, min))
-	  pp <- unlist(lapply(l, max))
-	}
-  
-	if (equation=="Hill") {
-	  # ici je laisse S contrairement à predict.tsd
-    parameter.expand <- expand.grid(S=c(ifelse(sign(par["S"]-range.CI.qnorm*res["S"])!=sign(par["S"]), sign(par["S"])*1e-5, par["S"]-range.CI.qnorm*res["S"]), 
-                                        ifelse(sign(par["S"]+range.CI.qnorm*res["S"])!=sign(par["S"]), sign(par["S"])*1e-5, par["S"]+range.CI.qnorm*res["S"])),
-                                    P=c(par["P"]-range.CI.qnorm*res["P"], par["P"]+range.CI.qnorm*res["P"]), temperatures=x)
-    y <- as.numeric(with(parameter.expand, 1/(1+exp((1/S)*(log(P)-log(temperatures))))))
-    l <- split(y, parameter.expand$temperatures)
+    out_tsd <- apply(df_par, 1, function(par) {
+      # marche en températures mais par en IP - corrigé 9/9/2014
+      limit.low.TRT <- limit.low.TRT.minimum
+      limit.high.TRT <- limit.high.TRT.maximum
+      for (i in 1:4) {
+        temperatures.se <- seq(from=limit.low.TRT, to=limit.high.TRT, length=20)
+        p <- .modelTSD(par, temperatures.se, equation)
+        
+        if (sign(par["S"])<0) {
+          limit.low.TRT <- temperatures.se[tail(which(p>(1-l)), n=1)]
+          limit.high.TRT <- temperatures.se[which(p < l)[1]]
+        } else {
+          limit.low.TRT <- temperatures.se[tail(which(p<l), n=1)]
+          limit.high.TRT <- temperatures.se[which(p >(1-l))[1]]
+        }
+        limit.low.TRT <- ifelse(identical(limit.low.TRT, numeric(0)), NA, limit.low.TRT)
+        limit.high.TRT <- ifelse(identical(limit.high.TRT, numeric(0)), NA, limit.high.TRT)
+        if (is.na(limit.low.TRT) | is.na(limit.high.TRT)) break
+      }
+      return(data.frame(l.l.TRT.c=limit.low.TRT, l.h.TRT.c=limit.high.TRT, TRT.c=limit.high.TRT-limit.low.TRT))
+    }
+    )
     
-    pm <- unlist(lapply(l, min))
-    pp <- unlist(lapply(l, max))
-	}
-	
-	if (equation=="Richards") {
-	  parameter.expand <- expand.grid(S=c(ifelse(sign(par["S"]-range.CI.qnorm*res["S"])!=sign(par["S"]), sign(par["S"])*1e-5, par["S"]-range.CI.qnorm*res["S"]), 
-	                                  ifelse(sign(par["S"]+range.CI.qnorm*res["S"])!=sign(par["S"]), sign(par["S"])*1e-5, par["S"]+range.CI.qnorm*res["S"])),
-	                                  P=c(par["P"]-range.CI.qnorm*res["P"], par["P"]+range.CI.qnorm*res["P"]), 
-                                    K=c(ifelse(sign(par["K"]-range.CI.qnorm*res["K"])!=sign(par["K"]), sign(par["K"])*1e-5, par["K"]-range.CI.qnorm*res["K"]), 
-                                        ifelse(sign(par["K"]+range.CI.qnorm*res["K"])!=sign(par["K"]), sign(par["K"])*1e-5, par["K"]+range.CI.qnorm*res["K"])), 
-	                                  temperatures=x)
-	  y <- as.numeric(with(parameter.expand, 
-	                       ifelse(K>3 & sign(P-temperatures)==sign(S), 
-	                              0.5*exp((temperatures-P)/(S*exp(K))), 
-	                              (1+(2^exp(K)-1)*exp((1/S)*(P-temperatures)))^(-1/exp(K)))
-                         ))
-	  l <- split(y, parameter.expand$temperatures)
-	  
-	  pm <- unlist(lapply(l, min))
-	  pp <- unlist(lapply(l, max))
-
-	}
-	
-	if (equation=="Double-Richards") {
-	  parameter.expand <- expand.grid(S=c(ifelse(sign(par["S"]-range.CI.qnorm*res["S"])!=sign(par["S"]), sign(par["S"])*1e-5, par["S"]-range.CI.qnorm*res["S"]), 
-	                                      ifelse(sign(par["S"]+range.CI.qnorm*res["S"])!=sign(par["S"]), sign(par["S"])*1e-5, par["S"]+range.CI.qnorm*res["S"])),
-	                                  P=c(par["P"]-range.CI.qnorm*res["P"], par["P"]+range.CI.qnorm*res["P"]), 
-	                                  K1=c(ifelse(sign(par["K1"]-range.CI.qnorm*res["K1"])!=sign(par["K1"]), sign(par["K1"])*1e-5, par["K1"]-range.CI.qnorm*res["K1"]), 
-	                                      ifelse(sign(par["K1"]+range.CI.qnorm*res["K1"])!=sign(par["K1"]), sign(par["K1"])*1e-5, par["K1"]+range.CI.qnorm*res["K1"])), 
-	                                  K2=c(ifelse(sign(par["K2"]-range.CI.qnorm*res["K2"])!=sign(par["K2"]), sign(par["K2"])*1e-5, par["K2"]-range.CI.qnorm*res["K2"]), 
-	                                       ifelse(sign(par["K2"]+range.CI.qnorm*res["K2"])!=sign(par["K2"]), sign(par["K2"])*1e-5, par["K2"]+range.CI.qnorm*res["K2"])), 
-	                                  temperatures=x)
-	  y <- as.numeric(with(parameter.expand, ifelse(temperatures<P, 
-	                       ifelse(K1>3 & sign(P-temperatures)==sign(S), 
-	                              0.5*exp((temperatures-P)/(S*exp(K1))), 
-	                              (1+(2^exp(K1)-1)*exp((1/S)*(P-temperatures)))^(-1/exp(K1))),
-	                       ifelse(K2>3 & sign(P-temperatures)==sign(S), 
-	                              0.5*exp((temperatures-P)/(S*exp(K2))), 
-	                              (1+(2^exp(K2)-1)*exp((1/S)*(P-temperatures)))^(-1/exp(K2)))
-	                       
-	  )
-	  ))
-	  l <- split(y, parameter.expand$temperatures)
-	  
-	  pm <- unlist(lapply(l, min))
-	  pp <- unlist(lapply(l, max))
-	  
-	}
-	
-  
-if (equation=="Hulin") {
-  parameter.expand <- expand.grid(S=c(ifelse(sign(par["S"]-range.CI.qnorm*res["S"])!=sign(par["S"]), sign(par["S"])*1e-5, par["S"]-range.CI.qnorm*res["S"]), 
-                                      ifelse(sign(par["S"]+range.CI.qnorm*res["S"])!=sign(par["S"]), sign(par["S"])*1e-5, par["S"]+range.CI.qnorm*res["S"])),
-                                  P=c(par["P"]-range.CI.qnorm*res["P"], par["P"]+range.CI.qnorm*res["P"]), 
-                                  K1=c(ifelse(sign(par["K1"]-range.CI.qnorm*res["K1"])!=sign(par["K1"]), sign(par["K1"])*1e-5, par["K1"]-range.CI.qnorm*res["K1"]), 
-                                      ifelse(sign(par["K1"]+range.CI.qnorm*res["K1"])!=sign(par["K1"]), sign(par["K1"])*1e-5, par["K1"]+range.CI.qnorm*res["K1"])), 
-                                  K2=c(ifelse(sign(par["K2"]-range.CI.qnorm*res["K2"])!=sign(par["K2"]), sign(par["K2"])*1e-5, par["K2"]-range.CI.qnorm*res["K2"]), 
-                                       ifelse(sign(par["K2"]+range.CI.qnorm*res["K2"])!=sign(par["K2"]), sign(par["K2"])*1e-5, par["K2"]+range.CI.qnorm*res["K2"])), 
-                                  temperatures=x)
-  y <- as.numeric(with(parameter.expand, 
-                       (1+(2^exp(K1*temperatures+K2)-1)*exp((1/S)*(P-temperatures)))^(-1/exp(K1*temperatures+K2)))
-  )
-  l <- split(y, parameter.expand$temperatures)
-  
-  pm <- unlist(lapply(l, min))
-  pp <- unlist(lapply(l, max))
-  
-}
-
-  
-	if (!is.null(pp)) {
-	par(new=TRUE)
-  	if (males.freq) {   
-
-  L1 <- modifyList(list(x=x, y=pm, bty="n"), L)
-  } else {
-  L1 <- modifyList(list(x=x, y=1-pm, bty="n"), L)
-  
+    out_tsd2 <- t(sapply(out_tsd, c))
+    
+    if (!is.null(temperatures.plot)) {
+      out_tsd_plot <- apply(df_par, 1, function(par) {
+        p <- .modelTSD(par, temperatures.plot, equation)
+        return(list(sr=p))
+      }
+      )
+      
+      out_tsd2_plot <- sapply(out_tsd_plot, c, simplify = TRUE)
+      # dans un df chaque colonne est une température
+      out_tsd3_plot <- t(sapply(out_tsd2_plot, c, simplify = TRUE))
+#      dim(out_tsd3_plot)
+      outquant <- apply(out_tsd3_plot, 2, quantile, probs = c(0.025, 0.975))
+      outquant <- rbind(outquant, mean=out_tsd3_plot[1,], temperatures=temperatures.plot)
+      result$CI <- outquant
+      
+    }
+    
+    
+    result$TRT <- as.numeric(out_tsd2[1, "TRT.c"])
+    result$TRT_limits <- as.numeric(c(out_tsd2[1, "l.l.TRT.c"], out_tsd2[1, "l.h.TRT.c"]))
+    result$SE_TRT <- sd(as.numeric(out_tsd2[, "TRT.c"]), na.rm = TRUE)
+    result$SE_TRT_limits <- c(sd(as.numeric(out_tsd2[, "l.l.TRT.c"]), na.rm = TRUE), sd(as.numeric(out_tsd2[, "l.h.TRT.c"]), na.rm = TRUE))
+    limit.low.TRT <- result$TRT_limits[1]-range.CI.qnorm*result$SE_TRT_limits[1]
+    limit.high.TRT <- result$TRT_limits[2]+range.CI.qnorm*result$SE_TRT_limits[2]
   }
-  L1 <- modifyList(L1, list(ylim=c(0,1), axes=FALSE, xlab="", ylab="", type="l", main="", lty=2, xlim=c(x1, x2)))
-  a <- do.call(plot, L1) 
   
-  par(new=TRUE)
-  	if (males.freq) {   
-
-  L1 <- modifyList(list(x=x, y=pp, bty="n"), L)
-  } else {
-  L1 <- modifyList(list(x=x, y=1-pp, bty="n"), L)
-  
-  }
-  L1 <- modifyList(L1, list(ylim=c(0,1), axes=FALSE, xlab="", ylab="", type="l", main="", lty=2, xlim=c(x1, x2)))
-  a <- do.call(plot, L1) 
-
-	}  
-}
-# fin du plot==true
-}
-
   saturated <- 0
   for (i in 1:length(N)) saturated <- saturated- dbinom(males[i], N[i], males[i]/N[i], log=TRUE)
   LRT <- 2*(result$value-saturated)
   result$GOF <- 1-pchisq(LRT, length(N)-length(par))
-
+  
   result$males <- males
   result$females <- females
   result$N <- N
@@ -602,16 +315,17 @@ if (equation=="Hulin") {
   result$males.freq <- males.freq
   result$equation <- equation
   result$l <- l
+  result$fixed.parameters <- fixed.parameters
   
   if (print) print(paste("The goodness of fit test is", sprintf("%.5f",result$GOF)))
-
-if (equation!="GSD" & print) {
-  print(paste("The", lab.PT, "is", sprintf("%.3f",par["P"]), "SE", sprintf("%.3f",res["P"])))
-  print(paste("The", lab.TRT, "is", sprintf("%.3f",result$TRT), "SE", sprintf("%.3f",result$SE_TRT)))
-  print(paste("The lower limit of ", lab.TRT, "is", sprintf("%.3f",result$TRT_limits[1]), "SE", sprintf("%.3f",result$SE_TRT_limits[1])))
-  print(paste("The higher limit of ", lab.TRT, "is", sprintf("%.3f",result$TRT_limits[2]), "SE", sprintf("%.3f",result$SE_TRT_limits[2])))
-}
-
-	class(result) <- "tsd"
+  
+  if (equation!="GSD" & print) {
+    print(paste("The pivotal is", sprintf("%.3f",par["P"]), "SE", sprintf("%.3f",res["P"])))
+    print(paste("The transitional range of temperatures is", sprintf("%.3f",result$TRT), "SE", sprintf("%.3f",result$SE_TRT)))
+    print(paste("The lower limit of transitional range of temperatures is", sprintf("%.3f",result$TRT_limits[1]), "SE", sprintf("%.3f",result$SE_TRT_limits[1])))
+    print(paste("The higher limit of transitional range of temperatures is", sprintf("%.3f",result$TRT_limits[2]), "SE", sprintf("%.3f",result$SE_TRT_limits[2])))
+  }
+  
+  class(result) <- "tsd"
   return(invisible(result))
 }

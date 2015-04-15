@@ -1,10 +1,12 @@
-#' embryogrowth_MHmcmc_p generates set of parameters to be used with embryogrowth_MHmcmc()
-#' @title Generates set of parameters to be used with embryogrowth_MHmcmc()
+#' TRN_MHmcmc_p generates set of parameters to be used with GRTRN_MHmcmc() or STRN_MHmcmc()
+#' @title Generates set of parameters to be used with GRTRN_MHmcmc() or STRN_MHmcmc()
 #' @author Marc Girondot
 #' @return A matrix with the parameters
 #' @param result An object obtained after a SearchR fit
+#' @param parameters A set of parameters if result is not given
+#' @param fixed.parameters A set of fixed parameters
 #' @param accept If TRUE, the script does not wait user information
-#' @description Interactive script used to generate set of parameters to be used with embryogrowth_MHmcmc().\cr
+#' @description Interactive script used to generate set of parameters to be used with GRTRN_MHmcmc() or STRN_MHmcmc().\cr
 #' @examples 
 #' \dontrun{
 #' library(embryogrowth)
@@ -22,21 +24,32 @@
 #' 	temperatures=formated, derivate=dydt.Gompertz, M0=1.7,  
 #' 	test=c(Mean=39.33, SD=1.92), method = "BFGS", maxiter = 200)
 #' data(resultNest_4p)
-#' pMCMC <- embryogrowth_MHmcmc_p(resultNest_4p, accept=TRUE)
+#' pMCMC <- TRN_MHmcmc_p(resultNest_4p, accept=TRUE)
 #' }
 #' @export
 
 # Algo Metropolis-Hastings
 # ------------------------
 
-embryogrowth_MHmcmc_p<-function(result=stop("An output from searchR must be provided"), accept=FALSE) {
+TRN_MHmcmc_p<-function(result=NULL, parameters=NULL, fixed.parameters=NULL, 
+                                accept=FALSE) {
 
 # d'abord je sors les paramètres à utiliser
+  
+  if (is.null(result) & is.null(parameters)) {
+    warning("Or result or parameters must be provided")
+    return()
+  }
 
-par <- result$par
+  par <- parameters
+  allpar <- c(par, fixed.parameters)
+  if (!is.null(result)) {
+    par <- result$par
+    allpar <- c(par, result$fixed.parameters)
+    }
 
 # 7/2/2014, ajout de la nouvelle version des paramètres
-if (all(names(c(par, result$fixed.parameters))!="Rho25")) {
+if (all(names(allpar)!="Rho25")) {
 	priors <- list()
 	for(i in 1:length(par)) {
 		pr <- c("dunif", 0.001, 20, 1, 0.001, 20, par[i])

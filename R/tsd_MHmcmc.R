@@ -1,5 +1,5 @@
 #' tsd_MHmcmc runs the Metropolis-Hastings algorithm for tsd (Bayesian MCMC)
-#' @title Run the Metropolis-Hastings algorithm for tsd
+#' @title Metropolis-Hastings algorithm for Sex ratio
 #' @author Marc Girondot
 #' @return A list with resultMCMC being mcmc.list object, resultLnL being likelihoods and parametersMCMC being the parameters used
 #' @param n.iter Number of iterations for each step
@@ -10,18 +10,24 @@
 #' @param thin Number of iterations between each stored output
 #' @param trace True or False, shows progress
 #' @param batchSize Number of observations to include in each batch fo SE estimation
+#' @param filename If intermediate is not NULL, save intermediate result in this file
+#' @param intermediate Period for saving intermediate result, NULL for no save
+#' @param previous Previous result to be continued. Can be the filename in which intermediate results are saved.
 #' @description Run the Metropolis-Hastings algorithm for tsd.\cr
 #' Deeply modified from a MCMC script by Olivier Martin (INRA, Paris-Grignon).\cr
 #' The number of iterations is n.iter+n.adapt+1 because the initial likelihood is also displayed.\cr
 #' I recommend that thin=1 because the method to estimate SE uses resampling.\cr
 #' If initial point is maximum likelihood, n.adapt = 0 is a good solution.\cr
-#' Note that resultLnL has all the likelihoods, not only those defined by n.adapt and thin.\cr
-#' To get the SE from result_mcmc <- embryogrowth_MHmcmc(result=try), use:\cr
+#' To get the SE from result_mcmc <- tsd_MHmcmc(result=try), use:\cr
 #' result_mcmc$BatchSE or result_mcmc$TimeSeriesSE\cr
 #' The batch standard error procedure is usually thought to be not as accurate as the time series methods.\cr
 #' Based on Jones, Haran, Caffo and Neath (2005), the batch size should be equal to sqrt(n.iter).\cr
 #' Jones, G.L., Haran, M., Caffo, B.S. and Neath, R. (2006) Fixed Width Output Analysis for Markov chain Monte Carlo , Journal of the American Statistical Association, 101:1537-1547.\cr
 #' coda package is necessary for this function.\cr
+#' #' The parameters intermediate and filename are used to save intermediate results every 'intermediate' iterations (for example 1000). Results are saved in a file of name filename.\cr
+#' The parameter previous is used to indicate the list that has been save using the parameters intermediate and filename. It permits to continue a mcmc search.\cr
+#' These options are used to prevent the consequences of computer crash or if the run is very very long and processes at time limited.\cr
+#' @family Functions for temperature-dependent sex determination
 #' @examples
 #' \dontrun{
 #' library(embryogrowth)
@@ -47,23 +53,28 @@
 #' }
 #' @export
 
-tsd_MHmcmc <- function(result=stop("An output from tsd() must be provided"), n.iter=10000, 
-parametersMCMC=stop("Priors must be given. Use tsd_MHmcmc_p()"), n.chains = 1, n.adapt = 0, 
-thin=1, trace=FALSE, batchSize=sqrt(n.iter)) {
+tsd_MHmcmc <- function(result=NULL, n.iter=10000, 
+parametersMCMC=NULL, n.chains = 1, n.adapt = 0, 
+thin=1, trace=FALSE, batchSize=sqrt(n.iter), 
+intermediate=NULL, filename="intermediate.Rdata", previous=NULL) {
 
 # result=eo_logistic; parametersMCMC=pMCMC; n.iter=10000; n.chains = 1;  n.adapt = 0; thin=1; trace=TRUE; batchSize=sqrt(n.iter)
+  if (is.character(previous)) {
+    itr <- NULL
+    load(previous)
+    previous <- itr
+    rm(itr)
+    print("Continue previous mcmc run")
+  } else {
+    print(parametersMCMC)
+  }
   
-  require("coda")
-  
-parameters <- parametersMCMC
-
-print(parameters)
-
 # 29/1/2014; Ajout de result$weight
-out <- .MHalgoGen(n.iter=n.iter, parameters=parametersMCMC, 
+out <- MHalgoGen(n.iter=n.iter, parameters=parametersMCMC, 
 n.chains = n.chains, n.adapt = n.adapt, thin=thin, trace=trace, 
 	data=list(males=result$males, N=result$N, temperatures=result$temperatures, 
-            equation=result$equation), likelihood=get(".fonctiontsdMCMC"))
+            equation=result$equation), likelihood=get(".fonctiontsdMCMC"), 
+intermediate=intermediate, filename=filename, previous=previous)
 
 if (batchSize>=n.iter/2) {
   print("batchSize cannot be larger than half the number of iterations.")

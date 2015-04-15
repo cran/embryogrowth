@@ -32,7 +32,7 @@
 #' 	method = "BFGS", maxiter = 200, weight=w)
 #' data(resultNest_4p_weight)
 #' plotR(resultNest_4p_weight, ylim=c(0,0.50), xlim=c(15, 35))
-#' # Standard error of parameters can use the embryogrowth_MHmcmc() function
+#' # Standard error of parameters can use the GRTRN_MHmcmc() function
 #' }
 #' @export
 

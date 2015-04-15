@@ -1,11 +1,12 @@
-#' tsd_MHmcmc_p generates set of parameters to be used with embryogrowth_MHmcmc()
+#' tsd_MHmcmc_p generates set of parameters to be used with tsd_MHmcmc()
 #' @title Generates set of parameters to be used with tsd_MHmcmc()
 #' @author Marc Girondot
 #' @return A matrix with the parameters
 #' @param result An object obtained after a tsd fit
 #' @param accept If TRUE, the script does not wait user information
 #' @description Interactive script used to generate set of parameters to be 
-#' used with tsd_MHmcmc().\cr
+#' used with tsd_MHmcmc().
+#' @family Functions for temperature-dependent sex determination
 #' @examples 
 #' \dontrun{
 #' library(embryogrowth)

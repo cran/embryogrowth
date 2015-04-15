@@ -4,9 +4,10 @@
 #' @docType data
 #' @name result_mcmc_4p_weight
 #' @description Fit using the nest database
-#' @references Girondot, M. & Kaska, Y. Submitted. A model to predict 
-#'             temperature dependency on embryo growth rate and incubation
-#'             duration from field data.
+#' @references Girondot, M., & Kaska, Y. (2014). A model to predict 
+#'             the thermal reaction norm for the embryo growth rate 
+#'             from field data. Journal of Thermal Biology, 45, 96-102. 
+#'             doi: 10.1016/j.jtherbio.2014.08.005
 #' @keywords datasets
 #' @usage result_mcmc_4p_weight
 #' @examples
@@ -25,9 +26,9 @@
 #' 	derivate=dydt.Gompertz, M0=1.7, test=c(Mean=39.33, SD=1.92),  
 #' 	method = "BFGS", maxiter = 200, weight=w)
 #' data(resultNest_4p_weight)
-#' pMCMC <- embryogrowth_MHmcmc_p(resultNest_4p_weight, accept=TRUE)
+#' pMCMC <- TRN_MHmcmc_p(resultNest_4p_weight, accept=TRUE)
 #' # Take care, it can be very long, sometimes several days
-#' result_mcmc_4p_weight <- embryogrowth_MHmcmc(result=resultNest_4p_weight,  
+#' result_mcmc_4p_weight <- GRTRN_MHmcmc(result=resultNest_4p_weight,  
 #' 	parametersMCMC=pMCMC, n.iter=10000, n.chains = 1, n.adapt = 0,  
 #' 	thin=1, trace=TRUE)
 #' data(result_mcmc_4p_weight)

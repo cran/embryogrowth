@@ -3,6 +3,42 @@ THIS IS THE CHANGELOG OF THE "embryogrowth" PACKAGE
 Please note that only the most significant changes are reported here.
 All the changes are indicated inside the R code.
 
+          CHANGES IN VERSION 6.0    (2015-04-15)
+
+* FormatNests() can convert old format database using data=xxx with xxx being the old format database
+* info.nests() is much more complete
+* polynom package is now in dependencies
+* New columns IndiceK in FormatNests() output to accelerate SearchR()
+* predict.tsd() uses the new model for CI estimation
+* plot.tsd() does not make any estimation; it just plot the object created by tsd()
+* New method for confidence interval in tsd()
+* If stopattest=TRUE is used in .fonctionfit() the time for end of incubation is estimated using polynomial interpolation
+* Hmisc package is no more required
+* new parameters SE and fixed.parameters in tsd()
+* The anchored parameters can use Celcius degrees
+* Many changes in .fonctionfit .STRNfit (hidden fonctions)
+* searchR() is more rational for initial tests of weights and better manage parallel runs
+* Add a progression bar for predict.tsd()
+* MHmcmcAlgo(), minmax.periodic(), temperature.periodic() and info.sun() functions are transfered to new package: HelpersMG
+* STRN() does not use replicate.CI for info.nests()
+* Add parameters= for GenerateAnchor() and GRTRN_MHmcmc_p()
+* The weight scheme for CTE called weigthed mean temperature during TSP can use another thermal reaction norm: the thermal reaction norm for sexualisation (STRN). The new CTE is named TSD.mean.temperature
+* New CTE named TSD.weighted.mean.temperature. It includes both the thernal reaction norm for growth rate and the thermal reaction norm for sexualisation.
+* New function STRN() to fit the Sexualisation thermal reaction norm
+* New function STRN_MHmcmc() to model the enveloppe of the STRN
+* New parameters to continue MCMC run from previous run in GRTRN_MHmcmc(), STRN_MHmcmc() and tsd_MHmcmc()
+* Correct a bug to estimate the mean temperature within the TSP
+* If weight is included in FormatNests, it is used in searchR()
+* Correct a bug when plotR() is called without result parameter
+* Correct a bug for info.nest() with SE
+* Temperatures or durations can be associated with SE for predict.tsd()
+* TestParallel() function display the user time of system.time()
+* Package polynom is required for anchored model
+* Anchored model uses now Lagrange polynoms rather than loess fitting method
+* When anchored model is negative, it is fixed to 0
+* New function sun.info()
+* minmax.periodic() can use different minimum or maximum time each day. Correct a bug for SD in minmax.periodic
+
           CHANGES IN VERSION 5.1    (2014-10-05)
 
 * New version of STRES_TSD and help for this database is more clear

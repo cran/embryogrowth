@@ -4,9 +4,10 @@
 #' @docType data
 #' @name resultNest_4p_weight
 #' @description Fit using the nest database with weight
-#' @references Girondot, M. & Kaska, Y. In press. A model to predict the thermal 
-#'          reaction norm for the embryo growth rate from field data. Journal of
-#'          Thermal Biology. In press
+#' @references Girondot, M., & Kaska, Y. (2014). A model to predict 
+#'             the thermal reaction norm for the embryo growth rate 
+#'             from field data. Journal of Thermal Biology, 45, 96-102. 
+#'             doi: 10.1016/j.jtherbio.2014.08.005
 #' @keywords datasets
 #' @usage resultNest_4p_weight
 #' @examples

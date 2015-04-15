@@ -25,7 +25,7 @@
 #' The Nest1 ends incubation at 65800 minutes whereas Nest2 ends incubation at 65950 (last row\cr
 #' with temperature for each).\cr
 #' The parameter Weight is a vector: weight=c(Nest1=1, Nest2=1.2)\cr
-#' \cr
+#' It can be used to format database already formated with old format; in this case, just use data=xxx with xxx being the old format database.\cr
 #' @examples 
 #' \dontrun{
 #' library(embryogrowth)
@@ -45,6 +45,19 @@ function(data=stop("A dataset must be provided !"), previous=NULL, simplify=TRUE
 # la tepérature en °C, la température en K, la valeur de r et la masse
 
 # previous=NULL; simplify=TRUE; weight=NULL
+  
+if (class(data)=="Nests") {
+
+  nidsEC <- data[1:data$IndiceT["NbTS"]]
+  for(i in 1:length(nidsEC)) {
+    ess <- nidsEC[[i]]
+    if (dim(ess)[2]==5) {
+      ess <- cbind(ess, IndiceK=NA)
+      nidsEC[[i]] <- ess
+    }
+  }
+  
+} else {
 
 nidsEC <- vector(mode="list", length=0)
 # même chose que nids=as.list(NULL)
@@ -59,7 +72,7 @@ for (j in 2:dim(data)[2]) {
 newess2 <- as.numeric(subset(data[,j], !is.na(data[,j])))
 newessT <- as.numeric(subset(data[,1], !is.na(data[,j])))
 
-# 19/10/2012 je calcule les états intermédaires en terme de temps
+# 19/10/2012 je calcule les états intermédiaires en terme de temps
 
 ess2 <- newess2[1]
 essT <- newessT[1]
@@ -74,9 +87,9 @@ for(i in 1:(length(newess2)-1)) {
 ess2 <- c(ess2, newess2[length(newess2)])
 essT <- c(essT, newessT[length(newess2)])
 
-ess<-matrix(c(essT, ess2, ess2+273.15, rep(NA, 2*length(ess2))), ncol=5)
+ess<-matrix(c(essT, ess2, ess2+273.15, rep(NA, 3*length(ess2))), ncol=6)
 
-colnames(ess)<-c("Time", "Temperatures C", "Temperatures K", "r", "Mass")
+colnames(ess)<-c("Time", "Temperatures C", "Temperatures K", "r", "Mass", "IndiceK")
 
 
 # ensuite je supprime les temps avec des valeurs de températures identiques
@@ -89,6 +102,8 @@ if ((dim(ess)[1]>2) & simplify) {
 }
 
 nidsEC[[names(data[j])]]<-subset(ess, !is.na(ess[,1]))
+
+}
 
 }
 
@@ -114,6 +129,13 @@ templevels <- levels(tempaf)
 
 nidsEC[["IndiceT"]] <- c(Tmin=tempmin,Tmax=tempmax, NbTS=nbts)
 nidsEC[["Temperatures"]] <- templevels
+
+# Je remplis la colonne IndiceK
+
+for (j in 1:nbts) {
+  temp<- nidsEC[[j]][, "Temperatures K"]
+  nidsEC[[j]][, "IndiceK"] <- match(as.character(temp), nidsEC[["Temperatures"]])
+}
 
 nidsEC[["weight"]] <- weight
 

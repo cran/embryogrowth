@@ -10,17 +10,52 @@
 
 .SSM<-function (T, parms) {
 
+  # Si je travaille en degree celsius, je convertis en Kelvin
+  if (T[1]<273) T <- T+273.15
+  
 	if (all(names(parms)!="Rho25")) {
 	  newx <- abs(parms[(names(parms)!="rK") & (names(parms)!="K") & (names(parms)!="Scale")])
     scale <- ifelse(is.na(parms["Scale"]), 1, parms["Scale"])
-	  tableT <- data.frame(Temperature=as.numeric(names(newx)), R=newx)
-	  ml <- loess(R ~ Temperature, data=tableT)
-	  newtable<- data.frame(Temperature=T)
-	  rT <- abs(predict(ml, newtable)*1E-5)*scale
+#	  tableT <- data.frame(Temperature=as.numeric(names(newx)), R=newx)
+#	  ml <- loess(R ~ Temperature, data=tableT)
+#	  newtable<- data.frame(Temperature=T)
+#	  rT <- predict(ml, newtable)*1E-5
+    if (as.numeric(names(newx[1]))<273) names(newx) <- as.character(273.15+as.numeric(names(newx)))
+
+#  	nnewx <- as.numeric(names(newx))
+#		p <- poly.calc(x=nnewx, y=newx)
+# 		r <- predict(p, T)
+
+#	  rT <- ifelse(r<0, 0, r)*scale*1E-5
+#	  rT_L <- rT
+
+    nnewx <- as.numeric(names(newx))
+	listpolynom <- NULL
+	for (i in 1:(length(newx)-3)) {
+		listpolynom <- c(listpolynom, list(list(
+		  polynom=polynom::poly.calc(nnewx[i:(i+3)], newx[i:(i+3)]), 
+		  range=c(nnewx[i+1], nnewx[i+2]))))
+	}
+	
+	listpolynom[[1]]$range[1] <- nnewx[1]-10
+	listpolynom[[length(listpolynom)]]$range[2] <- nnewx[length(nnewx)]+10
+
+	r <- NULL
+
+	for (i in 1:length(T)) {
+		l <- unlist(lapply(listpolynom, function(p) ((T[i]>=p$range[1]) & (T[i]<=p$range[2]))))
+ 		pl <- which(l)[1]
+ 		p <- listpolynom[[pl]]$polynom
+ 		r <- c(r, predict(p, T[i]))
+	}
+
+
+	  rT <- ifelse(r<0, 1E-4, r)*scale*1E-5
 	  rT_L <- rT
 	
 	} else {
 
+    
 	R <- 8.314472
 	rho25 <- parms["Rho25"]/1E7
 	dha <- parms["DHA"]*1E3
@@ -42,8 +77,6 @@
 		rT<-(rho25*(T/298)*exp((dha/R)*(unsur298-unsurT)))/(1+exp((dhl/R)*((1/t12L)-unsurT))+exp((dhh/R)*((1/t12H)-unsurT)))
 	}
 
-	rT_L <- rT
-
 	if (!is.na(parms["Rho25_L"])) {
 	
 	rho25_L <- parms["Rho25_L"]/1E7
@@ -62,11 +95,9 @@
 		t12H_L <- t12L+abs(parms["DT_L"])
 		rT_L <- (rho25_L*(T/298)*exp((dha_L/R)*(unsur298-unsurT)))/(1+exp((dhl_L/R)*((1/t12L_L)-unsurT))+exp((dhh_L/R)*((1/t12H_L)-unsurT)))
 	}
-	
-	
-	
-	
-	}
+	} else {
+	  rT_L <- rT
+  }
 	}
 
 return(list(as.numeric(rT), as.numeric(rT_L)))

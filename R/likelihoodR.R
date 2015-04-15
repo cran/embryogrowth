@@ -112,13 +112,10 @@ if (length(setdiff(names(temperatures)[1:temperatures$IndiceT[3]], names(weight)
 
 for (j in 1:NbTS) temperatures[[j]][1, "Mass"] <- M0
 
-
-ptec <- list(temperatures=temperatures, derivate=derivate, 
-		testuse=testuse, M0=M0, fixed.parameters=fixed.parameters, parallel=parallel, weight=weight)
-
 resultnest <- list(par=parameters)
 
-resultnest$value <- .fonctionfit(parameters, pt=ptec)
+resultnest$value <- .fonctionfit(parameters, temperatures=temperatures, derivate=derivate, 
+                                 test=testuse, M0=M0, fixed.parameters=fixed.parameters, weight=weight)
 
 if(echo) {
 
@@ -130,7 +127,8 @@ if (hessian) {
 
 	print("Estimate the SE for parameters at that point")
 
-	mathessian <- try(hessian(.fonctionfit, result$par, method="Richardson", pt=ptec), silent=TRUE)
+	mathessian <- try(hessian(.fonctionfit, result$par, method="Richardson", temperatures=temperatures, derivate=derivate, 
+	                          test=testuse, M0=M0, fixed.parameters=fixed.parameters, weight=weight), silent=TRUE)
 
 	if (inherits(mathessian, "try-error")) {
 			res<-rep(NA, length(parameters))

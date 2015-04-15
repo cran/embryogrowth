@@ -6,7 +6,7 @@
 #' @param fixed.parameters A set of parameters that will not be changed
 #' @param temperatures Timeseries of temperatures after formated using FormatNests()
 #' @param derivate Function used to fit embryo growth: dydt.Gompertz, dydt.exponential or dydt.linear
-#' @param test Mean and SD of size of hatchlings
+#' @param test A vector with Mean and SD of size of hatchlings, ex. test=c(Mean=39, SD=3)
 #' @param M0 Measure of hatchling size or mass proxi at laying date
 #' @param method Method uses for searching. Can be any method from optim function
 #' @param maxiter After maxiter iteration, the value of parameters is displayed but it continues if convergence is not acheived
@@ -14,8 +14,8 @@
 #' @param fileName The intermediate results are saved in file with fileName.Rdata name
 #' @param weight A named vector of the weight for each nest for likelihood estimation
 #' @param hessian If TRUE, the hessian matrix is estimated and the SE of parameters estimated.
-#' @param parallel If true, try to use several cores using parallel computing. Must be FALSE in Windows.
-#' @description Fit the parameters that best represent data.
+#' @description Fit the parameters that best represent data.\cr
+#' test can be a list with two elements Mean and SD and each element is a nammed vector with the nest name.
 #' @examples
 #' \dontrun{
 #' library(embryogrowth)
@@ -27,8 +27,8 @@
 #' # "T12L", "DT", "DHA",  "DHH", "DHL", "Rho25"
 #' # K for Gompertz must be set as fixed parameter or being a constant K  
 #' # or relative to the hatchling size rK
-#' x <- structure(c(118.768297442004, 475.750095909406, 306.243694918151, 
-#' 116.055824800264), .Names = c("DHA", "DHH", "T12H", "Rho25"))
+#' x <- structure(c(118.431040984352, 498.205702157603, 306.056280989839, 
+#' 118.189669472381), .Names = c("DHA", "DHH", "T12H", "Rho25"))
 #' # pfixed <- c(K=82.33) or rK=82.33/39.33
 #' pfixed <- c(rK=2.093313)
 #' resultNest_4p <- searchR(parameters=x, fixed.parameters=pfixed, 
@@ -44,9 +44,9 @@
 #' 	temperatures=formated, derivate=dydt.Gompertz, M0=1.7, 
 #' 	test=c(Mean=39.33, SD=1.92), method = "BFGS", maxiter = 200)
 #' data(resultNest_6p)
-#' pMCMC <- embryogrowth_MHmcmc_p(resultNest_6p, accept=TRUE)
+#' pMCMC <- TRN_MHmcmc_p(resultNest_6p, accept=TRUE)
 #' # Take care, it can be very long, sometimes several days
-#' result_mcmc_6p <- embryogrowth_MHmcmc(result=resultNest_6p,  
+#' result_mcmc_6p <- GRTRN_MHmcmc(result=resultNest_6p,  
 #' 	parametersMCMC=pMCMC, n.iter=10000, n.chains = 1, n.adapt = 0,  
 #' 	thin=1, trace=TRUE)
 #' data(result_mcmc_6p)
@@ -73,15 +73,15 @@
 
 searchR <-
 function(parameters=stop('Initial set of parameters must be provided'), 
-	fixed.parameters=NULL, temperatures=stop('Temperature data must be provided !'), 
+	fixed.parameters=NULL, temperatures=stop('Formated temperature must be provided !'), 
 	derivate=dydt.Gompertz, test=c(Mean=39.33, SD=1.92), 
 	M0=1.7, method="BFGS", maxiter=200, saveAtMaxiter=FALSE, fileName="intermediate", 
-  weight=NULL, hessian=TRUE, parallel=(.Platform$OS.type=="unix")) {
-	
-	if (parallel & (.Platform$OS.type!="unix")) {
-		parallel <- FALSE
-		warning("Parallel computing is not available for Windows")
-	}
+  weight=NULL, hessian=TRUE) {
+  
+  # parameters <- structure(c(118.768297442004, 475.750095909406, 306.243694918151, 116.055824800264), .Names = c("DHA", "DHH", "T12H", "Rho25")); fixed.parameters <- c(rK=2.093313)
+  # temperatures <- formated;derivate <- dydt.Gompertz;M0 <- 1.7
+  # test=c(Mean=39.33, SD=1.92); method = "BFGS"; maxiter = 200;saveAtMaxiter=FALSE;fileName="intermediate"
+	# weight=NULL; hessian=TRUE
   
 	if (!requireNamespace("numDeriv", quietly = TRUE)) {
 	  warning("numDeriv package is absent; less accurate fitting method will be used and SE of parameters cannot be calculated")
@@ -91,53 +91,43 @@ function(parameters=stop('Initial set of parameters must be provided'),
 	  numDeriv <- TRUE
 	}
 	
+  # dans temperatures il faut que je rajoute une colonne avec les indices de températures en K
+  
 	
 NbTS <- temperatures$IndiceT[3]
-	
-if (is.null(weight)) {
-	par <- rep(1, NbTS)
-	names(par) <- names(temperatures)[1:NbTS]
-} else {
 
-	if (any(is.na(weight))) {
-		par <- rep(1, NbTS)
-		names(par) <- names(temperatures)[1:NbTS]
-	} else {
-
-	if (is.list(weight)) weight <- weight$weight
-
-	if (length(setdiff(names(weight), names(temperatures)[1:NbTS]))==0) {
-		par <- weight
-	} else {
-		print("Check the weights")
-		return(invisible())
-	}
-	}
+# si j'ai weight dans les data formatées et pas en paramètres, je les prends
+if (is.null(weight) & !is.null(temperatures$weight)) {
+  weight <- temperatures$weight
 }
 
-weight <- par
+# si j'ai pas de weight, je mets tout à 1
+if (is.null(weight)) {
+  weight <- rep(1, NbTS)
+	names(weight) <- names(temperatures)[1:NbTS]
+}
 
-# test si tous sont là
-if (length(setdiff(names(temperatures)[1:temperatures$IndiceT[3]], names(weight)))!=0) {
-	print("The weight parameter must define weight for each nest.")
-	print(paste("check", setdiff(names(temperatures)[1:temperatures$IndiceT[3]], names(weight)), "nests"))
-	return(invisible())	
-}	
+# si c'est une liste, je prends l'élément weight
+if (is.list(weight)) weight <- weight$weight
 
+if (!setequal(names(weight), names(temperatures)[1:NbTS])) {
+  print("The weight parameter must define weight for each nest.")
+  print(paste("check", setdiff(names(temperatures)[1:temperatures$IndiceT[3]], names(weight)), "nests"))
+  return(invisible())	
+}
 
 ##########################################################
 # Données de base de Gompertz
 ##########################################################
 
 if (is.numeric(test)) {
-	testuse<-data.frame(Mean=rep(test["Mean"], temperatures[["IndiceT"]][3]), SD=rep(test["SD"], temperatures[["IndiceT"]][3]), row.names=names(temperatures[1:temperatures$IndiceT["NbTS"]]))
+	testuse<-data.frame(Mean=rep(test["Mean"], NbTS), SD=rep(test["SD"], NbTS), row.names=names(temperatures[1:NbTS]))
 } else {
 	testuse<-test
 }
 
-for (j in 1:temperatures[["IndiceT"]][3]) temperatures[[names(temperatures)[j]]][1, "Mass"] <- M0
-
-
+# 25/2/2015
+for (j in 1:NbTS) temperatures[[j]][1, "Mass"] <- M0
 
 # Un paramètre ne peut pas être indiqué en fixe et en fité - 22/7/2012	
 # test faux, corrigé le 19/2/2013
@@ -146,38 +136,41 @@ for (j in 1:temperatures[["IndiceT"]][3]) temperatures[[names(temperatures)[j]]]
 		return(invisible())
 	}
 
-ptec <- list(temperatures=temperatures, derivate=derivate, weight=weight,
-		testuse=testuse, M0=M0, fixed.parameters=fixed.parameters, parallel=parallel)
-
 repeat {
 
 # 30/8/2014 - Je retire optimx
   if (numDeriv) {
-	result=optim(parameters, .fonctionfit, pt=ptec,
+	result=optim(parameters, .fonctionfit, temperatures=temperatures, 
+	             derivate=derivate, weight=weight,
+	             test=testuse, M0=M0, fixed.parameters=fixed.parameters,
                gr=.gradientRichardson, method=method, 
                control=list(trace=2, REPORT=1, maxit=maxiter), hessian=FALSE)
 } else {
-  result=optim(parameters, .fonctionfit, pt=ptec,
+  result=optim(parameters, .fonctionfit, temperatures=temperatures, 
+               derivate=derivate, weight=weight,
+               test=testuse, M0=M0, fixed.parameters=fixed.parameters,
                method=method, control=list(trace=2, REPORT=1, maxit=maxiter), hessian=FALSE)
 }
 	if (result$convergence==0) break
 	parameters<-result$par
 	print("Convergence is not achieved. Optimization continues !")
-	print(parameters)
-  if (saveAtMaxiter) save(parameters, file=paste0(fileName, ".RData"))
+	print(dput(parameters))
+ if (saveAtMaxiter) save(parameters, file=paste0(fileName, ".RData"))
 }
 
 print(result$par)
 
 if (hessian) {
 
-	mathessian <- try(hessian(.fonctionfit, result$par, method="Richardson", pt=ptec), silent=TRUE)
+	mathessian <- try(hessian(.fonctionfit, result$par, method="Richardson", temperatures=temperatures, 
+	                          derivate=derivate, weight=weight,
+	                          test=testuse, M0=M0, fixed.parameters=fixed.parameters), silent=TRUE)
 
 	if (inherits(mathessian, "try-error")) {
 			res<-rep(NA, length(parameters))
 			result$hessian <- NA
 			print("SE of parameters cannot be estimated.")
-			print("Probably the model is badly fitted. Try using searchR() before.")
+			print("Probably the model is badly fitted. Try using searchR() again or use GRTRN_MHmcmc().")
 
 	} else {
 	
@@ -204,7 +197,7 @@ if (hessian) {
 			print("Probably the model is badly fitted. Try other initial points.")
 		} else {
 			print("Probably flat likelihood is observed around some parameters.")
-			print("Try using embryogrowth_MHmcmc() function to get the SE of parameters.")
+			print("Try using GRTRN_MHmcmc() function to get the SE of parameters.")
 		}
 	}
 }

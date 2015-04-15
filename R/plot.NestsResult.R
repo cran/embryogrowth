@@ -6,6 +6,7 @@
 #' @param ... Parameters for plot()
 #' @param OutPlot A previous output of a plot.NestsResult() or info.nests()
 #' @param parameters A set of parameters if result is not provided.
+#' @param SexualisationTRN A set of parameters used to model thermal reaction norm during TSP
 #' @param fixed.parameters Another set of parameters if result is not provided.
 #' @param SE Standard error for each parameter if result is not provided.
 #' @param temperatures Timeseries of temperatures. Will replace the one in result.
@@ -52,8 +53,39 @@
 #' For example for Caretta caretta, embryo.stages=list(number=21:30, size=c(8.4, 9.4, 13.6, 13.8, 18.9, 23.5, 32.2, 35.2, 35.5, 38.5)/39.33) indicates that the stages 21 begins at the relative size of 8.4/39.33.\cr
 #' The default is for the turtle "Caretta caretta".\cr
 #' Series can be indicated as the name of the series, its number or succesion of TRUE or FALSE. "all" indicates that all series must be printed.\cr
-#' The object return is an invisible list composed of two lists: $summary with the summary statistics for each nest and $traces with the change of length or mass for each nest.\cr
-#' show.fioritures does not affect show.test option.
+#' @description The function returns an object with two components:\cr
+#' \itemize{
+#'   \item \code{summary} is a named list with summary statistics for each nest
+#'   \item \code{traces} is a named list with detailled traces of embryo growth and 95% confidence interval
+#' }
+#' The summary objects are composed of these elements:
+#' \itemize{
+#'   \item \code{tsp.length.mean} Average number of days for the thermosensitive period
+#'   \item \code{tsp.length.SE} Standard error for number of days for the thermosensitive period
+#'   \item \code{tsp.begin.mean} Average number of days for the beginning of the thermosensitive period
+#'   \item \code{tsp.begin.SE} Standard error for number of days for the beginning of the thermosensitive period
+#'   \item \code{tsp.end.mean} Average number of days for the end of the thermosensitive period
+#'   \item \code{tsp.end.SE} Standard error for number of days for the end of the thermosensitive period
+#'   \item \code{incubation.length.mean} Average number of days for the incubation length
+#'   \item \code{incubation.length.SE} Standard error for number of days for the incubation length
+#'   \item \code{incubation.first.third} Day at which the middle third incubation begins
+#'   \item \code{incubation.second.third} Day at which the middle third incubation ends
+#'   \item \code{SSQ.borders.TSP} Squarred difference between incubation.first.third and tsp.begin.mean, and incubation.second.third and tsp.end.mean. Should be minimized at constant temperatures.
+#'   \item \code{temperature.TSP.mean} Average temperature during the TSP
+#'   \item \code{temperature.TSP.SE} Standard error for temperature during the TSP
+#'   \item \code{temperature.mean} Average temperature during the entire incubation
+#'   \item \code{end.size.mean} Average size of embryos at the end of incubation
+#'   \item \code{end.size.SE} Standard error for size of embryos at the end of incubation
+#'   \item \code{temperature.middle.third.mean} Average temperature during the middle third of incubation
+#'   \item \code{weighted.TSP.temperature.mean} Averaged temperature during the TSP weighted by embryo growth
+#'   \item \code{weighted.TSP.temperature.SE} Standard error for temperature during the TSP weighted by embryo growth
+#'   \item \code{TSD.temperature.mean} Averaged temperature during the TSP weighted by sexualisation thermal reaction norm
+#'   \item \code{TSD.temperature.SE} Standard error for temperature during the TSP weighted by sexualisation thermal reaction norm
+#'   \item \code{weighted.TSD.temperature.mean} Averaged temperature during the TSP weighted by sexualisation thermal reaction norm and embryo growth
+#'   \item \code{weighted.TSD.temperature.SE} Standard error for temperature during the TSP weighted by sexualisation thermal reaction norm and embryo growth
+#'   \item \code{LnL} -Log Likelihood of observed embryo metric as compared to the model
+#' }
+#' show.fioritures parameter does not affect show.test option.\cr
 #' @examples
 #' \dontrun{
 #' library(embryogrowth)
@@ -72,7 +104,7 @@
 
 
 plot.NestsResult <-
-function(x, ..., OutPlot=NULL, parameters=NULL, fixed.parameters=NULL, SE=NULL, temperatures=NULL, derivate=NULL, 
+function(x, ..., OutPlot=NULL, parameters=NULL, SexualisationTRN=NULL, fixed.parameters=NULL, SE=NULL, temperatures=NULL, derivate=NULL, 
 	test=NULL, stopattest=FALSE, M0=NULL, series=1, col.stages="blue", col.PT="red", col.TSP="gray", 
 		col.temperatures="green", col.S="black", 
 	lty.temperatures=1, lwd.temperatures=2, ylimT=c(25, 35), ylimS=NULL, xlim=NULL, TSP.borders=c(21, 26), 
@@ -84,7 +116,7 @@ function(x, ..., OutPlot=NULL, parameters=NULL, fixed.parameters=NULL, SE=NULL, 
 	mar = c(4, 5, 4, 5) + 0.3, 
   xlab="Days of incubation", ylabT=expression("Temperatures in " * degree * "C"), ylabS= "Embryo metric", show.plot=TRUE) {
 
-# OutPlot=NULL;parameters=NULL;fixed.parameters=NULL;SE=NULL;temperatures=NULL;derivate=NULL; test=NULL;stopattest=FALSE;M0=NULL;series=1;col.stages="blue";col.PT="red";col.TSP="gray"; col.temperatures="green";col.S="black";ylimT=c(25, 35);ylimS=NULL;xlim=NULL;TSP.borders=c(21, 26); embryo.stages="Caretta caretta"; show.stages=TRUE;show.TSP=TRUE;show.third=TRUE;show.CI=TRUE;replicate.CI=100;ref.stage=TRUE; show.fioritures=TRUE;progress=TRUE; show.temperatures=TRUE;show.PT=TRUE;PT=c(NA, NA);show.test=TRUE; lab.third="2nd third of incubation";at.lab.third=4;lab.PT="PT";lab.stages="Stages"; mar=c(4,5,4,5)+0.3; xlab="Days of incubation";ylabT=expression("Temperatures in"*degree*"C");ylabS="Embryo metric";show.plot=TRUE
+# OutPlot=NULL;parameters=NULL;SexualisationTRN=NULL; fixed.parameters=NULL;SE=NULL;temperatures=NULL;derivate=NULL; test=NULL;stopattest=FALSE;M0=NULL;series=1;col.stages="blue";col.PT="red";col.TSP="gray"; col.temperatures="green";col.S="black";ylimT=c(25, 35);ylimS=NULL;xlim=NULL;TSP.borders=c(21, 26); embryo.stages="Caretta caretta"; show.stages=TRUE;show.TSP=TRUE;show.third=TRUE;show.CI=TRUE;replicate.CI=100;ref.stage=TRUE; show.fioritures=TRUE;progress=TRUE; show.temperatures=TRUE;show.PT=TRUE;PT=c(NA, NA);show.test=TRUE; lab.third="2nd third of incubation";at.lab.third=4;lab.PT="PT";lab.stages="Stages"; mar=c(4,5,4,5)+0.3; xlab="Days of incubation";ylabT=expression("Temperatures in"*degree*"C");ylabS="Embryo metric";show.plot=TRUE
 # x=result.Georges; stopattest=TRUE; progress = FALSE
 
 # out <- plot(x, parameters=parameters, fixed.parameters=fixed.parameters, SE=SE, temperatures=temperatures, derivate=derivate, 
@@ -95,7 +127,7 @@ function(x, ..., OutPlot=NULL, parameters=NULL, fixed.parameters=NULL, SE=NULL, 
   
 #  parameters=parameters; fixed.parameters=fixed.parameters; SE=SE; temperatures=temperatures; derivate=derivate; test=test; stopattest=stopattest; M0=M0; series=series; TSP.borders=TSP.borders; progress=progress; embryo.stages=embryo.stages; replicate.CI=replicate.CI; ref.stage=ref.stage; show.plot=FALSE
 
-  
+  if (!replicate.CI | replicate.CI<2) replicate.CI <- 1
   
   result <- x
 
@@ -180,13 +212,14 @@ if (is.null(fixed.parameters)) {
 
 if (is.null(parameters)) {parssm <- c(result$par, fixed.parameters)} else {parssm <- c(parameters, fixed.parameters)}
 
-
 # je peux indiquer des SE en plus de ceux de result
 if (is.null(SE)) {
 	res <- result$SE
 } else {
 	res <- SE
 }
+
+if (is.null(SexualisationTRN)) SexualisationTRN <- parssm
 
 
 if (show.stages & (length(embryo.stages$number) != length(embryo.stages$size))) {
@@ -290,7 +323,12 @@ stages <- (embryo.stages$size)*mean.ts
 nustage <- embryo.stages$number
 
 nids <- temperatures[[series]]
-colnames(nids) <- c("Time", "Temperature", "Temperature2", "r", "Mass")
+colnames(nids) <- c("Time", "Temperature", "Temperature2", "r", "Mass", "IndiceK")
+
+# 9/12/2014
+# nids.sr <- temperatures[[series]]
+# colnames(nids.sr) <- c("Time", "Temperature", "Temperature2", "r", "Mass")
+
 
 # Je dois recalculer toutes les informations heure par heure pour avoir la TSP en heure
 # la durée d'incubation est= (0:(nids[,1][length(nids[,1])]%/%60)-1)*60
@@ -303,7 +341,9 @@ tl2 <- nids[,1]
 
 
 it <- findInterval(tl1, tl2, all.inside=TRUE)
-dftl1 <- data.frame(Time=tl1, Temperature=rep(NA, length(it)), Temperature2=rep(NA, length(it)), r=rep(NA, length(it)), Mass=rep(NA, length(it)))
+dftl1 <- data.frame(Time=tl1, Temperature=rep(NA, length(it)), 
+                    Temperature2=rep(NA, length(it)), r=rep(NA, length(it)), 
+                    Mass=rep(NA, length(it)), IndiceK=rep(NA, length(it)))
 
 # en Celsius
 dftl1[,"Temperature"] <- nids[it,"Temperature"]
@@ -355,6 +395,9 @@ numerictemplevels <- as.numeric(templevels)
 
 	y <- M0
 	nids[1,5] <- y
+# 9/12/2014
+#  nids.sr[1,5] <- y
+
 	k <- dim(nids)[1]-1
 	
 	if (!is.na(parssm["rK"])) {
@@ -387,9 +430,12 @@ if (stopattest) {
     # 12/2/2014 remplace as.numeric(names(valeur.r)) par templevels
 		pos <- which.min(abs(numerictemplevels-nids[i,3]))
 		a <- as.numeric(valeur.r[pos])*transition+as.numeric(valeur.r_L[pos])*(1-transition)
-		
+
 		parms <- c(alpha=a, K=anK)
 		out1 <- lsoda(y, timesunique, derivate, parms)
+
+    # parms.sr <- c(alpha=valeur.r.sr[pos], K=anK)
+    # out1.sr <- lsoda(y.sr, timesunique, derivate, parms.sr)
 
 #if (!is.finite(out1[2,2])) {
 #  print(paste("numerictemplevels=", numerictemplevels))
@@ -457,8 +503,12 @@ if (is.null(meanduree) & stopattest) {
 	rt <- c(rt, temperature.mean=NA)
 	rt <- c(rt, end.size.mean=NA, end.size.SE=NA)
 	# 21/1/2014
-	rt <- c(rt, temperature.middle.third.mean=NA, weighted.temperature.mean=NA)
-	rt <- c(rt, weighted.temperature.SE=NA)
+	rt <- c(rt, temperature.middle.third.mean=NA)
+	rt <- c(rt, weighted.TSP.temperature.mean=NA)
+	rt <- c(rt, weighted.TSP.temperature.SE=NA)
+  # 12/12/2014
+	rt <- c(rt, TSD.temperature.mean=NA)
+	rt <- c(rt, TSD.temperature.SE=NA)
 	rt <- c(rt, LnL=LnL)
 
 #ELSE 100
@@ -634,6 +684,10 @@ taillefin <- NULL
 SE.mean.temp.TSP <- NULL
 SE.weighted.mean.temp.TSP <- NULL
 
+# 12/12/2014
+SE.TSD.mean.temp.TSP <- NULL
+SE.WTSD.mean.temp.TSP <- NULL
+
 numerictemplevels <- as.numeric(templevels)
 
 for (j in 1:replicate.CI) {
@@ -709,14 +763,25 @@ valeur.r.list <- .SSM(numerictemplevels, Parametre[j,])
 				tspl <- c(tspl, x2-x1)
 				debut <- c(debut, x1)
 				fin <- c(fin, x2)
+        
 				# dans indice.x1 j'ai l'indice du début de la TSP et dans indice.x2 la fin
-				SE.mean.temp.TSP <- c(SE.mean.temp.TSP, sum(diff(nids[indice.x1:indice.x2, "Time"])*
-                                         nids[indice.x1:(indice.x2-1), "Temperature"])/
-            								sum(diff(nids[indice.x1:indice.x2, "Time"])))
-        SE.weighted.mean.temp.TSP <- c(SE.weighted.mean.temp.TSP, sum(diff(serie.taille[indice.x1:indice.x2])*
-                                         nids[indice.x1:(indice.x2-1), "Temperature"])/
-            								sum(diff(serie.taille[indice.x1:indice.x2])))
+        Timexxx <- diff(nids[indice.x1:indice.x2, "Time"])
+        Massxxx <- diff(serie.taille[indice.x1:indice.x2])
+        Tempxxx <- nids[indice.x1:(indice.x2-1), "Temperature"]
+        
+				SE.mean.temp.TSP <- c(SE.mean.temp.TSP, sum(Timexxx*Tempxxx)/sum(Timexxx))
+        SE.weighted.mean.temp.TSP <- c(SE.weighted.mean.temp.TSP, sum(Massxxx*Tempxxx)/
+            								sum(Massxxx))
+        
+        # 12/12/2014
+        # J'utilise la nouvelle norme de réaction pour pondérer
+        STRN <- .SSM(Tempxxx, SexualisationTRN)[[1]]
+        
+				SE.TSD.mean.temp.TSP <- c(SE.TSD.mean.temp.TSP, 
+				                          sum(Timexxx*Tempxxx*STRN)/sum(Timexxx*STRN))
 				
+				SE.WTSD.mean.temp.TSP <- c(SE.WTSD.mean.temp.TSP, 
+				                           sum(Massxxx*Timexxx*Tempxxx*STRN)/sum(Massxxx*Timexxx*STRN))
 			}
 
 			moyenne[i] <- moyenne[i]+y
@@ -749,8 +814,12 @@ valeur.r.list <- .SSM(numerictemplevels, Parametre[j,])
 			rt <- c(rt, temperature.mean=NA)
 			rt <- c(rt, end.size.mean=NA, end.size.SE=NA)
 			# 21/1/2014
-			rt <- c(rt, temperature.middle.third.mean=NA, weighted.temperature.mean=NA)
-			rt <- c(rt, weighted.temperature.SE=NA)
+			rt <- c(rt, temperature.middle.third.mean=NA)
+			rt <- c(rt, weighted.TSP.temperature.mean=NA, weighted.TSP.temperature.SE=NA)
+			# 25/1/2015
+			rt <- c(rt, TSD.temperature.mean=NA, TSD.temperature.SE=NA)
+			rt <- c(rt, weighted.TSD.temperature.mean=NA, weighted.TSD.temperature.SE=NA)
+			
 			rt <- c(rt, LnL=LnL)
 
 
@@ -793,13 +862,28 @@ valeur.r.list <- .SSM(numerictemplevels, Parametre[j,])
 				tspl <- c(tspl, x2-x1)
 				debut <- c(debut, x1)
 				fin <- c(fin, x2)
+ 
+				Timexxx <- diff(nids[indice.x1:indice.x2, "Time"])
+				Massxxx <- diff(serie.taille[indice.x1:indice.x2])
+				Tempxxx <- nids[indice.x1:(indice.x2-1), "Temperature"]
+        
 				# dans indice.x1 j'ai l'indice du début de la TSP et dans indice.x2 la fin
-				SE.mean.temp.TSP <- c(SE.mean.temp.TSP, sum(diff(nids[indice.x1:indice.x2, "Time"])*
-                                         nids[indice.x1:(indice.x2-1), "Temperature"])/
-            								sum(diff(nids[indice.x1:indice.x2, "Time"])))
-            	SE.weighted.mean.temp.TSP <- c(SE.weighted.mean.temp.TSP, sum(diff(serie.taille[indice.x1:indice.x2])*
-                                         nids[indice.x1:(indice.x2-1), "Temperature"])/
-            								sum(diff(serie.taille[indice.x1:indice.x2])))          	
+				SE.mean.temp.TSP <- c(SE.mean.temp.TSP, sum(Timexxx*Tempxxx)/
+            								sum(Timexxx))
+        SE.weighted.mean.temp.TSP <- c(SE.weighted.mean.temp.TSP, sum(Massxxx*Tempxxx)/
+            								sum(Massxxx))
+				# 12/12/2014
+				# J'utilise la nouvelle norme de reaction pour ponderer
+        STRN <- .SSM(Tempxxx, SexualisationTRN)[[1]]
+
+        SE.TSD.mean.temp.TSP <- c(SE.TSD.mean.temp.TSP, 
+				                          sum(Timexxx*Tempxxx*STRN)/
+				                            sum(Timexxx*STRN))
+        
+        SE.WTSD.mean.temp.TSP <- c(SE.WTSD.mean.temp.TSP, 
+                                  sum(Massxxx*Timexxx*Tempxxx*STRN)/
+                                    sum(Massxxx*Timexxx*STRN))
+				
 			}
 			
 			moyenne[i] <- moyenne[i]+y
@@ -852,23 +936,30 @@ if (!errorcptduree) {
 	
 	rt <- c(rt, SSQ.borders.TSP=as.numeric((rt["tsp.begin.mean"]-rt["incubation.first.third"])^2+(rt["tsp.end.mean"]-rt["incubation.second.third"])^2))
 
-	
-	rt <- c(rt, temperature.TSP.mean=sum(diff(nids[indice.debut.tsp:indice.fin.tsp, "Time"])*
-                                         nids[indice.debut.tsp:(indice.fin.tsp-1), "Temperature"])/
-            sum(diff(nids[indice.debut.tsp:indice.fin.tsp, "Time"])))
+  Timexxx <- diff(nids[indice.debut.tsp:indice.fin.tsp, "Time"])
+  Massxxx <- diff(nids[indice.debut.tsp:indice.fin.tsp, "Mass"])
+  Tempxxx <- nids[indice.debut.tsp:(indice.fin.tsp-1), "Temperature"]
+  STRN <- .SSM(Tempxxx, SexualisationTRN)[[1]]
+  
+	rt <- c(rt, temperature.TSP.mean=sum(Timexxx*Tempxxx)/sum(Timexxx))
 	rt <- c(rt, temperature.TSP.SE=sd(SE.mean.temp.TSP))  
 	rt <- c(rt, temperature.mean=sum(diff(nids[, 1])*nids[1:(dim(nids)[1]-1), "Temperature"])/nids[dim(nids)[1], "Time"])	
 	rt <- c(rt, end.size.mean=mean(taillefin), end.size.SE=sqrt(var(taillefin)/length(taillefin)))
 	# 21/1/2014
 	rt <- c(rt, temperature.middle.third.mean=sum(diff(nids[indice.debut.middle.third:indice.fin.middle.third, "Time"])*
-	                                                nids[indice.debut.middle.third:(indice.fin.middle.third-1), "Temperature"])/
-	          sum(diff(nids[indice.debut.middle.third:indice.fin.middle.third, "Time"]))
-	          )
-    rt <- c(rt, weighted.temperature.mean=sum(diff(nids[indice.debut.tsp:indice.fin.tsp, "Mass"])*
-                                          nids[indice.debut.tsp:(indice.fin.tsp-1), "Temperature"])/
-	          sum(diff(nids[indice.debut.tsp:indice.fin.tsp, "Mass"]))
-            )
-  	rt <- c(rt, weighted.temperature.SE=sd(SE.weighted.mean.temp.TSP))
+	                                                                              nids[indice.debut.middle.third:(indice.fin.middle.third-1), "Temperature"])/
+	          sum(diff(nids[indice.debut.middle.third:indice.fin.middle.third, "Time"])))
+  
+    rt <- c(rt, weighted.TSP.temperature.mean=sum(Massxxx*Tempxxx)/sum(Massxxx))
+  	rt <- c(rt, weighted.TSP.temperature.SE=sd(SE.weighted.mean.temp.TSP))  
+  # 12/12/2014
+  # J'utilise la nouvelle norme de réaction pour pondérer
+  rt <- c(rt, TSD.temperature.mean=sum(Timexxx*Tempxxx*STRN)/sum(Timexxx*STRN))
+  rt <- c(rt, TSD.temperature.SE=sd(SE.TSD.mean.temp.TSP))
+  # 25/1/2015
+  rt <- c(rt, weighted.TSD.temperature.mean=sum(Massxxx*Timexxx*Tempxxx*STRN)/sum(Massxxx*Timexxx*STRN))
+  rt <- c(rt, weighted.TSD.temperature.SE=sd(SE.WTSD.mean.temp.TSP))
+  
 	rt <- c(rt, LnL=LnL)
 	
 } else {
@@ -908,23 +999,40 @@ if (!errorcptduree) {
 	indice.debut.middle.third <- which.min(abs(nids[,"Time"]-first.third*1440))
 	indice.fin.middle.third <- which.min(abs(nids[,"Time"]-second.third*1440))
 	
+	Timexxx <- diff(nids[indice.debut.tsp:indice.fin.tsp, "Time"])
+	Massxxx <- diff(nids[indice.debut.tsp:indice.fin.tsp, "Mass"])
+	Tempxxx <- nids[indice.debut.tsp:(indice.fin.tsp-1), "Temperature"]
+	STRN <- .SSM(Tempxxx, SexualisationTRN)[[1]]
+	
+	
 	rt <- c(rt, SSQ.borders.TSP=as.numeric((rt["tsp.begin.mean"]-rt["incubation.first.third"])^2+(rt["tsp.end.mean"]-rt["incubation.second.third"])^2))
 
-	rt <- c(rt, temperature.TSP.mean=sum(diff(nids[indice.debut.tsp:indice.fin.tsp, "Time"])*
-                                         nids[indice.debut.tsp:(indice.fin.tsp-1), "Temperature"])/
-            sum(diff(nids[indice.debut.tsp:indice.fin.tsp, "Time"])))
+	rt <- c(rt, temperature.TSP.mean=sum(Timexxx*Tempxxx)/sum(Timexxx))
     rt <- c(rt, temperature.TSP.SE=NA)
 	rt <- c(rt, temperature.mean=sum(diff(nids[, "Time"])*nids[1:(dim(nids)[1]-1), "Temperature"])/nids[dim(nids)[1], "Time"])
 	rt <- c(rt, end.size.mean=taillefin, end.size.SE=NA)
+  
+  
+  
 	# 21/1/2014
 	rt <- c(rt, temperature.middle.third.mean=sum(diff(nids[indice.debut.middle.third:indice.fin.middle.third, "Time"])*
 	                                                nids[indice.debut.middle.third:(indice.fin.middle.third-1), "Temperature"])/
-	          sum(diff(nids[indice.debut.middle.third:indice.fin.middle.third, "Time"]))
-	        , weighted.temperature.mean=sum(diff(nids[indice.debut.tsp:indice.fin.tsp, "Mass"])*
-	                                        nids[indice.debut.tsp:(indice.fin.tsp-1), "Temperature"])/
-	          sum(diff(nids[indice.debut.tsp:indice.fin.tsp, "Mass"])) 
+	          sum(diff(nids[indice.debut.middle.third:indice.fin.middle.third, "Time"])))
+	
+	# 25/1/2015
+	rt <- c(rt, weighted.TSP.temperature.mean=sum(Massxxx*Tempxxx)/sum(Massxxx) 
             )
-	rt <- c(rt, weighted.temperature.SE=NA)
+	rt <- c(rt, weighted.TSP.temperature.SE=NA)
+	# 12/12/2014
+	# J'utilise la nouvelle norme de réaction pour pondérer
+	rt <- c(rt, TSD.temperature.mean=sum(Timexxx*Tempxxx*STRN)/sum(Timexxx*STRN))
+	rt <- c(rt, TSD.temperature.SE=NA)    
+	
+	# 26/1/2015
+	rt <- c(rt, weighted.TSD.temperature.mean=sum(Massxxx*Timexxx*Tempxxx*STRN)/sum(Massxxx*Timexxx*STRN))
+	rt <- c(rt, weighted.TSD.temperature.SE=NA)    
+	
+	
 	rt <- c(rt, LnL=LnL)
 
 }

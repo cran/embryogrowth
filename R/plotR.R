@@ -21,7 +21,7 @@
 #' @param replicate.CI Number of randomizations to estimate CI
 #' @param show.box If TRUE show a box with "mean" and "confidence interval"
 #' @param local.box Position of the box with "mean" and "confidence interval", default="topleft"
-#' @description To show the growth rate, the syntaxe is \cr
+#' @description To show the growth rate, the syntaxe is:\cr
 #' plotR(result=res)
 #' @examples
 #' \dontrun{
@@ -40,9 +40,9 @@
 #' 	temperatures=formated, derivate=dydt.Gompertz, M0=1.7, 
 #' 	test=c(Mean=39.33, SD=1.92), method = "BFGS", maxiter = 200)
 #' data(resultNest_4p)
-#' pMCMC <- embryogrowth_MHmcmc_p(resultNest_4p, accept=TRUE)
+#' pMCMC <- TRN_MHmcmc_p(resultNest_4p, accept=TRUE)
 #' # Take care, it can be very long, sometimes several days
-#' result_mcmc_4p_80 <- embryogrowth_MHmcmc(result=resultNest_4p,  
+#' result_mcmc_4p_80 <- GRTRN_MHmcmc(result=resultNest_4p,  
 #' 	parametersMCMC=pMCMC, n.iter=10000, n.chains = 1, n.adapt = 0,  
 #' 	thin=1, trace=TRUE)
 #' data(result_mcmc_4p)
@@ -51,6 +51,7 @@
 #' x <- structure(c(115.758929130522, 428.649022170996, 503.687251738993, 
 #' 12.2621455821612, 306.308841227278, 116.35048615105), .Names = c("DHA", 
 #' "DHH", "DHL", "DT", "T12L", "Rho25"))
+#' plotR(parameters=x, xlim=c(20,35))
 #' pfixed <- c(rK=2.093313)
 #' resultNest_6p <- searchR(parameters=x, fixed.parameters=pfixed, 
 #' 	temperatures=formated, derivate=dydt.Gompertz, M0=1.7, 
@@ -71,7 +72,7 @@ function(result=NULL, parameters=NULL, fixed.parameters=NULL, col="black", legen
 	SE=NULL, set.par=1, size=NA, xlim=c(20,35), scaleY="auto", lty=1, ltyCI=3, lwd=1, lwdCI=1, 
   xlimR=xlim, replicate.CI=100, show.box=TRUE, local.box="topleft", ...) {
 
-  # parameters=NULL; fixed.parameters=NULL; lty=1; col="black"; legend=NA; SE=NULL; set.par=1; size=NA; xlim=c(20,35); xlimR=xlim; scaleY="auto"; replicate.CI=100; show.box=TRUE; local.box="topleft"
+  # result=NULL;parameters=NULL; fixed.parameters=NULL; lty=1; ltyCI=3; lwd=1; lwdCI=1; col="black"; legend=NA; SE=NULL; set.par=1; size=NA; xlim=c(20,35); xlimR=xlim; scaleY="auto"; replicate.CI=100; show.box=TRUE; local.box="topleft"
   # result <- resultNest_4p; parameters <- newp; SE <- result_mcmc_newp$TimeSeriesSE; ylim <- c(0,0.4)
   
 if (is.null(result) & is.null(c(parameters, fixed.parameters))) {
@@ -81,16 +82,20 @@ if (is.null(result) & is.null(c(parameters, fixed.parameters))) {
 
 afficheCI <- FALSE
 
+if (!is.list(col)) col <- list(col)
+if (!is.list(lty)) lty <- list(lty)
+if (!is.list(ltyCI)) ltyCI <- list(ltyCI)
+if (!is.list(lwd)) lwd <- list(lwd)
+if (!is.list(lwdCI)) lwdCI <- list(lwdCI)
+if (!is.list(set.par)) set.par <- list(set.par)
+if (!is.list(SE)) SE <- list(SE)
+if (!is.list(xlimR)) xlimR <- list(xlimR)
+if (!is.list(legend)) legend <- list(legend)
+if (!is.list(parameters)) parameters <- list(parameters)
+
+
 if (!is.null(result)) {
 		if (class(result)!="list") result <- list(result)
-		if (!is.list(SE)) SE <- rep(list(SE), length(result))
-		
-     for(rs in 1:length(result)) {
-        if (is.null(SE[[rs]])) SE[[rs]] <- result[[rs]]$SE
-      }
-		  
-		if (!is.list(xlimR)) xlimR <- rep(list(xlimR), length(result))
-		if (!is.list(parameters)) parameters <- rep(list(parameters), length(result))
 		
 			nbr <- max(length(result), length(set.par), length(SE), length(legend), length(col), length(parameters))
 # sinon il faut que je complète recycle col et mette legend et SE à NA
@@ -101,16 +106,24 @@ if (!is.null(result)) {
       lwd <- as.list(rep(unlist(lwd), nbr)[1:nbr])
       lwdCI <- as.list(rep(unlist(lwdCI), nbr)[1:nbr])
 			set.par <- as.list(rep(unlist(set.par), nbr)[1:nbr])
-			SE <- c(SE, rep(list(NA), nbr-length(SE)))
-			xlimR <- c(xlimR, rep(list(xlim), nbr-length(xlimR)))
+			SE <- c(SE, rep(list(NULL), nbr-length(SE)))
+			for(rs in 1:length(result)) {
+			  if (is.null(SE[[rs]])) SE[[rs]] <- result[[rs]]$SE
+			}
+			
+			xlimR <- c(xlimR, rep(xlimR, nbr-length(xlimR)))
 			legend <- as.list(c(unlist(legend), rep(NA, nbr-length(legend))))
 			parameters <- c(parameters, rep(list(NULL), nbr-length(parameters)))
 
 	} else {
 # j'ai des paramètres
-	  nbr <- max(length(result), length(set.par), length(SE), length(legend), length(col), length(parameters))
 	  
-			result <- as.list(NA)
+	  
+	  
+	  nbr <- max(length(set.par), length(SE), length(legend), length(col), length(parameters))
+	  
+			result <- list(NA)
+			result <- as.list(rep(unlist(result), nbr)[1:nbr])
 #			col <- as.list(col)
 #			lty <- as.list(lty)
 #			SE <- as.list(SE)
@@ -124,15 +137,14 @@ if (!is.null(result)) {
     lwdCI <- as.list(rep(unlist(lwdCI), nbr)[1:nbr])
 	  set.par <- as.list(rep(unlist(set.par), nbr)[1:nbr])
 	  SE <- c(SE, rep(list(NA), nbr-length(SE)))
-	  xlimR <- c(xlimR, rep(list(xlimR), nbr-length(xlimR)))
+	  xlimR <- c(xlimR, rep(xlimR, nbr-length(xlimR)))
 	  legend <- as.list(c(unlist(legend), rep(NA, nbr-length(legend))))
 	  parameters <- c(parameters, rep(list(NULL), nbr-length(parameters)))
-	  
 }
 
 premier <- TRUE
 
-for (rs in 1:length(result)) {
+for (rs in 1:nbr) {
 
 # J'introduis les paramètres fixés - 16/7/2012
 if (is.na(result[rs])) {
@@ -150,7 +162,8 @@ if (is.na(result[rs])) {
 
 # je suis en Anchor
 if (all(names(parssm)!="Rho25")) {
-  xlR <- c(min(as.numeric(names(parssm[(names(parssm)!="rK") & (names(parssm)!="K") & (names(parssm)!="Scale")])), na.rm=TRUE), max(as.numeric(names(parssm[(names(parssm)!="rK") & (names(parssm)!="K") & (names(parssm)!="Scale")])), na.rm=TRUE))-273.15
+  xlR <- c(min(as.numeric(names(parssm[(names(parssm)!="rK") & (names(parssm)!="K") & (names(parssm)!="Scale")])), na.rm=TRUE), max(as.numeric(names(parssm[(names(parssm)!="rK") & (names(parssm)!="K") & (names(parssm)!="Scale")])), na.rm=TRUE))
+  if (xlR[1]>273) xlR <- xlR-273.15
   xlR <- c(max(xlR[1], xlimR[[rs]][1]), min(xlR[2], xlimR[[rs]][2]))
 
   } else {
@@ -158,7 +171,9 @@ if (all(names(parssm)!="Rho25")) {
 }
   
 x <- seq(xlR[1],xlR[2],by=0.1)
-voutlist <- .SSM(x+273.15, parssm)
+# if (x<273) x <- x+273.15
+voutlist <- .SSM(x, parssm)
+# voutlist <- embryogrowth:::.SSM(x, parssm)
 
 
 
@@ -182,6 +197,13 @@ if (premier) {
 	L <- modifyList(list(x=x, y=y, ...), list(type = "l", las=1, col=col[[rs]], lty=lty[[rs]], lwd=lwd[[rs]], axes = FALSE, bty = "n", xlab = "", ylab = "", xlim=xlim, ylim=c(y1, y2), main="")) 
 }
 
+# tp <- NULL
+# if (premier) {
+#  L <- modifyList(list(type = "l", las=1, col=col[[rs]], lty=lty[[rs]], lwd=lwd[[rs]], axes = TRUE, bty = "n", xlab = expression("Temperatures in " * degree * "C"), ylab = paste("r*", scaleY, sep=""), xlim=xlim), list(x=x, y=y, tp)) 
+# } else {
+#  L <- modifyList(list(x=x, y=y, tp), list(type = "l", las=1, col=col[[rs]], lty=lty[[rs]], lwd=lwd[[rs]], axes = FALSE, bty = "n", xlab = "", ylab = "", xlim=xlim, ylim=c(y1, y2), main="")) 
+# }
+
 
 if (length(which(names(L)=="show.box"))!=0) {
   L <- L[-which(names(L)=="show.box")]
@@ -198,6 +220,7 @@ y2 <- (par("usr")[3]+par("usr")[4]*26)/27
 y1 <- y2*26-par("usr")[4]/0.04
 # ylim=c(y1, y2)
 
+if (!is.null(res)) {
 if (!all(is.na(res))) {
 
 ## Nouvelle méthode prenant beaucoup moins de mémoire
@@ -239,7 +262,8 @@ for (i in 1:length(parssm)) {
 afficheCI <- TRUE
 
 for (i in 1:replicate.CI) {
-	valeurlist <- .SSM(x+273.15, ess$Parametre[i,])
+#  valeurlist <- embryogrowth:::.SSM(x+273.15, ess$Parametre[i,])
+valeurlist <- .SSM(x+273.15, ess$Parametre[i,])
 		
 	if (!is.na(size) & !is.na(parssm["transition_S"]) & !is.na(parssm["transition_P"])) {
 		r <- valeurlist[[1]]
@@ -264,6 +288,7 @@ plot(x, y-2*sdR, type="l", col=col[[rs]], xlab="", ylab="", xlim=xlim, ylim=c(y1
 par(new=TRUE)
 plot(x, y+2*sdR, type="l", col=col[[rs]], xlab="", ylab="", xlim=xlim, ylim=c(y1, y2), bty="n", axes = FALSE, lty=ltyCI[[rs]], lwd=lwdCI[[rs]], main="")
 
+}
 }
 
 par(new=TRUE)

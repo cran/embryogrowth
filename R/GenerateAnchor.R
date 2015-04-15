@@ -4,8 +4,11 @@
 #' @return A vector with parameters
 #' @param temperatures A vector with temperatures to serve as anchors
 #' @param nests Formated nest data or result object obtained from searchR()
+#' @param parameters A set of parameters value
 #' @param number.anchors Number of anchors
-#' @description Generate a set of anchored parameters
+#' @description Generate a set of anchored parameters.\cr
+#' It is important that the anchors (i.e. the temperatures used as anchors) encompass 
+#' the highest and lowest temperatures that are present in nests.
 #' @examples
 #' \dontrun{
 #' # Example to generate anchored parameters
@@ -26,7 +29,7 @@
 #' }
 #' @export
 
-GenerateAnchor <- function(temperatures=NULL, nests=NULL,
+GenerateAnchor <- function(temperatures=NULL, nests=NULL, parameters=NULL,
                       number.anchors=7) {
 
 if (number.anchors<7 | (length(temperatures)<7 & !is.null(temperatures))) {
@@ -52,18 +55,15 @@ if (is.null(temperatures)) {
   
 }
 
-if (class(nests)=="NestsResult") {
+  newx <- rep(2, length(temperatures))
+  
+if (!is.null(parameters)) {
+	newx <- .SSM(temperatures, parameters)[[1]]*1E5
+} else 
+  if (class(nests)=="NestsResult") 	newx <- .SSM(temperatures, nests$par)[[1]]*1E5
 
-	x0 <- nests$par
-	newx <- .SSM(temperatures, x0)[[1]]*1E5
-
-} else {
-	
-	newx <- rep(2, length(temperatures))
-}
 
 names(newx) <- temperatures
-
 
 return(newx)
 }

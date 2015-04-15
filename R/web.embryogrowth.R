@@ -13,9 +13,13 @@
 
 
 .web.embryogrowth <- function() {
-  
-  require("shiny")
 
-shiny::runApp(appDir = system.file("shiny", package="embryogrowth"),launch.browser =TRUE)
+  
+  if (requireNamespace("shiny", quietly = TRUE)) {
+    shiny::runApp(appDir = system.file("shiny", package="embryogrowth"),launch.browser =TRUE)
+  } else {
+    warning("shiny package is required for this function")
+  }
+  
 
 }

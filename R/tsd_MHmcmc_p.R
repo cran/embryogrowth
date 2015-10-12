@@ -47,6 +47,11 @@ parametersMCMC <- matrix(prencours, ncol=7, byrow=T)
 colnames(parametersMCMC) <- c("Density", "Prior1", "Prior2", "SDProp", "Min", "Max", "Init")
 rownames(parametersMCMC)<-names(par)
 
+parametersMCMC <- as.data.frame(parametersMCMC, stringsAsFactors = FALSE)
+
+for (i in 2:7)
+  parametersMCMC[,i] <- as.numeric(parametersMCMC[,i])
+
 parameters <- parametersMCMC
 
 if (accept) {
@@ -82,10 +87,10 @@ if (f=="q") {
 	
 	if (density == "dunif") {
 	
-	cat(paste("Distribution of the prior, Minimum (Enter for default ",parameters[variable, "Prior1"], "):", sep=""))
+	cat(paste("Distribution of the prior, Minimum (Enter for default ", parameters[variable, "Prior1"], "):", sep=""))
 	f<-scan(nmax=1, quiet=TRUE, what=character())
 	if (length(f)!=0) parameters[variable, "Prior1"] <- f
-	cat(paste("Distribution of the prior, Maximum (Enter for default ",parameters[variable, "Prior2"], "):", sep=""))
+	cat(paste("Distribution of the prior, Maximum (Enter for default ", parameters[variable, "Prior2"], "):", sep=""))
 	f<-scan(nmax=1, quiet=TRUE, what=character())
 	if (length(f)!=0) parameters[variable, "Prior2"] <- f
 	
@@ -93,7 +98,7 @@ if (f=="q") {
 	
 	if (density == "dnorm") {
 	
-	cat(paste("Distribution of the prior, Mean (Enter for default ",parameters[variable, "Prior1"], "):", sep=""))
+	cat(paste("Distribution of the prior, Mean (Enter for default ", parameters[variable, "Prior1"], "):", sep=""))
 	f<-scan(nmax=1, quiet=TRUE, what=character())
 	if (length(f)!=0) parameters[variable, "Prior1"] <- f
 	cat(paste("Distribution of the prior, Standard deviation (Enter for default ",parameters[variable, "Prior2"], "):", sep=""))

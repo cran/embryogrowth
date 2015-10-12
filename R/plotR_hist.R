@@ -22,22 +22,22 @@ def.par <- par(no.readonly = TRUE) # save default, for resetting...
   
   
 if (class(x)=="list") {
-
-	print("Only one series can be used with plotR_hist()")
-
-} else {
+	stop("Only one series can be used with plotR_hist()")
+}
 
 nids <- x
 
 par(mar = c(def.par[["mar"]][1:3], 5.1))
 
-L <- list(result=x, ...)
+L <- modifyList(list(result=x), list(...))
 
 a <- do.call(plotR, L) 
 
+ylim <- ScalePreviousPlot()$ylim[c("begin", "end")]
+
 par(new=TRUE)
 
-L <- list(x=x, ...)
+L <- modifyList(list(x=x), list(...))
 
 L["ylim"] <- NULL
 L["SE"] <- NULL
@@ -49,31 +49,21 @@ lp <- list("show.box", "set.par", "parameters", "fixed.parameters", "legend", "s
 "scaleY", "replicate.CI", "ylabH", "xlimR", "ltyCI", "lwdCI")
 L <- L[!(names(L) %in% lp)]
 
-
-#L <- ifelse(length(which(names(L)=="show.box"))==0, 0, L[-which(names(L)=="show.box")])
-#L <- ifelse(length(which(names(L)=="set.par"))==0, 0, L[-which(names(L)=="set.par")])
-#L <- ifelse(length(which(names(L)=="parameters"))==0, 0, L[-which(names(L)=="parameters")])
-#L <- ifelse(length(which(names(L)=="fixed.parameters"))==0, L, L[-which(names(L)=="fixed.parameters")])
-#L <- ifelse(length(which(names(L)=="legend"))==0, L, L[-which(names(L)=="legend")])
-#L <- ifelse(length(which(names(L)=="size"))==0, L, L[-which(names(L)=="size")])
-#L <- ifelse(length(which(names(L)=="scaleY"))==0, L, L[-which(names(L)=="scaleY")])
-#L <- ifelse(length(which(names(L)=="replicate.CI"))==0, L, L[-which(names(L)=="replicate.CI")])
-#L <- ifelse(length(which(names(L)=="ylabH"))==0, L, L[-which(names(L)=="ylabH")])
-
-
-x2 <- (par("usr")[1]+par("usr")[2]*26)/27
-x1 <- x2*26-par("usr")[2]/0.04
+# x2 <- (par("usr")[1]+par("usr")[2]*26)/27
+# x1 <- x2*26-par("usr")[2]/0.04
+xlim <- ScalePreviousPlot()$xlim[c("begin", "end")]
 
 L <- modifyList(L, list(xlab="", ylab="", main="", axes=FALSE, freq=FALSE, 
-	xlim=c(x1, x2))) 
+	xlim=xlim)) 
 
 a <- do.call(hist, L) 
 
 axis(side=4, ylim=par("yaxp")[1:2], las=1)
 mtext(ylabH, side=4, line=3)
+par(new=TRUE)
+# je rétablis l'échelle des y à celle de R
+plot(x = 1, y=1, ylim=ylim, xlim=xlim, xlab="", ylab="", axes=FALSE, bty="n", type="n")
 
 # par(def.par)  #- reset to default
 
-
-}
 }

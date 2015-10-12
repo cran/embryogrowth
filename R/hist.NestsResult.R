@@ -19,7 +19,7 @@
 
 hist.NestsResult <- function(x, series="all", ...) {
 
-# Je prends seulement les données de température et j'envoie à hist.Nests
+# Je prends seulement les donnees de temperature et j'envoie à hist.Nests
 # Ce sera plus simple pour faire les mises à jour - 30/7/2012
 
 # j'ai un objet de resultat
@@ -27,7 +27,10 @@ hist.NestsResult <- function(x, series="all", ...) {
 nids <- x$data
 class(nids) <- "Nests"
 
-a <- hist(nids, ... , series=series)
+L <- modifyList(list(x=nids), list(...))
+L <- modifyList(L, list(series=series))
+
+a <- do.call(hist, L)
 
 return(invisible(a))
 

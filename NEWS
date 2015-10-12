@@ -1,7 +1,37 @@
 THIS IS THE CHANGELOG OF THE "embryogrowth" PACKAGE
 
 Please note that only the most significant changes are reported here.
-All the changes are indicated inside the R code.
+All the major changes are indicated inside the R code.
+
+          CHANGES IN VERSION 6.1    (2015-10-11)
+
+* Correction of movingincubation() to work with the new version of info.nests()
+* In info.nests(), when temperatures are changed, if all NestResult$test parameters are the same and test is NULL, the test parameter is taken from NestResult$test
+* metric.end.incubation in info.nests() and plot.NestsResult() is recycled if necessary
+* plot.NestsResult() uses info.nests(), new parameter show.metric
+* if metric.end.incubation is NA, the embryo metrics for TSP are scaled by metric of hatchlings at the end of incubation
+* if metric.end.incubation is NULL, the embryo metrics for TSP are scaled by the maximum metric of mean in test parameters
+* if metric.end.incubation is a value, it is used directly for scale
+* New data for info.nests(): MiddleThird.MassWeighted.temperature.mean and .se
+* Correct a bug for info.nests() if there is only one temperature
+* Correct a bug for searchR() that prevent return a result in rare occasions
+* metric and summary can be used when partial incubations are observed using metric.end.incubation=x with x being the final size
+* Correct a bug for fill parameter in info.nests()
+* New data for embryological stages: Emys orbicularis.mass and Emys obicularis.SCL. They are store in TSP.list
+* Rename Caretta caretta embryological stages: Caretta caretta.SCL
+* After plotR_hist(), the y-scale is the scale for R graph (previously it was the one for histogram)
+* Only the function lsoda is imported from deSolve to prevent a warning during check
+
+          CHANGES IN VERSION 6.0.1    (2015-06-30)
+
+* Change info.nests() for R 3.2 compatibility
+* Minor changes in FormatNests(); test if names are unique
+* Correct a bug for Hill model of TSD
+* Add optimx as an option for searchR()
+* The latest version can always been installed using:
+  install.packages("http://www.ese.u-psud.fr/epc/conservation/CRAN/embryogrowth.tar.gz",
+    repos=NULL, type="source")
+* $SD is store also in mcmc objects. This SD is the SE for points estimates.
 
           CHANGES IN VERSION 6.0    (2015-04-15)
 

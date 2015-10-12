@@ -18,11 +18,8 @@
 #' The number of iterations is n.iter+n.adapt+1 because the initial likelihood is also displayed.\cr
 #' I recommend that thin=1 because the method to estimate SE uses resampling.\cr
 #' If initial point is maximum likelihood, n.adapt = 0 is a good solution.\cr
-#' To get the SE from result_mcmc <- STRN_MHmcmc(result=try), use:\cr
-#' result_mcmc$BatchSE or result_mcmc$TimeSeriesSE\cr
-#' The batch standard error procedure is usually thought to be not as accurate as the time series methods.\cr
-#' Based on Jones, Haran, Caffo and Neath (2005), the batch size should be equal to sqrt(n.iter).\cr
-#' Jones, G.L., Haran, M., Caffo, B.S. and Neath, R. (2006) Fixed Width Output Analysis for Markov chain Monte Carlo , Journal of the American Statistical Association, 101:1537-1547.\cr
+#' To get the SE of the point estimates from \code{result_mcmc <- STRN_MHmcmc(result=try)}, use:\cr
+#' \code{result_mcmc$SD}\cr
 #' coda package is necessary for this function.\cr
 #' The dataSTRN is a named list with the following objects:\cr
 #' \itemize{
@@ -85,7 +82,17 @@ if (batchSize>=n.iter/2) {
 
 class(out) <- "mcmcComposite"
 
-out <- c(out, TimeSeriesSE=list(summary(out)$statistics[,4]))
+fin <- try(summary(out), silent=TRUE)
+
+if (class(fin)=="try-error") {
+  lp <- rep(NA, nrow(out$parametersMCMC$parameters))
+  names(lp) <- rownames(out$parametersMCMC$parameters)
+  out <- c(out, TimeSeriesSE=list(lp))
+  out <- c(out, SD=list(lp))
+} else {
+  out <- c(out, TimeSeriesSE=list(fin$statistics[,4]))
+  out <- c(out, SD=list(fin$statistics[,"SD"]))
+}
 
 class(out) <- "mcmcComposite"
 

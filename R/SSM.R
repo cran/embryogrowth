@@ -64,12 +64,12 @@
   unsur298 <- 1/298
 
 	if (is.na(parms["DHL"])) {
-# Je suis en 4 paramètres
+# Je suis en 4 parametres
 #	"T12H", "DHA",  "DHH", "Rho25"
 		t12H=abs(parms["T12H"])
 		rT<-(rho25*(T/298)*exp((dha/R)*(unsur298-unsurT)))/(1+exp((dhh/R)*((1/t12H)-unsurT)))
 	} else {
-# 28/7/2012 - T12H changé en DT	
+# 28/7/2012 - T12H change en DT	
 #	"T12L", "DT", "DHA",  "DHH", "DHL", "Rho25"
 		dhl <- parms["DHL"]*1E3
 		t12L <- parms["T12L"]
@@ -88,7 +88,7 @@
 		t12H_L <- abs(parms["T12H_L"])
 		rT_L <- (rho25_L*(T/298)*exp((dha_L/R)*(unsur298-unsurT)))/(1+exp((dhh_L/R)*((1/t12H_L)-unsurT)))
 	} else {
-# 28/7/2012 - T12H changé en DT	
+# 28/7/2012 - T12H change en DT	
 #	"T12L", "T12H", "DHA",  "DHH", "DHL", "Rho25"
 		dhl_L <- parms["DHL_L"]*1E3
 		t12L_L <- parms["T12L_L"]

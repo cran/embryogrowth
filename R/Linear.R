@@ -21,7 +21,7 @@
 #' # K or rK are not used for dydt.linear or dydt.exponential
 #' resultNest_4p_linear <- searchR(parameters=x, fixed.parameters=NULL,  
 #' 	temperatures=formated, derivate=dydt.linear, M0=1.7,  
-#' 	test=c(Mean=39.33, SD=1.92), method = "BFGS", maxiter = 200)
+#' 	test=c(Mean=39.33, SD=1.92))
 #' }
 #' @export
 

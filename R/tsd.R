@@ -39,11 +39,14 @@
 #' tsdR <- with (CC_AtlanticSW, tsd(males=Males, females=Females, 
 #'                                  temperatures=Incubation.temperature-Correction.factor, 
 #'                                  equation="Richards"))
+#' tsdDR <- with (CC_AtlanticSW, tsd(males=Males, females=Females, 
+#'                                  temperatures=Incubation.temperature-Correction.factor, 
+#'                                  equation="Double-Richards"))
 #' gsd <- with (CC_AtlanticSW, tsd(males=Males, females=Females, 
 #'                                  temperatures=Incubation.temperature-Correction.factor, 
 #'                                  equation="GSD"))
 #' compare_AIC(Logistic_Model=tsdL, Hill_model=tsdH, Richards_model=tsdR, 
-#'                GSD_model=gsd)
+#'                DoubleRichards_model=tsdDR, GSD_model=gsd)
 #' ##############
 #' eo <- subset(STSRE_TSD, Species=="Emys orbicularis", c("Males", "Females", 
 #'                                        "Incubation.temperature"))
@@ -51,6 +54,7 @@
 #' eo_Hill <- with(eo, tsd(males=Males, females=Females, 
 #'                                        temperatures=Incubation.temperature,
 #'                                        equation="Hill"))
+#' eo_Hill <- tsd(df=eo, equation="Hill")
 #' eo_logistic <- tsd(eo)
 #' eo_Richards <- with(eo, tsd(males=Males, females=Females, 
 #'                                  temperatures=Incubation.temperature, 
@@ -88,22 +92,27 @@
 #' tsdL_IP <- with (CC_AtlanticSW, tsd(males=Males, females=Females, 
 #'                                  durations=IP.mean, 
 #'                                  equation="logistic"))
-#' plot(tsdL_IP)
+#' plot(tsdL_IP, xlab="Incubation durations in days")
 #' }
 #' @export
 
 
-tsd <- function(df=NULL, males=NULL, females=NULL, N=NULL, temperatures=NULL, durations=NULL,
-                l=0.05, parameters.initial=c(P=NA, S=-0.5, K=0, K1=1, K2=0), males.freq=TRUE, 
+tsd <- function(df=NULL, males=NULL, females=NULL, N=NULL, 
+                temperatures=NULL, 
+                durations=NULL,
+                l=0.05, parameters.initial=c(P=NA, S=-0.5, K=0, K1=1, K2=0), 
+                males.freq=TRUE, 
                 fixed.parameters=NULL, SE=NULL,
                 equation="logistic", replicates=1000, range.CI=0.95, 
                 limit.low.TRT.minimum=5, limit.high.TRT.maximum=90, print=TRUE, 
                 temperatures.plot=seq(from=20, to=40, by=0.1), 
-                durations.plot=seq(from=40, to=100, by=0.1)) {
+                durations.plot=seq(from=15, to=100, by=0.1)) {
   
-  # df=NULL; males=NULL; females=NULL; N=NULL; temperatures=NULL; durations=NULL; l=0.05; parameters.initial=c(P=NA, S=-0.5, K=0, K1=1, K2=0); males.freq=TRUE;  fixed.parameters=NULL; SE=NULL; equation="logistic"; replicates=1000; range.CI=0.95;  limit.low.TRT.minimum=5; limit.high.TRT.maximum=90; print=TRUE; temperatures.plot=seq(from=20, to=40, by=0.1)
-  # eo <- subset(STSRE_TSD, Species=="Emys orbicularis", c("Males", "Females", "Incubation.temperature"))
-  # males=eo$Males; females=eo$Females; N <- males+females; temperatures=eo$Incubation.temperature; equation<- "Double-Richards" 
+  # df=NULL; males=NULL; females=NULL; N=NULL; temperatures=NULL; durations=NULL; l=0.05; parameters.initial=c(P=NA, S=-0.5, K=0, K1=1, K2=0); males.freq=TRUE; fixed.parameters=NULL; SE=NULL; equation="logistic"; replicates=1000; range.CI=0.95; limit.low.TRT.minimum=5; limit.high.TRT.maximum=90; print=TRUE; temperatures.plot=seq(from=20, to=40, by=0.1); durations.plot=seq(from=15, to=100, by=0.1)
+  # females=females; males=males; durations=durations; parameters.initial=c(P=54.0445435044487, S=0.0567693543096269); equation="Hill"
+  # eo <- subset(STSRE_TSD, Species=="Emys orbicularis", c("Males", "Females","Incubation.temperature"))
+
+  # males=eo$Males; females=eo$Females; N <- Males+Females; temperatures=eo$Incubation.temperature; equation<- "Double-Richards" 
   
   # males <- c(10, 14, 7, 4, 3, 0, 0) ; females <- c(0, 1, 2, 4, 15, 10, 13); temperatures <- c(25, 26, 27, 28, 29, 30, 31)
   
@@ -111,7 +120,7 @@ tsd <- function(df=NULL, males=NULL, females=NULL, N=NULL, temperatures=NULL, du
   # temperatures <- c(70.4, 57.7, 53.9, 51.7)
   # parameters.initial <- c(P=53, S=0.05)
   # col.TRT="gray"; col.TRT.CI=rgb(0.8, 0.8, 0.8, 0.5); col.PT.CI=rgb(0.8, 0.8, 0.8, 0.5)
-  # N <- NULL; males <- CC_AtlanticSW$Males;females <- CC_AtlanticSW$Females; temperatures<- CC_AtlanticSW$Incubation.temperature-CC_AtlanticSW$Correction.factor
+  # N <- NULL; males <- CC_AtlanticSW$Males;females <- CC_AtlanticSW$Females; temperatures <- CC_AtlanticSW$Incubation.temperature-CC_AtlanticSW$Correction.factor
   # equation <- "Richards"
   # equation <- "Hill"
   # equation <- "Double-Richards"
@@ -134,11 +143,13 @@ tsd <- function(df=NULL, males=NULL, females=NULL, N=NULL, temperatures=NULL, du
     if (any(namesdf=="females")) females <- df[, which(namesdf=="females")]
     if (any(namesdf=="female")) females <- df[, which(namesdf=="female")]
     if (any(namesdf=="n")) N <- df[, which(namesdf=="n")]
+    if (any(namesdf=="sexed")) N <- df[, which(namesdf=="sexed")]
     if (any(namesdf=="temperatures")) temperatures <- df[, which(namesdf=="temperatures")]
     if (any(namesdf=="temperature")) temperatures <- df[, which(namesdf=="temperature")]
     if (any(namesdf=="incubation.temperature")) temperatures <- df[, which(namesdf=="incubation.temperature")]
     if (any(namesdf=="durations")) durations <- df[, which(namesdf=="durations")]
     if (any(namesdf=="duration")) durations <- df[, which(namesdf=="duration")]
+    if (any(namesdf=="IP.mean")) durations <- df[, which(namesdf=="IP.mean")]
   }
   
   if (is.null(durations) & is.null(temperatures)) {
@@ -150,7 +161,7 @@ tsd <- function(df=NULL, males=NULL, females=NULL, N=NULL, temperatures=NULL, du
   }
   
   
-  # si je retire des lignes, c'est décalé
+  # si je retire des lignes, c'est decale
   #  if (!is.null(males)) males <- na.omit(males)
   #  if (!is.null(females)) females <- na.omit(females)
   #  if (!is.null(N)) N <- na.omit(N)
@@ -172,13 +183,11 @@ tsd <- function(df=NULL, males=NULL, females=NULL, N=NULL, temperatures=NULL, du
   if (is.null(N)) N <- males+females
   
   if (length(temperatures)!=length(N)) {
-    print("A temperature or duration must be provided for each experiment")
-    return(invisible())    
+    stop("A temperature or duration must be provided for each experiment")
   }
   
   if (equation!="GSD" & equation!="Hulin" & equation!="logistic" & equation!="Hill" & equation!="Richards" & equation!="Double-Richards") {
-    print("Equations supported are GSD, logistic, Hill, Hulin, Double_Richards and Richards")
-    return(invisible())    
+    stop("Equations supported are GSD, logistic, Hill, Hulin, Double_Richards and Richards")
   }
   
   
@@ -208,7 +217,7 @@ tsd <- function(df=NULL, males=NULL, females=NULL, N=NULL, temperatures=NULL, du
     
     repeat {
      # result  <- optim(par, embryogrowth:::.tsd_fit, fixed.parameters=fixed.parameters, males=males, N=N, temperatures=temperatures, equation=equation, method="BFGS", hessian=TRUE, control = list(maxit=1000))
-     result  <- optim(par, .tsd_fit, fixed.parameters=fixed.parameters, males=males, N=N, temperatures=temperatures, equation=equation, method="BFGS", hessian=TRUE, control = list(maxit=1000))
+     result  <- optim(par, getFromNamespace(".tsd_fit", ns="embryogrowth"), fixed.parameters=fixed.parameters, males=males, N=N, temperatures=temperatures, equation=equation, method="BFGS", hessian=TRUE, control = list(maxit=1000))
 
       if (result$convergence==0) break
       par<-result$par
@@ -253,12 +262,12 @@ tsd <- function(df=NULL, males=NULL, females=NULL, N=NULL, temperatures=NULL, du
                          K2=unname(ifelse(is.na(par["K2"]), rep(NA, replicates), c(par["K2"], rnorm(rep, par["K2"], ifelse(is.na(res["K2"]), 0, res["K2"]))))))
 
     out_tsd <- apply(df_par, 1, function(par) {
-      # marche en températures mais par en IP - corrigé 9/9/2014
+      # marche en temperatures mais par en IP - corrige 9/9/2014
       limit.low.TRT <- limit.low.TRT.minimum
       limit.high.TRT <- limit.high.TRT.maximum
       for (i in 1:4) {
         temperatures.se <- seq(from=limit.low.TRT, to=limit.high.TRT, length=20)
-        p <- .modelTSD(par, temperatures.se, equation)
+        p <- getFromNamespace(".modelTSD", ns="embryogrowth")(par, temperatures.se, equation)
         
         if (sign(par["S"])<0) {
           limit.low.TRT <- temperatures.se[tail(which(p>(1-l)), n=1)]
@@ -279,13 +288,13 @@ tsd <- function(df=NULL, males=NULL, females=NULL, N=NULL, temperatures=NULL, du
     
     if (!is.null(temperatures.plot)) {
       out_tsd_plot <- apply(df_par, 1, function(par) {
-        p <- .modelTSD(par, temperatures.plot, equation)
+        p <- getFromNamespace(".modelTSD", ns="embryogrowth")(par, temperatures.plot, equation)
         return(list(sr=p))
       }
       )
       
       out_tsd2_plot <- sapply(out_tsd_plot, c, simplify = TRUE)
-      # dans un df chaque colonne est une température
+      # dans un df chaque colonne est une temperature
       out_tsd3_plot <- t(sapply(out_tsd2_plot, c, simplify = TRUE))
 #      dim(out_tsd3_plot)
       outquant <- apply(out_tsd3_plot, 2, quantile, probs = c(0.025, 0.975))

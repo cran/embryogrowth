@@ -21,8 +21,7 @@ GenerateTest <-
 function(series=stop("A result object or names of series must be provided"), size=NULL, previous=NULL) {
 
 	if (is.null(size) & (class(series)!="NestsResult")) {
-		print("size or a result from searchR() must be provided")
-		return()
+		stop("size or a result from searchR() must be provided")
 	}
 	
 	if (class(series)=="NestsResult") {

@@ -25,7 +25,7 @@
 #' pfixed <- c(rK=2.093313)
 #' resultNest_4p <- searchR(parameters=x, fixed.parameters=pfixed, 
 #' 	temperatures=formated, derivate=dydt.Gompertz, M0=1.7, 
-#' 	test=c(Mean=39.33, SD=1.92), method = "BFGS", maxiter = 200)
+#' 	test=c(Mean=39.33, SD=1.92))
 #' data(resultNest_4p)
 #' pMCMC <- TRN_MHmcmc_p(resultNest_4p, accept=TRUE)
 #' # Take care, it can be very long, sometimes several days
@@ -34,7 +34,7 @@
 #' 	thin=1, trace=TRUE)
 #' data(result_mcmc_4p)
 #' plot(result_mcmc_4p, parameters="T12H", main="", xlim=c(290, 320), bty="n")
-#' plotR(resultNest_4p, SE=result_mcmc_4p$TimeSeriesSE, ylim=c(0,0.3), las=1)
+#' plotR(resultNest_4p, SE=result_mcmc_4p$SD, ylim=c(0,0.4), las=1)
 #' }
 #' @format A list of class mcmcComposite with mcmc result for data(nest) with 4 parameters and Gompertz model of growth
 NULL

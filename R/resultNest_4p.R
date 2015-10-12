@@ -25,7 +25,7 @@
 #' pfixed <- c(rK=2.093313)
 #' resultNest_4p <- searchR(parameters=x, fixed.parameters=pfixed, 
 #' 	temperatures=formated, derivate=dydt.Gompertz, M0=1.7, 
-#' 	test=c(Mean=39.33, SD=1.92), method = "BFGS", maxiter = 200)
+#' 	test=c(Mean=39.33, SD=1.92))
 #' }
 #' @format A list with fitted information about data(nest)
 NULL

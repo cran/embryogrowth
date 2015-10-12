@@ -38,7 +38,7 @@
 #' pfixed <- c(rK=2.093313)
 #' resultNest_4p <- searchR(parameters=x, fixed.parameters=pfixed, 
 #' 	temperatures=formated, derivate=dydt.Gompertz, M0=1.7, 
-#' 	test=c(Mean=39.33, SD=1.92), method = "BFGS", maxiter = 200)
+#' 	test=c(Mean=39.33, SD=1.92))
 #' data(resultNest_4p)
 #' pMCMC <- TRN_MHmcmc_p(resultNest_4p, accept=TRUE)
 #' # Take care, it can be very long, sometimes several days
@@ -55,7 +55,7 @@
 #' pfixed <- c(rK=2.093313)
 #' resultNest_6p <- searchR(parameters=x, fixed.parameters=pfixed, 
 #' 	temperatures=formated, derivate=dydt.Gompertz, M0=1.7, 
-#' 	test=c(Mean=39.33, SD=1.92), method = "BFGS", maxiter = 200)
+#' 	test=c(Mean=39.33, SD=1.92))
 #' data(resultNest_6p)
 #' plotR(list(resultNest_4p, resultNest_6p),  
 #' col=c("black", "red"), legend=c("4 parameters", "6 parameters"))
@@ -146,7 +146,7 @@ premier <- TRUE
 
 for (rs in 1:nbr) {
 
-# J'introduis les paramètres fixés - 16/7/2012
+# J'introduis les paramètres fixes - 16/7/2012
 if (is.na(result[rs])) {
 	parssm <- c(parameters[[rs]], fixed.parameters)
 	res <- SE[[rs]]
@@ -192,9 +192,9 @@ if (scaleY=="auto") scaleY <- 10^(-floor(log10(max(vout)))-1)
 y<- scaleY*vout
 
 if (premier) {
-	L <- modifyList(list(type = "l", las=1, col=col[[rs]], lty=lty[[rs]], lwd=lwd[[rs]], axes = TRUE, bty = "n", xlab = expression("Temperatures in " * degree * "C"), ylab = paste("r*", scaleY, sep=""), xlim=xlim), list(x=x, y=y, ...)) 
+	L <- modifyList(list(type = "l", las=1, col=col[[rs]], lty=lty[[rs]], lwd=lwd[[rs]], axes = TRUE, bty = "n", xlab = expression("Temperatures in " * degree * "C"), ylab = paste("r*", scaleY, sep=""), xlim=xlim), modifyList(list(x=x, y=y), list(...)))
 } else {
-	L <- modifyList(list(x=x, y=y, ...), list(type = "l", las=1, col=col[[rs]], lty=lty[[rs]], lwd=lwd[[rs]], axes = FALSE, bty = "n", xlab = "", ylab = "", xlim=xlim, ylim=c(y1, y2), main="")) 
+	L <- modifyList(modifyList(list(x=x, y=y), list(...)), list(type = "l", las=1, col=col[[rs]], lty=lty[[rs]], lwd=lwd[[rs]], axes = FALSE, bty = "n", xlab = "", ylab = "", xlim=xlim, ylim=c(y1, y2), main="")) 
 }
 
 # tp <- NULL
@@ -223,7 +223,7 @@ y1 <- y2*26-par("usr")[4]/0.04
 if (!is.null(res)) {
 if (!all(is.na(res))) {
 
-## Nouvelle méthode prenant beaucoup moins de mémoire
+## Nouvelle methode prenant beaucoup moins de memoire
   
 
 # ess <- list(Parametre=matrix(rep(NA, 16*replicate.CI), ncol=16, dimnames=list(NULL, c("DHA", "DHL", "DHH", "T12L", "T12H", "DT", "Rho25", "DHA_L", "DHL_L", "DHH_L", "T12L_L", "T12H_L", "DT_L", "Rho25_L", "transition_P", "transition_S"))), moyenne=rep(0,length(x)), moyenne2=rep(0,length(x)))
@@ -294,7 +294,7 @@ plot(x, y+2*sdR, type="l", col=col[[rs]], xlab="", ylab="", xlim=xlim, ylim=c(y1
 par(new=TRUE)
 premier <- FALSE
 
-# fin de la boucle des résultats
+# fin de la boucle des resultats
 }
 
 if (show.box) {

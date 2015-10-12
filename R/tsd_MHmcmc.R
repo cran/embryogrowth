@@ -87,7 +87,17 @@ if (batchSize>=n.iter/2) {
 
 class(out) <- "mcmcComposite"
 
-out <- c(out, TimeSeriesSE=list(summary(out)$statistics[,4]))
+fin <- try(summary(out), silent=TRUE)
+
+if (class(fin)=="try-error") {
+  lp <- rep(NA, nrow(out$parametersMCMC$parameters))
+  names(lp) <- rownames(out$parametersMCMC$parameters)
+  out <- c(out, TimeSeriesSE=list(lp))
+  out <- c(out, SD=list(lp))
+} else {
+  out <- c(out, TimeSeriesSE=list(fin$statistics[,4]))
+  out <- c(out, SD=list(fin$statistics[,"SD"]))
+}
 
 class(out) <- "mcmcComposite"
 

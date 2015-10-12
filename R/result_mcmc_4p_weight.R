@@ -24,7 +24,7 @@
 #' resultNest_4p_weight <- searchR(parameters=x,  
 #' 	fixed.parameters=pfixed, temperatures=formated,  
 #' 	derivate=dydt.Gompertz, M0=1.7, test=c(Mean=39.33, SD=1.92),  
-#' 	method = "BFGS", maxiter = 200, weight=w)
+#' 	method = "BFGS", weight=w)
 #' data(resultNest_4p_weight)
 #' pMCMC <- TRN_MHmcmc_p(resultNest_4p_weight, accept=TRUE)
 #' # Take care, it can be very long, sometimes several days
@@ -33,13 +33,14 @@
 #' 	thin=1, trace=TRUE)
 #' data(result_mcmc_4p_weight)
 #' plot(result_mcmc_4p_weight, parameter="T12H", main="", xlim=c(290, 320), bty="n")
-#' plotR(resultNest_4p_weight, SE=result_mcmc_4p_weight$TimeSeriesSE, 
+#' plotR(resultNest_4p_weight, SE=result_mcmc_4p_weight$SD, 
 #'  ylim=c(0,0.3), las=1)
 #' data(resultNest_4p)
 #' data(result_mcmc_4p)
+#' par(xpd=TRUE)
 #' plotR(list(resultNest_4p_weight, resultNest_4p), 
-#'  SE=list(result_mcmc_4p_weight$TimeSeriesSE, result_mcmc_4p$TimeSeriesSE), 
-#'  ylim=c(0,0.3), las=1, col=list("red", "black"), 
+#'  SE=list(result_mcmc_4p_weight$SD, result_mcmc_4p$SD), 
+#'  ylim=c(0,0.4), las=1, col=list("red", "black"), 
 #'  legend=list("Maximum entropy weighted", "Not weighted"))
 #' }
 #' @format A list of class mcmcComposite with mcmc result for data(nest) with 4 parameters and Gompertz model of growth weigted to maximized entropy

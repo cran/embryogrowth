@@ -22,7 +22,7 @@ hist.Nests <- function(x, series="all", ...) {
 
 nids <- x
 
-# Plus possible car fonction spéciale
+# Plus possible car fonction speciale
  if (inherits(nids, "NestsResult")) {
 # j'ai un objet de resultat
 # je prends les donnees
@@ -89,11 +89,11 @@ if (is.null(temptotal)) {
 } else {
 	x <- temptotal
 
-	L <- modifyList(list(ylab="Frequencies among the nests", xlab=expression("Temperatures in " * degree * "C"), main="", freq=FALSE, las=1), list(x=x, ...)) 
+	L <- modifyList(list(ylab="Frequencies among the nests", xlab=expression("Temperatures in " * degree * "C"), main="", freq=FALSE, las=1), modifyList(list(x=x), list(...))) 
   
 	if (any(names(L)=="plot")) {
     if (!L$plot)
-      L <- list(x=x, ...) 
+      L <- modifyList(list(x=x), list(...)) 
 	}
   
 	a <- do.call(hist, L) 

@@ -101,8 +101,8 @@ if (length(setdiff(names(temperatures)[1:temperatures$IndiceT[3]], names(weight)
 }	
 
 
-# Un paramètre ne peut pas être indiqué en fixe et en fité - 22/7/2012	
-# test faux, corrigé le 19/2/2013
+# Un paramètre ne peut pas être indique en fixe et en fite - 22/7/2012	
+# test faux, corrige le 19/2/2013
 
 	if (length(intersect(names(parameters), names(fixed.parameters)))!=0) {
 		warning("A parameter cannot be fixed and fitted at the same time !")
@@ -114,7 +114,7 @@ for (j in 1:NbTS) temperatures[[j]][1, "Mass"] <- M0
 
 resultnest <- list(par=parameters)
 
-resultnest$value <- .fonctionfit(parameters, temperatures=temperatures, derivate=derivate, 
+resultnest$value <- info.nests(parameters=parameters, temperatures=temperatures, derivate=derivate, 
                                  test=testuse, M0=M0, fixed.parameters=fixed.parameters, weight=weight)
 
 if(echo) {
@@ -127,7 +127,7 @@ if (hessian) {
 
 	print("Estimate the SE for parameters at that point")
 
-	mathessian <- try(hessian(.fonctionfit, result$par, method="Richardson", temperatures=temperatures, derivate=derivate, 
+	mathessian <- try(hessian(info.nests, parameters=result$par, method="Richardson", temperatures=temperatures, derivate=derivate, 
 	                          test=testuse, M0=M0, fixed.parameters=fixed.parameters, weight=weight), silent=TRUE)
 
 	if (inherits(mathessian, "try-error")) {
@@ -192,7 +192,7 @@ resultnest$M0 <- M0
 # 29/1/2014
 resultnest$weight <- weight
 
-# Je stocke aussi les paramètres fixé-16/7/2012
+# Je stocke aussi les paramètres fixe-16/7/2012
 resultnest$fixed.parameters <- fixed.parameters
 
 class(resultnest) <- "NestsResult"

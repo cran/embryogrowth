@@ -29,7 +29,7 @@
 #' resultNest_4p_weight <- searchR(parameters=x,  
 #' 	fixed.parameters=pfixed, temperatures=formated,  
 #' 	derivate=dydt.Gompertz, M0=1.7, test=c(Mean=39.33, SD=1.92),  
-#' 	method = "BFGS", maxiter = 200, weight=w)
+#' 	method = "BFGS", weight=w)
 #' data(resultNest_4p_weight)
 #' plotR(resultNest_4p_weight, ylim=c(0,0.50), xlim=c(15, 35))
 #' # Standard error of parameters can use the GRTRN_MHmcmc() function
@@ -54,7 +54,7 @@ if (is.null(control_plot)) control_plot <- list(NULL)
 if (is.null(control_entropy)) control_entropy <- list(NULL)
 if (is.null(control_optim)) control_optim <- list(NULL)
 
-NbTS <- temperatures$IndiceT[3]
+NbTS <- temperatures$IndiceT["NbTS"]
 
 
 if (is.null(weight)) {
@@ -78,7 +78,7 @@ if (is.null(weight)) {
 	}
 }
 
-# j'ai le weight mais je dois le classer dans le même ordre que les températures
+# j'ai le weight mais je dois le classer dans le même ordre que les temperatures
 pec <- NULL
 for(i in 1:NbTS) {
 	pec <- c(pec, par[which(names(par)==names(temperatures)[i])])
@@ -113,9 +113,9 @@ for(series in 1:NbTS) {
 
 	nids <- temperatures[[series]]
 
-# Je créé un tableau avec les données heures par heure
+# Je cree un tableau avec les donnees heures par heure
 	tl1 <- (0:(nids[,1][length(nids[,1])]%/%60-1))*60
-# je prends les vraies données
+# je prends les vraies donnees
 	tl2 <- nids[,1]
 
 

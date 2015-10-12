@@ -3,8 +3,8 @@
 #' @author Marc Girondot
 #' @return A matrix with the parameters
 #' @param result An object obtained after a SearchR fit
-#' @param parameters A set of parameters if result is not given
-#' @param fixed.parameters A set of fixed parameters
+#' @param parameters A set of parameters. Replace the one from result
+#' @param fixed.parameters A set of fixed parameters. Replace the one from result
 #' @param accept If TRUE, the script does not wait user information
 #' @description Interactive script used to generate set of parameters to be used with GRTRN_MHmcmc() or STRN_MHmcmc().\cr
 #' @examples 
@@ -22,7 +22,7 @@
 #' pfixed <- c(rK=2.093313)
 #' resultNest_4p <- searchR(parameters=x, fixed.parameters=pfixed,  
 #' 	temperatures=formated, derivate=dydt.Gompertz, M0=1.7,  
-#' 	test=c(Mean=39.33, SD=1.92), method = "BFGS", maxiter = 200)
+#' 	test=c(Mean=39.33, SD=1.92))
 #' data(resultNest_4p)
 #' pMCMC <- TRN_MHmcmc_p(resultNest_4p, accept=TRUE)
 #' }
@@ -37,16 +37,15 @@ TRN_MHmcmc_p<-function(result=NULL, parameters=NULL, fixed.parameters=NULL,
 # d'abord je sors les paramètres à utiliser
   
   if (is.null(result) & is.null(parameters)) {
-    warning("Or result or parameters must be provided")
-    return()
+    stop("Or result or parameters must be provided")
   }
 
+# 26/4/2015
+  if (is.null(parameters)) parameters <- result$par
+  if (is.null(fixed.parameters)) fixed.parameters <- result$fixed.parameters
+  
   par <- parameters
-  allpar <- c(par, fixed.parameters)
-  if (!is.null(result)) {
-    par <- result$par
-    allpar <- c(par, result$fixed.parameters)
-    }
+  allpar <- c(parameters, fixed.parameters)
 
 # 7/2/2014, ajout de la nouvelle version des paramètres
 if (all(names(allpar)!="Rho25")) {
@@ -170,7 +169,10 @@ parametersMCMC <- matrix(prencours, ncol=7, byrow=T)
 colnames(parametersMCMC) <- c("Density", "Prior1", "Prior2", "SDProp", "Min", "Max", "Init")
 rownames(parametersMCMC)<-names(par)
 
+parametersMCMC <- as.data.frame(parametersMCMC, stringsAsFactors = FALSE)
 
+for (i in 2:7)
+  parametersMCMC[,i] <- as.numeric(parametersMCMC[,i])
 
 parameters <- parametersMCMC
 

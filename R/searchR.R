@@ -8,14 +8,13 @@
 #' @param derivate Function used to fit embryo growth: dydt.Gompertz, dydt.exponential or dydt.linear
 #' @param test A vector with Mean and SD of size of hatchlings, ex. test=c(Mean=39, SD=3)
 #' @param M0 Measure of hatchling size or mass proxi at laying date
-#' @param method Method uses for searching. Can be any method from optim function
-#' @param maxiter After maxiter iteration, the value of parameters is displayed but it continues if convergence is not acheived
 #' @param saveAtMaxiter If True, each time number of interation reach maxiter, current data are saved in file with filename name
 #' @param fileName The intermediate results are saved in file with fileName.Rdata name
 #' @param weight A named vector of the weight for each nest for likelihood estimation
 #' @param hessian If TRUE, the hessian matrix is estimated and the SE of parameters estimated.
+#' @param control List for control parameters for optimx
 #' @description Fit the parameters that best represent data.\cr
-#' test can be a list with two elements Mean and SD and each element is a nammed vector with the nest name.
+#' test can be a list with two elements Mean and SD and each element is a named vector with the nest name.\cr
 #' @examples
 #' \dontrun{
 #' library(embryogrowth)
@@ -27,22 +26,22 @@
 #' # "T12L", "DT", "DHA",  "DHH", "DHL", "Rho25"
 #' # K for Gompertz must be set as fixed parameter or being a constant K  
 #' # or relative to the hatchling size rK
-#' x <- structure(c(118.431040984352, 498.205702157603, 306.056280989839, 
-#' 118.189669472381), .Names = c("DHA", "DHH", "T12H", "Rho25"))
+#' x <- structure(c(106.59891311201, 614.181133951497, 306.267053513175, 
+#' 120.327257089974), .Names = c("DHA", "DHH", "T12H", "Rho25"))
 #' # pfixed <- c(K=82.33) or rK=82.33/39.33
 #' pfixed <- c(rK=2.093313)
 #' resultNest_4p <- searchR(parameters=x, fixed.parameters=pfixed, 
 #' 	temperatures=formated, derivate=dydt.Gompertz, M0=1.7, 
-#' 	test=c(Mean=39.33, SD=1.92), method = "BFGS", maxiter = 200)
+#' 	test=c(Mean=39.33, SD=1.92))
 #' data(resultNest_4p)
 #' plot(resultNest_4p, xlim=c(0,70), ylimT=c(22, 32), ylimS=c(0,45), series=1)
-#' x <- structure(c(115.758929130522, 428.649022170996, 503.687251738993, 
-#' 12.2621455821612, 306.308841227278, 116.35048615105), .Names = c("DHA", 
+#' x <- structure(c(106.567809092008, 527.359011254683, 614.208632495199, 
+#' 2720.94506457237, 306.268259715624, 120.336791245212), .Names = c("DHA", 
 #' "DHH", "DHL", "DT", "T12L", "Rho25"))
 #' pfixed <- c(rK=2.093313)
 #' resultNest_6p <- searchR(parameters=x, fixed.parameters=pfixed, 
 #' 	temperatures=formated, derivate=dydt.Gompertz, M0=1.7, 
-#' 	test=c(Mean=39.33, SD=1.92), method = "BFGS", maxiter = 200)
+#' 	test=c(Mean=39.33, SD=1.92))
 #' data(resultNest_6p)
 #' pMCMC <- TRN_MHmcmc_p(resultNest_6p, accept=TRUE)
 #' # Take care, it can be very long, sometimes several days
@@ -50,23 +49,26 @@
 #' 	parametersMCMC=pMCMC, n.iter=10000, n.chains = 1, n.adapt = 0,  
 #' 	thin=1, trace=TRUE)
 #' data(result_mcmc_6p)
-#' # compare_AIC() is a function from the package "phenology"
-#' outputAIC<-compare_AIC(list(test1=resultNest_4p, test2=resultNest_6p))
+#' # compare_AIC() is a function from the package "HelpersMG"
+#' compare_AIC(test1=resultNest_4p, test2=resultNest_6p)
 #' ############ with new parametrization
 #' data(resultNest_4p)
 #' x0 <- resultNest_4p$par
 #' t <- hist(resultNest_4p, plot=FALSE)
-#' temperatures <- seq(from=floor(range(t$temperatures)[1]+273.15-1), 
-#' to=floor(range(t$temperatures)[2]+273.15+1), length.out=7)
-#' newx <- embryogrowth:::.SSM(temperatures, x0)[[1]]*1E5
-#' names(newx) <- temperatures
+#' x <- c(3.4, 3.6, 5.4, 5.6, 7.6, 7.5, 3.2)
+#' names(x) <- seq(from=range(t$temperatures)[1], to=range(t$temperatures)[2], 
+#'      length.out=7)
+#' newx <- ChangeSSM(temperatures = (200:350)/10, parameters = x0, 
+#'        initial.parameters = x, 
+#'        control=list(maxit=5000))
 #' pfixed <- c(rK=2.093313)
 #' resultNest_newp <- searchR(parameters=newx, fixed.parameters=pfixed,
 #'  temperatures=formated, derivate=dydt.Gompertz, M0=1.7,
-#'  test=c(Mean=39.33, SD=1.92), method = "BFGS", maxiter = 200)
+#'  test=c(Mean=39.33, SD=1.92))
 #' plotR_hist(resultNest_newp, ylim=c(0,0.3), xlimR=c(23, 34), ylimH=c(0, 0.3))
-#' outputAIC<-compare_AIC(list(test4p=resultNest_4p, test6p=resultNest_6p, 
-#'  testAnchor=resultNest_newp))
+#' compare_AIC(test4p=resultNest_4p, 
+#'             test6p=resultNest_6p, 
+#'             testAnchor=resultNest_newp)
 #' }
 #' @export
 
@@ -75,28 +77,29 @@ searchR <-
 function(parameters=stop('Initial set of parameters must be provided'), 
 	fixed.parameters=NULL, temperatures=stop('Formated temperature must be provided !'), 
 	derivate=dydt.Gompertz, test=c(Mean=39.33, SD=1.92), 
-	M0=1.7, method="BFGS", maxiter=200, saveAtMaxiter=FALSE, fileName="intermediate", 
-  weight=NULL, hessian=TRUE) {
+	M0=1.7, saveAtMaxiter=FALSE, fileName="intermediate", 
+  weight=NULL, hessian=TRUE, control=list(trace=1, REPORT=100, maxit=500)) {
   
   # parameters <- structure(c(118.768297442004, 475.750095909406, 306.243694918151, 116.055824800264), .Names = c("DHA", "DHH", "T12H", "Rho25")); fixed.parameters <- c(rK=2.093313)
-  # temperatures <- formated;derivate <- dydt.Gompertz;M0 <- 1.7
-  # test=c(Mean=39.33, SD=1.92); method = "BFGS"; maxiter = 200;saveAtMaxiter=FALSE;fileName="intermediate"
-	# weight=NULL; hessian=TRUE
+  # temperatures <- formated
+  # parameters=x; fixed.parameters=pfixed; temperatures=formatedNest; derivate=dydt.Gompertz; M0=1.7;test=c(Mean=39.33, SD=1.92); control=list(trace=1, REPORT=100, maxit=200)
+  # derivate <- dydt.Gompertz;M0 <- 1.7; test=c(Mean=39.33, SD=1.92); saveAtMaxiter=FALSE;fileName="intermediate"; weight=NULL; hessian=TRUE
   
-	if (!requireNamespace("numDeriv", quietly = TRUE)) {
-	  warning("numDeriv package is absent; less accurate fitting method will be used and SE of parameters cannot be calculated")
-	  numDeriv <- FALSE
-    hessian <- FALSE
-	} else {
-	  numDeriv <- TRUE
-	}
-	
-  # dans temperatures il faut que je rajoute une colonne avec les indices de températures en K
   
-	
-NbTS <- temperatures$IndiceT[3]
+    if (!requireNamespace("optimx", quietly = TRUE)) {
+      stop("optimx package is absent; Please install it first")
+    }
 
-# si j'ai weight dans les data formatées et pas en paramètres, je les prends
+    if (!requireNamespace("numDeriv", quietly = TRUE)) {
+      stop("numDeriv package is absent; Please install it first")
+    }
+
+  # dans temperatures il faut que je rajoute une colonne avec les indices de temperatures en K
+  
+  method <- c("Nelder-Mead","BFGS")
+  NbTS <- temperatures$IndiceT[3]
+
+# si j'ai weight dans les data formatees et pas en paramètres, je les prends
 if (is.null(weight) & !is.null(temperatures$weight)) {
   weight <- temperatures$weight
 }
@@ -107,17 +110,16 @@ if (is.null(weight)) {
 	names(weight) <- names(temperatures)[1:NbTS]
 }
 
-# si c'est une liste, je prends l'élément weight
+# si c'est une liste, je prends l'element weight
 if (is.list(weight)) weight <- weight$weight
 
 if (!setequal(names(weight), names(temperatures)[1:NbTS])) {
-  print("The weight parameter must define weight for each nest.")
-  print(paste("check", setdiff(names(temperatures)[1:temperatures$IndiceT[3]], names(weight)), "nests"))
-  return(invisible())	
+  stop(paste("The weight parameter must define weight for each nest. Check", 
+             setdiff(names(temperatures)[1:temperatures$IndiceT[3]], names(weight)), "nests"))
 }
 
 ##########################################################
-# Données de base de Gompertz
+# Donnees de base de Gompertz
 ##########################################################
 
 if (is.numeric(test)) {
@@ -129,40 +131,50 @@ if (is.numeric(test)) {
 # 25/2/2015
 for (j in 1:NbTS) temperatures[[j]][1, "Mass"] <- M0
 
-# Un paramètre ne peut pas être indiqué en fixe et en fité - 22/7/2012	
-# test faux, corrigé le 19/2/2013
+# Un paramètre ne peut pas être indique en fixe et en fite - 22/7/2012	
+# test faux, corrige le 19/2/2013
 	if (length(intersect(names(parameters), names(fixed.parameters)))!=0) {
-		print("A parameter cannot be fixed and fitted at the same time !")
-		return(invisible())
+		stop("A parameter cannot be fixed and fitted at the same time !")
 	}
 
+  grR <- getFromNamespace(".gradientRichardson", ns="embryogrowth")
+  
 repeat {
-
-# 30/8/2014 - Je retire optimx
-  if (numDeriv) {
-	result=optim(parameters, .fonctionfit, temperatures=temperatures, 
-	             derivate=derivate, weight=weight,
-	             test=testuse, M0=M0, fixed.parameters=fixed.parameters,
-               gr=.gradientRichardson, method=method, 
-               control=list(trace=2, REPORT=1, maxit=maxiter), hessian=FALSE)
-} else {
-  result=optim(parameters, .fonctionfit, temperatures=temperatures, 
-               derivate=derivate, weight=weight,
-               test=testuse, M0=M0, fixed.parameters=fixed.parameters,
-               method=method, control=list(trace=2, REPORT=1, maxit=maxiter), hessian=FALSE)
-}
-	if (result$convergence==0) break
-	parameters<-result$par
+      result <- try(optimx::optimx(par=parameters, fn=getFromNamespace("info.nests", ns="embryogrowth"), 
+                                 temperatures=temperatures, 
+                                 derivate=derivate, weight=weight,
+                                 test=testuse, M0=M0, fixed.parameters=fixed.parameters,
+                                 gr=grR, method=method, 
+                                 control=modifyList(control, list(dowarn=FALSE, follow.on=TRUE, kkt=FALSE)), 
+                                 hessian=FALSE), silent=TRUE)
+    minL <- dim(result)[1]
+    nm <- names(parameters)
+    x <- result[minL, nm]
+    x <- as.numeric(x)
+    names(x) <- nm
+    conv <- result[minL, "convcode"]
+    value <- result[minL, "value"]
+  
+  
+	if (conv==0) break
+	parameters<-x
 	print("Convergence is not achieved. Optimization continues !")
 	print(dput(parameters))
  if (saveAtMaxiter) save(parameters, file=paste0(fileName, ".RData"))
 }
 
+  result_list <- list()
+  result_list$par <- x
+  result_list$value <- value
+  result_list$convergence <- conv
+  result <- result_list
+
 print(result$par)
 
 if (hessian) {
 
-	mathessian <- try(hessian(.fonctionfit, result$par, method="Richardson", temperatures=temperatures, 
+	mathessian <- try(hessian(info.nests, parameters=result$par, method="Richardson", 
+	                          temperatures=temperatures, 
 	                          derivate=derivate, weight=weight,
 	                          test=testuse, M0=M0, fixed.parameters=fixed.parameters), silent=TRUE)
 
@@ -220,7 +232,7 @@ result$AIC <- 2*result$value+2*length(parameters)
 result$test <- testuse
 result$derivate <- derivate
 result$M0 <- M0
-# Je stocke aussi les paramètres fixé-16/7/2012
+# Je stocke aussi les paramètres fixe-16/7/2012
 result$fixed.parameters <- fixed.parameters
 # 29/1/2014
 result$weight <- weight

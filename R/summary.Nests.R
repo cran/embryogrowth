@@ -1,10 +1,10 @@
 #' summary.Nests Summarize the information from a Nests object
 #' @title Summarize the information from a Nests object.
 #' @author Marc Girondot
-#' @return None\cr
+#' @return None
 #' @param object A object obtained after FormatNests()
 #' @param ... Not used
-#' @description Summarize the information from a Nests object:
+#' @description Summarize the information from a Nests object:\cr
 #' - Name of the nests, total incubation length and average temperature
 #' @examples
 #' \dontrun{

@@ -37,12 +37,13 @@
 
 
 FormatNests <-
-function(data=stop("A dataset must be provided !"), previous=NULL, simplify=TRUE, weight=NULL) {
+function(data=stop("A dataset must be provided !"), previous=NULL, 
+         simplify=TRUE, weight=NULL) {
 
-# Je crée une fonction qui prépare un fichier pour être utilisé
-# Les différents nids seront des matrices dans une liste
-# Dans chaque matrice on a le temps depuis le début de l'incubation
-# la tepérature en °C, la température en K, la valeur de r et la masse
+# Je cree une fonction qui prepare un fichier pour etre utilise
+# Les differents nids seront des matrices dans une liste
+# Dans chaque matrice on a le temps depuis le debut de l'incubation
+# la temperature en C, la temperature en K, la valeur de r et la masse
 
 # previous=NULL; simplify=TRUE; weight=NULL
   
@@ -59,20 +60,20 @@ if (class(data)=="Nests") {
   
 } else {
 
-nidsEC <- vector(mode="list", length=0)
-# même chose que nids=as.list(NULL)
+nidsEC <- list()
+# meme chose que nids=as.list(NULL)
 
 for (j in 2:dim(data)[2]) {
 
-# je veux le transformer en une liste avec à l'intérieur un dataframe par enregistreur
+# je veux le transformer en une liste avec a l'interieur un dataframe par enregistreur
 # je commence par sortir la liste un par un qui n'ont pas de NA
 
-# je stocke les données de l'enregistreur dans une matrice
+# je stocke les donnees de l'enregistreur dans une matrice
 
 newess2 <- as.numeric(subset(data[,j], !is.na(data[,j])))
 newessT <- as.numeric(subset(data[,1], !is.na(data[,j])))
 
-# 19/10/2012 je calcule les états intermédiaires en terme de temps
+# 19/10/2012 je calcule les etats intermediaires en terme de temps
 
 ess2 <- newess2[1]
 essT <- newessT[1]
@@ -92,8 +93,8 @@ ess<-matrix(c(essT, ess2, ess2+273.15, rep(NA, 3*length(ess2))), ncol=6)
 colnames(ess)<-c("Time", "Temperatures C", "Temperatures K", "r", "Mass", "IndiceK")
 
 
-# ensuite je supprime les temps avec des valeurs de températures identiques
-# sauf la dernière qui doit rester - 20/7/2012
+# ensuite je supprime les temps avec des valeurs de temperatures identiques
+# sauf la derniere qui doit rester - 20/7/2012
 # si que deux lignes, je ne fais rien - 27/7/2012
 if ((dim(ess)[1]>2) & simplify) {
 	for (i in 2:(dim(ess)[1]-1)) {
@@ -101,8 +102,9 @@ if ((dim(ess)[1]>2) & simplify) {
 	}
 }
 
-nidsEC[[names(data[j])]]<-subset(ess, !is.na(ess[,1]))
-
+# nidsEC[[names(data[j])]]<-subset(ess, !is.na(ess[,1]))
+# 23/4/2015
+nidsEC[[colnames(data)[j]]]<-subset(ess, !is.na(ess[,1]))
 }
 
 }
@@ -115,7 +117,7 @@ if (!is.null(previous)) {
 
 # J'enregistre les tempmin et max car toujours pareil - Je n'en ai plus besoin; je les garde cependant
 
-# j'enregestre les temp comme des facteurs
+# j'enregistre les temp comme des facteurs
 nbts <- length(nidsEC)
 temp<-NULL
 for (j in 1:nbts) {
@@ -141,6 +143,12 @@ nidsEC[["weight"]] <- weight
 
 class(nidsEC) <- "Nests"
 
-return(nidsEC)
+# 27/4/2015
+
+if (any(duplicated(names(nidsEC)[1:(nidsEC[["IndiceT"]]["NbTS"])]))) {
+  stop("Nests must have unique names")
+} else {
+  return(nidsEC)
+}
 
 }

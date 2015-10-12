@@ -38,7 +38,7 @@ plot.tsd <- function(x, ..., males.freq=TRUE,
 	col.TRT="gray", col.TRT.CI=rgb(0.8, 0.8, 0.8, 0.5), 
   col.PT.CI=rgb(0.8, 0.8, 0.8, 0.5), show.CI=TRUE) {
 
-# se=NULL; l <- 0.05; males.freq <- TRUE; las.x <- 1; las.y <- 1; lab.PT <- "Pivotal temperature"; lab.TRT <- "Transitional range of temperatures l=5%"; equation <- "logistic"; range.CI=0.95; replicate <- 1000; col.TRT="gray"; col.TRT.CI=rgb(0.8, 0.8, 0.8, 0.5); col.PT.CI=rgb(0.8, 0.8, 0.8, 0.5); limit.low.TRT.minimum=5; limit.high.TRT.maximum=90; print=TRUE
+# males.freq=TRUE; las.x=1; las.y=1; lab.PT="Pivotal temperature"; lab.TRT=paste0("Transitional range of temperatures l=95%"); col.TRT="gray"; col.TRT.CI=rgb(0.8, 0.8, 0.8, 0.5); col.PT.CI=rgb(0.8, 0.8, 0.8, 0.5); show.CI=TRUE
   
   range.CI.qnorm <- qnorm(1-((1-x$range.CI)/2))
   l <- x$l
@@ -74,7 +74,7 @@ plot.tsd <- function(x, ..., males.freq=TRUE,
   
   axis(1, at=x1:x2, las=las.x)
   
-  # je trace la TRT centrée sur P
+  # je trace la TRT centree sur P
   
   
 if (equation!="GSD") {

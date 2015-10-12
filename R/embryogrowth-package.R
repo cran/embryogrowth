@@ -3,8 +3,8 @@
 #' \tabular{ll}{
 #'  Package: \tab embryogrowth\cr
 #'  Type: \tab Package\cr
-#'  Version: \tab 6.0 - build 444\cr
-#'  Date: \tab 2015-04-15\cr
+#'  Version: \tab 6.1 - build 465\cr
+#'  Date: \tab 2015-10-11\cr
 #'  License: \tab GPL (>= 2)\cr
 #'  LazyLoad: \tab yes\cr
 #'  }
@@ -51,7 +51,7 @@
 #' pfixed <- c(rK=2.093313)
 #' resultNest_4p <- searchR(parameters=x, fixed.parameters=pfixed, 
 #' 	temperatures=formated, derivate=dydt.Gompertz, M0=1.7, 
-#' 	test=c(Mean=39.33, SD=1.92), method = "BFGS", maxiter = 200)
+#' 	test=c(Mean=39.33, SD=1.92))
 #' data(resultNest_4p)
 #' pMCMC <- TRN_MHmcmc_p(resultNest_4p, accept=TRUE)
 #' # Take care, it can be very long, sometimes several days
@@ -66,11 +66,7 @@
 #' plot(result_mcmc_4p, parameters=3, xlim=c(290,320))
 #' # summary() permits to get rapidly the standard errors for parameters
 #' summary(result_mcmc_4p)
-#' # The batch standard error procedure is usually thought to  
-#' # be not as accurate as the time series methods.
-#' se <- result_mcmc_4p$BatchSE
-#' # or
-#' se <- result_mcmc_4p$TimeSeriesSE
+#' se <- result_mcmc_4p$SD
 #' }
 
 NULL

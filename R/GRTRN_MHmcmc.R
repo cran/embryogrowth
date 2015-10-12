@@ -15,19 +15,15 @@
 #' @param intermediate Period for saving intermediate result, NULL for no save
 #' @param previous Previous result to be continued. Can be the filename in which intermediate results are saved.
 #' @description Run the Metropolis-Hastings algorithm for data.\cr
-#' Deeply modified from a MCMC script by Olivier Martin (INRA, Paris-Grignon).\cr
-#' The number of iterations is n.iter+n.adapt+1 because the initial likelihood is also displayed.\cr
+#' The number of iterations is \code{n.iter+n.adapt+1} because the initial likelihood is also displayed.\cr
 #' I recommend that thin=1 because the method to estimate SE uses resampling.\cr
 #' If initial point is maximum likelihood, n.adapt = 0 is a good solution.\cr
-#' To get the SE from result_mcmc <- GRTRN_MHmcmc(result=try), use:\cr
-#' result_mcmc$BatchSE or result_mcmc$TimeSeriesSE\cr
-#' The batch standard error procedure is usually thought to be not as accurate as the time series methods.\cr
-#' Based on Jones, Haran, Caffo and Neath (2005), the batch size should be equal to sqrt(n.iter).\cr
-#' Jones, G.L., Haran, M., Caffo, B.S. and Neath, R. (2006) Fixed Width Output Analysis for Markov chain Monte Carlo , Journal of the American Statistical Association, 101:1537-1547.\cr
-#' coda package is necessary for this function.\cr
-#' The parameters intermediate and filename are used to save intermediate results every 'intermediate' iterations (for example 1000). Results are saved in a file of name filename.\cr
+#' To get the SE of the point estimates from \code{result_mcmc <- GRTRN_MHmcmc(result=try)}, use:\cr
+#' \code{result_mcmc$SD}\cr
+#' \code{coda} package is necessary for this function.\cr
+#' The parameters \code{intermediate} and \code{filename} are used to save intermediate results every 'intermediate' iterations (for example 1000). Results are saved in a file named \code{filename}.\cr
 #' The parameter previous is used to indicate the list that has been save using the parameters intermediate and filename. It permits to continue a mcmc search.\cr
-#' These options are used to prevent the consequences of computer crash or if the run is very very long and processes at time limited.\cr
+#' These options are used to prevent the consequences of computer crash or if the run is very very long and processes with user limited time.\cr
 #' @examples
 #' \dontrun{
 #' library(embryogrowth)
@@ -43,7 +39,7 @@
 #' pfixed <- c(rK=2.093313)
 #' resultNest_4p <- searchR(parameters=x, fixed.parameters=pfixed,  
 #' 	temperatures=formated, derivate=dydt.Gompertz, M0=1.7,  
-#' 	test=c(Mean=39.33, SD=1.92), method = "BFGS", maxiter = 200)
+#' 	test=c(Mean=39.33, SD=1.92))
 #' data(resultNest_4p)
 #' pMCMC <- TRN_MHmcmc_p(resultNest_4p, accept=TRUE)
 #' # Take care, it can be very long; several days
@@ -61,13 +57,11 @@
 #' plot(result_mcmc_4p, parameters=1, xlim=c(0,550))
 #' plot(result_mcmc_4p, parameters=3, xlim=c(290,320))
 #' # summary() permits to get rapidly the standard errors for parameters
-#' # They are store in the result also. Two SE are estimated using or 
-#' # batch method or time-series SE:
-#' # The batch standard error procedure is usually thought to be not 
-#' # as accurate as the time series methods.
-#' se1 <- result_mcmc_4p$BatchSE
-#' se2 <- result_mcmc_4p$TimeSeriesSE
-#' # The use of the intermediate method is as follow;
+#' # They are store in the result also.
+#' se <- result_mcmc_4p$SD
+#' # the confidence interval is better estimated by:
+#' apply(out[[1]], 2, quantile, probs=c(0.025, 0.975))
+#' # The use of the intermediate method is as followed;
 #' # Here the total mcmc iteration is 10000, but every 1000, intermediate
 #' # results are saved in file intermediate1000.Rdata:
 #' result_mcmc_4p <- GRTRN_MHmcmc(result=resultNest_4p, 
@@ -124,8 +118,10 @@ if (class(fin)=="try-error") {
   lp <- rep(NA, nrow(out$parametersMCMC$parameters))
   names(lp) <- rownames(out$parametersMCMC$parameters)
   out <- c(out, TimeSeriesSE=list(lp))
+  out <- c(out, SD=list(lp))
 } else {
   out <- c(out, TimeSeriesSE=list(fin$statistics[,4]))
+  out <- c(out, SD=list(fin$statistics[,"SD"]))
 }
 
 class(out) <- "mcmcComposite"

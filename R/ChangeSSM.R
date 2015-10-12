@@ -24,9 +24,11 @@
 #' x0 <- resultNest_4p$par
 #' t <- hist(resultNest_4p, plot=FALSE)
 #' x <- c(3.4, 3.6, 5.4, 5.6, 7.6, 7.5, 3.2)
-#' names(x) <- seq(from=range(t$temperatures)[1], to=range(t$temperatures)[2], length.out=7)
-#' newx <- ChangeSSM(temperatures = (200:350)/10, parameters = x0, initial.parameters = x, 
-#'  control=list(maxit=5000))
+#' names(x) <- seq(from=range(t$temperatures)[1], to=range(t$temperatures)[2], 
+#'      length.out=7)
+#' newx <- ChangeSSM(temperatures = (200:350)/10, parameters = x0, 
+#'        initial.parameters = x, 
+#'        control=list(maxit=5000))
 #'  # Example on how to generate a set of SSM parameters from anchored parameters
 #'  xanchor <- GenerateAnchor(nests=resultNest_4p)
 #'  x <- resultNest_4p$par

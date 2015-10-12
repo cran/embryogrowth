@@ -22,7 +22,7 @@
 #' pfixed <- c(rK=2.093313, transition_P=20)
 #' resultNest_4p_transition <- searchR(parameters=x2, fixed.parameters=pfixed, 
 #' temperatures=formated, derivate=dydt.Gompertz, M0=1.7, 
-#' test=c(Mean=39.33, SD=1.92), method = "BFGS", maxiter = 200)
+#' test=c(Mean=39.33, SD=1.92))
 #' data(resultNest_4p_transition)
 #' # show the model for smallest size
 #' plotR(resultNest_4p_transition, ylim=c(0,0.3))
@@ -46,7 +46,7 @@ function(result=NULL, parameters=NULL, sizes=c(0,40), ...) {
 	
 	if (!is.na(parssm["transition_S"]) & !is.na(parssm["transition_P"])) {
 	
-		L <- list(xlim=sizes, ...)
+		L <- modifyList(list(xlim=sizes), list(...))
 
 		x1 <- sizes[1]
 		x2 <- sizes[2]

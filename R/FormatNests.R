@@ -40,7 +40,7 @@ FormatNests <-
 function(data=stop("A dataset must be provided !"), previous=NULL, 
          simplify=TRUE, weight=NULL) {
 
-# Je cree une fonction qui prepare un fichier pour etre utilise
+# Je cree une une fonction qui prepare un fichier pour etre utilise
 # Les differents nids seront des matrices dans une liste
 # Dans chaque matrice on a le temps depuis le debut de l'incubation
 # la temperature en C, la temperature en K, la valeur de r et la masse

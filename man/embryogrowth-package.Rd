@@ -13,8 +13,8 @@ Fit a parametric function that describes dependency of embryo growth to temperat
 \tabular{ll}{
  Package: \tab embryogrowth\cr
  Type: \tab Package\cr
- Version: \tab 6.1 - build 465\cr
- Date: \tab 2015-10-11\cr
+ Version: \tab 6.1.1 - build 467\cr
+ Date: \tab 2015-10-16\cr
  License: \tab GPL (>= 2)\cr
  LazyLoad: \tab yes\cr
  }

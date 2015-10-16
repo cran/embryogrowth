@@ -4,7 +4,7 @@
 \name{nest}
 \alias{nest}
 \title{Timeseries of temperatures for nests}
-\format{A dataframe with raw data.}
+\format{A dataframe with raw data}
 \usage{
 nest
 }

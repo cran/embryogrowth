@@ -34,7 +34,7 @@
 TRN_MHmcmc_p<-function(result=NULL, parameters=NULL, fixed.parameters=NULL, 
                                 accept=FALSE) {
 
-# d'abord je sors les paramètres à utiliser
+# d'abord je sors les parametres a utiliser
   
   if (is.null(result) & is.null(parameters)) {
     stop("Or result or parameters must be provided")
@@ -47,7 +47,7 @@ TRN_MHmcmc_p<-function(result=NULL, parameters=NULL, fixed.parameters=NULL,
   par <- parameters
   allpar <- c(parameters, fixed.parameters)
 
-# 7/2/2014, ajout de la nouvelle version des paramètres
+# 7/2/2014, ajout de la nouvelle version des parametres
 if (all(names(allpar)!="Rho25")) {
 	priors <- list()
 	for(i in 1:length(par)) {

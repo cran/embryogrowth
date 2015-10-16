@@ -61,7 +61,7 @@ a <- do.call(hist, L)
 axis(side=4, ylim=par("yaxp")[1:2], las=1)
 mtext(ylabH, side=4, line=3)
 par(new=TRUE)
-# je rétablis l'échelle des y à celle de R
+# je rtablis l'chelle des y  celle de R
 plot(x = 1, y=1, ylim=ylim, xlim=xlim, xlab="", ylab="", axes=FALSE, bty="n", type="n")
 
 # par(def.par)  #- reset to default

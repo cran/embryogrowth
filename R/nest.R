@@ -14,5 +14,5 @@
 #' library(embryogrowth)
 #' data(nest)
 #' }
-#' @format A dataframe with raw data.
+#' @format A dataframe with raw data
 NULL

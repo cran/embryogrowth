@@ -78,7 +78,7 @@ if (is.null(weight)) {
 	}
 }
 
-# j'ai le weight mais je dois le classer dans le même ordre que les temperatures
+# j'ai le weight mais je dois le classer dans le mme ordre que les temperatures
 pec <- NULL
 for(i in 1:NbTS) {
 	pec <- c(pec, par[which(names(par)==names(temperatures)[i])])

@@ -149,7 +149,7 @@ if (!show.fioritures) {
   }
   
 ###############################
-#### je compte le nombre de series à faire
+#### je compte le nombre de series  faire
 ###############################
 
 
@@ -180,7 +180,7 @@ if (nbseries==0) {
 	stop("No series has been selected")
 }
 
-# fais du recyclage des couleurs des séries si nécessaire
+# fais du recyclage des couleurs des sries si ncessaire
 cptcol.S <- 0
 col.S <- rep(col.S, nbseries)[1:nbseries]
 
@@ -320,17 +320,17 @@ for(seriesx in 1:NbTS) {
      
  
      
-     # je rétablis l'axe de la métrique
+     # je rtablis l'axe de la mtrique
      #  par(new=TRUE)
      #  L1 <- list(type = "n", axes = FALSE, bty = "n", xlab = "", ylab = "", yaxs="r", xaxs="r", ylim=ylimS, xlim=xlim, main="")
      #  L2 <- c(list(x=metric.summary$metric[[1]]$Time/(60*24), y=metric.summary$metric[[1]]$SCL), as.list(troispoints))
      #  do.call(plot, modifyList(L1, L2) )
      
      
-     # fin de test si on doit faire la série
+     # fin de test si on doit faire la srie
   }
   
-  # fin des séries
+  # fin des sries
 }
 
 # fin de la fonction

@@ -93,7 +93,7 @@ if (is.null(weight)) {
 
 weight <- par
 
-# test si tous sont là
+# test si tous sont l
 if (length(setdiff(names(temperatures)[1:temperatures$IndiceT[3]], names(weight)))!=0) {
 	warning("The weight parameter must define weight for each nest.")
 	warning(paste("check", setdiff(names(temperatures)[1:temperatures$IndiceT[3]], names(weight)), "nests"))
@@ -101,7 +101,7 @@ if (length(setdiff(names(temperatures)[1:temperatures$IndiceT[3]], names(weight)
 }	
 
 
-# Un paramètre ne peut pas être indique en fixe et en fite - 22/7/2012	
+# Un paramtre ne peut pas tre indique en fixe et en fite - 22/7/2012	
 # test faux, corrige le 19/2/2013
 
 	if (length(intersect(names(parameters), names(fixed.parameters)))!=0) {
@@ -150,7 +150,7 @@ if (hessian) {
 	}
 	
 
-	# Je gère plus correctement les erreurs - 17/7/2012
+	# Je gre plus correctement les erreurs - 17/7/2012
 
 	neg=any(res<0)
 	if (!neg) {
@@ -165,7 +165,7 @@ if (hessian) {
 			print("Try using MHmcmc() function to get the SE of parameters.")
 		}
 	}
-# fin du test sur la première erreur
+# fin du test sur la premire erreur
 }
 
 } else {
@@ -192,7 +192,7 @@ resultnest$M0 <- M0
 # 29/1/2014
 resultnest$weight <- weight
 
-# Je stocke aussi les paramètres fixe-16/7/2012
+# Je stocke aussi les paramtres fixe-16/7/2012
 resultnest$fixed.parameters <- fixed.parameters
 
 class(resultnest) <- "NestsResult"

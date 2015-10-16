@@ -19,8 +19,8 @@
 
 hist.NestsResult <- function(x, series="all", ...) {
 
-# Je prends seulement les donnees de temperature et j'envoie à hist.Nests
-# Ce sera plus simple pour faire les mises à jour - 30/7/2012
+# Je prends seulement les donnees de temperature et j'envoie a hist.Nests
+# Ce sera plus simple pour faire les mises a jour - 30/7/2012
 
 # j'ai un objet de resultat
 # je prends les donnees

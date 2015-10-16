@@ -3,6 +3,10 @@ THIS IS THE CHANGELOG OF THE "embryogrowth" PACKAGE
 Please note that only the most significant changes are reported here.
 All the major changes are indicated inside the R code.
 
+          CHANGES IN VERSION 6.1.1    (2015-10-16)
+
+* Correct a problem occuring only with windows version
+
           CHANGES IN VERSION 6.1    (2015-10-11)
 
 * Correction of movingincubation() to work with the new version of info.nests()

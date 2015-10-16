@@ -15,7 +15,7 @@ The columns are:\cr
 * Species: Name de the species in binominal nommenclature\cr
 * Country: From which country the eggs come from\cr
 * Area: Name of the beach or region the eggs come from\cr
-* RMU: For marine turtles, name of the RMU for this population; see Wallace, B.P., DiMatteo, A.D., Hurley, B.J., Finkbeiner, E.M., Bolten, A.B., Chaloupka, M.Y., Hutchinson, B.J., Abreu-Grobois, F.A., Amorocho, D., Bjorndal, K.A., Bourjea, J., Bowen, B.W., Dueñas, R.B., Casale, P., Choudhury, B.C., Costa, A., Dutton, P.H., Fallabrino, A., Girard, A., Girondot, M., Godfrey, M.H., Hamann, M., López-Mendilaharsu, M., Marcovaldi, M.A., Mortimer, J.A., Musick, J.A., Nel, R., Seminoff, J.A., Troëng, S., Witherington, B., Mast, R.B., 2010. Regional management units for marine turtles: a novel framework for prioritizing conservation and research across multiple scales. Plos One 5, e15465.\cr
+* RMU: For marine turtles, name of the RMU for this population; see Wallace, B.P., DiMatteo, A.D., Hurley, B.J., Finkbeiner, E.M., Bolten, A.B., Chaloupka, M.Y., Hutchinson, B.J., Abreu-Grobois, F.A., Amorocho, D., Bjorndal, K.A., Bourjea, J., Bowen, B.W., Duenas, R.B., Casale, P., Choudhury, B.C., Costa, A., Dutton, P.H., Fallabrino, A., Girard, A., Girondot, M., Godfrey, M.H., Hamann, M., Lopez-Mendilaharsu, M., Marcovaldi, M.A., Mortimer, J.A., Musick, J.A., Nel, R., Seminoff, J.A., Troeng, S., Witherington, B., Mast, R.B., 2010. Regional management units for marine turtles: a novel framework for prioritizing conservation and research across multiple scales. Plos One 5, e15465.\cr
 * Incubation.temperature: Nominal incubation temperature\cr
 * Fluctuation: How much the temperature could fluctuate around nominal temperature\cr
 * Precision: What is the precision of the measure of temperature\cr
@@ -77,13 +77,13 @@ Hulin, V., Delmas, V., Girondot, M., Godfrey, M. H. and Guillon, J.-M. 2009. Tem
 
 Limpus C.J., Reed P.C. and Miller J.D. (1985) Temperature dependent sex determination in Queensland sea turtles: Intraspecific variation in Caretta caretta. In Grigg G., Shine R. and Ehmann H. (eds) Biology of Australian frogs and reptiles. New South Wales, Australia: Royal Zoological Society, pp 343-351.
 
-López Correa, J.Y., 2010. Diferenciación gonádica en crias de Lepidochelys olivacea (Eschscholtz, 1829) (Testudinata: Cheloniidae), Instituto Politécnico Nacional, Centro Interdisciplinaria de Ciencias Marinas, La Paz, BCS, p. 108.
+Lopez Correa, J.Y., 2010. Diferenciacion gonadica en crias de Lepidochelys olivacea (Eschscholtz, 1829) (Testudinata: Cheloniidae), Instituto Politicnico Nacional, Centro Interdisciplinaria de Ciencias Marinas, La Paz, BCS, p. 108.
 
 Marcovaldi M.A., Godfrey M.H. and Mrosovsky N. (1997) Estimating sex ratios of loggerhead turtles in Brazil from pivotal incubation temperatures. Canadian Journal of Zoology-Revue Canadienne De Zoologie, 75, 755-770.
 
 McCoy C.J., Vogt R.C. and Censky E.J. (1983) Temperature-controlled sex determination in the sea turtle Lepidochelys olivacea. J. Herpetol., 17(4), 404-406.
 
-Merchant-Larios, H, Díaz-Hernández, V, Marmolejo-Valencia A. 2010. Gonadal morphogenesis and gene expression in reptiles with temperature-dependent sex determination. Sexual Development 4:50-61.
+Merchant-Larios, H, Diaz-Hernandez, V, Marmolejo-Valencia A. 2010. Gonadal morphogenesis and gene expression in reptiles with temperature-dependent sex determination. Sexual Development 4:50-61.
 
 Merchant-Larios, H., Villalpando-Fierro, I. & Centeno-Urruiza, B. 1989. Gonadal morphogenesis under controlled temperature in the sea turtle Lepidochelys olivacea. Herpetol. Monographs, 3, 43-61.
 
@@ -101,7 +101,7 @@ Rimblot F., Fretey J., Mrosovsky N., Lescure J. and Pieau C. (1985) Sexual diffe
 
 Rimblot-Baly F., Lescure J., Fretey J. and Pieau C. (1986-1987) Sensibilite a la temperature de la differenciation sexuelle chez la tortue Luth, Dermochelys coriacea (Vandelli, 1761); application des donnees de l'incubation artificielle a l'etude de la sex-ratio dans la nature. Annales des Sciences Naturelles, Zoologie, 8, 277-290.
 
-Ruiz García N.A. (2014) Efectos de la temperatura sobre el desarrollo embrionario y el desempeño de crías de la tortuga golfina, Lepidochelys olivacea. Tesis Nivel Maestria.
+Ruiz Garcia N.A. (2014) Efectos de la temperatura sobre el desarrollo embrionario y el desempero de crias de la tortuga golfina, Lepidochelys olivacea. Tesis Nivel Maestria.
 
 Valenzuela, N., 2001. Constant, shift, and natural temperature effects on sex determination in Podocnemis expansa. Ecology 82, 3010-3024.
 

@@ -98,7 +98,7 @@ if (!is.null(result)) {
 		if (class(result)!="list") result <- list(result)
 		
 			nbr <- max(length(result), length(set.par), length(SE), length(legend), length(col), length(parameters))
-# sinon il faut que je complète recycle col et mette legend et SE à NA
+# sinon il faut que je complte recycle col et mette legend et SE  NA
 			result <- c(result, rep(result, nbr-length(result)))
 			col <- as.list(rep(unlist(col), nbr)[1:nbr])
 			lty <- as.list(rep(unlist(lty), nbr)[1:nbr])
@@ -116,7 +116,7 @@ if (!is.null(result)) {
 			parameters <- c(parameters, rep(list(NULL), nbr-length(parameters)))
 
 	} else {
-# j'ai des paramètres
+# j'ai des paramtres
 	  
 	  
 	  
@@ -146,7 +146,7 @@ premier <- TRUE
 
 for (rs in 1:nbr) {
 
-# J'introduis les paramètres fixes - 16/7/2012
+# J'introduis les paramtres fixes - 16/7/2012
 if (is.na(result[rs])) {
 	parssm <- c(parameters[[rs]], fixed.parameters)
 	res <- SE[[rs]]
@@ -245,7 +245,7 @@ if (!all(is.na(res))) {
 # if (!is.na(parssm["transition_S"])) ess$Parametre[,"transition_S"]=rnorm(replicate.CI,parssm["transition_S"], res["transition_S"])
 
 
-# 8/2/2014 dans parssm j'ai les paramètres
+# 8/2/2014 dans parssm j'ai les paramtres
 ess <- list(Parametre=matrix(rep(NA, length(parssm)*replicate.CI), ncol=length(parssm), dimnames=list(NULL, names(parssm))), moyenne=rep(0,length(x)), moyenne2=rep(0,length(x)))
 
 

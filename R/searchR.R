@@ -99,12 +99,12 @@ function(parameters=stop('Initial set of parameters must be provided'),
   method <- c("Nelder-Mead","BFGS")
   NbTS <- temperatures$IndiceT[3]
 
-# si j'ai weight dans les data formatees et pas en paramètres, je les prends
+# si j'ai weight dans les data formatees et pas en paramtres, je les prends
 if (is.null(weight) & !is.null(temperatures$weight)) {
   weight <- temperatures$weight
 }
 
-# si j'ai pas de weight, je mets tout à 1
+# si j'ai pas de weight, je mets tout  1
 if (is.null(weight)) {
   weight <- rep(1, NbTS)
 	names(weight) <- names(temperatures)[1:NbTS]
@@ -131,7 +131,7 @@ if (is.numeric(test)) {
 # 25/2/2015
 for (j in 1:NbTS) temperatures[[j]][1, "Mass"] <- M0
 
-# Un paramètre ne peut pas être indique en fixe et en fite - 22/7/2012	
+# Un paramtre ne peut pas tre indique en fixe et en fite - 22/7/2012	
 # test faux, corrige le 19/2/2013
 	if (length(intersect(names(parameters), names(fixed.parameters)))!=0) {
 		stop("A parameter cannot be fixed and fitted at the same time !")
@@ -197,7 +197,7 @@ if (hessian) {
 		res <- diag(inversemathessian)
 	}
 
-	# Je gère plus correctement les erreurs - 17/7/2012
+	# Je gre plus correctement les erreurs - 17/7/2012
 
 	neg=any(res<0)
 	if (!neg) {
@@ -232,7 +232,7 @@ result$AIC <- 2*result$value+2*length(parameters)
 result$test <- testuse
 result$derivate <- derivate
 result$M0 <- M0
-# Je stocke aussi les paramètres fixe-16/7/2012
+# Je stocke aussi les paramtres fixe-16/7/2012
 result$fixed.parameters <- fixed.parameters
 # 29/1/2014
 result$weight <- weight

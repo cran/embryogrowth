@@ -22,7 +22,7 @@
 tsd_MHmcmc_p<-function(result=stop("An output from tsd() must be provided"), 
                        accept=FALSE) {
 
-# d'abord je sors les paramètres à utiliser
+# d'abord je sors les paramtres  utiliser
 
 par <- result$par
 

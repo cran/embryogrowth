@@ -176,17 +176,17 @@
       }
     }
     
-    # La taille au début et fin de TSP devrait dépendre de la taille finale
-    # A méditer
-    # C'est résolu le 16/9/2015
+    # La taille au dbut et fin de TSP devrait dpendre de la taille finale
+    # A mditer
+    # C'est rsolu le 16/9/2015
     size.begin.TSP <- unname(embryo.stages[TSP.borders[1]])
     size.end.TSP <- unname(embryo.stages[TSP.borders[2]])
     
-    # dans x j'ai les paramètres à ajuster
+    # dans x j'ai les paramtres  ajuster
     # Il faut que je rajoute les fixes - 16/7/2012
     x <- c(parameters, fixed.parameters)
     logicTransition <- (is.na(x["transition_P"]) | is.na(x["transition_S"]))
-    # je genère les se
+    # je genre les se
     df_random <- data.frame(fake=rep(NA, replicate.CI))
 
     if (is.null(SE)) {
@@ -206,7 +206,7 @@
     xx <- seq_along(temperatures_ec)
     names(xx) <- names(temperatures_ec)
     
-    # prépare le df pour les r?sultats
+    # prpare le df pour les r?sultats
     temperatures_ec <- mclapply(xx, function (xxx) {
 #      temperatures_ec <- lapply(xx, function (xxx) {
         # xxx <- 1
@@ -363,7 +363,7 @@
 #     indice.begin.tsp        #
 ###############################
 
-        # 16/9/2015 Même si je suis en stopattest, je prends la valeur finale si trop court        
+        # 16/9/2015 Mme si je suis en stopattest, je prends la valeur finale si trop court        
 #       if (stopattest) {
 #          meanSCL_ec <- meanSCL
 #        } else {
@@ -537,7 +537,7 @@
             time.end.incubation <- df_ec[indice.end.incubation,"Time"]
             indice.end.incubation <- which(df[,"SCL"]>(meanSCL))[1]-1
             
-            # Maintenant je tronque df de façon à ne garder que jusqu'à time.end.incubation
+            # Maintenant je tronque df de faon  ne garder que jusqu' time.end.incubation
             # garde
             df <- df[df[, "SCL"]<meanSCL,]
             df <- rbind(df, c(Time=time.end.incubation, 
@@ -813,7 +813,7 @@
     
     if (any(out=="metric")) {
       
-      # Il faut d'abord que je retire les temps créés pour le début et la fin de la TSP
+      # Il faut d'abord que je retire les temps crs pour le dbut et la fin de la TSP
       # En fait le plus simple serait que je ne les mette pas si 
       # je suis en metric, seulement en summary
       

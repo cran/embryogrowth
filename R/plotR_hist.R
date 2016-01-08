@@ -59,7 +59,7 @@ L <- modifyList(L, list(xlab="", ylab="", main="", axes=FALSE, freq=FALSE,
 a <- do.call(hist, L) 
 
 axis(side=4, ylim=par("yaxp")[1:2], las=1)
-mtext(ylabH, side=4, line=3)
+mtext(ylabH, side=4, line=3, cex=par("cex"))
 par(new=TRUE)
 # je rtablis l'chelle des y  celle de R
 plot(x = 1, y=1, ylim=ylim, xlim=xlim, xlab="", ylab="", axes=FALSE, bty="n", type="n")

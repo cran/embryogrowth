@@ -22,10 +22,10 @@
 #' @param metric.end.incubation The expected metric at the end of incubation. Used to calibrate TSP size. If NULL, take the maximum Mean of the test parameter. If NA, use the actual final size. Can be a vector and is recycled if necessary.
 #' @param progress If FALSE, the progress bar is not shown (useful for using with sweave or knitr)
 #' @param warnings if FALSE, does not show warnings
-#' @description Calculate statistics about nests\cr
+#' @description This function calculates many statistics about nests.\cr
 #' The embryo.stages is a list with stage numbers and relative size as compared to final size at the beginning of the stage.\cr
 #' For example embryo.stages=list(number=21:30, size=c(8.4, 9.4, 13.6, 13.8, 18.9, 23.5, 32.2, 35.2, 35.5, 38.5)/39.33) indicates that the stages 21 begins at the relative size of 8.4/39.33.\cr
-#' series can be indicated as the name of the series, their numbers or series of TRUE or FALSE. "all" indicates that all series must be analyzed.\cr
+#' Series can be indicated as the name of the series, their numbers or series or sucession of TRUE or FALSE. "all" indicates that all series must be analyzed.\cr
 #' The likelihood object is just the total likelihood of the data in the model.\cr
 #' The summary object is a data.frame composed of these elements:
 #' \itemize{
@@ -71,13 +71,14 @@
 #'   \item \code{stopattest} NA if stopattest was false, TRUE if at least one incubation series was longer than hatchling size and FALSE at contrary
 #' }
 #' If you indicate new set of temperatures, you must probably also indicate new test values.\cr
-#' Note: two species have predefined embryo stages. embryo.stages parameter can take the values:\cr
+#' Note: three species have predefined embryo stages. embryo.stages parameter can take the values:\cr
 #' \itemize{
 #'   \item \code{Caretta caretta.SCL}
+#'   \item \code{Chelonia mydas.SCL}
 #'   \item \code{Emys orbicularis.SCL}
 #'   \item \code{Emys orbicularis.mass}
 #'   }
-#' The progress bar is based on replicates.
+#' The progress bar is based on replicates and timeseries.
 #' @examples
 #' \dontrun{
 #' library(embryogrowth)
@@ -92,7 +93,7 @@
 #'   SE=c(DHA=17.7357362231266, DHH=55.2002231419364, 
 #'   T12H=0.850237694629938, Rho25=8.47868153136681)))
 #' # Result is in summary.nests$metric
-#' infoall.both <- info.nests(resultNest_4p, out=c("metric", summary), replicate.CI=20, 
+#' infoall.both <- info.nests(resultNest_4p, out=c("metric", "summary"), replicate.CI=20, 
 #'   SE=c(DHA=17.7357362231266, DHH=55.2002231419364, 
 #'   T12H=0.850237694629938, Rho25=8.47868153136681)))
 #' # Result is in summary.nests$summary and in summary.nests$metric
@@ -176,17 +177,17 @@
       }
     }
     
-    # La taille au dbut et fin de TSP devrait dpendre de la taille finale
+    # La taille au dbut et fin de TSP devrait dependre de la taille finale
     # A mditer
-    # C'est rsolu le 16/9/2015
-    size.begin.TSP <- unname(embryo.stages[TSP.borders[1]])
-    size.end.TSP <- unname(embryo.stages[TSP.borders[2]])
+    # C'est resolu le 16/9/2015
+    size.begin.TSP <- unname(embryo.stages[as.character(TSP.borders[1])])
+    size.end.TSP <- unname(embryo.stages[as.character(TSP.borders[2])])
     
     # dans x j'ai les paramtres  ajuster
     # Il faut que je rajoute les fixes - 16/7/2012
     x <- c(parameters, fixed.parameters)
     logicTransition <- (is.na(x["transition_P"]) | is.na(x["transition_S"]))
-    # je genre les se
+    # je gere les se
     df_random <- data.frame(fake=rep(NA, replicate.CI))
 
     if (is.null(SE)) {
@@ -206,7 +207,7 @@
     xx <- seq_along(temperatures_ec)
     names(xx) <- names(temperatures_ec)
     
-    # prpare le df pour les r?sultats
+    # prepare le df pour les resultats
     temperatures_ec <- mclapply(xx, function (xxx) {
 #      temperatures_ec <- lapply(xx, function (xxx) {
         # xxx <- 1
@@ -223,6 +224,17 @@
     }
     
     df <- cbind(df, DeltaT=c(diff(df$Time), 0))
+
+    ind <- which(!is.na(df$TempC))      # get positions of nonmissing values
+    if(is.na(df$TempC[1]))             # if it begins with a missing, add the 
+      ind <- c(1,ind)        # first position to the indices
+    df$TempC <- rep(df$TempC[ind], times = diff(   # repeat the values at these indices
+      c(ind, length(df$TempC) + 1) ))
+    df$TempK <- rep(df$TempK[ind], times = diff(   # repeat the values at these indices
+      c(ind, length(df$TempK) + 1) ))
+    df$IndiceK <- rep(df$IndiceK[ind], times = diff(   # repeat the values at these indices
+      c(ind, length(df$IndiceK) + 1) ))
+    
     df[1, "SCL"] <- M0
     return(df)
     })
@@ -236,8 +248,10 @@
     
     for(sp in 1:replicate.CI) {
       if (progress) setTxtProgressBar(pb, sp)
-      
- #     print(sp)
+# sp <- 1      
+# if (sp==48) browser()
+#     print(sp)
+
       x <- as.numeric(df_random[sp, ])
       names(x) <- gsub("^X", "", colnames(df_random))
       if (!logicTransition) {
@@ -321,6 +335,8 @@
               df[range, "SCL"] <- out1[,2]
               if (y>meanSCL) {
                 df <- df[1:ldt[i+1], ]
+                df <- df[1:which(df[, "SCL"] >meanSCL)[1],]
+                y <- tail(df[, "SCL"], n=1)
                 break
               }
             }
@@ -338,6 +354,8 @@
               df[i+1, "SCL"] <- y
               if (y>meanSCL) {
                 df <- df[1:(i+1), ]
+                df <- df[1:which(df[, "SCL"] >meanSCL)[1],]
+                y <- tail(df[, "SCL"], n=1)
                 break
               }
             }
@@ -541,9 +559,9 @@
             # garde
             df <- df[df[, "SCL"]<meanSCL,]
             df <- rbind(df, c(Time=time.end.incubation, 
-                              TempC=tail(df$TempC[1], n=1L), tempK=tail(df$TempK[1], n=1L), 
+                              TempC=tail(df$TempC, n=1L), tempK=tail(df$TempK, n=1L), 
                               R=NA, SCL=meanSCL, 
-                              IndiceK=tail(df$IndiceK[1], n=1L), DeltaT=0))
+                              IndiceK=tail(df$IndiceK, n=1L), DeltaT=0))
             df[, "DeltaT"] <- c(diff(df[, "Time"]), 0)
       } else {attSAT <- FALSE}
           } else {attSAT <- NA}
@@ -650,7 +668,7 @@
         # fin du mcapply
       })
       
-      if (out[1]=="likelihood") {
+      if (any(out=="likelihood")) {
         L <- unlist(AnalyseTraces)
         names(L) <- names(AnalyseTraces)
         # dans L j'ai un vecteur avec le nom
@@ -665,7 +683,7 @@
       
        if (any(out=="summary")) {
         
-        if (any(unlist(lapply(AnalyseTraces, function(x) {xp <- attributes(x) <- NULL; identical(x = x, y=FALSE)})))) {
+        if (any(unlist(lapply(AnalyseTraces, function(x) {attributes(x) <- NULL; identical(x = x, y=FALSE)})))) {
           if (warnings) warning("replicate ", sp, ": Something goes wrong")
           summarydf <- data.frame(
             TimeWeighted.temperature.mean=NA,
@@ -806,21 +824,40 @@
       # fin de la boucle des replicats
     }
     
-    if (out[1]=="likelihood") return(returntotal.likelihood)
+    if (any(out=="likelihood")) return(returntotal.likelihood)
     
     ret.summary <- NULL
     ret.metric <- NULL
     
     if (any(out=="metric")) {
       
-      # Il faut d'abord que je retire les temps crs pour le dbut et la fin de la TSP
+      # Il faut d'abord que je retire les temps crees pour le debut et la fin de la TSP
       # En fait le plus simple serait que je ne les mette pas si 
       # je suis en metric, seulement en summary
       
+      # je sors la longeur max de la serie
+      lmax <- sapply(returntotal.metric, function(x) sapply(x, function(y) dim(y)[1]))
+      if (class(lmax)=="matrix") lmax <- lmax[,1]
+      lmax <- aggregate(lmax, by=list(names(lmax)), max)
+      rownames(lmax) <- lmax[,1]
+      
+      # l1 <- length(meanTotal[[j]])
+      # l2 <- length(meanTotal_i[[j]])
+      
+      # D'abord je sors les valeurs pour le premier de la serie des randoms
+      
       meanTotal <- lapply(returntotal.metric[[1]], function(x) x[,"SCL"])
+      
+      meanTotal <- lapply(lmax[,1], function(x) c(meanTotal[[x]], rep(0, lmax[x, 2]-length(meanTotal[[x]]))))
+      names(meanTotal) <- lmax[,1]
+      nbdif0 <- lapply(meanTotal, function(x) ifelse(x != 0, 1, 0))
+      
       meanTotal2 <- lapply(returntotal.metric[[1]], function(x) x[,"SCL"]^2)
+      meanTotal2 <- lapply(lmax[,1], function(x) c(meanTotal2[[x]], rep(0, lmax[x, 2]-length(meanTotal2[[x]]))))
       meanRTotal <- lapply(returntotal.metric[[1]], function(x) x[,"R"])
+      meanRTotal <- lapply(lmax[,1], function(x) c(meanRTotal[[x]], rep(0, lmax[x, 2]-length(meanRTotal[[x]]))))
       meanRTotal2 <- lapply(returntotal.metric[[1]], function(x) x[,"R"]^2)
+      meanRTotal2 <- lapply(lmax[,1], function(x) c(meanRTotal2[[x]], rep(0, lmax[x, 2]-length(meanRTotal2[[x]]))))
       
       att <- lapply(returntotal.metric[[1]], function(x) c(
         attributes(x)[["time.begin.tsp"]], 
@@ -851,9 +888,17 @@
       if (length(returntotal.metric) != 1) {
         for (i in 2:length(returntotal.metric)) {
           meanTotal_i <- lapply(returntotal.metric[[i]], function(x) x[,"SCL"])
+          meanTotal_i <- lapply(lmax[,1], function(x) c(meanTotal_i[[x]], rep(0, lmax[x, 2]-length(meanTotal_i[[x]]))))
+          
           meanTotal2_i <- lapply(returntotal.metric[[i]], function(x) x[,"SCL"]^2)
+          meanTotal2_i <- lapply(lmax[,1], function(x) c(meanTotal2_i[[x]], rep(0, lmax[x, 2]-length(meanTotal2_i[[x]]))))
+
           meanRTotal_i <- lapply(returntotal.metric[[i]], function(x) x[,"R"])
+          meanRTotal_i <- lapply(lmax[,1], function(x) c(meanRTotal_i[[x]], rep(0, lmax[x, 2]-length(meanRTotal_i[[x]]))))
+          
           meanRTotal2_i <- lapply(returntotal.metric[[i]], function(x) x[,"R"]^2)
+          meanRTotal2_i <- lapply(lmax[,1], function(x) c(meanRTotal2_i[[x]], rep(0, lmax[x, 2]-length(meanRTotal2_i[[x]]))))
+
           att_i <- lapply(returntotal.metric[[i]], function(x) c(
             attributes(x)[["time.begin.tsp"]], 
             attributes(x)[["time.end.tsp"]], 
@@ -879,11 +924,16 @@
           att_sat_i <- lapply(returntotal.metric[[i]], function(x) c(
             attributes(x)[["stopattest"]]
           ))   
+          
           for(j in 1:length(meanTotal_i)) {
             meanTotal[[j]] <- meanTotal[[j]]+meanTotal_i[[j]]
             meanTotal2[[j]] <- meanTotal2[[j]]+meanTotal2_i[[j]]
             meanRTotal[[j]] <- meanRTotal[[j]]+meanRTotal_i[[j]]
             meanRTotal2[[j]] <- meanRTotal2[[j]]+meanRTotal2_i[[j]]
+            
+            nbdif1 <- lapply(meanTotal_i, function(x) ifelse(x != 0, 1, 0))
+            
+            nbdif0 <- lapply(seq_along(nbdif0), function(x) nbdif0[[x]]+nbdif1[[x]])
             
             att[[j]] <- att[[j]]+att_i[[j]]
             att2[[j]] <- att2[[j]]+att2_i[[j]]
@@ -898,13 +948,27 @@
       
       # sum(a^2)-length(a)*mean(a)^2)/(length(a)-1)
       for(j in 1:length(meanTotal)) {
-        se_i <- (meanTotal2[[j]]-replicate.CI*(meanTotal[[j]]/replicate.CI)^2)/(replicate.CI-1)
-        se_i <- sqrt(ifelse(se_i<=0, 0,se_i))
-        seR_i <- (meanRTotal2[[j]]-replicate.CI*(meanRTotal[[j]]/replicate.CI)^2)/(replicate.CI-1)
-        seR_i <- sqrt(ifelse(seR_i<=0, 0,seR_i))
         
-        ret[[j]] <- cbind(ret[[j]], mean.SCL=meanTotal[[j]]/replicate.CI, 
-                          mean.R=meanRTotal[[j]]/replicate.CI, 
+        se_i <- ifelse(nbdif0[[j]]>1, 
+                       (meanTotal2[[j]]-nbdif0[[j]]*(meanTotal[[j]]/nbdif0[[j]])^2)/(nbdif0[[j]]-1), 
+                       NA)
+        se_i <- ifelse(is.na(se_i), NA, sqrt(ifelse(se_i<=0, 0,se_i)))
+        seR_i <- ifelse(nbdif0[[j]]>1, 
+                        (meanRTotal2[[j]]-nbdif0[[j]]*(meanRTotal[[j]]/nbdif0[[j]])^2)/(nbdif0[[j]]-1),
+                        NA)
+        seR_i <- ifelse(is.na(seR_i), NA, sqrt(ifelse(seR_i<=0, 0,seR_i)))
+        
+        intret <- ret[[j]]
+        if (lmax[j, 2]!=dim(intret)[1]) {
+        missinglines <- rep(NA, lmax[j, 2]-dim(intret)[1])
+        intret <- rbind(intret, data.frame(Time=missinglines, TempC=missinglines, TempK=missinglines,
+                   R=missinglines, SCL=missinglines, IndiceK=missinglines, 
+                   DeltaT=missinglines))
+        }
+        
+        
+        ret[[j]] <- cbind(intret, mean.SCL=meanTotal[[j]]/nbdif0[[j]], 
+                          mean.R=meanRTotal[[j]]/nbdif0[[j]], 
                           se.SCL=se_i, se.R=seR_i)
         
         # je fais les attributs

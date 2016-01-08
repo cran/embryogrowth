@@ -1,7 +1,19 @@
 THIS IS THE CHANGELOG OF THE "embryogrowth" PACKAGE
 
-Please note that only the most significant changes are reported here.
-All the major changes are indicated inside the R code.
+          CHANGES IN VERSION 6.2    (2016-01-08)
+
+* Update of documentation
+
+          CHANGES IN VERSION 6.1.3-6.1.5    (2015-12-04)
+
+* plot.NestResult() and plotR_hist() can be used with layout() or mfrow() - 6.1.3
+* New database stages for embryonics stages, mass and SCL. Will be expanded in next versions - 6.1.4
+* Solve a problem with mcmc - 6.1.5
+
+          CHANGES IN VERSION 6.1.2    (2015-10-22)
+
+* Correct a problem with info.nest when timeseries are of different length during resampling of parameters
+* Correct a problem with info.nest when fill is not NULL
 
           CHANGES IN VERSION 6.1.1    (2015-10-16)
 

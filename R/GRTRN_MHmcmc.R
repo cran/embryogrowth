@@ -79,11 +79,17 @@ thin=1, trace=FALSE, batchSize=sqrt(n.iter), parallel=TRUE,
 intermediate=NULL, filename="intermediate.Rdata", previous=NULL)
 {
 
+  # result=NULL; n.iter=10000; parametersMCMC=NULL; n.chains = 1; n.adapt = 0; thin=1; trace=FALSE; batchSize=sqrt(n.iter); parallel=TRUE; intermediate=NULL; filename="intermediate.Rdata"; previous=NULL
+  # previous <- "/Users/marc/Dropbox/DropBoxPerso/_Package_HelpersMG/previous_result_mcmc_AtlMed_simplify_2.RData"
+  # result=resultNest_4p; parametersMCMC=pMCMC; n.iter=100; n.chains = 1; n.adapt = 0; thin=1; trace=TRUE; intermediate = 10
   if (is.character(previous)) {
     itr <- NULL
     load(previous)
     previous <- itr
     rm(itr)
+  }
+  
+  if (is.list(previous)) {
     print("Continue previous mcmc run")
     # 29/1/2014; Ajout de result$weight
     out <- MHalgoGen(previous=previous)
@@ -91,11 +97,16 @@ intermediate=NULL, filename="intermediate.Rdata", previous=NULL)
   } else {
     print(parametersMCMC)
     # 29/1/2014; Ajout de result$weight
+    # n.iter=n.iter; parameters=parametersMCMC; n.chains = n.chains; n.adapt = n.adapt; thin=thin; trace=trace; data=list(data=result$data, derivate=result$derivate, test=result$test, M0=result$M0, fixed.parameters=result$fixed.parameters, weight=result$weight); likelihood=getFromNamespace(".fonctionMCMC", ns="embryogrowth"); intermediate=intermediate; filename=filename; previous=previous
+    # 3/12/2015 j'avais un data=list(data=result$data, derivate=result$derivate, 
+    # test=result$test, M0=result$M0, fixed.parameters=result$fixed.parameters, 
+    # weight=result$weight)
     out <- MHalgoGen(n.iter=n.iter, parameters=parametersMCMC, 
                                   n.chains = n.chains, n.adapt = n.adapt, thin=thin, trace=trace, 
-                                  data=list(temperatures=result$data, derivate=result$derivate, 
+                                  data=result$data, derivate=result$derivate, 
                                             test=result$test, M0=result$M0, fixed.parameters=result$fixed.parameters, 
-                                            weight=result$weight), likelihood=get(".fonctionMCMC"), 
+                                            weight=result$weight, 
+                                  likelihood=getFromNamespace(".fonctionMCMC", ns="embryogrowth"), 
                                   intermediate=intermediate, filename=filename, previous=previous)
     
   }

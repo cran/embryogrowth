@@ -55,9 +55,10 @@
 #' The default is for the turtle "Caretta caretta".\cr
 #' Series can be indicated as the name of the series, its number or succesion of TRUE or FALSE. "all" indicates that all series must be printed.\cr
 #' show.fioritures parameter does not affect show.test option.\cr
-#' Note: two species have predefined embryo stages. embryo.stages parameter can take the values:\cr
+#' Note: three species have predefined embryo stages. embryo.stages parameter can take the values:\cr
 #' \itemize{
 #'   \item \code{Caretta caretta.SCL}
+#'   \item \code{Chelonia mydas.SCL}
 #'   \item \code{Emys orbicularis.SCL}
 #'   \item \code{Emys orbicularis.mass}
 #'   }
@@ -81,9 +82,9 @@
 plot.NestsResult <-
 function(x, ..., parameters=NULL, fixed.parameters=NULL, 
          SE=NULL, temperatures=NULL, derivate=NULL, 
-         test=NULL, stopattest=FALSE, M0=NULL, series="all",
+         test=NULL, stopattest=FALSE, M0=NULL, weight=NULL, series="all",
          TSP.borders=NULL, embryo.stages="Caretta caretta.SCL",
-         replicate.CI=100, weight=NULL, 
+         replicate.CI=100, 
          metric.end.incubation=NULL,
          col.stages="blue", col.PT="red", col.TSP="gray", 
          col.temperatures="green", col.S="black", 
@@ -98,7 +99,7 @@ function(x, ..., parameters=NULL, fixed.parameters=NULL,
          xlab="Days of incubation", ylabT=expression("Temperatures in " * degree * "C"), 
          ylabS= "Embryo metric", progress=TRUE) {
 
-#  x=NULL; parameters=NULL; fixed.parameters=NULL; SE=NULL; temperatures=NULL; derivate=NULL; test=NULL; stopattest=FALSE; M0=NULL; series="all"; TSP.borders=NULL; embryo.stages="Caretta caretta.SCL"; replicate.CI=100; metric.end.incubation=NULL; col.stages="blue"; col.PT="red"; col.TSP="gray"; col.temperatures="green"; col.S="black"; lty.temperatures=1; lwd.temperatures=2; ylimT=c(25, 35); ylimS=NULL; xlim=NULL; show.stages=TRUE; show.TSP=TRUE; show.third=TRUE; show.CI=TRUE; replicate.CI=100; show.fioritures=TRUE; progress=TRUE; show.temperatures=TRUE; show.PT=TRUE; PT=c(mean=NA, SE=NA); show.test=TRUE; lab.third="2nd third of incubation"; at.lab.third=4; lab.PT="PT"; lab.stages="Stages"; mar = c(4, 5, 4, 5) + 0.3; xlab="Days of incubation"; ylabT=expression("Temperatures in " * degree * "C"); ylabS= "Embryo metric"
+#  parameters=NULL; fixed.parameters=NULL; SE=NULL; temperatures=NULL; derivate=NULL; test=NULL; stopattest=FALSE; M0=NULL; weight=NULL; series="all"; TSP.borders=NULL; embryo.stages="Caretta caretta.SCL"; replicate.CI=100; metric.end.incubation=NULL; col.stages="blue"; col.PT="red"; col.TSP="gray"; col.temperatures="green"; col.S="black"; lty.temperatures=1; lwd.temperatures=2; ylimT=NULL; ylimS=NULL; xlim=NULL; show.stages=TRUE; show.TSP=TRUE; show.third=TRUE; show.CI=TRUE;  show.metric=TRUE; show.fioritures=TRUE; show.temperatures=TRUE; show.PT=TRUE; PT=c(mean=NA, SE=NA); show.test=TRUE; add=FALSE; lab.third="2nd third of incubation"; at.lab.third=4; lab.PT="PT"; lab.stages="Stages"; mar = c(4, 5, 4, 5) + 0.3; xlab="Days of incubation"; ylabT=expression("Temperatures in " * degree * "C"); ylabS= "Embryo metric"; progress=TRUE
 #  ylimS <- c(0, 35); ylimT <- c(20, 32); x <- resultNest_4p  
   
   TSP.list <- embryogrowth::TSP.list
@@ -245,7 +246,7 @@ for(seriesx in 1:NbTS) {
        do.call(plot, L) 
        
        axis(side=4, ylim=ylimT, las=1)
-       mtext(ylabT, side=4, line=3)
+       mtext(ylabT, side=4, line=3, cex=par("cex"))
        
        if (show.PT & !is.na(PT[1])) {
          

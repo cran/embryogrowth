@@ -3,8 +3,8 @@
 #' \tabular{ll}{
 #'  Package: \tab embryogrowth\cr
 #'  Type: \tab Package\cr
-#'  Version: \tab 6.1.1 - build 467\cr
-#'  Date: \tab 2015-10-16\cr
+#'  Version: \tab 6.2 - build 475\cr
+#'  Date: \tab 2016-01-08\cr
 #'  License: \tab GPL (>= 2)\cr
 #'  LazyLoad: \tab yes\cr
 #'  }
@@ -12,7 +12,9 @@
 #' @author Marc Girondot \email{marc.girondot@@u-psud.fr}
 #' @docType package
 #' @name embryogrowth-package
-#' @description Tools to analyze the embryo growth and the sexualisation thermal reaction norms.
+#' @description Tools to analyze the embryo growth and the sexualisation thermal reaction norms.\cr
+#' The lastest version of this package can always been installed using:\cr
+#' install.packages("http://www.ese.u-psud.fr/epc/conservation/CRAN/embryogrowth.tar.gz", repos=NULL, type="source")
 #' @references Girondot, M. & Kaska, Y. 2014. A model to predict the thermal 
 #'          reaction norm for the embryo growth rate from field data. Journal of
 #'          Thermal Biology. 45, 96-102.

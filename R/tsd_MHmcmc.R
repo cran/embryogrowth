@@ -31,7 +31,7 @@
 #' @examples
 #' \dontrun{
 #' library(embryogrowth)
-#' eo <- subset(STSRE_TSD, Species=="Emys orbicularis", c("Males", "Females", 
+#' eo <- subset(DatabaseTSD, Species=="Emys orbicularis", c("Males", "Females", 
 #'                                        "Incubation.temperature"))
 #' eo_logistic <- tsd(eo)
 #' pMCMC <- tsd_MHmcmc_p(eo_logistic, accept=TRUE)
@@ -53,12 +53,13 @@
 #' }
 #' @export
 
-tsd_MHmcmc <- function(result=NULL, n.iter=10000, 
+tsd_MHmcmc <- function(result=stop("A result of tsd() fit must be provided"), n.iter=10000, 
 parametersMCMC=NULL, n.chains = 1, n.adapt = 0, 
 thin=1, trace=FALSE, batchSize=sqrt(n.iter), 
 intermediate=NULL, filename="intermediate.Rdata", previous=NULL) {
 
-# result=eo_logistic; parametersMCMC=pMCMC; n.iter=10000; n.chains = 1;  n.adapt = 0; thin=1; trace=TRUE; batchSize=sqrt(n.iter)
+# result=eo_logistic; parametersMCMC=NULL; 
+# n.iter=10000; n.chains = 1;  n.adapt = 0; thin=1; trace=TRUE; batchSize=sqrt(n.iter);intermediate=NULL; filename="intermediate.Rdata"; previous=NULL
   if (is.character(previous)) {
     itr <- NULL
     load(previous)
@@ -70,11 +71,13 @@ intermediate=NULL, filename="intermediate.Rdata", previous=NULL) {
   }
   
 # 29/1/2014; Ajout de result$weight
-out <- MHalgoGen(n.iter=n.iter, parameters=parametersMCMC, 
-n.chains = n.chains, n.adapt = n.adapt, thin=thin, trace=trace, 
-	data=list(males=result$males, N=result$N, temperatures=result$temperatures, 
-            equation=result$equation), likelihood=get(".fonctiontsdMCMC"), 
-intermediate=intermediate, filename=filename, previous=previous)
+  # 30/1/2015 Ajout de fixedparameters
+  out <- MHalgoGen(n.iter=n.iter, parameters=parametersMCMC, 
+                   n.chains = n.chains, n.adapt = n.adapt, thin=thin, trace=trace, 
+                   data=list(males=result$males, N=result$N, temperatures=result$temperatures, 
+                             equation=result$equation, fixed.parameters=result$fixed.parameters), 
+                             likelihood=getFromNamespace(".fonctiontsdMCMC", ns="embryogrowth"), 
+                             intermediate=intermediate, filename=filename, previous=previous)
 
 if (batchSize>=n.iter/2) {
   print("batchSize cannot be larger than half the number of iterations.")

@@ -40,7 +40,7 @@ turtle Trachemys scripta. Canadian Journal of Zoology-Revue Canadienne de
 Zoologie 80, 1350-1370.
 }
 \seealso{
-Other Functions.for.temperature.dependent.sex.determination: \code{\link{STSRE_TSD}},
+Other Functions.for.temperature.dependent.sex.determination: \code{\link{DatabaseTSD}},
   \code{\link{TSP.list}}, \code{\link{predict.tsd}},
   \code{\link{tsd_MHmcmc_p}}, \code{\link{tsd_MHmcmc}},
   \code{\link{tsd}}

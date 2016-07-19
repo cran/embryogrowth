@@ -39,7 +39,7 @@ temperatures and thermosensitive stages for sex determination in reptiles.
 Amphibia-Reptilia 12, 169-179.
 }
 \seealso{
-Other Functions.for.temperature.dependent.sex.determination: \code{\link{STSRE_TSD}},
+Other Functions.for.temperature.dependent.sex.determination: \code{\link{DatabaseTSD}},
   \code{\link{predict.tsd}}, \code{\link{stages}},
   \code{\link{tsd_MHmcmc_p}}, \code{\link{tsd_MHmcmc}},
   \code{\link{tsd}}

@@ -5,10 +5,12 @@
 \title{Show the fitted growth rate dependent on temperature}
 \usage{
 plotR(result = NULL, parameters = NULL, fixed.parameters = NULL,
-  col = "black", legend = NA, SE = NULL, set.par = 1, size = NA,
-  xlim = c(20, 35), scaleY = "auto", lty = 1, ltyCI = 3, lwd = 1,
-  lwdCI = 1, xlimR = xlim, replicate.CI = 100, show.box = TRUE,
-  local.box = "topleft", ...)
+  col = "black", legend = NA, SE = NULL, x.SE = qnorm(0.975),
+  set.par = 1, size = NULL, xlim = c(20, 35), scaleY = "auto",
+  lty = 1, ltyCI = 3, lwd = 1, lwdCI = 1, xlimR = xlim,
+  xlimSE = xlim, replicate.CI = 100, show.box = TRUE,
+  local.box = "topleft", pch.anchors = 19, cex.anchors = 1,
+  col.anchors = "black", y.anchors = 0, show.anchors = TRUE, ...)
 }
 \arguments{
 \item{result}{A result object or a list of result objects}
@@ -23,9 +25,11 @@ plotR(result = NULL, parameters = NULL, fixed.parameters = NULL,
 
 \item{SE}{The standard error for the parameters or a list of SE if several results. Use NA to force not use SE}
 
+\item{x.SE}{The factor used to show the confidence interval envelope}
+
 \item{set.par}{1 or 2 or a list of 1 or 2 to designate with set of parameters to show}
 
-\item{size}{If indicated, will show the growth rate for this size}
+\item{size}{If indicated, will show the growth rate for this size. Useful only for model with two sets of parameters, High and Low and a transition}
 
 \item{xlim}{Range of values for x-axis}
 
@@ -39,22 +43,35 @@ plotR(result = NULL, parameters = NULL, fixed.parameters = NULL,
 
 \item{lwdCI}{The type of line to use for confidence interval as a list}
 
-\item{xlimR}{Range of values to be displayed for R curve; can be a list if a list of results is used}
+\item{xlimR}{Range of values to be displayed for R curve or vector of values; can be a list if a list of results is used}
 
-\item{replicate.CI}{Number of randomizations to estimate CI}
+\item{xlimSE}{Range of values to be displayed for SE curves; can be a list if a list of results is used}
+
+\item{replicate.CI}{Number of replicates to estimate CI}
 
 \item{show.box}{If TRUE show a box with "mean" and "confidence interval"}
 
 \item{local.box}{Position of the box with "mean" and "confidence interval", default="topleft"}
 
+\item{pch.anchors}{Symbol used to show anchors}
+
+\item{cex.anchors}{Size of symbol used to show anchors}
+
+\item{col.anchors}{Color of symbols used to show anchors}
+
+\item{y.anchors}{Position of anchors in y axis}
+
+\item{show.anchors}{Should the anchors been shown}
+
 \item{...}{Parameters for plot() such as main= or ylim=}
 }
 \value{
-Nothing
+A list with data.frame with the confidence interval and the average.
 }
 \description{
 To show the growth rate, the syntaxe is:\cr
-plotR(result=res)
+plotR(result=res)\cr
+If SE is a matrix with two raws, the row values will use to draw the CI.
 }
 \details{
 plotR shows the fitted growth rate dependent on temperature
@@ -76,14 +93,15 @@ resultNest_4p <- searchR(parameters=x, fixed.parameters=pfixed,
 	temperatures=formated, derivate=dydt.Gompertz, M0=1.7, 
 	test=c(Mean=39.33, SD=1.92))
 data(resultNest_4p)
+plotR(resultNest_4p, ylim=c(0,0.3))
 pMCMC <- TRN_MHmcmc_p(resultNest_4p, accept=TRUE)
 # Take care, it can be very long, sometimes several days
 result_mcmc_4p_80 <- GRTRN_MHmcmc(result=resultNest_4p,  
 	parametersMCMC=pMCMC, n.iter=10000, n.chains = 1, n.adapt = 0,  
 	thin=1, trace=TRUE)
 data(result_mcmc_4p)
-plotR(result=resultNest_4p, SE=result_mcmc_4p$TimeSeriesSE,  
-ylim=c(0,0.3))
+plotR(result=resultNest_4p, SE=result_mcmc_4p$SD,  
+ylim=c(0,0.3), x.SE=1)
 x <- structure(c(115.758929130522, 428.649022170996, 503.687251738993, 
 12.2621455821612, 306.308841227278, 116.35048615105), .Names = c("DHA", 
 "DHH", "DHL", "DT", "T12L", "Rho25"))
@@ -93,12 +111,41 @@ resultNest_6p <- searchR(parameters=x, fixed.parameters=pfixed,
 	temperatures=formated, derivate=dydt.Gompertz, M0=1.7, 
 	test=c(Mean=39.33, SD=1.92))
 data(resultNest_6p)
-plotR(list(resultNest_4p, resultNest_6p),  
+plotR(list(resultNest_4p, resultNest_6p), ylim=c(0, 0.3), 
 col=c("black", "red"), legend=c("4 parameters", "6 parameters"))
 ##########################################
-# new formulation of parameters
+# new formulation of parameters using anchors
 data(resultNest_newp)
-plotR(resultNest_newp)
+# without envelope
+plotR(resultNest_newp, ylim=c(0, 0.5))
+# with envelope based in 1.96*SE and central curve based on mean
+plotR(result=resultNest_newp, ylim=c(0, 0.5), 
+ SE=result_mcmc_newp$SD)
+# with envelope based on quantiles and central curve based on mean
+plotR(result=resultNest_newp, ylim=c(0, 0.5), 
+ SE=apply(result_mcmc_newp[["resultMCMC"]][[1]], 
+   MARGIN=2, FUN=quantile, probs=c(0.025, 0.975)))
+# with envelope based on quantiles and central curve based on median
+plotR(result=resultNest_newp, ylim=c(0, 0.5), 
+ SE=apply(result_mcmc_newp[["resultMCMC"]][[1]], 
+   MARGIN=2, FUN=quantile, probs=c(0.025, 0.975)),
+ parameters=apply(result_mcmc_newp[["resultMCMC"]][[1]], 
+   MARGIN=2, FUN=quantile, probs=c(0.5)))
+# Example to get the results
+(plotR(result=resultNest_newp, ylim=c(0, 0.5), 
+       SE=apply(result_mcmc_newp[["resultMCMC"]][[1]], 
+                MARGIN=2, FUN=quantile, probs=c(0.025, 0.975)),
+       parameters=apply(result_mcmc_newp[["resultMCMC"]][[1]],
+                       MARGIN=2, FUN=quantile, probs=c(0.5)), 
+       xlimR=as.numeric(names(resultNest_newp$par))-273.15)[[1]])
+ ##########################################
+ # New Weilbull model
+ ##########################################
+ x <- c(k=3, lambda=3, theta=290)
+ resultNest_4p_Weibull <- searchR(parameters=x, fixed.parameters=pfixed,
+   temperatures=formated, derivate=dydt.Gompertz, M0=1.7,
+   test=c(Mean=39.33, SD=1.92))
+ plotR(resultNest_4p_Weibull)
 }
 }
 \author{

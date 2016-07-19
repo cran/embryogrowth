@@ -6,6 +6,7 @@
 \usage{
 MovingIncubation(NestsResult = NULL,
   temperatures.df = stop("A data.frame with timeseries of temperatures must be provided"),
+  metabolic.heating = 0, temperature.heterogenetity = 0,
   average.incubation.duration = 60 * 1440, skip = 1, parameters = NULL,
   fixed.parameters = NULL, SE = NULL, derivate = NULL, test = NULL,
   M0 = NULL, TSP.borders = c(21, 26),
@@ -17,7 +18,11 @@ MovingIncubation(NestsResult = NULL,
 
 \item{temperatures.df}{A data.frame with 2 or 3 columns: Times, Temperatures and Temperatures.end.incubation (facultative)}
 
-\item{average.incubation.duration}{The average time to complete incubation}
+\item{metabolic.heating}{Degrees Celsius to be added at the end of incubation due to metabolic heating}
+
+\item{temperature.heterogenetity}{The SD of intercept temperature for a nest}
+
+\item{average.incubation.duration}{The average time to complete incubation (not used if metabolic heating is setup)}
 
 \item{skip}{Number of data to skip between two runs}
 
@@ -25,7 +30,7 @@ MovingIncubation(NestsResult = NULL,
 
 \item{fixed.parameters}{Another set of parameters if result is not provided.}
 
-\item{SE}{Standard error for each parameter if not present in result is not provided (not used still)}
+\item{SE}{Standard error for each parameter if not present in result is not provided}
 
 \item{derivate}{Function used to fit embryo growth: dydt.Gompertz, dydt.exponential or dydt.linear}
 
@@ -60,13 +65,25 @@ data(resultNest_4p)
 ti <- seq(from=0, to=(60*24*100), by=60)
 temp <- rnorm(length(ti), 29, 5)
 temp <- temp+ti/(60*24*100)/2
-layout(mat=c(1, 2))
+layout(mat=1:3)
 parpre <- par(mar=c(4, 4, 1, 1)+0.4)
-plot(ti/(60*24), temp, type="l", xlab="Days", ylab="Nest temperature", bty="n", las=1)
+plot(ti/(60*24), temp, type="l", xlab="Days", 
+     ylab=expression("Nest temperature in "*degree*"C"), bty="n", las=1)
+# The sexualisation thermal reaction norm is calculated for South Pacific RMU
 out <- MovingIncubation(NestsResult=resultNest_4p, 
-     temperatures.df=data.frame(Time=ti, Temperature=temp))
-with(out, plot(Time/(60*24), Incubation.length.mean/(60*24), xlab="Days along the season", 
-ylab="Incubation duration", type="l", bty="n", las=1, ylim=c(74, 78)))
+     temperatures.df=data.frame(Time=ti, Temperature=temp),
+     metabolic.heating=0, 
+     SexualisationTRN = structure(c(71.922411148397, 613.773055147801, 
+     318.059753164125, 120.327257089974), 
+     .Names = c("DHA", "DHH", "T12H", "Rho25")))
+with(out, plot(Time/(60*24), Incubation.length.mean/(60*24), 
+     xlab="Days along the season", 
+     ylab="Incubation duration", 
+     type="l", bty="n", las=1, ylim=c(74, 78)))
+with(out, plot(Time/(60*24), TSP.MassWeighted.STRNWeighted.temperature.mean, 
+     xlab="Days along the season", 
+     ylab=expression("CTE for sex ratio in "*degree*"C"), 
+      type="l", bty="n", las=1, ylim=c(20, 35)))
 par(mar=parpre)
 layout(mat=c(1))
 }

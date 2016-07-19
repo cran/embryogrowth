@@ -6,7 +6,7 @@
 #' @param temperatures A vector of temperatures
 #' @param durations A vector of durations
 #' @param SE The standard error for temperatures or durations
-#' @param range.CI The range of confidence interval for estimation, default=0.95
+#' @param quantiles The quantiles to be returned, default=c(0.025, 0.5, 0.975)
 #' @param replicates Number of replicates to estimate CI
 #' @param progressbar Logical. Does a progression bar must be shown
 #' @param ... Not used
@@ -38,9 +38,9 @@
 
 predict.tsd <-
 function(object, temperatures=NULL, durations=NULL, SE=NULL, 
-	range.CI=0.95, replicates=1000, progressbar=FALSE, ...) {
+	quantiles=c(0.025, 0.5, 0.975), replicates=1000, progressbar=FALSE, ...) {
   
-  # durations=NULL; SE=NULL; range.CI=0.95; replicates=1000; progressbar=FALSE
+  # durations=NULL; SE=NULL; quantiles=c(0.025, 0.5, 0.975); replicates=1000; progressbar=FALSE
   
   temper <- TRUE
   if (is.null(temperatures) & !is.null(durations)) {
@@ -59,12 +59,6 @@ function(object, temperatures=NULL, durations=NULL, SE=NULL,
 	equation <- x$equation
 	par <- c(x$par, x$fixed.parameters)
 	res <- x$SE
-	
-
-if (is.null(range.CI) | is.infinite(range.CI) | range.CI>1 | range.CI<0) {
-  warning("The parameter range.CI is changed to 0.95")
-  range.CI <- 0.95
-}
 
     if (progressbar) pb<-txtProgressBar(min=1, max=length(temperatures), style=3)
 
@@ -92,27 +86,27 @@ if (is.null(range.CI) | is.infinite(range.CI) | range.CI>1 | range.CI<0) {
       if (progressbar) setTxtProgressBar(pb, i)
         temperatures_ec <- c(temperatures[i], rnorm(replicates-1, temperatures[i], SE[i]))
         out_tsd_plot <- apply(df_par, 1, function(par) {
-        p <- .modelTSD(par, temperatures_ec, equation)
+        p <- getFromNamespace(".modelTSD", ns="embryogrowth")(par, temperatures_ec, equation)
         return(list(sr=p))
       }
       )
       
       out_tsd3_plot <- unlist(out_tsd_plot)
-      outquant <- quantile(out_tsd3_plot, probs = c((1-range.CI)/2, range.CI+((1-range.CI)/2)))
+      outquant <- quantile(out_tsd3_plot, probs = quantiles)
+      nm <- paste0("q", gsub("%", "", names(outquant)))
  #     outquant <- rbind(outquant, mean=out_tsd3_plot[1,], temperatures=temperatures_ec)
-      df.out <- rbind(df.out, data.frame(temperatures=unname(temperatures[i]), 
-                                SE=unname(SE[i]),
-                                sexratio=unname(out_tsd3_plot[1]),
-                                CI.minus.sexratio=unname(outquant[1]),
-                                CI.plus.sexratio=unname(outquant[2]),
-                                range.CI=range.CI))
+      df.out <- rbind(df.out, data.frame(temperatures=as.numeric(temperatures[i]), 
+                                SE=as.numeric(SE[i]),
+                                sexratio=as.numeric(out_tsd3_plot[1]),
+                                matrix(outquant, nrow=1, dimnames =list(NULL, nm))
+      )
+                                )
       
     }
 
 	if (!x$males.freq) {
 	  df.out$sexratio <- 1-df.out$sexratio
-	  df.out$CI.minus.sexratio <- 1-df.out$CI.minus.sexratio
-	  df.out$CI.plus.sexratio <- 1-df.out$CI.plus.sexratio
+	  df.out[, nm] <- 1-df.out[, nm]
 	}
 if (!temper) colnames(df.out)[1] <- "durations"
 return(df.out)

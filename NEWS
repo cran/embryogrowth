@@ -1,5 +1,49 @@
 THIS IS THE CHANGELOG OF THE "embryogrowth" PACKAGE
 
+          CHANGES IN VERSION 6.3    (2016-07-17)
+
+* Minor update of plot.NestResult() to show TSP at the top of temperatures - 6.2.1
+* Caretta caretta stages are no more defaults for plot.NestResult() - 6.2.1
+* equation Hulin for tsd() is more robust - 6.2.2
+* fixedparameter is used for mcmc - 6.2.2
+* A matrix for SE can be used in plotR() for anchored parameters to use quantiles - 6.2.3
+* New parameter x.SE to control the envelope of R - 6.2.3
+* cex.axis and cex.lab works for temperature scale in plotR_hist - 6.2.4
+* tsd indicates durations or temperatures correctly depending on data input - 6.2.5
+* plot.tsd indicates durations or temperatures correctly - 6.2.6
+* It is possible to show anchors in plotR() and plotR_hist() - 6.2.7
+* New columns and information in STSR_TSD database - 6.2.8
+* STRN() has been changed to be more reliable if the order of nests is changed - 6.2.8
+* Bug correction in info.nests() - 6.2.9
+* New option to not show observations in plot.tsd() - 6.2.9
+* New parameter parallel for info.nests() and GTRN_MHmcmc() to control the use of parallel version within R (preparation for SparkR version) - 6.2.10
+* batchsize option has been removed from GTRN_MHmcmc() - 6.2.10
+* New example for movingincubation() - 6.2.11
+* Introduction of Weibull function to fit thermal reaction norm - 6.2.11
+* New parameter metabolic.heating in info.nests() - 6.2.11
+* New parameter metabolic.heating in movingincubation() - 6.2.12
+* range.CI parameter of predict.tsd() is replaced by quantiles - 6.2.13
+* New temperature.heterogeneity parameter in info.nests() and movingincubation() - 6.2.14
+* Changes in documentation - 6.2.15
+* Better managment of error in SE during SearchR() - 6.2.16
+* New function SEforR() to estimate SE for a set of parameters based on Fisher information matrix - 6.2.16
+* Estimation of anchored model is more rapid - 6.2.16
+* New parameter XlimSE for plotR and plotR is simplified - 6.2.17
+* New model for anchors (polynomial fit) - 6.2.18
+* New parameter hessian to return the hessian matrix in SEforR() - 6.2.18
+* New model for anchors (linear fit) - 6.2.19
+* Correct a bug in STRN() that prevent SE estimation - 6.2.19
+* Object returns by STRN() is more complete and can be used by compare_AIC - 6.2.20
+* info.nests() can use an object created by STRN() for the parameter SexualisationTRN - 6.2.20
+* Call to MCMC is simplified - 6.2.21
+* info.nests() use a parameter x rather than parameters - 6.2.21
+* info.nests() can use both x and parameters to provide back compatibility - 6.2.22
+* plotR() and plotR_hist() return a list with confidence intevals - 6.2.23
+* Correct a bug in info.nests() (Thanks to Taylor R. Roberge to identifiy it) - 6.2.24
+* xlimR of plotR() or plotR_hist() can be a vector of values - 6.2.24
+* New example for plotR() using xlimR as a vector - 6.2.25
+* shiny version has been removed as it was not maintained anymore - 6.3
+
           CHANGES IN VERSION 6.2    (2016-01-08)
 
 * Update of documentation

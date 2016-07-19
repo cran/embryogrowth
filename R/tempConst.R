@@ -4,9 +4,8 @@
 #' @docType data
 #' @name tempConst
 #' @description Timeseries of temperatures for nests
-#' @references Girondot, M. & Kaska, Y. Submitted. A model to predict 
-#'             temperature dependency on embryo growth rate and incubation
-#'             duration from field data.
+#' @references Girondot, M., Kaska, Y., 2014. A model to predict the thermal reaction 
+#' norm for the embryo growth rate from field data. Journal of Thermal Biology 45, 96-102.
 #' @keywords datasets
 #' @usage tempConst
 #' @examples

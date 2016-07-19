@@ -4,19 +4,22 @@
 \alias{plotR_hist}
 \title{Shows the histogram of temperatures with set of nests and the R function superimpose}
 \usage{
-plotR_hist(x, ..., ylimH = NULL, ylabH = "Frequency of temperatures")
+plotR_hist(result = NULL, ..., ylimH = NULL, atH = NULL,
+  ylabH = "Frequency of temperatures")
 }
 \arguments{
-\item{x}{Result data}
+\item{result}{Result data}
 
 \item{...}{Parameters used by hist or plotR functions}
 
 \item{ylimH}{Scale of histogram using ylimH=c(min, max)}
 
+\item{atH}{Position of ticks for scale of histogram}
+
 \item{ylabH}{Label for histogram scale}
 }
 \value{
-Nothing
+A list with data.frame with the confidence interval and the average.
 }
 \description{
 Shows the histogram of temperatures with set of nests and the R function superimpose
@@ -30,6 +33,7 @@ plotR_hist shows the histogram of temperatures with set of nests and the R funct
 library(embryogrowth)
 data(resultNest_4p)
 plotR_hist(resultNest_4p)
+plotR_hist(resultNest_4p, ylim=c(0,0.3), ylimH=c(0,0.5), atH=c(0, 0.1, 0.2))
 }
 }
 \author{

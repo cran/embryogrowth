@@ -9,7 +9,7 @@ searchR(parameters = stop("Initial set of parameters must be provided"),
   temperatures = stop("Formated temperature must be provided !"),
   derivate = dydt.Gompertz, test = c(Mean = 39.33, SD = 1.92), M0 = 1.7,
   saveAtMaxiter = FALSE, fileName = "intermediate", weight = NULL,
-  hessian = TRUE, control = list(trace = 1, REPORT = 100, maxit = 500))
+  SE = FALSE, control = list(trace = 1, REPORT = 100, maxit = 500))
 }
 \arguments{
 \item{parameters}{A set of parameters used as initial point for searching}
@@ -30,7 +30,7 @@ searchR(parameters = stop("Initial set of parameters must be provided"),
 
 \item{weight}{A named vector of the weight for each nest for likelihood estimation}
 
-\item{hessian}{If TRUE, the hessian matrix is estimated and the SE of parameters estimated.}
+\item{SE}{If TRUE, the SE of parameters are estimated.}
 
 \item{control}{List for control parameters for optimx}
 }
@@ -40,6 +40,7 @@ A result object
 \description{
 Fit the parameters that best represent data.\cr
 test can be a list with two elements Mean and SD and each element is a named vector with the nest name.\cr
+Function to fit thermal reaction norm can be also expressed as a Weibull function with k (shape), lambda (scale) and theta parameters.
 }
 \details{
 searchR fits the parameters that best represent nest incubation data.
@@ -98,6 +99,21 @@ plotR_hist(resultNest_newp, ylim=c(0,0.3), xlimR=c(23, 34), ylimH=c(0, 0.3))
 compare_AIC(test4p=resultNest_4p, 
             test6p=resultNest_6p, 
             testAnchor=resultNest_newp)
+############################################
+# example with thermal reaction norm fitted from Weibull function
+############################################
+x <- structure(c(298890.11996796, 1229465.06811278, -1229160.54956529, 
+27.2843254770591), .Names = c("k", "lambda", "theta", "scale"))
+pfixed <- c(rK=2.093313)
+x <- ChangeSSM(temperatures = (200:350)/10,
+               parameters = resultNest_4p$par,
+               initial.parameters = x, 
+               control=list(maxit=1000))
+resultNest_4p_Weibull <- searchR(parameters=x, fixed.parameters=pfixed, 
+                         temperatures=formated, derivate=dydt.Gompertz, M0=1.7, 
+                         test=c(Mean=39.33, SD=1.92))
+plotR(list(resultNest_4p, resultNest_4p_Weibull), ylim=c(0,0.3), col=c("Black", "red"))
+compare_AIC(SSM=resultNest_4p, Weibull=resultNest_4p_Weibull)
 }
 }
 \author{

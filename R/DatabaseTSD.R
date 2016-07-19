@@ -1,11 +1,10 @@
 #' Database of TSD information for marine turtles
-#' @title Database of TSD information for marine turtles
+#' @title Database of TSD information for reptiles
 #' @author Marc Girondot \email{marc.girondot@@u-psud.fr}
-#' @author Maria Sousa Martins \email{maria.esmartins@@gmail.com}
 #' @docType data
-#' @name STSRE_TSD
+#' @name DatabaseTSD
 #' @encoding UTF-8
-#' @description Database of TSD information for turtles\cr
+#' @description Database of TSD information for reptiles\cr
 #' The columns are:\cr
 #' * Species: Name de the species in binominal nommenclature\cr
 #' * Country: From which country the eggs come from\cr
@@ -25,6 +24,7 @@
 #' * IP.pm: If incubation period are indicated with a plus-minus term with no more precision\cr
 #' * Total: Total number of eggs incubated\cr
 #' * Hatched: Number of hatchlings\cr
+#' * Undeveloped: Number of embryos showing no devlopment\cr
 #' * Intersexes: Number of individuals intersexes or ambiguous for sex phenotype\cr
 #' * Males: Number of individuals indentified as males\cr
 #' * Females: Number of individuals indentified as females\cr
@@ -32,16 +32,19 @@
 #' * Clutch: Identity of clutch\cr
 #' * Reference: Bibliographic reference\cr
 #' * Note: Diverse information for this incubation\cr
-#' * Version: Date of the version of this database
+#' * Version: Date of the version of this database\cr
+#' Initial version of this database has been built by Maria Sousa Martins.
 #' @references Binckley C.A., Spotila J.R., Wilson K.S. and Paladino F.V. (1998) Sex determination and sex ratios of Pacific Leatherback Turtles, Dermochelys coriacea. Copeia, 1998(2), 291-300.
 #' @references Crastz F. (1982) Embryological stages of the marine turtle Lepidochelys olivacea (Eschscholtz). Rev. Biol. Trop., 30, 113-120.
 #' @references De Souza, R.R., Vogt, R.C., 1994. Incubation temperature influences sex and hatchling size in the neotropical turtle Podocnemis unifilis. Journal of Herpetology 28, 453-464.
+#' @references Georges A., Limpus C.J. and Stoutjesdijk R. (1994) Hatchling sex in the marine turtle Caretta caretta is determined by proportion of development at a temperature, not daily duration of exposure. Journal of Experimental Zoology, 270(5), 432-444.
 #' @references Girondot M. 1999 Statistical description of temperature-dependent sex determination using maximum likelihood. Evolutionary Ecology Research, 1(3), 479-486.
 #' @references Gutzke, W. H. N., & Paukstis, G. L. (1983). Influence of the hydric environment on sexual differentiation in turtles. J. Exp. Zool., 226, 467-469. [Chrysemys picta]
 #' @references Hewavisenthi, S. (1999) Influence of incubation environment on the development of the flatback turtle (Natator depressus). Ph.D. Thesis, Central Queensland University.
 #' @references Hewavisenthi, S. & Parmenter, C.J. (2000) Hydric environment and sex determination in the flatback turtle (Natator depressus Garman) (Chelonia : Cheloniidae). Australian Journal of Zoology, 48, 653-659.
 #' @references Hulin, V., Delmas, V., Girondot, M., Godfrey, M. H. and Guillon, J.-M. 2009. Temperature-dependent sex determination and global change: are some species at greater risk? Oecologia, 160, 493-506.
 #' @references Limpus C.J., Reed P.C. and Miller J.D. (1985) Temperature dependent sex determination in Queensland sea turtles: Intraspecific variation in Caretta caretta. In Grigg G., Shine R. and Ehmann H. (eds) Biology of Australian frogs and reptiles. New South Wales, Australia: Royal Zoological Society, pp 343-351.
+#' @references Limpus C.J., Reed P. and Miller J.D. (1983) Islands and turtles: the influence of choice of nesting beach on sex ratio. In Baker J.J., Carter R.M., Saurmarco P.W. and Stark K.P. (eds.) Proceedings of the Proceedings of the Inaugural Great Barrier Reef Conference, 29 August-2 September, 1983. James Cook University Press of North Queensland, pp. 397-402.
 #' @references Lopez Correa, J.Y., 2010. Diferenciacion gonadica en crias de Lepidochelys olivacea (Eschscholtz, 1829) (Testudinata: Cheloniidae), Instituto Politicnico Nacional, Centro Interdisciplinaria de Ciencias Marinas, La Paz, BCS, p. 108.
 #' @references Marcovaldi M.A., Godfrey M.H. and Mrosovsky N. (1997) Estimating sex ratios of loggerhead turtles in Brazil from pivotal incubation temperatures. Canadian Journal of Zoology-Revue Canadienne De Zoologie, 75, 755-770.
 #' @references McCoy C.J., Vogt R.C. and Censky E.J. (1983) Temperature-controlled sex determination in the sea turtle Lepidochelys olivacea. J. Herpetol., 17(4), 404-406.
@@ -62,13 +65,13 @@
 #' @references Yntema C.L. and Mrosovsky N. (1982) Critical periods and pivotal temperatures for sexual differentiation in loggerhead sea turtles. Canadian Journal of Zoology-Revue Canadienne De Zoologie, 60(5), 1012-1016.
 #' @keywords datasets
 #' @family Functions for temperature-dependent sex determination
-#' @usage STSRE_TSD
+#' @usage DatabaseTSD
 #' @examples
 #' \dontrun{
 #' library(embryogrowth)
-#' data(STSRE_TSD)
-#' STSRE_TSD$Version[1]
-#' totalIncubation_Lo <- subset(STSRE_TSD, Species=="Lepidochelys olivacea" & Sexed!=0)
+#' data(DatabaseTSD)
+#' DatabaseTSD$Version[1]
+#' totalIncubation_Lo <- subset(DatabaseTSD, Species=="Lepidochelys olivacea" & Sexed!=0)
 #' tot_Lo <- with(totalIncubation_Lo, tsd(males=Males, females=Females, 
 #'  temperatures=Incubation.temperature, par=c(P=29, S=-0.01), xlim=c(25, 35)))
 #'  predict(tot_Lo)

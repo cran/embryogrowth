@@ -5,9 +5,8 @@
 \title{Metropolis-Hastings algorithm for Embryo Growth Rate Thermal Reaction Norm}
 \usage{
 GRTRN_MHmcmc(result = NULL, n.iter = 10000, parametersMCMC = NULL,
-  n.chains = 1, n.adapt = 0, thin = 1, trace = FALSE,
-  batchSize = sqrt(n.iter), parallel = TRUE, intermediate = NULL,
-  filename = "intermediate.Rdata", previous = NULL)
+  n.chains = 1, n.adapt = 0, thin = 1, trace = FALSE, parallel = TRUE,
+  intermediate = NULL, filename = "intermediate.Rdata", previous = NULL)
 }
 \arguments{
 \item{result}{An object obtained after a SearchR fit}
@@ -23,8 +22,6 @@ GRTRN_MHmcmc(result = NULL, n.iter = 10000, parametersMCMC = NULL,
 \item{thin}{Number of iterations between each stored output}
 
 \item{trace}{True or False, shows progress}
-
-\item{batchSize}{Number of observations to include in each batch fo SE estimation}
 
 \item{parallel}{If true, try to use several cores using parallel computing}
 

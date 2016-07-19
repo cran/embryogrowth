@@ -28,7 +28,7 @@
 #' @family Functions for temperature-dependent sex determination
 #' @examples
 #' \dontrun{
-#' CC_AtlanticSW <- subset(STSRE_TSD, RMU=="Atlantic, SW" & 
+#' CC_AtlanticSW <- subset(DatabaseTSD, RMU=="Atlantic, SW" & 
 #'                           Species=="Caretta caretta" & Sexed!=0)
 #' tsdL <- with (CC_AtlanticSW, tsd(males=Males, females=Females, 
 #'                                  temperatures=Incubation.temperature-Correction.factor, 
@@ -48,7 +48,7 @@
 #' compare_AIC(Logistic_Model=tsdL, Hill_model=tsdH, Richards_model=tsdR, 
 #'                DoubleRichards_model=tsdDR, GSD_model=gsd)
 #' ##############
-#' eo <- subset(STSRE_TSD, Species=="Emys orbicularis", c("Males", "Females", 
+#' eo <- subset(DatabaseTSD, Species=="Emys orbicularis", c("Males", "Females", 
 #'                                        "Incubation.temperature"))
 #'                                        
 #' eo_Hill <- with(eo, tsd(males=Males, females=Females, 
@@ -87,7 +87,7 @@
 #'        temperatures=c(eo_Double_Richards$par["P"]-0.2, eo_Double_Richards$par["P"]+0.2))
 #' predict(eo_Double_Richards)
 #' ### It can be used also for incubation duration
-#' CC_AtlanticSW <- subset(STSRE_TSD, RMU=="Atlantic, SW" & 
+#' CC_AtlanticSW <- subset(DatabaseTSD, RMU=="Atlantic, SW" & 
 #'                           Species=="Caretta caretta" & Sexed!=0)
 #' tsdL_IP <- with (CC_AtlanticSW, tsd(males=Males, females=Females, 
 #'                                  durations=IP.mean, 
@@ -125,6 +125,8 @@ tsd <- function(df=NULL, males=NULL, females=NULL, N=NULL,
   # equation <- "Hill"
   # equation <- "Double-Richards"
   # equation <- "logistic"
+  
+  equation <- tolower(equation)
   
   range.CI.qnorm <- qnorm(1-((1-range.CI)/2))
   
@@ -186,12 +188,12 @@ tsd <- function(df=NULL, males=NULL, females=NULL, N=NULL,
     stop("A temperature or duration must be provided for each experiment")
   }
   
-  if (equation!="GSD" & equation!="Hulin" & equation!="logistic" & equation!="Hill" & equation!="Richards" & equation!="Double-Richards") {
+  if (equation!="gsd" & equation!="hulin" & equation!="logistic" & equation!="hill" & equation!="richards" & equation!="double-richards") {
     stop("Equations supported are GSD, logistic, Hill, Hulin, Double_Richards and Richards")
   }
   
   
-  if (equation=="GSD") {
+  if (equation=="gsd") {
     result <- list(par = NULL, SE=NULL, hessian=NULL, 
                    TRT=NULL,
                    SE_TRT=NULL,
@@ -211,9 +213,9 @@ tsd <- function(df=NULL, males=NULL, females=NULL, N=NULL,
     }
       
     }
-    if (equation!="Richards") par <- par[which(names(par)!="K")]
-    if (equation!="Hulin" & equation!="Double-Richards") par <- par[which(names(par)!="K1")]
-    if (equation!="Hulin" & equation!="Double-Richards") par <- par[which(names(par)!="K2")]
+    if (equation!="richards") par <- par[which(names(par)!="K")]
+    if (equation!="hulin" & equation!="double-richards") par <- par[which(names(par)!="K1")]
+    if (equation!="hulin" & equation!="double-richards") par <- par[which(names(par)!="K2")]
     
     repeat {
      # result  <- optim(par, embryogrowth:::.tsd_fit, fixed.parameters=fixed.parameters, males=males, N=N, temperatures=temperatures, equation=equation, method="BFGS", hessian=TRUE, control = list(maxit=1000))
@@ -248,7 +250,7 @@ tsd <- function(df=NULL, males=NULL, females=NULL, N=NULL,
   result$range.CI <- range.CI
   result$l <- l
   
-  if (equation!="GSD") {
+  if (equation!="gsd") {
     l.l.TRT.c <- NULL
     l.h.TRT.c <- NULL
     TRT.c <- NULL
@@ -325,14 +327,16 @@ tsd <- function(df=NULL, males=NULL, females=NULL, N=NULL,
   result$equation <- equation
   result$l <- l
   result$fixed.parameters <- fixed.parameters
+  # print(IP)
+  result$type <- ifelse(IP, "duration", "temperature")
   
   if (print) print(paste("The goodness of fit test is", sprintf("%.5f",result$GOF)))
   
-  if (equation!="GSD" & print) {
-    print(paste("The pivotal is", sprintf("%.3f",par["P"]), "SE", sprintf("%.3f",res["P"])))
-    print(paste("The transitional range of temperatures is", sprintf("%.3f",result$TRT), "SE", sprintf("%.3f",result$SE_TRT)))
-    print(paste("The lower limit of transitional range of temperatures is", sprintf("%.3f",result$TRT_limits[1]), "SE", sprintf("%.3f",result$SE_TRT_limits[1])))
-    print(paste("The higher limit of transitional range of temperatures is", sprintf("%.3f",result$TRT_limits[2]), "SE", sprintf("%.3f",result$SE_TRT_limits[2])))
+  if (equation!="gsd" & print) {
+    print(paste("The pivotal", result$type, "is", sprintf("%.3f",par["P"]), "SE", sprintf("%.3f",res["P"])))
+    print(paste0("The transitional range of ", result$type, "s is ", sprintf("%.3f",result$TRT), " SE ", sprintf("%.3f",result$SE_TRT)))
+    print(paste0("The lower limit of transitional range of ", result$type, "s is ", sprintf("%.3f",result$TRT_limits[1]), " SE ", sprintf("%.3f",result$SE_TRT_limits[1])))
+    print(paste0("The higher limit of transitional range of ", result$type, "s is ", sprintf("%.3f",result$TRT_limits[2]), " SE ", sprintf("%.3f",result$SE_TRT_limits[2])))
   }
   
   class(result) <- "tsd"

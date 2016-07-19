@@ -3,7 +3,7 @@
 #' @author Marc Girondot \email{marc.girondot@@u-psud.fr}
 #' @author Maria Sousa Martins \email{maria.esmartins@@gmail.com}
 #' @docType data
-#' @name STSRE_NestingArea
+#' @name DatabaseNestingArea
 #' @description Database of RMU for marine turtles
 #' @references Wallace, B. P., DiMatteo, A. D., Hurley, B. J., Finkbeiner, 
 #'             E. M., Bolten, A. B., Chaloupka, M. Y., Hutchinson, B. J., 
@@ -16,11 +16,11 @@
 #'             units for marine turtles: a novel framework for prioritizing conservation 
 #'             and research across multiple scales. Plos One, 5, e15465.
 #' @keywords datasets
-#' @usage STSRE_NestingArea
+#' @usage DatabaseNestingArea
 #' @examples
 #' \dontrun{
 #' library(embryogrowth)
-#' data(STSRE_NestingArea)
+#' data(DatabaseNestingArea)
 #' }
 #' @format A dataframe with raw data.
 NULL

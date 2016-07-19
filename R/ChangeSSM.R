@@ -39,6 +39,12 @@
 #'  plotR(result=resultNest_4p, parameters=list(resultNest_4p$par, xprime$par), 
 #'        ylim=c(0,0.3), col=c("black", "red"), 
 #'        legend=list("Fitted parameters", "Constrainted parameters"))
+#'  # Weibull model
+#'  x <- ChangeSSM(temperatures = (200:350)/10,
+#'                parameters = resultNest_4p$par,
+#'                initial.parameters = structure(c(305589.587084682, 1229463.81678347, 
+#'                -1229159.91873432, 26.2471517948129), .Names = c("k", "lambda", "theta", "scale")), 
+#'                control=list(maxit=1000))
 #' }
 #' @export
 
@@ -47,14 +53,14 @@ ChangeSSM <- function(temperatures=(200:350)/10,
                       initial.parameters=stop("A set of parameters for new model must be supplied"), 
                       ...) {
 
-growth.rate <- .SSM(273.15+temperatures, parameters)[[1]]*1E5
+growth.rate <- getFromNamespace(".SSM", ns="embryogrowth")(273.15+temperatures, parameters)[[1]]*1E5
 
 c <- list(...)
 
 if (length(c)==0) {
-  s <- optim(par=initial.parameters, fn=.fitSSM, temperatures=temperatures, growth.rate=growth.rate)
+  s <- optim(par=initial.parameters, fn=getFromNamespace(".fitSSM", ns="embryogrowth"), temperatures=temperatures, growth.rate=growth.rate)
 } else {
-  s <- optim(par=initial.parameters, fn=.fitSSM, temperatures=temperatures, growth.rate=growth.rate, control=c[[1]])
+  s <- optim(par=initial.parameters, fn=getFromNamespace(".fitSSM", ns="embryogrowth"), temperatures=temperatures, growth.rate=growth.rate, control=c[[1]])
 }
 return(s)
 }

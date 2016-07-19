@@ -36,7 +36,7 @@ pMCMC <- tsd_MHmcmc_p(eo_logistic, accept=TRUE)
 Marc Girondot
 }
 \seealso{
-Other Functions.for.temperature.dependent.sex.determination: \code{\link{STSRE_TSD}},
+Other Functions.for.temperature.dependent.sex.determination: \code{\link{DatabaseTSD}},
   \code{\link{TSP.list}}, \code{\link{predict.tsd}},
   \code{\link{stages}}, \code{\link{tsd_MHmcmc}},
   \code{\link{tsd}}

@@ -59,6 +59,12 @@ newx <- ChangeSSM(temperatures = (200:350)/10, parameters = x0,
  plotR(result=resultNest_4p, parameters=list(resultNest_4p$par, xprime$par), 
        ylim=c(0,0.3), col=c("black", "red"), 
        legend=list("Fitted parameters", "Constrainted parameters"))
+ # Weibull model
+ x <- ChangeSSM(temperatures = (200:350)/10,
+               parameters = resultNest_4p$par,
+               initial.parameters = structure(c(305589.587084682, 1229463.81678347, 
+               -1229159.91873432, 26.2471517948129), .Names = c("k", "lambda", "theta", "scale")), 
+               control=list(maxit=1000))
 }
 }
 \author{

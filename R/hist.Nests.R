@@ -61,6 +61,7 @@ if (series[[1]]=="all") {
 temptotal=NULL
 
 for (j in 1:NbTS) {
+  
 	if (series[j]) {
 
 		nidsx <- nids[[j]][, 1:2]

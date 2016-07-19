@@ -63,7 +63,7 @@ tsd estimates the parameters that best describe temperature-dependent sex determ
 }
 \examples{
 \dontrun{
-CC_AtlanticSW <- subset(STSRE_TSD, RMU=="Atlantic, SW" & 
+CC_AtlanticSW <- subset(DatabaseTSD, RMU=="Atlantic, SW" & 
                           Species=="Caretta caretta" & Sexed!=0)
 tsdL <- with (CC_AtlanticSW, tsd(males=Males, females=Females, 
                                  temperatures=Incubation.temperature-Correction.factor, 
@@ -83,7 +83,7 @@ gsd <- with (CC_AtlanticSW, tsd(males=Males, females=Females,
 compare_AIC(Logistic_Model=tsdL, Hill_model=tsdH, Richards_model=tsdR, 
                DoubleRichards_model=tsdDR, GSD_model=gsd)
 ##############
-eo <- subset(STSRE_TSD, Species=="Emys orbicularis", c("Males", "Females", 
+eo <- subset(DatabaseTSD, Species=="Emys orbicularis", c("Males", "Females", 
                                        "Incubation.temperature"))
                                        
 eo_Hill <- with(eo, tsd(males=Males, females=Females, 
@@ -122,7 +122,7 @@ predict(eo_Double_Richards,
        temperatures=c(eo_Double_Richards$par["P"]-0.2, eo_Double_Richards$par["P"]+0.2))
 predict(eo_Double_Richards)
 ### It can be used also for incubation duration
-CC_AtlanticSW <- subset(STSRE_TSD, RMU=="Atlantic, SW" & 
+CC_AtlanticSW <- subset(DatabaseTSD, RMU=="Atlantic, SW" & 
                           Species=="Caretta caretta" & Sexed!=0)
 tsdL_IP <- with (CC_AtlanticSW, tsd(males=Males, females=Females, 
                                  durations=IP.mean, 
@@ -141,7 +141,7 @@ Godfrey, M.H., Delmas, V., Girondot, M., 2003. Assessment of patterns of tempera
 Hulin, V., Delmas, V., Girondot, M., Godfrey, M.H., Guillon, J.-M., 2009. Temperature-dependent sex determination and global change: are some species at greater risk? Oecologia 160, 493-506.
 }
 \seealso{
-Other Functions.for.temperature.dependent.sex.determination: \code{\link{STSRE_TSD}},
+Other Functions.for.temperature.dependent.sex.determination: \code{\link{DatabaseTSD}},
   \code{\link{TSP.list}}, \code{\link{predict.tsd}},
   \code{\link{stages}}, \code{\link{tsd_MHmcmc_p}},
   \code{\link{tsd_MHmcmc}}

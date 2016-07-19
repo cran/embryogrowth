@@ -9,7 +9,6 @@
 #' @param n.adapt Number of iterations before to store outputs
 #' @param thin Number of iterations between each stored output
 #' @param trace True or False, shows progress
-#' @param batchSize Number of observations to include in each batch fo SE estimation
 #' @param parallel If true, try to use several cores using parallel computing
 #' @param filename If intermediate is not NULL, save intermediate result in this file
 #' @param intermediate Period for saving intermediate result, NULL for no save
@@ -75,13 +74,16 @@
 
 GRTRN_MHmcmc <- function(result=NULL, n.iter=10000, 
 parametersMCMC=NULL, n.chains = 1, n.adapt = 0, 
-thin=1, trace=FALSE, batchSize=sqrt(n.iter), parallel=TRUE, 
+thin=1, trace=FALSE, parallel=TRUE, 
 intermediate=NULL, filename="intermediate.Rdata", previous=NULL)
 {
 
   # result=NULL; n.iter=10000; parametersMCMC=NULL; n.chains = 1; n.adapt = 0; thin=1; trace=FALSE; batchSize=sqrt(n.iter); parallel=TRUE; intermediate=NULL; filename="intermediate.Rdata"; previous=NULL
   # previous <- "/Users/marc/Dropbox/DropBoxPerso/_Package_HelpersMG/previous_result_mcmc_AtlMed_simplify_2.RData"
   # result=resultNest_4p; parametersMCMC=pMCMC; n.iter=100; n.chains = 1; n.adapt = 0; thin=1; trace=TRUE; intermediate = 10
+  
+  # result=medFit_4p;parametersMCMC=pMCMC; n.iter=1000; n.chains = 1;n.adapt = 0; thin=1; trace=TRUE
+  
   if (is.character(previous)) {
     itr <- NULL
     load(previous)
@@ -102,24 +104,17 @@ intermediate=NULL, filename="intermediate.Rdata", previous=NULL)
     # test=result$test, M0=result$M0, fixed.parameters=result$fixed.parameters, 
     # weight=result$weight)
     out <- MHalgoGen(n.iter=n.iter, parameters=parametersMCMC, 
-                                  n.chains = n.chains, n.adapt = n.adapt, thin=thin, trace=trace, 
-                                  data=result$data, derivate=result$derivate, 
-                                            test=result$test, M0=result$M0, fixed.parameters=result$fixed.parameters, 
-                                            weight=result$weight, 
-                                  likelihood=getFromNamespace(".fonctionMCMC", ns="embryogrowth"), 
-                                  intermediate=intermediate, filename=filename, previous=previous)
+                     n.chains = n.chains, n.adapt = n.adapt, thin=thin, trace=trace, 
+                     temperatures=result$data, derivate=result$derivate, 
+                     test=result$test, M0=result$M0, 
+                     fixed.parameters=result$fixed.parameters, 
+                     weight=result$weight, out="Likelihood", 
+                     progress=FALSE, warnings=FALSE, 
+                     likelihood=getFromNamespace("info.nests", ns = "embryogrowth"), 
+                     intermediate=intermediate, filename=filename, previous=previous, 
+                     parallel=parallel)
     
   }
-
-
-if (batchSize>=n.iter/2) {
-  print("batchSize cannot be larger than half the number of iterations.")
-  rese <- rep(NA, dim(parametersMCMC)[1])
-  names(rese) <- rownames(parametersMCMC)
-  out <- c(out, SE=list(rese))
-} else {
-  out <- c(out, BatchSE=list(coda::batchSE(out$resultMCMC, batchSize=batchSize)))
-}
 
 class(out) <- "mcmcComposite"
 

@@ -4,10 +4,10 @@
 \alias{tsd_MHmcmc}
 \title{Metropolis-Hastings algorithm for Sex ratio}
 \usage{
-tsd_MHmcmc(result = NULL, n.iter = 10000, parametersMCMC = NULL,
-  n.chains = 1, n.adapt = 0, thin = 1, trace = FALSE,
-  batchSize = sqrt(n.iter), intermediate = NULL,
-  filename = "intermediate.Rdata", previous = NULL)
+tsd_MHmcmc(result = stop("A result of tsd() fit must be provided"),
+  n.iter = 10000, parametersMCMC = NULL, n.chains = 1, n.adapt = 0,
+  thin = 1, trace = FALSE, batchSize = sqrt(n.iter),
+  intermediate = NULL, filename = "intermediate.Rdata", previous = NULL)
 }
 \arguments{
 \item{result}{An object obtained after a SearchR fit}
@@ -57,7 +57,7 @@ tsd_MHmcmc runs the Metropolis-Hastings algorithm for tsd (Bayesian MCMC)
 \examples{
 \dontrun{
 library(embryogrowth)
-eo <- subset(STSRE_TSD, Species=="Emys orbicularis", c("Males", "Females", 
+eo <- subset(DatabaseTSD, Species=="Emys orbicularis", c("Males", "Females", 
                                        "Incubation.temperature"))
 eo_logistic <- tsd(eo)
 pMCMC <- tsd_MHmcmc_p(eo_logistic, accept=TRUE)
@@ -82,7 +82,7 @@ plot(eo_logistic, se=se2)
 Marc Girondot
 }
 \seealso{
-Other Functions.for.temperature.dependent.sex.determination: \code{\link{STSRE_TSD}},
+Other Functions.for.temperature.dependent.sex.determination: \code{\link{DatabaseTSD}},
   \code{\link{TSP.list}}, \code{\link{predict.tsd}},
   \code{\link{stages}}, \code{\link{tsd_MHmcmc_p}},
   \code{\link{tsd}}

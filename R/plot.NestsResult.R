@@ -50,9 +50,8 @@
 #' @param add If TRUE, all the curves are shown on the same graph 
 #' @param progress If FALSE, the progress bar is not shown (useful for use with sweave or knitr)
 #' @description Plot the embryo growth from one or several nests.\cr
-#' The embryo.stages is a list with stage numbers and relative size as compared to final size at the beginning of the stage.\cr
-#' For example for Caretta caretta, embryo.stages=list(number=21:30, size=c(8.4, 9.4, 13.6, 13.8, 18.9, 23.5, 32.2, 35.2, 35.5, 38.5)/39.33) indicates that the stages 21 begins at the relative size of 8.4/39.33.\cr
-#' The default is for the turtle "Caretta caretta".\cr
+#' The embryo.stages is a named vector with relative size as compared to final size at the beginning of the stage. Names are the stages.\cr
+#' For example for SCL in Caretta caretta, embryo.stages=list(number=21:30, size=c(8.4, 9.4, 13.6, 13.8, 18.9, 23.5, 32.2, 35.2, 35.5, 38.5)/39.33) indicates that the stages 21 begins at the relative size of 8.4/39.33.\cr
 #' Series can be indicated as the name of the series, its number or succesion of TRUE or FALSE. "all" indicates that all series must be printed.\cr
 #' show.fioritures parameter does not affect show.test option.\cr
 #' Note: three species have predefined embryo stages. embryo.stages parameter can take the values:\cr
@@ -67,13 +66,16 @@
 #' library(embryogrowth)
 #' data(resultNest_4p)
 #' plot(resultNest_4p, xlim=c(0,70), ylimT=c(22, 32), ylimS=c(0,45), series=1,  
-#' 	SE=c(DHA=1.396525, DHH=4.101217, T12H=0.04330405, Rho25=1.00479))
+#' 	SE=c(DHA=1.396525, DHH=4.101217, T12H=0.04330405, Rho25=1.00479), 
+#' 	embryo.stages="Caretta caretta.SCL")
 #' # to plot all the nest at the same time, use
 #' plot(resultNest_4p, xlim=c(0,70), ylimT=c(22, 32), ylimS=c(0,45),  
-#' 	series="all", show.fioritures=FALSE, add=TRUE)
+#' 	series="all", show.fioritures=FALSE, add=TRUE, 
+#' 	embryo.stages="Caretta caretta.SCL")
 #' # to use color different for series
 #' plot(resultNest_4p, xlim=c(0,70), ylimT=c(22, 32), ylimS=c(0,45), add=TRUE, 
-#' 	series="all", show.fioritures=FALSE, col.S=c(rep("black", 5), rep("red", 6)))
+#' 	series="all", show.fioritures=FALSE, col.S=c(rep("black", 5), rep("red", 6)), 
+#' 	embryo.stages="Caretta caretta.SCL")
 #' }
 #' @method plot NestsResult
 #' @export
@@ -83,7 +85,7 @@ plot.NestsResult <-
 function(x, ..., parameters=NULL, fixed.parameters=NULL, 
          SE=NULL, temperatures=NULL, derivate=NULL, 
          test=NULL, stopattest=FALSE, M0=NULL, weight=NULL, series="all",
-         TSP.borders=NULL, embryo.stages="Caretta caretta.SCL",
+         TSP.borders=NULL, embryo.stages=NULL,
          replicate.CI=100, 
          metric.end.incubation=NULL,
          col.stages="blue", col.PT="red", col.TSP="gray", 
@@ -103,6 +105,10 @@ function(x, ..., parameters=NULL, fixed.parameters=NULL,
 #  ylimS <- c(0, 35); ylimT <- c(20, 32); x <- resultNest_4p  
   
   TSP.list <- embryogrowth::TSP.list
+  
+  if(is.null(embryo.stages) & ((show.stages) | (show.TSP))) {
+    stop("You must indicate embryo stages.")
+  }
   
   if (class(embryo.stages)=="character") {
     estages <- TSP.list[[gsub(" ", "_", embryo.stages)]]
@@ -221,19 +227,22 @@ for(seriesx in 1:NbTS) {
      xlim <- unname(ScalePreviousPlot()$xlim[1:2])
      
      if (show.TSP) {
+       par(new=TRUE)
+       plot(1,1, xlim=xlim, ylim=ylimS, axes=FALSE, type="n", xlab="", ylab="")
        x1 <- xlim[1]
        x2 <- xlim[2]
        ty1 <- attributes(metric.summary$metric[[1]])$metric.begin.tsp
        ty2 <- attributes(metric.summary$metric[[1]])$metric.end.tsp
-         polygon(x=c(x1, x2, x2, x1), y=c(ty1, ty1, ty2, ty2), col=col.TSP, border=NA)
-         text(x=x1+5, y=ty1+(ty2-ty1)/2, labels="TSP")
-        x1 <- attributes(metric.summary$metric[[1]])$time.begin.tsp/(24*60)
-        x2 <- attributes(metric.summary$metric[[1]])$time.end.tsp/(24*60)
-        ty1 <- ylimS[1]
-        ty2 <- ylimS[2]
-          polygon(x=c(x1, x2, x2, x1), y=c(ty1, ty1, ty2, ty2), col=col.TSP, border=NA)
-          text(x=x1+(x2-x1)/2, y=ty1+5, labels="TSP")
+       polygon(x=c(x1, x2, x2, x1), y=c(ty1, ty1, ty2, ty2), col=col.TSP, border=NA)
+#       text(x=x1+5, y=ty1+(ty2-ty1)/2, labels="TSP")
+       x1 <- attributes(metric.summary$metric[[1]])$time.begin.tsp/(24*60)
+       x2 <- attributes(metric.summary$metric[[1]])$time.end.tsp/(24*60)
+       ty1 <- ylimS[1]
+       ty2 <- ylimS[2]
+       polygon(x=c(x1, x2, x2, x1), y=c(ty1, ty1, ty2, ty2), col=col.TSP, border=NA)
+#       text(x=x1+(x2-x1)/2, y=ty1+5, labels="TSP")
      }
+     
      
      if (show.temperatures) {
        # na.omit(metric.summary$metric[[1]][, c("Time", "TempC")])
@@ -258,6 +267,23 @@ for(seriesx in 1:NbTS) {
          }
          
        }
+     }
+     
+     if (show.TSP) {
+       par(new=TRUE)
+       plot(1,1, xlim=xlim, ylim=ylimS, axes=FALSE, type="n", xlab="", ylab="")
+       x1 <- xlim[1]
+       x2 <- xlim[2]
+       ty1 <- attributes(metric.summary$metric[[1]])$metric.begin.tsp
+       ty2 <- attributes(metric.summary$metric[[1]])$metric.end.tsp
+#       polygon(x=c(x1, x2, x2, x1), y=c(ty1, ty1, ty2, ty2), col=col.TSP, border=NA)
+       text(x=x1+5, y=ty1+(ty2-ty1)/2, labels="TSP")
+       x1 <- attributes(metric.summary$metric[[1]])$time.begin.tsp/(24*60)
+       x2 <- attributes(metric.summary$metric[[1]])$time.end.tsp/(24*60)
+       ty1 <- ylimS[1]
+       ty2 <- ylimS[2]
+#       polygon(x=c(x1, x2, x2, x1), y=c(ty1, ty1, ty2, ty2), col=col.TSP, border=NA)
+       text(x=x1+(x2-x1)/2, y=ty1+5, labels="TSP")
      }
      
      par(new=TRUE)

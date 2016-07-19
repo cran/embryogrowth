@@ -11,10 +11,11 @@
 #' @param saveAtMaxiter If True, each time number of interation reach maxiter, current data are saved in file with filename name
 #' @param fileName The intermediate results are saved in file with fileName.Rdata name
 #' @param weight A named vector of the weight for each nest for likelihood estimation
-#' @param hessian If TRUE, the hessian matrix is estimated and the SE of parameters estimated.
+#' @param SE If TRUE, the SE of parameters are estimated.
 #' @param control List for control parameters for optimx
 #' @description Fit the parameters that best represent data.\cr
 #' test can be a list with two elements Mean and SD and each element is a named vector with the nest name.\cr
+#' Function to fit thermal reaction norm can be also expressed as a Weibull function with k (shape), lambda (scale) and theta parameters.
 #' @examples
 #' \dontrun{
 #' library(embryogrowth)
@@ -69,6 +70,21 @@
 #' compare_AIC(test4p=resultNest_4p, 
 #'             test6p=resultNest_6p, 
 #'             testAnchor=resultNest_newp)
+#' ############################################
+#' # example with thermal reaction norm fitted from Weibull function
+#' ############################################
+#' x <- structure(c(298890.11996796, 1229465.06811278, -1229160.54956529, 
+#' 27.2843254770591), .Names = c("k", "lambda", "theta", "scale"))
+#' pfixed <- c(rK=2.093313)
+#' x <- ChangeSSM(temperatures = (200:350)/10,
+#'                parameters = resultNest_4p$par,
+#'                initial.parameters = x, 
+#'                control=list(maxit=1000))
+#' resultNest_4p_Weibull <- searchR(parameters=x, fixed.parameters=pfixed, 
+#'                          temperatures=formated, derivate=dydt.Gompertz, M0=1.7, 
+#'                          test=c(Mean=39.33, SD=1.92))
+#' plotR(list(resultNest_4p, resultNest_4p_Weibull), ylim=c(0,0.3), col=c("Black", "red"))
+#' compare_AIC(SSM=resultNest_4p, Weibull=resultNest_4p_Weibull)
 #' }
 #' @export
 
@@ -78,7 +94,7 @@ function(parameters=stop('Initial set of parameters must be provided'),
 	fixed.parameters=NULL, temperatures=stop('Formated temperature must be provided !'), 
 	derivate=dydt.Gompertz, test=c(Mean=39.33, SD=1.92), 
 	M0=1.7, saveAtMaxiter=FALSE, fileName="intermediate", 
-  weight=NULL, hessian=TRUE, control=list(trace=1, REPORT=100, maxit=500)) {
+  weight=NULL, SE=FALSE, control=list(trace=1, REPORT=100, maxit=500)) {
   
   # parameters <- structure(c(118.768297442004, 475.750095909406, 306.243694918151, 116.055824800264), .Names = c("DHA", "DHH", "T12H", "Rho25")); fixed.parameters <- c(rK=2.093313)
   # temperatures <- formated
@@ -140,13 +156,14 @@ for (j in 1:NbTS) temperatures[[j]][1, "Mass"] <- M0
   grR <- getFromNamespace(".gradientRichardson", ns="embryogrowth")
   
 repeat {
-      result <- try(optimx::optimx(par=parameters, fn=getFromNamespace("info.nests", ns="embryogrowth"), 
+      result <- try(optimx::optimx(par=parameters, 
+                                   fn=getFromNamespace("info.nests", ns="embryogrowth"), 
                                  temperatures=temperatures, 
                                  derivate=derivate, weight=weight,
                                  test=testuse, M0=M0, fixed.parameters=fixed.parameters,
                                  gr=grR, method=method, 
                                  control=modifyList(control, list(dowarn=FALSE, follow.on=TRUE, kkt=FALSE)), 
-                                 hessian=FALSE), silent=TRUE)
+                                 hessian=SE), silent=TRUE)
     minL <- dim(result)[1]
     nm <- names(parameters)
     x <- result[minL, nm]
@@ -171,58 +188,46 @@ repeat {
 
 print(result$par)
 
-if (hessian) {
-
-	mathessian <- try(hessian(info.nests, parameters=result$par, method="Richardson", 
-	                          temperatures=temperatures, 
-	                          derivate=derivate, weight=weight,
-	                          test=testuse, M0=M0, fixed.parameters=fixed.parameters), silent=TRUE)
-
-	if (inherits(mathessian, "try-error")) {
-			res<-rep(NA, length(parameters))
-			result$hessian <- NA
-			print("SE of parameters cannot be estimated.")
-			print("Probably the model is badly fitted. Try using searchR() again or use GRTRN_MHmcmc().")
-
-	} else {
-	
-
-	result$hessian <- mathessian
-
-	inversemathessian <- try(solve(mathessian), silent=TRUE)
-	
-	if (inherits(inversemathessian, "try-error")) {
-		res <- -1
-	} else {
-		res <- diag(inversemathessian)
-	}
-
-	# Je gre plus correctement les erreurs - 17/7/2012
-
-	neg=any(res<0)
-	if (!neg) {
-		res=sqrt(res)
-	} else {
-		res<-rep(NA, length(parameters))
-		print("SE of parameters cannot be estimated.")
-		if (inherits(inversemathessian, "try-error")) {
-			print("Probably the model is badly fitted. Try other initial points.")
-		} else {
-			print("Probably flat likelihood is observed around some parameters.")
-			print("Try using GRTRN_MHmcmc() function to get the SE of parameters.")
-		}
-	}
-}
-	
+if (SE) {
+  
+  mathessian <- try(numDeriv::hessian(info.nests, 
+                                      x=result$par, 
+                                      method="Richardson", 
+                                      temperatures=temperatures, 
+                                      derivate=derivate, weight=weight,
+                                      test=testuse, M0=M0, 
+                                      fixed.parameters=fixed.parameters)
+                    , silent=TRUE)
+  
+  if (inherits(mathessian, "try-error")) {
+    res <- rep(NA, length(parameters))
+  } else {
+    result$hessian <- mathessian
+    inversemathessian <- try(solve(mathessian), silent=TRUE)
+    if (inherits(inversemathessian, "try-error")) {
+      res <- rep(NA, length(parameters))
+    } else {
+      res <- diag(inversemathessian)
+      res <- ifelse(res<0, NA, sqrt(res))
+    }
+  }
+  
 } else {
-# pas de hessian donc pas de SE
-	res<-rep(NA, length(parameters))
+  # pas de hessian donc pas de SE
+  res<-rep(NA, length(parameters))
 }
-
-
-names(res)=names(parameters)
-
+names(res) <- names(parameters)
 result$SE <- res 
+
+if (any(is.na(res))) {
+  if (all(is.na(res))) {
+    print("SE of parameters cannot be estimated.")
+    print("Probably the model is badly fitted. Try other initial points.")
+  } else {
+    print("Probably flat likelihood is observed around some parameters.")
+    print("Try using GRTRN_MHmcmc() function to get the SE of parameters.")
+  }
+}
 
 result$data <- temperatures
 

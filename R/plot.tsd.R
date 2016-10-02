@@ -39,7 +39,7 @@ plot.tsd <- function(x, ..., show.observations=TRUE, males.freq=TRUE,
 	col.TRT="gray", col.TRT.CI=rgb(0.8, 0.8, 0.8, 0.5), 
   col.PT.CI=rgb(0.8, 0.8, 0.8, 0.5), show.CI=TRUE) {
 
-# males.freq=TRUE; las.x=1; las.y=1; lab.PT="Pivotal"; lab.TRT=paste0("Transitional range l=95%"); col.TRT="gray"; col.TRT.CI=rgb(0.8, 0.8, 0.8, 0.5); col.PT.CI=rgb(0.8, 0.8, 0.8, 0.5); show.CI=TRUE
+# show.observations=TRUE; males.freq=TRUE; las.x=1; las.y=1; lab.PT="Pivotal"; lab.TRT=paste0("Transitional range l=95%"); col.TRT="gray"; col.TRT.CI=rgb(0.8, 0.8, 0.8, 0.5); col.PT.CI=rgb(0.8, 0.8, 0.8, 0.5); show.CI=TRUE
   
   range.CI.qnorm <- qnorm(1-((1-x$range.CI)/2))
   l <- x$l
@@ -71,12 +71,20 @@ plot.tsd <- function(x, ..., show.observations=TRUE, males.freq=TRUE,
     L1 <- modifyList(L1, list(xlim=c(floor(min(temperatures)), floor(1+max(temperatures)))))
   }
   
-  a <- do.call(plot, L1) 
+  L2 <- L1[!(names(L1) %in% c("errbar.tick", "errbar.lwd"
+                              , "errbar.lty", "errbar.col"
+                              , "errbar.y.polygon"
+                              , "errbar.y.polygon.list"))]
+  
+  a <- do.call(plot, L2) 
   
   x2 <- (par("usr")[1]+par("usr")[2]*26)/27
   x1 <- x2*26-par("usr")[2]/0.04
   
-  axis(1, at=x1:x2, las=las.x)
+  cex.x <- par("cex.axis")
+  if (!is.null(L$cex.axis)) cex.x <- L$cex.axis
+  
+  axis(1, at=x1:x2, las=las.x, cex.axis=cex.x)
   
   # je trace la TRT centree sur P
   
@@ -128,7 +136,12 @@ p <- result$CI["mean", ]
   }
   L1 <- modifyList(L1, list(ylim=c(0,1), axes=FALSE, xlab="", ylab="", type="l", main="", xlim=c(x1, x2)))
 
-  a <- do.call(plot, L1)
+  L2 <- L1[!(names(L1) %in% c("errbar.tick", "errbar.lwd"
+                              , "errbar.lty", "errbar.col"
+                              , "errbar.y.polygon"
+                              , "errbar.y.polygon.list"))]
+  
+  a <- do.call(plot, L2)
 
 if (show.CI) {
   
@@ -142,7 +155,13 @@ if (show.CI) {
     L1 <- modifyList(list(x=x, y=1-pm, bty="n"), L)
   }
   L1 <- modifyList(L1, list(ylim=c(0,1), axes=FALSE, xlab="", ylab="", type="l", main="", lty=2, xlim=c(x1, x2)))
-  a <- do.call(plot, L1) 
+  
+  L2 <- L1[!(names(L1) %in% c("errbar.tick", "errbar.lwd"
+                              , "errbar.lty", "errbar.col"
+                              , "errbar.y.polygon"
+                              , "errbar.y.polygon.list"))]
+  
+  a <- do.call(plot, L2) 
   
   par(new=TRUE)
   if (males.freq) {   
@@ -151,7 +170,13 @@ if (show.CI) {
     L1 <- modifyList(list(x=x, y=1-pp, bty="n"), L)
   }
   L1 <- modifyList(L1, list(ylim=c(0,1), axes=FALSE, xlab="", ylab="", type="l", main="", lty=2, xlim=c(x1, x2)))
-  a <- do.call(plot, L1) 
+  
+  L2 <- L1[!(names(L1) %in% c("errbar.tick", "errbar.lwd"
+                              , "errbar.lty", "errbar.col"
+                              , "errbar.y.polygon"
+                              , "errbar.y.polygon.list"))]
+  
+  a <- do.call(plot, L2) 
 }
 }
 }

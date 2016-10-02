@@ -21,7 +21,7 @@
 
 \item{replicates}{Number of replicates to estimate CI}
 
-\item{progressbar}{Logical. Does a progression bar must be shown}
+\item{progressbar}{Logical. Does a progression bar must be shown?}
 
 \item{...}{Not used}
 }

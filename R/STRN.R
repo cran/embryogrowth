@@ -104,11 +104,11 @@ STRN <- function(Initial_STRN=NULL,
   }
   
   method <- c("Nelder-Mead","BFGS")
-  
+  p3p <- list(...)
+  # p3p <- list()
   
   repeat {
     
-    p3p <- list(...)
     L <- list(hessian=SE, method=method, 
               par=pSTRN, fn=getFromNamespace(".STRN_fit", ns="embryogrowth"), 
               EmbryoGrowthTRN=EmbryoGrowthTRN, 

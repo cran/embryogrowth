@@ -6,7 +6,7 @@
 \usage{
 tsd(df = NULL, males = NULL, females = NULL, N = NULL,
   temperatures = NULL, durations = NULL, l = 0.05,
-  parameters.initial = c(P = NA, S = -0.5, K = 0, K1 = 1, K2 = 0),
+  parameters.initial = c(P = NA, S = -2, K = 0, K1 = 1, K2 = 0),
   males.freq = TRUE, fixed.parameters = NULL, SE = NULL,
   equation = "logistic", replicates = 1000, range.CI = 0.95,
   limit.low.TRT.minimum = 5, limit.high.TRT.maximum = 90, print = TRUE,

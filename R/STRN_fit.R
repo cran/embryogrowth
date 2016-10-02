@@ -13,6 +13,7 @@
     
 #    par_TSD <<- par
     
-  -sum(dbinom(prob=predict(tsd, temp_TSD, replicates=1)$sexratio[!is.na(Sexed)], size=Sexed[!is.na(Sexed)], x=Males[!is.na(Sexed)], log=TRUE))
+  -sum(dbinom(prob=predict(tsd, temp_TSD[!is.na(Sexed)], replicates=1)$sexratio, 
+              size=Sexed[!is.na(Sexed)], x=Males[!is.na(Sexed)], log=TRUE))
     
 }

@@ -74,8 +74,10 @@ Series can be indicated as the name of the series, their numbers or series or su
 The likelihood object is just the total likelihood of the data in the model.\cr
 The summary object is a data.frame composed of these elements:
 \itemize{
-  \item \code{TimeWeighted.temperature.mean} Average temperature weigthed by the time at each temperature
-  \item \code{TimeWeighted.temperature.se} Standard error for the average temperature weigthed by the time at each temperature
+  \item \code{TimeWeighted.temperature.mean} Average temperature weigthed by the time at each temperature for all incubation
+  \item \code{TimeWeighted.temperature.se} Standard error for the average temperature weigthed by the time at each temperature for all incubation
+  \item \code{MassWeighted.temperature.mean} Average temperature weigthed by the growth of embryo for all incubation
+  \item \code{MassWeighted.temperature.se} Standard error for the average temperature weigthed by the growth of embryo for all incubation
   \item \code{TSP.TimeWeighted.temperature.mean} Average temperature during the TSP weigthed by the time at each temperature
   \item \code{TSP.TimeWeighted.temperature.se} Standard error for the average temperature during the TSP weigthed by the time at each temperature
   \item \code{TSP.MassWeighted.temperature.mean} Average temperature during the TSP weigthed by the mass increase at each temperature
@@ -100,8 +102,8 @@ The summary object is a data.frame composed of these elements:
   \item \code{Middlethird.length.se} Standard error for second third of incubation
   \item \code{MiddleThird.TimeWeighted.temperature.mean} Average temperature during the middle third of incubation
   \item \code{MiddleThird.TimeWeighted.temperature.se} Standard error for the temperature during the middle third of incubation
-  \item \code{MiddleThird.MassWeighted.temperature.mean} Average temperature during the middle third of incubation weight by embryo growth
-  \item \code{MiddleThird.MassWeighted.temperature.se} Standard error for temperature during the middle third of incubation weight by embryo growth
+  \item \code{MiddleThird.MassWeighted.temperature.mean} Average temperature during the middle third of incubation weighted by embryo growth
+  \item \code{MiddleThird.MassWeighted.temperature.se} Standard error for temperature during the middle third of incubation weighted by embryo growth
 }
 The metric object is a list composed of data.frames which have the following attributes for each element of the list:
 \itemize{
@@ -123,6 +125,7 @@ Note: three species have predefined embryo stages. embryo.stages parameter can t
   \item \code{Emys orbicularis.SCL}
   \item \code{Emys orbicularis.mass}
   }
+But remember that mass is not the best proxy to describe the growth of an embryo because it can decrease if the subtrate becomes dry.\cr
 The progress bar is based on replicates and timeseries.
 }
 \details{
@@ -134,17 +137,20 @@ library(embryogrowth)
 data(resultNest_4p)
 summary.nests <- info.nests(resultNest_4p, out="summary", replicate.CI=20, 
   SE=c(DHA=17.7357362231266, DHH=55.2002231419364, 
-  T12H=0.850237694629938, Rho25=8.47868153136681))
+  T12H=0.850237694629938, Rho25=8.47868153136681), 
+  progress=TRUE)
   # Result is in summary.nests$summary
 infoall <- info.nests(resultNest_4p)
   # Result is a value
 infoall.df <- info.nests(resultNest_4p, out="metric", replicate.CI=20, 
   SE=c(DHA=17.7357362231266, DHH=55.2002231419364, 
-  T12H=0.850237694629938, Rho25=8.47868153136681)))
+  T12H=0.850237694629938, Rho25=8.47868153136681), 
+  progress=TRUE)
 # Result is in summary.nests$metric
 infoall.both <- info.nests(resultNest_4p, out=c("metric", "summary"), replicate.CI=20, 
   SE=c(DHA=17.7357362231266, DHH=55.2002231419364, 
-  T12H=0.850237694629938, Rho25=8.47868153136681)))
+  T12H=0.850237694629938, Rho25=8.47868153136681), 
+  progress=TRUE)
 # Results are in summary.nests$summary and in summary.nests$metric
 }
 }

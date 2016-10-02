@@ -7,6 +7,7 @@
 #' @param ylimH Scale of histogram using ylimH=c(min, max)
 #' @param atH Position of ticks for scale of histogram
 #' @param ylabH Label for histogram scale
+#' @param show.anchors Should the anchors been shown
 #' @description Shows the histogram of temperatures with set of nests and the R function superimpose
 #' plotR_hist(data)
 #' @examples
@@ -14,11 +15,13 @@
 #' library(embryogrowth)
 #' data(resultNest_4p)
 #' plotR_hist(resultNest_4p)
-#' plotR_hist(resultNest_4p, ylim=c(0,0.3), ylimH=c(0,0.5), atH=c(0, 0.1, 0.2))
+#' plotR_hist(resultNest_4p, ylim=c(0, 3), ylimH=c(0,0.5), atH=c(0, 0.1, 0.2))
 #' }
 #' @export
 
-plotR_hist <- function(result=NULL, ..., ylimH=NULL, atH=NULL, ylabH="Frequency of temperatures") {
+plotR_hist <- function(result=NULL, ..., 
+                       show.anchors = TRUE,
+                       ylimH=NULL, atH=NULL, ylabH="Frequency of temperatures") {
 
 def.par <- par(no.readonly = TRUE) # save default, for resetting...
 
@@ -33,7 +36,7 @@ nids <- result
 
 par(mar = c(def.par[["mar"]][1:3], 5.1))
 
-L <- modifyList(list(result=result), p3p)
+L <- modifyList(list(result=result, show.anchors = show.anchors), p3p)
 lp <- list("series")
 L2 <- L[!(names(L) %in% lp)]
 

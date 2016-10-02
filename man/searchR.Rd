@@ -20,7 +20,7 @@ searchR(parameters = stop("Initial set of parameters must be provided"),
 
 \item{derivate}{Function used to fit embryo growth: dydt.Gompertz, dydt.exponential or dydt.linear}
 
-\item{test}{A vector with Mean and SD of size of hatchlings, ex. test=c(Mean=39, SD=3)}
+\item{test}{A vector with Mean and SD of size of hatchlings, ex. test=c(Mean=39, SD=3). Can be a data.frame also. See description}
 
 \item{M0}{Measure of hatchling size or mass proxi at laying date}
 
@@ -39,7 +39,7 @@ A result object
 }
 \description{
 Fit the parameters that best represent data.\cr
-test can be a list with two elements Mean and SD and each element is a named vector with the nest name.\cr
+test can be a data.frame with two columns Mean and SD and rownames with the nest name.\cr
 Function to fit thermal reaction norm can be also expressed as a Weibull function with k (shape), lambda (scale) and theta parameters.
 }
 \details{
@@ -69,9 +69,15 @@ x <- structure(c(106.567809092008, 527.359011254683, 614.208632495199,
 2720.94506457237, 306.268259715624, 120.336791245212), .Names = c("DHA", 
 "DHH", "DHL", "DT", "T12L", "Rho25"))
 pfixed <- c(rK=2.093313)
+
+# exemple of data.frame for test
+ttest <- data.frame(Mean=rep(25.5, formated$IndiceT["NbTS"]), 
+                     SD=rep(0.75, formated$IndiceT["NbTS"]), 
+                     row.names=names(formated)[1:formated$IndiceT["NbTS"]])
 resultNest_6p <- searchR(parameters=x, fixed.parameters=pfixed, 
-	temperatures=formated, derivate=dydt.Gompertz, M0=1.7, 
-	test=c(Mean=39.33, SD=1.92))
+	                        temperatures=formated, derivate=dydt.Gompertz, M0=1.7, 
+	                        test=ttest)
+	                        
 data(resultNest_6p)
 pMCMC <- TRN_MHmcmc_p(resultNest_6p, accept=TRUE)
 # Take care, it can be very long, sometimes several days

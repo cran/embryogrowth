@@ -254,8 +254,13 @@ for(seriesx in 1:NbTS) {
        par(new=TRUE)
        do.call(plot, L) 
        
-       axis(side=4, ylim=ylimT, las=1)
-       mtext(ylabT, side=4, line=3, cex=par("cex"))
+       cex.y2 <- par("cex.axis")
+       if (!is.null(troispoints$cex.axis)) cex.y2 <- troispoints$cex.axis
+       cex.lab2 <- par("cex.lab")
+       if (!is.null(troispoints$cex.lab)) cex.lab2 <- troispoints$cex.lab
+       
+       axis(side=4, ylim=ylimT, las=1, cex.axis=cex.y2)
+       mtext(ylabT, side=4, line=3, cex=cex.lab2*par("cex"))
        
        if (show.PT & !is.na(PT[1])) {
          

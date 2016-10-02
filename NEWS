@@ -1,5 +1,25 @@
 THIS IS THE CHANGELOG OF THE "embryogrowth" PACKAGE
 
+          CHANGES IN VERSION 6.4    (2016-10-02)
+          
+* New version for CRAN - 6.4
+
+          CHANGES IN VERSION 6.3.1-6.3.11    (2016-09-15)
+          
+* New shiny function web.tsd() - 6.3.1
+* Restore web.tsd() - 6.3.2
+* Minor modification of shiny application - 6.3.3
+* plotR() returns R values in the unmodified scale - 6.3.4
+* Modification of the scale of R graph produced by plotR() - 6.3.4
+* errbar.tick does not produce warnings() in plot.tsd() - 6.3.5
+* No error if show.anchors is used with plotR_hist() - 6.3.6
+* Info.nest() returns also MassWeighted.temperature.mean - 6.3.7
+* Solve some rare cases when info.nest()$summary returns NA - 6.3.7
+* Correct description for test parameter in searchR() - 6.3.8
+* Add parameter show.legend in plotR() - 6.3.9
+* Correct a bug for STRN() when one of the timeseries had no known sex ratio - 6.3.10
+* cex.axis in plot.tsd() and plot.NestResult() is used for x-axis - 6.3.11
+
           CHANGES IN VERSION 6.3    (2016-07-17)
 
 * Minor update of plot.NestResult() to show TSP at the top of temperatures - 6.2.1

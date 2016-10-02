@@ -11,6 +11,7 @@
 #' @param set.par 1 or 2 or a list of 1 or 2 to designate with set of parameters to show
 #' @param size If indicated, will show the growth rate for this size. Useful only for model with two sets of parameters, High and Low and a transition
 #' @param legend Text to show in bottom right legend or a list of text if several results
+#' @param show.legend Should the legend about several series be shown?
 #' @param col The color to use for a list of colors if several results
 #' @param lty The type of line to use if several results as a list
 #' @param ltyCI The type of line to use for confidence interval as a list
@@ -48,7 +49,7 @@
 #' 	temperatures=formated, derivate=dydt.Gompertz, M0=1.7, 
 #' 	test=c(Mean=39.33, SD=1.92))
 #' data(resultNest_4p)
-#' plotR(resultNest_4p, ylim=c(0,0.3))
+#' plotR(resultNest_4p, ylim=c(0,3))
 #' pMCMC <- TRN_MHmcmc_p(resultNest_4p, accept=TRUE)
 #' # Take care, it can be very long, sometimes several days
 #' result_mcmc_4p_80 <- GRTRN_MHmcmc(result=resultNest_4p,  
@@ -56,38 +57,38 @@
 #' 	thin=1, trace=TRUE)
 #' data(result_mcmc_4p)
 #' plotR(result=resultNest_4p, SE=result_mcmc_4p$SD,  
-#' ylim=c(0,0.3), x.SE=1)
+#'  ylim=c(0, 3), x.SE=1)
 #' x <- structure(c(115.758929130522, 428.649022170996, 503.687251738993, 
 #' 12.2621455821612, 306.308841227278, 116.35048615105), .Names = c("DHA", 
 #' "DHH", "DHL", "DT", "T12L", "Rho25"))
-#' plotR(parameters=x, xlim=c(20,35))
+#' plotR(parameters=x, xlim=c(20, 35))
 #' pfixed <- c(rK=2.093313)
 #' resultNest_6p <- searchR(parameters=x, fixed.parameters=pfixed, 
 #' 	temperatures=formated, derivate=dydt.Gompertz, M0=1.7, 
 #' 	test=c(Mean=39.33, SD=1.92))
 #' data(resultNest_6p)
-#' plotR(list(resultNest_4p, resultNest_6p), ylim=c(0, 0.3), 
+#' plotR(list(resultNest_4p, resultNest_6p), ylim=c(0, 3), 
 #' col=c("black", "red"), legend=c("4 parameters", "6 parameters"))
 #' ##########################################
 #' # new formulation of parameters using anchors
 #' data(resultNest_newp)
 #' # without envelope
-#' plotR(resultNest_newp, ylim=c(0, 0.5))
+#' plotR(resultNest_newp, ylim=c(0, 5))
 #' # with envelope based in 1.96*SE and central curve based on mean
-#' plotR(result=resultNest_newp, ylim=c(0, 0.5), 
+#' plotR(result=resultNest_newp, ylim=c(0, 5), 
 #'  SE=result_mcmc_newp$SD)
 #' # with envelope based on quantiles and central curve based on mean
-#' plotR(result=resultNest_newp, ylim=c(0, 0.5), 
+#' plotR(result=resultNest_newp, ylim=c(0, 5), 
 #'  SE=apply(result_mcmc_newp[["resultMCMC"]][[1]], 
 #'    MARGIN=2, FUN=quantile, probs=c(0.025, 0.975)))
 #' # with envelope based on quantiles and central curve based on median
-#' plotR(result=resultNest_newp, ylim=c(0, 0.5), 
+#' plotR(result=resultNest_newp, ylim=c(0, 5), 
 #'  SE=apply(result_mcmc_newp[["resultMCMC"]][[1]], 
 #'    MARGIN=2, FUN=quantile, probs=c(0.025, 0.975)),
 #'  parameters=apply(result_mcmc_newp[["resultMCMC"]][[1]], 
 #'    MARGIN=2, FUN=quantile, probs=c(0.5)))
 #' # Example to get the results
-#' (plotR(result=resultNest_newp, ylim=c(0, 0.5), 
+#' (plotR(result=resultNest_newp, ylim=c(0, 5), 
 #'        SE=apply(result_mcmc_newp[["resultMCMC"]][[1]], 
 #'                 MARGIN=2, FUN=quantile, probs=c(0.025, 0.975)),
 #'        parameters=apply(result_mcmc_newp[["resultMCMC"]][[1]],
@@ -108,6 +109,7 @@
 
 plotR <-
   function(result=NULL, parameters=NULL, fixed.parameters=NULL, col="black", legend=NA, 
+           show.legend=TRUE,
            SE=NULL, x.SE=qnorm(0.975), set.par=1, size=NULL, xlim=c(20,35), 
            scaleY="auto", lty=1, ltyCI=3, lwd=1, lwdCI=1, 
            xlimR=xlim, xlimSE=xlim, replicate.CI=100, show.box=TRUE, local.box="topleft", 
@@ -243,17 +245,22 @@ plotR <-
         vout <- voutlist[[set.par[[rs]]]]
       }
       
-      if (scaleY=="auto" & premier) scaleY <- 10^(-floor(log10(max(vout, na.rm = TRUE)))-1)
+      if (scaleY=="auto" & premier) scaleY <- 10^(-floor(log10(max(vout, na.rm = TRUE))))
       
-      y <- scaleY*vout
+      y <- vout
       
       
       
       if (premier) {
-        L <- modifyList(list(type = "l", las=1, col=col[[rs]], lty=lty[[rs]], lwd=lwd[[rs]], axes = TRUE, bty = "n", xlab = expression("Temperatures in " * degree * "C"), ylab = paste("r*", scaleY, sep=""), xlim=xlim), modifyList(list(x=x, y=y), p3p))
+        L <- modifyList(list(type = "l", las=1, col=col[[rs]]
+                             , lty=lty[[rs]], lwd=lwd[[rs]]
+                             , axes = TRUE, bty = "n"
+                             , xlab = expression("Temperatures in " * degree * "C")
+                             , ylab = expression(paste0("r x", as.character(scaleY), "(mm."~min^-1~")")), xlim=xlim), 
+                        modifyList(list(x=x, y=scaleY*y), p3p))
         do.call(plot, L) 
       } else {
-        lines(x=x, y=y, col=col[[rs]], lty=lty[[rs]], lwd=lwd[[rs]])
+        lines(x=x, y=scaleY*y, col=col[[rs]], lty=lty[[rs]], lwd=lwd[[rs]])
       }
       
       intermediaire <- rbind(intermediaire, data.frame(Temperature=x, Average=y, CI.Plus=rep(NA, length(y)), CI.Minus=rep(NA, length(y))))
@@ -267,8 +274,8 @@ plotR <-
         if (class(res)=="matrix") {
         lines(xSE, SSM(xSE, res[1,])[[1]]*scaleY, type="l", col=col[[rs]], lty=ltyCI[[rs]], lwd=lwdCI[[rs]])
         lines(xSE, SSM(xSE, res[2,])[[2]]*scaleY, type="l", col=col[[rs]], lty=ltyCI[[rs]], lwd=lwdCI[[rs]])
-        intermediaire[xSEDeb:xSEFin, "CI.Minus"] <- SSM(xSE, res[1,])[[1]]*scaleY
-        intermediaire[xSEDeb:xSEFin, "CI.Plus"] <- SSM(xSE, res[2,])[[2]]*scaleY
+        intermediaire[xSEDeb:xSEFin, "CI.Minus"] <- SSM(xSE, res[1,])[[1]]
+        intermediaire[xSEDeb:xSEFin, "CI.Plus"] <- SSM(xSE, res[2,])[[2]]
         # Ou alors ce sont des parametres
       } else {
         # parssm c'est les parametres
@@ -292,14 +299,14 @@ plotR <-
           lines(xSE, scaleY*vout, 
                 type="l", col=col[[rs]], lty=ltyCI[[rs]], lwd=lwdCI[[rs]])
           
-          intermediaire[xSEDeb:xSEFin, "CI.Plus"] <- scaleY*vout
+          intermediaire[xSEDeb:xSEFin, "CI.Plus"] <- vout
           
           vout <- SSM(xSE, parssm[!is.na(res)]-x.SE*res[!is.na(res)])[[1]]
           
           lines(xSE, scaleY*vout, 
                 type="l", col=col[[rs]], lty=ltyCI[[rs]], lwd=lwdCI[[rs]])
           
-          intermediaire[xSEDeb:xSEFin, "CI.Minus"] <-scaleY*vout
+          intermediaire[xSEDeb:xSEFin, "CI.Minus"] <- vout
           
         } else {
           
@@ -335,10 +342,10 @@ plotR <-
               ess$moyenne2 <- ess$moyenne2+valeur^2
             }
             
-            sdR=sqrt(ess$moyenne2/replicate.CI-(ess$moyenne/replicate.CI)^2)*scaleY
+            sdR=sqrt(ess$moyenne2/replicate.CI-(ess$moyenne/replicate.CI)^2)
             
-            lines(xSE, y-x.SE*sdR, type="l", col=col[[rs]], lty=ltyCI[[rs]], lwd=lwdCI[[rs]])
-            lines(xSE, y+x.SE*sdR, type="l", col=col[[rs]], lty=ltyCI[[rs]], lwd=lwdCI[[rs]])
+            lines(xSE, (y-x.SE*sdR)*scaleY, type="l", col=col[[rs]], lty=ltyCI[[rs]], lwd=lwdCI[[rs]])
+            lines(xSE, (y+x.SE*sdR)*scaleY, type="l", col=col[[rs]], lty=ltyCI[[rs]], lwd=lwdCI[[rs]])
             intermediaire[xSEDeb:xSEFin, "CI.Minus"] <- y-x.SE*sdR
             intermediaire[xSEDeb:xSEFin, "CI.Plus"] <- y+x.SE*sdR
 # fin du test qu'il n'y a pas de NA dans le modele parametrique
@@ -367,7 +374,7 @@ plotR <-
     }
     
     
-    if (any(!is.na(unlist(legend)))) {
+    if (show.legend & any(!is.na(unlist(legend)))) {
       legend("bottomright", unlist(legend), lty=unlist(lty), lwd=unlist(lwd), bty = "n", col=unlist(col))
     }
     

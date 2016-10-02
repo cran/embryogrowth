@@ -8,7 +8,7 @@
 #' @param SE The standard error for temperatures or durations
 #' @param quantiles The quantiles to be returned, default=c(0.025, 0.5, 0.975)
 #' @param replicates Number of replicates to estimate CI
-#' @param progressbar Logical. Does a progression bar must be shown
+#' @param progressbar Logical. Does a progression bar must be shown?
 #' @param ... Not used
 #' @description Estimate sex ratio according to constant incubation temperature\cr
 #' The data.frame has the following components:\cr

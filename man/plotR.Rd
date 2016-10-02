@@ -5,10 +5,10 @@
 \title{Show the fitted growth rate dependent on temperature}
 \usage{
 plotR(result = NULL, parameters = NULL, fixed.parameters = NULL,
-  col = "black", legend = NA, SE = NULL, x.SE = qnorm(0.975),
-  set.par = 1, size = NULL, xlim = c(20, 35), scaleY = "auto",
-  lty = 1, ltyCI = 3, lwd = 1, lwdCI = 1, xlimR = xlim,
-  xlimSE = xlim, replicate.CI = 100, show.box = TRUE,
+  col = "black", legend = NA, show.legend = TRUE, SE = NULL,
+  x.SE = qnorm(0.975), set.par = 1, size = NULL, xlim = c(20, 35),
+  scaleY = "auto", lty = 1, ltyCI = 3, lwd = 1, lwdCI = 1,
+  xlimR = xlim, xlimSE = xlim, replicate.CI = 100, show.box = TRUE,
   local.box = "topleft", pch.anchors = 19, cex.anchors = 1,
   col.anchors = "black", y.anchors = 0, show.anchors = TRUE, ...)
 }
@@ -22,6 +22,8 @@ plotR(result = NULL, parameters = NULL, fixed.parameters = NULL,
 \item{col}{The color to use for a list of colors if several results}
 
 \item{legend}{Text to show in bottom right legend or a list of text if several results}
+
+\item{show.legend}{Should the legend about several series be shown?}
 
 \item{SE}{The standard error for the parameters or a list of SE if several results. Use NA to force not use SE}
 
@@ -93,7 +95,7 @@ resultNest_4p <- searchR(parameters=x, fixed.parameters=pfixed,
 	temperatures=formated, derivate=dydt.Gompertz, M0=1.7, 
 	test=c(Mean=39.33, SD=1.92))
 data(resultNest_4p)
-plotR(resultNest_4p, ylim=c(0,0.3))
+plotR(resultNest_4p, ylim=c(0,3))
 pMCMC <- TRN_MHmcmc_p(resultNest_4p, accept=TRUE)
 # Take care, it can be very long, sometimes several days
 result_mcmc_4p_80 <- GRTRN_MHmcmc(result=resultNest_4p,  
@@ -101,38 +103,38 @@ result_mcmc_4p_80 <- GRTRN_MHmcmc(result=resultNest_4p,
 	thin=1, trace=TRUE)
 data(result_mcmc_4p)
 plotR(result=resultNest_4p, SE=result_mcmc_4p$SD,  
-ylim=c(0,0.3), x.SE=1)
+ ylim=c(0, 3), x.SE=1)
 x <- structure(c(115.758929130522, 428.649022170996, 503.687251738993, 
 12.2621455821612, 306.308841227278, 116.35048615105), .Names = c("DHA", 
 "DHH", "DHL", "DT", "T12L", "Rho25"))
-plotR(parameters=x, xlim=c(20,35))
+plotR(parameters=x, xlim=c(20, 35))
 pfixed <- c(rK=2.093313)
 resultNest_6p <- searchR(parameters=x, fixed.parameters=pfixed, 
 	temperatures=formated, derivate=dydt.Gompertz, M0=1.7, 
 	test=c(Mean=39.33, SD=1.92))
 data(resultNest_6p)
-plotR(list(resultNest_4p, resultNest_6p), ylim=c(0, 0.3), 
+plotR(list(resultNest_4p, resultNest_6p), ylim=c(0, 3), 
 col=c("black", "red"), legend=c("4 parameters", "6 parameters"))
 ##########################################
 # new formulation of parameters using anchors
 data(resultNest_newp)
 # without envelope
-plotR(resultNest_newp, ylim=c(0, 0.5))
+plotR(resultNest_newp, ylim=c(0, 5))
 # with envelope based in 1.96*SE and central curve based on mean
-plotR(result=resultNest_newp, ylim=c(0, 0.5), 
+plotR(result=resultNest_newp, ylim=c(0, 5), 
  SE=result_mcmc_newp$SD)
 # with envelope based on quantiles and central curve based on mean
-plotR(result=resultNest_newp, ylim=c(0, 0.5), 
+plotR(result=resultNest_newp, ylim=c(0, 5), 
  SE=apply(result_mcmc_newp[["resultMCMC"]][[1]], 
    MARGIN=2, FUN=quantile, probs=c(0.025, 0.975)))
 # with envelope based on quantiles and central curve based on median
-plotR(result=resultNest_newp, ylim=c(0, 0.5), 
+plotR(result=resultNest_newp, ylim=c(0, 5), 
  SE=apply(result_mcmc_newp[["resultMCMC"]][[1]], 
    MARGIN=2, FUN=quantile, probs=c(0.025, 0.975)),
  parameters=apply(result_mcmc_newp[["resultMCMC"]][[1]], 
    MARGIN=2, FUN=quantile, probs=c(0.5)))
 # Example to get the results
-(plotR(result=resultNest_newp, ylim=c(0, 0.5), 
+(plotR(result=resultNest_newp, ylim=c(0, 5), 
        SE=apply(result_mcmc_newp[["resultMCMC"]][[1]], 
                 MARGIN=2, FUN=quantile, probs=c(0.025, 0.975)),
        parameters=apply(result_mcmc_newp[["resultMCMC"]][[1]],

@@ -27,24 +27,23 @@ x <- structure(c(118.768297442004, 475.750095909406, 306.243694918151,
 116.055824800264), .Names = c("DHA", "DHH", "T12H", "Rho25"))
 # pfixed <- c(K=82.33) or rK=82.33/39.33
 pfixed <- c(rK=2.093313)
-resultNest_4p <- searchR(parameters=x, fixed.parameters=pfixed, 
+resultNest_4p_SSM4p <- searchR(parameters=x, fixed.parameters=pfixed, 
 	temperatures=formated, derivate=dydt.linear, M0=1.7, 
 	test=c(Mean=39.33, SD=1.92))
-data(resultNest_4p)
-# Use the fited parameters from resultNest_4p with  
+data(resultNest_4p_SSM4p)
+# Use the fited parameters from resultNest_4p_SSM4p with  
 # the constant incubation temperatures:
-plot(resultNest_4p, temperatures=tempConst_f,  
+plot(resultNest_4p_SSM4p, temperatures=tempConst_f,  
 	stopattest=TRUE, series="all", xlim=c(0,120),  
 	ylimT=c(22, 32), show.stages=FALSE, show.PT=FALSE,  
 	show.temperatures=FALSE, show.TSP=FALSE)
 }
 }
-\author{
-Marc Girondot \email{marc.girondot@u-psud.fr}
-}
 \references{
 Girondot, M., Kaska, Y., 2014. A model to predict the thermal reaction 
 norm for the embryo growth rate from field data. Journal of Thermal Biology 45, 96-102.
 }
+\author{
+Marc Girondot \email{marc.girondot@u-psud.fr}
+}
 \keyword{datasets}
-

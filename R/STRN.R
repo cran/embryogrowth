@@ -3,6 +3,7 @@
 #' @author Marc Girondot
 #' @return The list with object return by optim() 
 #' @param Initial_STRN Values for initial model of Sexualisation Thermal Reaction Norm
+#' @param fixed.parameters Value for Sexualisation Thermal Reaction Norm model that will not be changed
 #' @param EmbryoGrowthTRN The Embryo Growth Thermal Reaction Norm obtained with searchR()
 #' @param tsd The model used to predict sex ratio, obtained from tsd()
 #' @param Sexed The number of sexed embryos with names identifying timeseries
@@ -39,30 +40,30 @@
 #' -8.94560833594928, 135.781961273868, 71.2176230826628), 
 #' .Names = c("20", "22.5", "25", "27.5", "30", "32.5", "35"))
 #' males <- c(7, 0, 0, 0, 0, 5, 6, 3, 5, 3, 2, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0)
-#' names(males) <- rev(rev(names(resultNest_4p$data))[-(1:2)])
+#' names(males) <- rev(rev(names(resultNest_4p_SSM4p$data))[-(1:2)])
 #' sexed <- rep(10, length(males))
-#' names(sexed) <- rev(rev(names(resultNest_4p$data))[-(1:2)])
-#' fitSTRN <- STRN(Initial_STRN, EmbryoGrowthTRN=resultNest_4p, tsd=Med_Cc, 
+#' names(sexed) <- rev(rev(names(resultNest_4p_SSM4p$data))[-(1:2)])
+#' fitSTRN <- STRN(Initial_STRN, EmbryoGrowthTRN=resultNest_4p_SSM4p, tsd=Med_Cc, 
 #' Sexed=sexed, Males=males, 
 #' Temperatures="TSP.MassWeighted.STRNWeighted.temperature.mean")
-#' CTE <- info.nests(NestsResult=resultNest_4p, 
+#' CTE <- info.nests(NestsResult=resultNest_4p_SSM4p, 
 #'  SexualisationTRN=fitSTRN$par, out="summary")$summary
 #' plot_add(x=CTE$TSP.MassWeighted.STRNWeighted.temperature.mean, y=males/sexed, 
 #'  col="red", pch=19)
 #' legend("topright", legend=c("CTE with Sexualisation TRN"), 
 #' pch=19, col=c("red"))
 #' plotR(parameters=fitSTRN$par, main="Sexualisation TRN")
-#' # Initial_STRN <- resultNest_4p$par
+#' # Initial_STRN <- resultNest_4p_SSM4p$par
 #' Initial_STRN <- structure(c(4230.10750319997, 510.543319171189, 1015.78663983953,
 #' 118.189709917707), .Names = c("DHA", "DHH", "T12H", "Rho25"))
 #' males <- c(7, 0, 0, 0, 0, 5, 6, 3, 5, 3, 2, 3, 0, 0, 0, 0, 0, 0, 0, 0, NA)
-#' names(males) <- rev(rev(names(resultNest_4p$data))[-(1:2)])
+#' names(males) <- rev(rev(names(resultNest_4p_SSM4p$data))[-(1:2)])
 #' sexed <- c(rep(10, length(males)-1), NA)
-#' names(sexed) <- rev(rev(names(resultNest_4p$data))[-(1:2)])
-#' fitSTRN <- STRN(Initial_STRN, EmbryoGrowthTRN=resultNest_4p, tsd=Med_Cc, 
+#' names(sexed) <- rev(rev(names(resultNest_4p_SSM4p$data))[-(1:2)])
+#' fitSTRN <- STRN(Initial_STRN, EmbryoGrowthTRN=resultNest_4p_SSM4p, tsd=Med_Cc, 
 #' Sexed=sexed, Males=males, 
 #' Temperatures="TSP.MassWeighted.STRNWeighted.temperature.mean")
-#' CTE <- info.nests(NestsResult=resultNest_4p, 
+#' CTE <- info.nests(NestsResult=resultNest_4p_SSM4p, 
 #' SexualisationTRN=fitSTRN$par, out="summary")$summary
 #' plot(Med_Cc, xlim=c(25, 35))
 #' plot_add(x=CTE$TSP.MassWeighted.STRNWeighted.temperature.mean, y=males/sexed, 
@@ -74,6 +75,7 @@
 #' @export
 
 STRN <- function(Initial_STRN=NULL, 
+                 fixed.parameters = NULL, 
                  EmbryoGrowthTRN=stop("Embryo Growth Thermal Reaction Norm must be provided"), 
                  tsd=stop("A result from the function tsd() must be provided"),
                  Sexed=NULL, Males=NULL, Females=NULL, 
@@ -110,7 +112,9 @@ STRN <- function(Initial_STRN=NULL,
   repeat {
     
     L <- list(hessian=SE, method=method, 
-              par=pSTRN, fn=getFromNamespace(".STRN_fit", ns="embryogrowth"), 
+              par=pSTRN, 
+              fixed.parameters=fixed.parameters, 
+              fn=getFromNamespace(".STRN_fit", ns="embryogrowth"), 
               EmbryoGrowthTRN=EmbryoGrowthTRN, 
               tsd=tsd, Sexed=Sexed, Males=Males, Temperatures=Temperatures, 
               control=modifyList(list(dowarn=FALSE, follow.on=TRUE, kkt=FALSE), p3p))
@@ -135,7 +139,9 @@ STRN <- function(Initial_STRN=NULL,
   
   if (SE) {
     mathessian <- try(numDeriv::hessian(getFromNamespace(".STRN_fit", ns="embryogrowth"), 
-                                        parameters=result$par, method="Richardson", 
+                                        parameters=result$par, 
+                                        fixed.parameters=fixed.parameters, 
+                                        method="Richardson", 
                                         EmbryoGrowthTRN=EmbryoGrowthTRN, 
                                         tsd=tsd, Sexed=Sexed, Males=Males, 
                                         Temperatures=Temperatures), silent=TRUE)
@@ -166,7 +172,7 @@ STRN <- function(Initial_STRN=NULL,
       print("Probably the model is badly fitted. Try other initial points.")
     } else {
       print("Probably flat likelihood is observed around some parameters.")
-      print("Try using GRTRN_MHmcmc() function to get the SE of parameters.")
+      print("Try using STRN_MHmcmc() function to get the SE of parameters.")
     }
   }
   
@@ -176,6 +182,7 @@ STRN <- function(Initial_STRN=NULL,
                       Temperatures="Temperatures", 
                       EmbryoGrowthTRN=EmbryoGrowthTRN, 
                       tsd=tsd)
+  result$fixed.parameters <- fixed.parameters
   
   class(result) <- "STRN"
   

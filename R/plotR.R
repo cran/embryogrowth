@@ -1,390 +1,460 @@
-#' plotR shows the fitted growth rate dependent on temperature
-#' @title Show the fitted growth rate dependent on temperature
+#' plotR shows the fitted growth rate dependent on temperature and the density of the mcmc
+#' @title Show the fitted growth rate dependent on temperature and its density
 #' @author Marc Girondot
-#' @return A list with data.frame with the confidence interval and the average.
+#' @return The value of scaleY to be used with other plotR function
 #' @param result A result object or a list of result objects
-#' @param ... Parameters for plot() such as main= or ylim=
-#' @param parameters Indicate some parameters if the result object is not supplied
-#' @param fixed.parameters Indicate some parameters if the result object is not supplied
-#' @param SE The standard error for the parameters or a list of SE if several results. Use NA to force not use SE
-#' @param x.SE The factor used to show the confidence interval envelope
-#' @param set.par 1 or 2 or a list of 1 or 2 to designate with set of parameters to show
-#' @param size If indicated, will show the growth rate for this size. Useful only for model with two sets of parameters, High and Low and a transition
-#' @param legend Text to show in bottom right legend or a list of text if several results
-#' @param show.legend Should the legend about several series be shown?
-#' @param col The color to use for a list of colors if several results
-#' @param lty The type of line to use if several results as a list
-#' @param ltyCI The type of line to use for confidence interval as a list
-#' @param lwd The type of line to use if several results as a list
-#' @param lwdCI The type of line to use for confidence interval as a list
+#' @param resultmcmc A result object from GRTN_MHmcmc() function
+#' @param parameters A set of parameters - Has the priority over result
+#' @param fixed.parameters A set of fixed parameters
+#' @param temperatures A set of temperatures - Has the priority over result
+#' @param curves What curves to show: "MCMC quantiles" or "MCMC mean-SD" based on mcmc or "ML" or "ML quantiles" for maximum-likelihood
+#' @param colramp Ramp function accepting an integer as an argument and returning n colors.
+#' @param bandwidth numeric vector (length 1 or 2) of smoothing bandwidth(s). If missing, a more or less useful default is used. bandwidth is subsequently passed to function bkde2D.
+#' @param xlab Label for x axis
+#' @param ylab Label for y axis
+#' @param cex.lab cex value for axis
+#' @param cex.axis cex value for axis
+#' @param bty Box around the pot
+#' @param las Orientation for labels in y axis
+#' @param main Title of the graph
+#' @param set.par 1 or 2 to designate with set of parameters to show
+#' @param pch Character for outlayers
+#' @param col The color of the lines
+#' @param col.polygon The color of the polygon
+#' @param polygon If TRUE, confidence interval is shown as a polygon with color
+#' @param lty The type of lines
+#' @param ltyCI The type of lines
+#' @param lwd The type of lines
+#' @param lwdCI The type of lines
+#' @param ylim Range of values for y-axis
 #' @param xlim Range of values for x-axis
-#' @param xlimR Range of values to be displayed for R curve or vector of values; can be a list if a list of results is used
-#' @param xlimSE Range of values to be displayed for SE curves; can be a list if a list of results is used
+#' @param by.temperature Step to built the temperatures
 #' @param scaleY Scaling factor for y axis or "auto"
-#' @param replicate.CI Number of replicates to estimate CI
-#' @param show.box If TRUE show a box with "mean" and "confidence interval"
-#' @param local.box Position of the box with "mean" and "confidence interval", default="topleft"
-#' @param pch.anchors Symbol used to show anchors
-#' @param cex.anchors Size of symbol used to show anchors
-#' @param col.anchors Color of symbols used to show anchors
-#' @param y.anchors Position of anchors in y axis
-#' @param show.anchors Should the anchors been shown
-#' @description To show the growth rate, the syntaxe is:\cr
-#' plotR(result=res)\cr
-#' If SE is a matrix with two raws, the row values will use to draw the CI.
+#' @param show.density TRUE or FALSE
+#' @param probs Confidence or credibility interval to show
+#' @param new Should the graphics be a new one (TRUE) or superimposed to a previous one (FALSE) 
+#' @param show.hist TRUE or FALSE
+#' @param ylimH Scale of histogram using ylimH=c(min, max)
+#' @param atH Position of ticks for scale of histogram
+#' @param ylabH Label for histogram scale
+#' @param breaks See ?hist
+#' @param log.hist SHould the y scale for hist is log ?
+#' @param mar The value of par("mar"). If null, it will use default depending on show.dist. If NA, does not change par("mar").
+#' @description Show the fitted growth rate dependent on temperature and its density.\cr
+#' The curve "ML quantiles" is based on delta method.\cr
+#' The curve "ML" just shows the fitted model.\cr
+#' The curve "MCMC quantiles" uses the mcmc replicates to build the quantiles.\cr
+#' The curve "MCMC mean-SD" uses the mcmc replicates to build a symetric credibility interval.\cr
+#' The parameter curves is case insensitive.
 #' @examples
 #' \dontrun{
 #' library(embryogrowth)
-#' data(nest)
-#' formated <- FormatNests(nest)
-#' # The initial parameters value can be:
-#' # "T12H", "DHA",  "DHH", "Rho25"
-#' # Or
-#' # "T12L", "DT", "DHA",  "DHH", "DHL", "Rho25"
-#' x <- structure(c(118.768297442004, 475.750095909406, 306.243694918151, 
-#' 116.055824800264), .Names = c("DHA", "DHH", "T12H", "Rho25"))
-#' # pfixed <- c(K=82.33) or rK=82.33/39.33
-#' pfixed <- c(rK=2.093313)
-#' resultNest_4p <- searchR(parameters=x, fixed.parameters=pfixed, 
-#' 	temperatures=formated, derivate=dydt.Gompertz, M0=1.7, 
-#' 	test=c(Mean=39.33, SD=1.92))
-#' data(resultNest_4p)
-#' plotR(resultNest_4p, ylim=c(0,3))
-#' pMCMC <- TRN_MHmcmc_p(resultNest_4p, accept=TRUE)
-#' # Take care, it can be very long, sometimes several days
-#' result_mcmc_4p_80 <- GRTRN_MHmcmc(result=resultNest_4p,  
-#' 	parametersMCMC=pMCMC, n.iter=10000, n.chains = 1, n.adapt = 0,  
-#' 	thin=1, trace=TRUE)
-#' data(result_mcmc_4p)
-#' plotR(result=resultNest_4p, SE=result_mcmc_4p$SD,  
-#'  ylim=c(0, 3), x.SE=1)
-#' x <- structure(c(115.758929130522, 428.649022170996, 503.687251738993, 
-#' 12.2621455821612, 306.308841227278, 116.35048615105), .Names = c("DHA", 
-#' "DHH", "DHL", "DT", "T12L", "Rho25"))
-#' plotR(parameters=x, xlim=c(20, 35))
-#' pfixed <- c(rK=2.093313)
-#' resultNest_6p <- searchR(parameters=x, fixed.parameters=pfixed, 
-#' 	temperatures=formated, derivate=dydt.Gompertz, M0=1.7, 
-#' 	test=c(Mean=39.33, SD=1.92))
-#' data(resultNest_6p)
-#' plotR(list(resultNest_4p, resultNest_6p), ylim=c(0, 3), 
-#' col=c("black", "red"), legend=c("4 parameters", "6 parameters"))
-#' ##########################################
-#' # new formulation of parameters using anchors
-#' data(resultNest_newp)
-#' # without envelope
-#' plotR(resultNest_newp, ylim=c(0, 5))
-#' # with envelope based in 1.96*SE and central curve based on mean
-#' plotR(result=resultNest_newp, ylim=c(0, 5), 
-#'  SE=result_mcmc_newp$SD)
-#' # with envelope based on quantiles and central curve based on mean
-#' plotR(result=resultNest_newp, ylim=c(0, 5), 
-#'  SE=apply(result_mcmc_newp[["resultMCMC"]][[1]], 
-#'    MARGIN=2, FUN=quantile, probs=c(0.025, 0.975)))
-#' # with envelope based on quantiles and central curve based on median
-#' plotR(result=resultNest_newp, ylim=c(0, 5), 
-#'  SE=apply(result_mcmc_newp[["resultMCMC"]][[1]], 
-#'    MARGIN=2, FUN=quantile, probs=c(0.025, 0.975)),
-#'  parameters=apply(result_mcmc_newp[["resultMCMC"]][[1]], 
-#'    MARGIN=2, FUN=quantile, probs=c(0.5)))
-#' # Example to get the results
-#' (plotR(result=resultNest_newp, ylim=c(0, 5), 
-#'        SE=apply(result_mcmc_newp[["resultMCMC"]][[1]], 
-#'                 MARGIN=2, FUN=quantile, probs=c(0.025, 0.975)),
-#'        parameters=apply(result_mcmc_newp[["resultMCMC"]][[1]],
-#'                        MARGIN=2, FUN=quantile, probs=c(0.5)), 
-#'        xlimR=as.numeric(names(resultNest_newp$par))-273.15)[[1]])
-#'  ##########################################
-#'  # New Weilbull model
-#'  ##########################################
-#'  x <- c(k=3, lambda=3, theta=290)
-#'  resultNest_4p_Weibull <- searchR(parameters=x, fixed.parameters=pfixed,
-#'    temperatures=formated, derivate=dydt.Gompertz, M0=1.7,
-#'    test=c(Mean=39.33, SD=1.92))
-#'  plotR(resultNest_4p_Weibull)
-
+#' plotR(result = resultNest_4p_SSM4p, 
+#'              resultmcmc=resultNest_mcmc_4p_SSM4p, 
+#'              curves = "MCMC quantiles")
+#' #################
+#' plotR(resultmcmc=resultNest_mcmc_4p_SSM4p, 
+#'              curves = "MCMC quantiles", show.density=TRUE)
+#' #################
+#' plotR(resultmcmc=resultNest_mcmc_4p_SSM4p, 
+#'              curves = "MCMC quantiles", polygon=TRUE)
+#' #################
+#' plotR(resultmcmc=resultNest_mcmc_6p_SSM6p, ylim=c(0,4), 
+#'       curves = "MCMC quantiles", polygon=TRUE, col.polygon = rgb(0, 1, 0, 1))
+#' plotR(resultmcmc=resultNest_mcmc_4p_SSM4p,
+#'        curves = "MCMC quantiles", polygon=TRUE, col.polygon = rgb(1, 0, 0, 0.5), new=FALSE)
+#' legend("topleft", legend=c("SSM 4 parameters", "SSM 6 parameters"), 
+#'         pch=c(15, 15), col=c(rgb(1, 0, 0, 0.5), rgb(0, 1, 0, 1)))
+#' #################
+#' sy <- plotR(resultmcmc=resultNest_mcmc_4p_SSM4p, 
+#'              curves = "MCMC quantiles", show.density=FALSE)
+#' plotR(resultmcmc=resultNest_mcmc_6p_SSM6p, col="red",
+#'              curves = "MCMC quantiles", show.density=FALSE, 
+#'              new=FALSE, scaleY=sy)
+#' #################
+#' sy <- plotR(result=resultNest_6p_SSM6p, curves="ML", 
+#'              show.hist = TRUE, new = TRUE)
+#' plotR(result=resultNest_4p_SSM4p, curves="ML", scaleY=sy, 
+#'              show.hist = FALSE, new = FALSE, col="red")
+#' #################
+#' plotR(result=resultNest_6p_SSM6p, curves="ML", 
+#'              show.hist = TRUE, ylimH=c(0,1), atH=c(0, 0.1, 0.2))
+#' ################
+#' plotR(result = resultNest_4p_SSM4p, 
+#'              resultmcmc=resultNest_mcmc_4p_SSM4p, 
+#'              show.density = TRUE, 
+#'              curves = "MCMC quantiles")
+#' #################
+#' plotR(result=resultNest_4p_SSM4p, 
+#'              ylim=c(0, 4), curves="ML quantiles", scaleY=1E5)
+#' #################             
+#' plotR(result=resultNest_4p_SSM4p, show.hist = TRUE,
+#'              ylim=c(0, 4), curves="ML quantiles", scaleY=1E5)
+#' #################
+#' plotR(resultmcmc=resultNest_mcmc_4p_SSM4p, 
+#'              ylim=c(0, 4), curves = "MCMC quantiles", show.density=TRUE, scaleY=1E5)
 #' }
 #' @export
 
 
 plotR <-
-  function(result=NULL, parameters=NULL, fixed.parameters=NULL, col="black", legend=NA, 
-           show.legend=TRUE,
-           SE=NULL, x.SE=qnorm(0.975), set.par=1, size=NULL, xlim=c(20,35), 
-           scaleY="auto", lty=1, ltyCI=3, lwd=1, lwdCI=1, 
-           xlimR=xlim, xlimSE=xlim, replicate.CI=100, show.box=TRUE, local.box="topleft", 
-           pch.anchors=19, cex.anchors=1, col.anchors="black", y.anchors=0, 
-           show.anchors=TRUE, ...) {
+  function(result = NULL, 
+           resultmcmc = NULL, 
+           parameters = NULL, fixed.parameters = NULL, 
+           temperatures  = NULL,
+           curves = "ML quantiles", set.par=1, ylim=c(0, 5), xlim=c(20,35), 
+           cex.lab = par("cex"), cex.axis = par("cex"),
+           scaleY="auto", lty=1, ltyCI=3, lwd=1, lwdCI=1, col = "black", 
+           col.polygon="grey", polygon=FALSE, probs=0.99,
+           colramp=colorRampPalette(c("white", rgb(red = 0.5, green = 0.5, blue = 0.5))), 
+           bandwidth = c(0.1, 0.01), pch = "", main="",
+           xlab = expression("Temperature in "*degree*"C"), 
+           ylab = NULL, bty = "n", las = 1, 
+           by.temperature=0.1, show.density=FALSE, 
+           new=TRUE, show.hist=FALSE, ylimH = NULL, atH = NULL, 
+           ylabH="Temperature density", breaks = "Sturges", 
+           log.hist=FALSE,
+           mar=NULL) {
     
-    # result=NULL;parameters=NULL; fixed.parameters=NULL; lty=1; ltyCI=3; lwd=1; lwdCI=1; col="black"; legend=NA; SE=NULL; set.par=1; size=NA; xlim=c(20,35); xlimR=xlim; xlimSE=xlim; x.SE=qnorm(0.975); scaleY="auto"; replicate.CI=100; show.box=TRUE; local.box="topleft"; pch.anchors=19; cex.anchors=1; col.anchors="black"; y.anchors=0; show.anchors=TRUE
-    # result <- resultNest_4p; parameters <- newp; SE <- result_mcmc_newp$SD; ylim <- c(0,0.4)
-    # result=resultNest_newp; p3p <- list(ylim=c(0, 0.5)); SE=result_mcmc_newp$SD
-    # plotR(result=resultNest_newp, ylim=c(0, 0.5), SE=result_mcmc_newp$SD, xlimSE=c(25, 30))
+    # result = NULL; resultmcmc=NULL; parameters = NULL; fixed.parameters = NULL; probs=0.99; temperatures  = NULL;curves = "ML quantiles"; set.par=1; ylim=c(0, 5); xlim=c(20,35); cex.lab = 1; cex.axis = 1;scaleY="auto"; lty=1; ltyCI=3; lwd=1; lwdCI=1; colramp=colorRampPalette(c("white", rgb(red = 0.5, green = 0.5, blue = 0.5))); bandwidth = c(0.3, 0.05); pch = ""; main=""; col = "black"; col.polygon="grey"; polygon=FALSE; xlab = expression("Temperature in"*degree*"C"); ylab = NULL; bty = "n"; las = 1; by.temperature=0.1; show.density=FALSE;new=TRUE;show.hist=FALSE; ylimH = NULL; atH = NULL;ylabH="Temperature density";breaks = "Sturges";log.hist=FALSE;mar=NULL
+    # resultmcmc = resultNest_mcmc_4p_SSM4p
+    # result = resultNest_4p_SSM4p
     
-    if (is.null(result) & is.null(c(parameters, fixed.parameters))) {
-      stop("Or parameters or result from searchR must be provided !")
+    curves <- tolower(curves)
+    
+    SSM <- getFromNamespace(".SSM", ns="embryogrowth")
+    
+    if (class(result)=="mcmcComposite") {
+      resultmcmc <- result
+      result <- NULL
     }
     
-    p3p <- list(...)
-    # p3p <- list(NULL)
+    if (class(result)=="numeric") {
+      parameters <- result
+      result <- NULL
+    }
     
-    # 3/4/2016
-    SSM <- getFromNamespace(x=".SSM", ns="embryogrowth")
-    afficheCI <- FALSE
+    if (is.null(fixed.parameters) & !is.null(result)) fixed.parameters <- result$fixed.parameters
+    if (is.null(parameters) & !is.null(result)) parameters <- result$par
     
     
-    if (!is.list(col)) col <- list(col)
-    if (!is.list(lty)) lty <- list(lty)
-    if (!is.list(ltyCI)) ltyCI <- list(ltyCI)
-    if (!is.list(lwd)) lwd <- list(lwd)
-    if (!is.list(lwdCI)) lwdCI <- list(lwdCI)
-    if (!is.list(set.par)) set.par <- list(set.par)
-    if (!is.list(SE)) SE <- list(SE)
-    if (!is.list(xlimR)) xlimR <- list(xlimR)
-    if (!is.list(xlimSE)) xlimSE <- list(xlimSE)
-    if (!is.list(legend)) legend <- list(legend)
-    if (!is.list(parameters)) parameters <- list(parameters)
-    if (!is.list(fixed.parameters)) fixed.parameters <- list(fixed.parameters)
+    parameters <- c(parameters, fixed.parameters)
+    if (is.null(parameters) & !is.null(result)) parameters <- c(result$par, result$fixed.parameters)
+    if (is.null(parameters) & !is.null(resultmcmc)) parameters <- suppressMessages(as.parameters(resultmcmc))
     
-    if (is.null(result)) result <- NA
-
-    if (class(result)!="list") result <- list(result)
-      
-      nbr <- max(length(col), length(lty), length(ltyCI), length(lwd), length(lwdCI), 
-                 length(set.par), length(SE), length(xlimR), length(xlimSE), 
-                 length(legend), 
-                 length(parameters), length(fixed.parameters), length(result)
-                 )
-
-      # Je les mets tous a la meme taille
-      
-      col <- as.list(rep(unlist(col), nbr)[1:nbr])
-      lty <- as.list(rep(unlist(lty), nbr)[1:nbr])
-      ltyCI <- as.list(rep(unlist(ltyCI), nbr)[1:nbr])
-      lwd <- as.list(rep(unlist(lwd), nbr)[1:nbr])
-      lwdCI <- as.list(rep(unlist(lwdCI), nbr)[1:nbr])
-      set.par <- as.list(rep(unlist(set.par), nbr)[1:nbr])
-      # je dois les grouper par deux
-      xlimR <- rep(xlimR, nbr)[1:nbr]
-      xlimSE <- rep(xlimSE, nbr)[1:nbr]
-      
-      
-      SE <- c(SE, rep(NA, nbr-length(SE)))
-      result <- c(result, rep(NA, nbr-length(result)))
-      parameters <- c(parameters, rep(NA, nbr-length(parameters)))
-      fixed.parameters <- c(fixed.parameters, rep(NA, nbr-length(fixed.parameters)))
-      
-      legend <- c(unlist(legend), rep("", nbr-length(unlist(legend))))
-      
-      for (i in 1:nbr) {
-        if (length(result[[i]]) != 1) {
-          if ((length(parameters[[i]]) <= 1) & ifelse(is.null(parameters[[i]]), TRUE, all(is.na(parameters[[i]])))) parameters[[i]] <- result[[i]]$par
-          if ((length(fixed.parameters[[i]]) <= 1) & ifelse(is.null(fixed.parameters[[i]]), TRUE, all(is.na(fixed.parameters[[i]])))) fixed.parameters[[i]] <- result[[i]]$fixed.parameters
-          if ((length(SE[[i]]) <= 1) & ifelse(is.null(SE[[i]]), TRUE, all(is.na(SE[[i]])))) SE[[i]] <- result[[i]]$SE
-        }
-      }
-
+    if (is.null(temperatures) & !is.null(result)) temperatures <- result$data
     
-    premier <- TRUE
-    output <- NULL
+    if (show.density & is.null(resultmcmc)) {
+      warning("show.density option needs a mcmc object")
+      show.density <- FALSE
+    }
     
-    # dans nbr j'ai le nombre de series
-    for (rs in 1:nbr) {
-      
-      intermediaire <- data.frame(Temperatures=numeric(), Average=numeric(), CI.Minus=numeric(), CI.Plus=numeric())
-      
-      # J'introduis les paramtres fixes - 16/7/2012
-        parssm <- c(parameters[[rs]], fixed.parameters[[rs]])
-        model_p <- ifelse(all(names(parssm)!="Rho25") & all(names(parssm)!="k"), 
-                          "anchor", "equation")
-
-        # 4/4/2016 res peut etre une matrice si je suis en anchor
-        res <- SE[[rs]]
-        # je cree une variable pour savoir le type de modele
-      
-      # je suis en Anchor
-      if (model_p == "anchor") {
-        parvalue <- parssm[!(names(parssm) %in% c("rK", "K", "Scale"))]
-        parvalueT <- as.numeric(names(parvalue))
-        xlR <- xlimR[[rs]]
-        if (any(is.na(xlR))) xlR <- c(min(parvalueT, na.rm=TRUE), max(parvalueT, na.rm=TRUE))
-        if (xlR[1]>273) xlR <- xlR-273.15
-        xlSE <- xlimSE[[rs]]
-        if (any(is.na(xlSE))) xlSE <- c(min(parvalueT, na.rm=TRUE), max(parvalueT, na.rm=TRUE))
-        if (xlSE[1]>273) xlSE <- xlSE-273.15
-        
-        
-      } else {
-        xlR <- xlimR[[rs]]
-        xlSE <- xlimSE[[rs]]
-      }
-        
-      
-      if (length(xlR)==2) {
-        x <- seq(from=xlR[1],to=xlR[2],length=100)
-      } else {
-        x <- xlR
-      }
-        
-      # xSE <- seq(from=xlSE[1],to=xlSE[2],length=100)
-      
-      xSEDeb <- which.min(abs(x-xlSE[1]))
-      xSEFin <- which.min(abs(x-xlSE[2]))
-      xSE <- x[xSEDeb:xSEFin]
-      
-      
-      # if (x<273) x <- x+273.15
-      voutlist <- SSM(x, parssm)
-      
-      if (!is.null(size) & !is.na(parssm["transition_S"]) & !is.na(parssm["transition_P"])) {
-        r <- voutlist[[1]]
-        r_L <- voutlist[[2]]
-        transition <- 1/(1+exp(parssm["transition_S"]*(size-parssm["transition_P"])))
-        vout <- r*transition+r_L*(1-transition)
-      } else {
-        vout <- voutlist[[set.par[[rs]]]]
-      }
-      
-      if (scaleY=="auto" & premier) scaleY <- 10^(-floor(log10(max(vout, na.rm = TRUE))))
-      
-      y <- vout
-      
-      
-      
-      if (premier) {
-        L <- modifyList(list(type = "l", las=1, col=col[[rs]]
-                             , lty=lty[[rs]], lwd=lwd[[rs]]
-                             , axes = TRUE, bty = "n"
-                             , xlab = expression("Temperatures in " * degree * "C")
-                             , ylab = expression(paste0("r x", as.character(scaleY), "(mm."~min^-1~")")), xlim=xlim), 
-                        modifyList(list(x=x, y=scaleY*y), p3p))
-        do.call(plot, L) 
-      } else {
-        lines(x=x, y=scaleY*y, col=col[[rs]], lty=lty[[rs]], lwd=lwd[[rs]])
-      }
-      
-      intermediaire <- rbind(intermediaire, data.frame(Temperature=x, Average=y, CI.Plus=rep(NA, length(y)), CI.Minus=rep(NA, length(y))))
-            
-###### J'affiche l'intervalle de confiance
-      
-      # J'affiche l'intervalle de confiance si je l'ai
-      if (!is.null(res)) 
-        if (!all(is.na(res))) {
-        # Soit c'est directement une matrice qui est fournie
-        if (class(res)=="matrix") {
-        lines(xSE, SSM(xSE, res[1,])[[1]]*scaleY, type="l", col=col[[rs]], lty=ltyCI[[rs]], lwd=lwdCI[[rs]])
-        lines(xSE, SSM(xSE, res[2,])[[2]]*scaleY, type="l", col=col[[rs]], lty=ltyCI[[rs]], lwd=lwdCI[[rs]])
-        intermediaire[xSEDeb:xSEFin, "CI.Minus"] <- SSM(xSE, res[1,])[[1]]
-        intermediaire[xSEDeb:xSEFin, "CI.Plus"] <- SSM(xSE, res[2,])[[2]]
-        # Ou alors ce sont des parametres
-      } else {
-        # parssm c'est les parametres
-        # res c'est les SD
-        res2 <- parssm
-        res2[] <- 0
-        res2[match(names(res), names(res2))] <- res[na.omit(match(names(res2), names(res)))]
-        res <- res2
-        
-        if (model_p=="anchor") {
-          # Je suis en Anchor, je peux avoir des NA au début et à la fin
-          
-#          nm <- ! (names(res) %in% c("rK", "K", "Scale", "transition_S", "transition_P"))
-#          newx <- res[nm]
-#          newT <- as.numeric(names(res)[nm])
-          
-#          xSEp <- xSE[(xSE>min(newT[!is.na(newx)])-273.15) & (xSE<max(newT[!is.na(newx)])-273.15)]
-          
-          vout <- SSM(xSE, parssm[!is.na(res)]+x.SE*res[!is.na(res)])[[1]]
-          
-          lines(xSE, scaleY*vout, 
-                type="l", col=col[[rs]], lty=ltyCI[[rs]], lwd=lwdCI[[rs]])
-          
-          intermediaire[xSEDeb:xSEFin, "CI.Plus"] <- vout
-          
-          vout <- SSM(xSE, parssm[!is.na(res)]-x.SE*res[!is.na(res)])[[1]]
-          
-          lines(xSE, scaleY*vout, 
-                type="l", col=col[[rs]], lty=ltyCI[[rs]], lwd=lwdCI[[rs]])
-          
-          intermediaire[xSEDeb:xSEFin, "CI.Minus"] <- vout
-          
+    if (show.hist & is.null(temperatures)) {
+      warning("show.hist option needs a result object or temperatures")
+      show.hist <- FALSE
+    }
+    
+      if (is.null(mar)) {
+        if (!is.null(result) & show.hist & new) {
+          par(mar=c(4, 4, 1, 4)+0.4) 
         } else {
-          
-          if (!any(is.na(res))) {
-          # Je suis en modèle SSM ou Weibull; il ne doit pas y avoir de NA
-
-            # 8/2/2014 dans parssm j'ai les paramtres
-            # Je cree une liste avec les parametres et la moyenne et moyenne^2 pour chaque x
-            ess <- list(Parametre=matrix(rep(NA, length(parssm)*replicate.CI), ncol=length(parssm), dimnames=list(NULL, names(parssm))), moyenne=rep(0,length(xSE)), moyenne2=rep(0,length(xSE)))
-            
-            # Pour chacun des parametres, je tire la valeur dans une loi normale
-            for (i in seq_along(parssm)) {
-                ess$Parametre[,i] <- rnorm(replicate.CI, parssm[i], res[names(parssm[i])])
-            }
-            
-            afficheCI <- TRUE
-            
-            # Pour chacun des replicats, je calcule l'attendu
-            for (i in 1:replicate.CI) {
-              valeurlist <- SSM(xSE+273.15, ess$Parametre[i,])
-              
-              if (!is.null(size) & !is.na(parssm["transition_S"]) & !is.na(parssm["transition_P"])) {
-                r <- valeurlist[[1]]
-                r_L <- valeurlist[[2]]
-                transition <- 1/(1+exp(parssm["transition_S"]*(size-parssm["transition_P"])))
-                valeur <- r*transition+r_L*(1-transition)
-                
-              } else {
-                valeur <- valeurlist[[set.par[[rs]]]]
-              }
-              
-              ess$moyenne <- ess$moyenne+valeur
-              ess$moyenne2 <- ess$moyenne2+valeur^2
-            }
-            
-            sdR=sqrt(ess$moyenne2/replicate.CI-(ess$moyenne/replicate.CI)^2)
-            
-            lines(xSE, (y-x.SE*sdR)*scaleY, type="l", col=col[[rs]], lty=ltyCI[[rs]], lwd=lwdCI[[rs]])
-            lines(xSE, (y+x.SE*sdR)*scaleY, type="l", col=col[[rs]], lty=ltyCI[[rs]], lwd=lwdCI[[rs]])
-            intermediaire[xSEDeb:xSEFin, "CI.Minus"] <- y-x.SE*sdR
-            intermediaire[xSEDeb:xSEFin, "CI.Plus"] <- y+x.SE*sdR
-# fin du test qu'il n'y a pas de NA dans le modele parametrique
-          }
-# fin du test SSM ou Weibull            
+          par(mar=c(4, 4, 4, 1)+0.4)
         }
-# fin du test matrix de res
-      }
-# fin du test si res existe
-      }
-
-      par(new=TRUE)
-      premier <- FALSE
-      
-      output <- c(output, list(intermediaire))
-      
-      # fin de la boucle des series de resultats
-    }
-    
-    if (show.box) {
-      if (afficheCI) {
-        legend(local.box, c("Mean", "Confidence interval"), lty=c(lty[[1]], ltyCI[[1]]), lwd=c(lwd[[1]], lwdCI[[1]]), bty = "n")
       } else {
-        legend(local.box, c("Mean"), lty=lty[[1]], lwd=lwd[[1]], bty = "n")
+        if (all(!is.na(mar))) par(mar=mar)
+      }
+    
+    temp <- seq(from=xlim[1], to=xlim[2], by=by.temperature)
+    
+    rxxw_ML <- NULL
+    rxxw <- NULL
+    xxw <- NULL
+    xxw_ML <- NULL
+    
+    if (!is.null(resultmcmc) & (show.density | curves=="mcmc quantiles" | curves=="mcmc mean-sd")) {
+    dataR <- resultmcmc$resultMCMC[[1]]
+    xxw <- matrix(ncol = 2, 
+                  nrow = length(temp)*nrow(dataR))
+    xxw2 <- matrix(data = as.numeric(), ncol = length(temp), 
+                   nrow = nrow(dataR))
+    
+    xxw[, 1] <- rep(temp, nrow(dataR))
+    for (i in 1:nrow(dataR)) {
+      r <- SSM(T=temp, 
+               parms=c(dataR[i,], fixed.parameters))[[set.par]]
+      jhn <- (1+(i-1)*length(temp)):((i-1)*length(temp)+length(temp))
+      # xxw[jhn, 1] <- temp
+      xxw[jhn, 2] <- r
+      xxw2[i, ] <- r
+    }
+    rxxw <- apply(xxw2, MARGIN = 2, 
+                  FUN = function(x) c(Mean=mean(x), sd=sd(x), quantile(x, probs =c((1-probs)/2, 0.5, 1-(1-probs)/2), na.rm=TRUE)))
+    rxxw <- rbind(temperatures=temp, rxxw)
+    }
+    
+    # j'ai un hessian qui est fourni
+    if (curves=="ml quantiles" & !is.null(result$hessian)) {
+      
+
+      Scoefs <- result$par
+      hessian <- result$hessian
+      # rownames(hessian) <- colnames(hessian) <- names(Scoefs)
+      
+
+      
+      rxxw_ML <- data.frame(temperatures = numeric(), 
+                            Mean=numeric(), sd=numeric(), 
+                            "2.5%" = numeric(), 
+                            "50%" = numeric(), 
+                            "97.5%" = numeric()) 
+      
+      txt <- paste0("getFromNamespace('.wrapperSSM', ns='embryogrowth')(", 
+      paste0("b[", 1:length(Scoefs), "], ", collapse=""), 
+      ifelse(length(fixed.parameters)>0, 
+      paste0("x[1]", ", x[", 2:(1+length(fixed.parameters)), "] ", collapse=""), 
+      paste0("x[1]")), 
+      ")", collapse="")
+    warn <- FALSE
+      for (temperature in temp) {
+        options(warn=2) 
+        # if it returns an error, it means that CI is too small to be estimated
+        ic5 <- try(getFromNamespace(".nlConfint", ns="HelpersMG")(texts=txt, 
+                                              level = probs, coeff = Scoefs,
+                                              Vcov = solve(hessian), df2 = TRUE, 
+                                              x = c(T=temperature, fixed.parameters), 
+                                              silent=TRUE), silent=TRUE)
+        options(warn=0)
+        vy <- getFromNamespace('.wrapperSSM', ns='embryogrowth')(c(Scoefs, fixed.parameters, T=temperature))
+        if (class(ic5) == "try-error") {
+          # L'inervalle de confiance est nul ou autre probleme dans le genre
+          # warning(ic5)
+          warn <- TRUE
+          rxxw_ML <- rbind(rxxw_ML, 
+                         data.frame(temperatures=temperature, 
+                                    Mean = vy, sd = NA, 
+                                    "2.5%" = vy, 
+                                    "50%" = vy, 
+                                    "97.5%" = vy))
+        } else {
+          rxxw_ML <- rbind(rxxw_ML, 
+                           data.frame(temperatures=temperature, 
+                                      Mean = vy, sd = NA, 
+                                      "2.5%" = ic5[1, 2], 
+                                      "50%" = vy, 
+                                      "97.5%" = ic5[1, 3]))
+        }
+      }
+      rxxw_ML <- as.matrix(t(rxxw_ML))
+      if (warn) warning("At least some parts of confidence interval cannot be estimated")
+    }
+    
+      
+    # Si je n'ai pas de tableau generes, je les mets a NA
+    if (is.null(rxxw))
+          rxxw <- as.matrix(t(data.frame(temperatures=temp, Mean=NA, sd=NA, "2.5%"=NA, "50%"=NA, "97.5%"=NA)))
+    if (is.null(rxxw_ML))
+          rxxw_ML <- as.matrix(t(data.frame(temperatures=temp, Mean=NA, sd=NA, "2.5%"=NA, "50%"=NA, "97.5%"=NA)))
+    
+    
+    if (!is.null(parameters)) {
+      r <- SSM(T=temp, 
+               parms=parameters)[[set.par]]
+      r[is.infinite(r)] <- NA
+      if (is.null(xxw_ML)) xxw_ML <- data.frame(temperatures=temp, r=r)
+      rxxw_ML <- rbind(rxxw_ML, ML=r)
+    }  
+    
+    if (is.null(xxw)) xxw <- xxw_ML
+    if (scaleY=="auto") scaleY <- 10^(-floor(log10(max(xxw[, 2], na.rm = TRUE))))
+    
+    xxw[, 2] <- xxw[, 2] * scaleY
+    
+    rxxw[2:6, ] <- rxxw[2:6, ] * scaleY
+    rxxw_ML[2:7, ] <- rxxw_ML[2:7, ] * scaleY
+    rownames(rxxw) <- c("temperatures", "Mean", "sd", "X2.5", "X50", "X97.5")
+    rownames(rxxw_ML) <- c("temperatures", "Mean", "sd", "X2.5", "X50", "X97.5", "ML")
+    
+    if (is.null(ylab)) ylab <- as.expression(bquote(.(paste0("r x ", format(scaleY, scientific=FALSE), 
+                                                             " (mm.min"))*""^-1*")"))
+    
+    if (show.density & !is.null(xxw)) {
+      if (new) {
+        par(new=FALSE)
+    smoothScatter(x=xxw[, 1], y=xxw[, 2], las=las, bty = bty,  pch=pch, 
+                  bandwidth = bandwidth, 
+                  xlab=xlab, 
+                  main=main,
+                  colramp=colramp, 
+                  ylab=ylab, 
+                  ylim=ylim, xlim = xlim, nbin = 128, postPlotHook=NULL, 
+                  cex.axis=cex.axis, 
+                  cex.lab=cex.lab)
+      } else {
+        par(new=TRUE)
+        smoothScatter(x=xxw[, 1], y=xxw[, 2], bty = "n",  pch=pch, 
+                      bandwidth = bandwidth, 
+                      xlab="", 
+                      main="",
+                      colramp=colramp, 
+                      ylab="", 
+                      # xlim=c(ScalePreviousPlot()$xlim[1]-ScalePreviousPlot()$xlim[4]*0.04, ScalePreviousPlot()$xlim[2]+ScalePreviousPlot()$xlim[4]*0.04), 
+                      # ylim=c(ScalePreviousPlot()$ylim[1]-ScalePreviousPlot()$ylim[4]*0.04, ScalePreviousPlot()$ylim[2]+ScalePreviousPlot()$ylim[4]*0.04),
+                      ylim = ScalePreviousPlot()$ylim[1:2], 
+                      xlim = ScalePreviousPlot()$xlim[1:2], 
+                      nbin = 128, postPlotHook=NULL, 
+                      axes=FALSE,
+                      new=FALSE)
+      }
+    } else {
+      if (new) {
+        par(new=FALSE)
+      plot(xxw[, 1], y=xxw[, 2], type="n", 
+           las=las, 
+           bty = bty, 
+           xlab=xlab, 
+           main=main,
+           ylab=ylab, 
+           ylim=ylim, 
+           xlim = xlim, 
+           cex.axis=cex.axis, 
+           cex.lab=cex.lab)
+      # } else {
+      #   par(new=TRUE)
+      #   plot(xxw[, 1], y=xxw[, 2], type="n", 
+      #        las=las, 
+      #        bty = bty, 
+      #        xlab="", 
+      #        main="",
+      #        ylab="", 
+      #        ylim = ScalePreviousPlot()$ylim[1:2], 
+      #        xlim = ScalePreviousPlot()$xlim[1:2], 
+      #        axes=FALSE)
       }
     }
     
+
+    vx <- c(rxxw["temperatures", ], rev(rxxw["temperatures", ]))
     
-    if (show.legend & any(!is.na(unlist(legend)))) {
-      legend("bottomright", unlist(legend), lty=unlist(lty), lwd=unlist(lwd), bty = "n", col=unlist(col))
+    if (any(curves == "mcmc quantiles") & any(!is.na(rxxw[c("X2.5", "X50", "X97.5"), ]))) {
+      if (polygon) {
+        vy <- c(rxxw["X2.5", ], rev(rxxw["X97.5", ]))
+        vy <- ifelse(vy<ylim[1], ylim[1], vy)
+        vy <- ifelse(vy>ylim[2], ylim[2], vy)
+        polygon(x=vx, y=vy, col=col.polygon, border = NA)
+      }
+      
+    dxy <- data.frame(x=rxxw["temperatures", ], y=ifelse(rxxw["X50", ]>ylim[1] & rxxw["X50", ]<ylim[2], rxxw["X50", ], NA))
+    dxy <- na.omit(dxy)
+    lines(x = dxy$x, y=dxy$y, lty=lty, lwd=lwd, col=col)
+    
+    dxy <- data.frame(x=rxxw["temperatures", ], y=ifelse(rxxw["X2.5", ]>ylim[1] & rxxw["X2.5", ]<ylim[2], rxxw["X2.5", ], NA))
+    dxy <- na.omit(dxy)
+    lines(x = dxy$x, y=dxy$y, lty=ltyCI, lwd=lwdCI, col=col)
+    
+    dxy <- data.frame(x=rxxw["temperatures", ], y=ifelse(rxxw["X97.5", ]>ylim[1] & rxxw["X97.5", ]<ylim[2], rxxw["X97.5", ], NA))
+    dxy <- na.omit(dxy)
+    lines(x = dxy$x, y=dxy$y, lty=ltyCI, lwd=lwdCI, col=col)
     }
     
-    if (show.anchors)
-      if (all(names(parssm)!="Rho25") & all(names(parssm)!="k")) {
-        parssm2 <- parssm[! (names(parssm) %in% c("rK", "K", "Scale", "transition_S", "transition_P"))]
-        # je suis en anchor
-        if (!is.null(pch.anchors) & !is.null(cex.anchors) & !is.null(col.anchors))
-          points(x=as.numeric(names(parssm2))-273.15, y=rep(y.anchors, length(parssm2)), pch=pch.anchors, col=col.anchors, cex=cex.anchors) 
+    if (any(curves == "mcmc mean-sd") & any(!is.na(rxxw[c("Mean", "sd"), ]))) {
+      if (polygon) {
+        vy <- c(rxxw["Mean", ]+1.96*rxxw["sd", ], rev(rxxw["Mean", ]-1.96*rxxw["sd", ]))
+        vy <- ifelse(vy<ylim[1], ylim[1], vy)
+        vy <- ifelse(vy>ylim[2], ylim[2], vy)
+        polygon(x=vx, y=vy, col=col.polygon, border = NA)
       }
+      
+      dxy <- data.frame(x=rxxw["temperatures", ], y=ifelse(rxxw["Mean", ]>ylim[1] & rxxw["Mean", ]<ylim[2], rxxw["Mean", ], NA))
+      dxy <- na.omit(dxy)
+      lines(x = dxy$x, y=dxy$y, lty=lty, lwd=lwd, col=col)
+      
+      dxy <- data.frame(x=rxxw["temperatures", ], y=ifelse((rxxw["Mean", ]-1.96*rxxw["sd", ])>ylim[1] & (rxxw["Mean", ]-1.96*rxxw["sd", ])<ylim[2], rxxw["Mean", ]-1.96*rxxw["sd", ], NA))
+      dxy <- na.omit(dxy)
+      lines(x = dxy$x, y=dxy$y, lty=ltyCI, lwd=lwdCI, col=col)
+      
+      dxy <- data.frame(x=rxxw["temperatures", ], y=ifelse((rxxw["Mean", ]+1.96*rxxw["sd", ])>ylim[1] & (rxxw["Mean", ]+1.96*rxxw["sd", ])<ylim[2], rxxw["Mean", ]+1.96*rxxw["sd", ], NA))
+      dxy <- na.omit(dxy)
+      lines(x = dxy$x, y=dxy$y, lty=ltyCI, lwd=lwdCI, col=col)
+    }
+    if (any(curves == "ml") & !is.null(parameters) & any(!is.na(rxxw_ML[c("ML"), ]))) {
+      dxy <- data.frame(x=rxxw_ML["temperatures", ], y=ifelse(rxxw_ML["ML", ]>ylim[1] & rxxw_ML["ML", ]<ylim[2], rxxw_ML["ML", ], NA))
+      dxy <- na.omit(dxy)
+      lines(x = dxy$x, y=dxy$y, lty=lty, lwd=lwd, col=col)
+    }
     
-    return(invisible(output))
+    if (any(curves == "ml quantiles") & !is.null(parameters) & any(!is.na(rxxw_ML[c("X2.5", "X50", "X97.5"), ]))) {
+      if (polygon) {
+        vy <- c(rxxw_ML["X2.5", ], rev(rxxw_ML["X97.5", ]))
+        vy <- ifelse(vy<ylim[1], ylim[1], vy)
+        vy <- ifelse(vy>ylim[2], ylim[2], vy)
+        polygon(x=vx, y=vy, col=col.polygon, border = NA)
+      }
+      
+      dxy <- data.frame(x=rxxw_ML["temperatures", ], y=ifelse(rxxw_ML["X50", ]>ylim[1] & rxxw_ML["X50", ]<ylim[2], rxxw_ML["X50", ], NA))
+      dxy <- na.omit(dxy)
+      lines(x = dxy$x, y=dxy$y, lty=lty, lwd=lwd, col=col)
+      
+      dxy <- data.frame(x=rxxw_ML["temperatures", ], y=ifelse(rxxw_ML["X2.5", ]>ylim[1] & rxxw_ML["X2.5", ]<ylim[2], rxxw_ML["X2.5", ], NA))
+      dxy <- na.omit(dxy)
+      lines(x = dxy$x, y=dxy$y, lty=ltyCI, lwd=lwdCI, col=col)
+      
+      dxy <- data.frame(x=rxxw_ML["temperatures", ], y=ifelse(rxxw_ML["X97.5", ]>ylim[1] & rxxw_ML["X97.5", ]<ylim[2], rxxw_ML["X97.5", ], NA))
+      dxy <- na.omit(dxy)
+      lines(x = dxy$x, y=dxy$y, lty=ltyCI, lwd=lwdCI, col=col)
+    }
+    
+    if (!is.null(temperatures) & show.hist) {
+    
+    xlim <- ScalePreviousPlot()$xlim[c("begin", "end")]
+    ylim <- ScalePreviousPlot()$ylim[c("begin", "end")]
+    
+    par(new=TRUE)
+    if (log.hist==FALSE) {
+     if (is.null(ylimH)) {
+       a <- hist(x=temperatures, xlab="", ylab="", main="", axes=FALSE, freq=FALSE, 
+                            xlim=xlim, breaks=breaks)
+      } else {
+        a <- hist(x=temperatures, xlab="", ylab="", main="", axes=FALSE, freq=FALSE, 
+                  xlim=xlim, ylim=ylimH, breaks=breaks)
+      }
+      axis(side=4, las=1, at=atH, cex.axis=cex.axis)
+      
+    } else {
+      ax <- hist(x=temperatures, plot=FALSE)
+      yi <- ifelse(log(ax$histogram$density*1000)<0, 0, log(ax$histogram$density*1000))
+      myi <- max(yi)
+      yi <- yi/myi
+      if (!is.null(ylimH)) yi <- yi*ylimH[2]
+      
+      yi <- yi*ylim[2]
+      
+      for (i in seq_along(ax$histogram$density)) {
+        polygon(x=ax$histogram$breaks[c(i, i+1, i+1, i)], y=c(0, 0, yi[i], yi[i]))
+      }
+      
+      if (is.null(atH)) {
+        atH <- seq(from=0, to=max(ax$histogram$density), by=0.05)
+      } 
+        
+        yi <- ifelse(log(atH*1000)<0, 0, log(atH*1000))
+        # myi <- max(yi)
+        yi <- yi/myi
+        
+        if (!is.null(ylimH)) yi <- yi*ylimH[2]
+        yi <- yi*ylim[2]
+        
+        axis(side=4, las=1, at=yi, labels = atH, cex.axis=cex.axis)
+      
+        atH <- yi
+    }
+    
+    mtext(ylabH, side=4, line=3, at=ifelse(is.null(atH), NA, mean(c(atH[1], rev(atH)[1]))), cex=cex.lab)
+    
+    par(new=TRUE)
+    # je retablis l'echelle des y et celle de R
+    plot(x = 1, y=1, ylim=ylim, xlim=xlim, xlab="", ylab="", axes=FALSE, bty="n", type="n")
+    
+    }
+    
+    return(invisible(scaleY))
   }

@@ -3,6 +3,7 @@
 #' @author Marc Girondot \email{marc.girondot@@u-psud.fr}
 #' @docType data
 #' @name result_mcmc_4p_weight
+#' @encoding UTF-8
 #' @description Fit using the nest database
 #' @references Girondot, M., & Kaska, Y. (2014). A model to predict 
 #'             the thermal reaction norm for the embryo growth rate 
@@ -35,11 +36,11 @@
 #' plot(result_mcmc_4p_weight, parameter="T12H", main="", xlim=c(290, 320), bty="n")
 #' plotR(resultNest_4p_weight, SE=result_mcmc_4p_weight$SD, 
 #'  ylim=c(0,0.3), las=1)
-#' data(resultNest_4p)
-#' data(result_mcmc_4p)
+#' data(resultNest_4p_SSM4p)
+#' data(resultNest_mcmc_4p_SSM4p)
 #' par(xpd=TRUE)
-#' plotR(list(resultNest_4p_weight, resultNest_4p), 
-#'  SE=list(result_mcmc_4p_weight$SD, result_mcmc_4p$SD), 
+#' plotR(list(resultNest_4p_weight, resultNest_4p_SSM4p), 
+#'  SE=list(result_mcmc_4p_weight$SD, resultNest_mcmc_4p_SSM4p$SD), 
 #'  ylim=c(0,0.4), las=1, col=list("red", "black"), 
 #'  legend=list("Maximum entropy weighted", "Not weighted"))
 #' }

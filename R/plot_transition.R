@@ -12,9 +12,9 @@
 #' library(embryogrowth)
 #' data(nest)
 #' formated <- FormatNests(nest)
-#' data(resultNest_4p)
+#' data(resultNest_4p_SSM4p)
 #' # Get a set of parameters without transition
-#' x1 <- resultNest_4p$par
+#' x1 <- resultNest_4p_SSM4p$par
 #' # Generate a set of parameters with transition
 #' x2 <- switch.transition(x1)
 #' x2 <- x2[names(x2)!="transition_P"]
@@ -32,7 +32,7 @@
 #' plotR(resultNest_4p_transition, set.par=c(1,2), ylim=c(0,0.3), 
 #'        col=c("red", "black"), legend=list("Initial", "End"))
 #' plot_transition(result=resultNest_4p_transition, las=1, sizes=c(0,40))
-#' compare_AIC(one.model=list(resultNest_4p), two.models=list(resultNest_4p_transition))
+#' compare_AIC(one.model=list(resultNest_4p_SSM4p), two.models=list(resultNest_4p_transition))
 #' # Note that the model with fitted transition_P is trivial. Embryos grow fast until  
 #' # they reach hatchling size and then growth rate becomes null!
 #' }
@@ -51,13 +51,13 @@ function(result=NULL, parameters=NULL, sizes=c(0,40), ...) {
 		x1 <- sizes[1]
 		x2 <- sizes[2]
 	
-		L <- modifyList(list(x=seq(from=x1, to=x2, by=0.1), y=1/(1+exp((1/parssm["transition_S"]*(parssm["transition_P"]-seq(from=x1, to=x2, by=0.1))))), bty="n", type="l", ylim=c(0,1), xlab="Size", ylab="Proportion of model 2"), L)
+		L <- modifyList(list(x=seq(from=x1, to=x2, by=0.1), y=1/(1+exp(parssm["transition_S"]*(parssm["transition_P"]-seq(from=x1, to=x2, by=0.1)))), bty="n", type="l", ylim=c(0,1), xlab="Size", ylab="Proportion of model 2"), L)
 	
 
 		a <- do.call(plot, L) 
 	
 	} else {
-		print("Transition parameters are not defined.")
+		stop("Transition parameters are not defined.")
 	}
 
 }

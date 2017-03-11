@@ -4,6 +4,7 @@
 #' @author Maria Sousa Martins \email{maria.esmartins@@gmail.com}
 #' @docType data
 #' @name DatabaseNestingArea
+#' @encoding UTF-8
 #' @description Database of RMU for marine turtles
 #' @references Wallace, B. P., DiMatteo, A. D., Hurley, B. J., Finkbeiner, 
 #'             E. M., Bolten, A. B., Chaloupka, M. Y., Hutchinson, B. J., 

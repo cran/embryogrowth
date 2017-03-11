@@ -3,6 +3,7 @@
 #' @author Marc Girondot \email{marc.girondot@@u-psud.fr}
 #' @docType data
 #' @name resultNest_4p_weight
+#' @encoding UTF-8
 #' @description Fit using the nest database with weight
 #' @references Girondot, M., & Kaska, Y. (2014). A model to predict 
 #'             the thermal reaction norm for the embryo growth rate 

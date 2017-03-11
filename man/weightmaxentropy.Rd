@@ -62,4 +62,3 @@ plotR(resultNest_4p_weight, ylim=c(0,0.50), xlim=c(15, 35))
 \author{
 Marc Girondot
 }
-

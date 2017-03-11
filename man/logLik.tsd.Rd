@@ -34,4 +34,3 @@ AIC(result)
 \author{
 Marc Girondot
 }
-

@@ -22,19 +22,20 @@ hist.Nests <- function(x, series="all", ...) {
 
 nids <- x
 
+p3p <- list(...)
+
 # Plus possible car fonction speciale
- if (inherits(nids, "NestsResult")) {
+# if (inherits(nids, "NestsResult")) {
 # j'ai un objet de resultat
 # je prends les donnees
-	nids <- nids$data
- }
+#	nids <- nids$data
+# }
 
 
-if (!inherits(nids, "Nests")) {
+# if (!inherits(nids, "Nests")) {
 #Je n'ai ni un objet result ni un objet formate. Je quitte
-	print("'Nests' object obtained after FormatNests() or 'NestsResult' obtained after searchR() must be provided.")
-	return(invisible())
-}
+#	stop("'Nests' object obtained after FormatNests() or 'NestsResult' obtained after searchR() must be provided.")
+# }
 
 
 NbTS <- nids[["IndiceT"]][3]
@@ -78,23 +79,24 @@ for (j in 1:NbTS) {
 
 		it <- findInterval(tl1, tl2)
 
-		temptotal<-append(temptotal, nidsx[it,"Temperature"])
+		temptotal <- append(temptotal, nidsx[it,"Temperature"])
 
 	}
 }
 
 
 if (is.null(temptotal)) {
-	print("No nest is selected !")
-	a <- NULL
+	stop("No nest is selected !")
+#	a <- NULL
 } else {
 	x <- temptotal
 
-	L <- modifyList(list(ylab="Frequencies among the nests", xlab=expression("Temperatures in " * degree * "C"), main="", freq=FALSE, las=1), modifyList(list(x=x), list(...))) 
+	L <- modifyList(list(ylab="Temperature density", xlab=expression("Temperature in " * degree * "C"), main="", freq=FALSE, las=1), modifyList(list(x=x), p3p)) 
   
+	# C'est quoi ca ?
 	if (any(names(L)=="plot")) {
     if (!L$plot)
-      L <- modifyList(list(x=x), list(...)) 
+      L <- modifyList(list(x=x), p3p) 
 	}
   
 	a <- do.call(hist, L) 

@@ -20,7 +20,7 @@ shinyUI(fluidPage(
     , p(strong("The embryogrowth R package is a set of tools used 
                to model embryo growth and sexual phenotype linked to 
                temperature."))
-    , p("This web server version v. 3.62 is a simplified version of the complete tools available ", 
+    , p("This web server version v. 4.00 is a simplified version of the complete tools available ", 
         a("here."
           , href="https://cran.r-project.org/package=embryogrowth"
           , target="_blank"))
@@ -81,7 +81,7 @@ shinyUI(fluidPage(
       )
       
       ,  wellPanel(h4("Options to evaluate TSD")
-                   , radioButtons("Male", "Should the data presented as male or female frequency?", list(Male=1, Female=2), selected=1, inline = TRUE)
+                   , radioButtons("Male", "Should the data presented as male or female relative frequency?", list(Male=1, Female=2), selected=1, inline = TRUE)
                    , radioButtons("Temperature", "Analyze sex ratio against temperature or incubation duration ?", list(Temperature=1, Duration=2), selected=1, inline = TRUE)
                    , selectInput("Equation", "What equation should be used?"
                                  , choices=list("GSD", "Logistic", "Hill", "Richards", "Double-Richards", "Hulin")
@@ -115,7 +115,7 @@ shinyUI(fluidPage(
       , h4("Prediction")
       , tableOutput(outputId="Prediction")
       # , verbatimTextOutput(outputId="Prediction")
-      #, verbatimTextOutput(outputId="p")
+      # , verbatimTextOutput(outputId="p")
       
     )
   )

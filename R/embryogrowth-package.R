@@ -3,8 +3,8 @@
 #' \tabular{ll}{
 #'  Package: \tab embryogrowth\cr
 #'  Type: \tab Package\cr
-#'  Version: \tab 6.4 - build 534\cr
-#'  Date: \tab 2016-10-02\cr
+#'  Version: \tab 6.5 - build 597\cr
+#'  Date: \tab 2017-03-10\cr
 #'  License: \tab GPL (>= 2)\cr
 #'  LazyLoad: \tab yes\cr
 #'  }
@@ -14,6 +14,7 @@
 #' @name embryogrowth-package
 #' @description Tools to analyze the embryo growth and the sexualisation thermal reaction norms.\cr
 #' The lastest version of this package can always been installed using:\cr
+#' install.packages("http://www.ese.u-psud.fr/epc/conservation/CRAN/HelpersMG.tar.gz", repos=NULL, type="source")\cr
 #' install.packages("http://www.ese.u-psud.fr/epc/conservation/CRAN/embryogrowth.tar.gz", repos=NULL, type="source")
 #' @references Girondot, M. & Kaska, Y. 2014. A model to predict the thermal 
 #'          reaction norm for the embryo growth rate from field data. Journal of
@@ -51,24 +52,41 @@
 #' 118.189669472381), .Names = c("DHA", "DHH", "T12H", "Rho25"))
 #' # pfixed <- c(K=82.33) or rK=82.33/39.33
 #' pfixed <- c(rK=2.093313)
-#' resultNest_4p <- searchR(parameters=x, fixed.parameters=pfixed, 
+#' resultNest_4p_SSM4p <- searchR(parameters=x, fixed.parameters=pfixed, 
 #' 	temperatures=formated, derivate=dydt.Gompertz, M0=1.7, 
 #' 	test=c(Mean=39.33, SD=1.92))
-#' data(resultNest_4p)
-#' pMCMC <- TRN_MHmcmc_p(resultNest_4p, accept=TRUE)
+#' data(resultNest_4p_SSM4p)
+#' pMCMC <- TRN_MHmcmc_p(resultNest_4p_SSM4p, accept=TRUE)
 #' # Take care, it can be very long, sometimes several days
-#' result_mcmc_4p <- GRTRN_MHmcmc(result=resultNest_4p,  
+#' resultNest_mcmc_4p_SSM4p <- GRTRN_MHmcmc(result=resultNest_4p_SSM4p,  
 #' 	parametersMCMC=pMCMC, n.iter=10000, n.chains = 1, n.adapt = 0,  
 #' 	thin=1, trace=TRUE)
-#' data(result_mcmc_4p)
-#' out <- as.mcmc(result_mcmc_4p)
+#' data(resultNest_mcmc_4p_SSM4p)
+#' out <- as.mcmc(resultNest_mcmc_4p_SSM4p)
 #' # This out obtained after as.mcmc can be used with coda package
 #' # plot() can use the direct output of GRTRN_MHmcmc() function.
-#' plot(result_mcmc_4p, parameters=1, xlim=c(0,550))
-#' plot(result_mcmc_4p, parameters=3, xlim=c(290,320))
-#' # summary() permits to get rapidly the standard errors for parameters
-#' summary(result_mcmc_4p)
-#' se <- result_mcmc_4p$SD
+#' plot(resultNest_mcmc_4p_SSM4p, parameters=1, xlim=c(0,550))
+#' plot(resultNest_mcmc_4p_SSM4p, parameters=3, xlim=c(290,320))
+#' # But rather than to use the SD for each parameter independantly, it is
+#' # more logical to estimate the distribution of the curves
+#' new_result <- ChangeSSM(resultmcmc = resultNest_mcmc_4p_SSM4p, result = resultNest_4p_SSM4p,
+#'                         temperatures = seq(from = 20, to = 35, by = 0.1), 
+#'                         initial.parameters = NULL)
+#' par(mar=c(4, 4, 1, 5)+0.4)
+#' 
+#' plotR(result = resultNest_4p_SSM4p, parameters = new_result$par, 
+#'            ylabH = "Temperatures\ndensity", ylimH=c(0, 0.3), atH=c(0, 0.1, 0.2), 
+#'            ylim=c(0, 3), show.hist=TRUE)
+#'       
+#' # Beautiful density plot
+#' plotR(result = resultNest_4p_SSM4p, 
+#'              resultmcmc=resultNest_mcmc_4p_SSM4p, 
+#'              curves = "MCMC quantiles", show.density=TRUE)
+#' 
+#' plotR(resultNest_6p_SSM6p, resultmcmc=resultNest_mcmc_6p_SSM6p, 
+#'             ylim=c(0, 4), show.density=TRUE, show.hist=TRUE, 
+#'             curves = "MCMC quantiles", 
+#'             ylimH=c(0,0.5), atH=c(0, 0.1, 0.2))
 #' }
 
 NULL

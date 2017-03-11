@@ -20,11 +20,11 @@
 #' 116.055824800264), .Names = c("DHA", "DHH", "T12H", "Rho25"))
 #' # pfixed <- c(K=82.33) or rK=82.33/39.33
 #' pfixed <- c(rK=2.093313)
-#' resultNest_4p <- searchR(parameters=x, fixed.parameters=pfixed,  
+#' resultNest_4p_SSM4p <- searchR(parameters=x, fixed.parameters=pfixed,  
 #' 	temperatures=formated, derivate=dydt.Gompertz, M0=1.7,  
 #' 	test=c(Mean=39.33, SD=1.92))
-#' data(resultNest_4p)
-#' pMCMC <- TRN_MHmcmc_p(resultNest_4p, accept=TRUE)
+#' data(resultNest_4p_SSM4p)
+#' pMCMC <- TRN_MHmcmc_p(resultNest_4p_SSM4p, accept=TRUE)
 #' }
 #' @export
 
@@ -34,6 +34,8 @@
 TRN_MHmcmc_p<-function(result=NULL, parameters=NULL, fixed.parameters=NULL, 
                                 accept=FALSE) {
 
+  # result=NULL; parameters=NULL; fixed.parameters=NULL; accept=TRUE
+  
 # d'abord je sors les parametres a utiliser
   
   if (is.null(result) & is.null(parameters)) {
@@ -48,7 +50,7 @@ TRN_MHmcmc_p<-function(result=NULL, parameters=NULL, fixed.parameters=NULL,
   allpar <- c(parameters, fixed.parameters)
 
 # 7/2/2014, ajout de la nouvelle version des parametres
-if (all(names(allpar)!="Rho25")) {
+if (all(names(allpar)!="Rho25") & all(names(allpar)!="Peak") & all(names(allpar)!="k")) {
 	priors <- list()
 	for(i in 1:length(par)) {
 		pr <- c("dunif", 0.001, 20, 1, 0.001, 20, par[i])
@@ -57,6 +59,61 @@ if (all(names(allpar)!="Rho25")) {
 	names(priors) <- names(par)
 
 } else {
+  
+# k
+  if (!is.na(par["k"])) par["k"] <- abs(par["k"])
+  k <- c("dunif", 0, ifelse(is.na(par["k"]), 500, par["k"]*2), 2, 0, ifelse(is.na(par["k"]), 500, par["k"]*2), ifelse(is.na(par["k"]), 400, par["k"]))
+  
+# lambda
+  if (!is.na(par["lambda"])) par["lambda"] <- abs(par["lambda"])
+  lambda <- c("dunif", 0, ifelse(is.na(par["lambda"]), 500, par["lambda"]*2), 2, 0, ifelse(is.na(par["lambda"]), 500, par["lambda"]*2), ifelse(is.na(par["lambda"]), 400, par["lambda"]))
+  
+# scale
+  if (!is.na(par["scale"])) par["scale"] <- abs(par["scale"])
+  scale <- c("dunif", 0, ifelse(is.na(par["scale"]), 500, par["scale"]*2), 2, 0, ifelse(is.na(par["scale"]), 500, par["scale"]*2), ifelse(is.na(par["scale"]), 400, par["scale"]))
+
+  # k_L
+  if (!is.na(par["k_L"])) par["k_L"] <- abs(par["k_L"])
+  k_L <- c("dunif", 0, ifelse(is.na(par["k_L"]), 500, par["k_L"]*2), 2, 0, ifelse(is.na(par["k_L"]), 500, par["k_L"]*2), ifelse(is.na(par["k_L"]), 400, par["k_L"]))
+  
+  # lambda_L
+  if (!is.na(par["lambda_L"])) par["lambda_L"] <- abs(par["lambda_L"])
+  lambda_L <- c("dunif", 0, ifelse(is.na(par["lambda_L"]), 500, par["lambda_L"]*2), 2, 0, ifelse(is.na(par["lambda_L"]), 500, par["lambda_L"]*2), ifelse(is.na(par["lambda_L"]), 400, par["lambda_L"]))
+  
+  # scale_L
+  if (!is.na(par["scale_L"])) par["scale_L"] <- abs(par["scale_L"])
+  scale_L <- c("dunif", 0, ifelse(is.na(par["scale_L"]), 500, par["scale_L"]*2), 2, 0, ifelse(is.na(par["scale_L"]), 500, par["scale_L"]*2), ifelse(is.na(par["scale_L"]), 400, par["scale_L"]))
+  
+# Peak
+  Peak <- c("dnorm", 32, 2, 1, 20, 40, ifelse(is.na(par["Peak"]), 32, par["Peak"]))
+  
+# Length
+  Length <- c("dnorm", 5, 2, 1, 0, 20, ifelse(is.na(par["Length"]), 10, par["Length"]))
+
+# LengthB
+  LengthB <- c("dnorm", 5, 2, 1, 0, 20, ifelse(is.na(par["LengthB"]), 10, par["LengthB"]))
+
+# LengthE
+  LengthE <- c("dnorm", 5, 2, 1, 0, 20, ifelse(is.na(par["LengthE"]), 10, par["LengthE"]))
+  
+# Max
+  Max <- c("dnorm", 5, 2, 1, 0, 20, ifelse(is.na(par["Max"]), 10, par["Max"]))
+  
+# sd
+  sd <- c("dnorm", 5, 2, 1, 0, 20, ifelse(is.na(par["sd"]), 10, par["sd"]))
+  
+# sdH
+  sdH <- c("dnorm", 5, 2, 1, 0, 20, ifelse(is.na(par["sdH"]), 10, par["sdH"]))
+  
+# sdL
+  sdL <- c("dnorm", 5, 2, 1, 0, 20, ifelse(is.na(par["sdL"]), 10, par["sdL"]))
+
+# Scale
+  Scale <- c("dnorm", 3, 5, 1, 0, 100, ifelse(is.na(par["Scale"]), 3, par["Scale"]))
+  
+# "epsilon"
+  
+  epsilon <- c("dunif", -10, 10, 0.5, -10, 10, 0)
 
 # "DHA"
 
@@ -154,7 +211,11 @@ transition_S <- c("dunif", -100, 100, 2, -100, 100, ifelse(is.na(par["transition
 
 priors <- list(DHA=DHA, DHL=DHL, DHH=DHH, T12L=T12L, T12H=T12H, DT=DT, Rho25=Rho25, 
 DHA_L=DHA_L, DHL_L=DHL_L, DHH_L=DHH_L, T12L_L=T12L_L, T12H_L=T12H_L, DT_L=DT_L, Rho25_L=Rho25_L,
-transition_P=transition_P, transition_S=transition_S)
+transition_P=transition_P, transition_S=transition_S, epsilon=epsilon, 
+Peak=Peak, Scale=Scale, sdL=sdL, sdH=sdH, sd=sd, Length=Length, LengthB=LengthB, 
+LengthE=LengthE, Max=Max, 
+k=k, scale=scale, lambda=lambda, 
+k_L=k_L, scale_L=scale_L, lambda_L=lambda_L)
 
 }
 

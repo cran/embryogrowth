@@ -45,12 +45,12 @@ shinyServer(function(input, output) {
         if (is.null(zRMU)) zRMU <- "All"
         
         if (all(zRMU != "All")) {
-          zdf <- subset(DatabaseTSD, RMU %in% zRMU & 
-                          Species==input$Species & Sexed!=0 & 
-                          Note != "Sinusoidal pattern")
+          zdf <- subset(DatabaseTSD, (RMU %in% zRMU) & 
+                          (Species==input$Species) & (Sexed!=0) & 
+                          (!is.na(Sexed)) & ((Note != "Sinusoidal pattern")  | (is.na(Note))))
         } else {
-          zdf <- subset(DatabaseTSD, Species==input$Species & Sexed!=0 & 
-                          Note != "Sinusoidal pattern")
+          zdf <- subset(DatabaseTSD, (Species==input$Species) & (Sexed!=0) & (!is.na(Sexed)) 
+                        & ((Note != "Sinusoidal pattern") | (is.na(Note))))
         }
         
         zmale <- ifelse(input$Male=="1", TRUE, FALSE)
@@ -135,15 +135,12 @@ shinyServer(function(input, output) {
           valp <- gsub(" +", "#", valp)
           valp <- gsub("#+", "#", valp)
           valp <- as.numeric(unlist(strsplit(valp, "#")))
-          #output$p <- renderPrint({print(str(valp))})
+          # output$p <- renderPrint({print(dput(ztsd))})
           
-          if (input$Temperature == "1") {
-            output$Prediction <- renderTable({predict(ztsd, temperatures=valp)})
-          } else {
-            output$Prediction <- renderTable({predict(ztsd, durations=valp)})
-          }
+          o <- predict(ztsd, temperatures=valp)
+          output$Prediction <- renderTable(o)
         } else {
-          output$Prediction <- renderTable({data.frame()})
+          output$Prediction <- renderTable(data.frame())
         }
       })
     } else {

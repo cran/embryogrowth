@@ -2,155 +2,161 @@
 % Please edit documentation in R/plotR.R
 \name{plotR}
 \alias{plotR}
-\title{Show the fitted growth rate dependent on temperature}
+\title{Show the fitted growth rate dependent on temperature and its density}
 \usage{
-plotR(result = NULL, parameters = NULL, fixed.parameters = NULL,
-  col = "black", legend = NA, show.legend = TRUE, SE = NULL,
-  x.SE = qnorm(0.975), set.par = 1, size = NULL, xlim = c(20, 35),
-  scaleY = "auto", lty = 1, ltyCI = 3, lwd = 1, lwdCI = 1,
-  xlimR = xlim, xlimSE = xlim, replicate.CI = 100, show.box = TRUE,
-  local.box = "topleft", pch.anchors = 19, cex.anchors = 1,
-  col.anchors = "black", y.anchors = 0, show.anchors = TRUE, ...)
+plotR(result = NULL, resultmcmc = NULL, parameters = NULL,
+  fixed.parameters = NULL, temperatures = NULL, curves = "ML quantiles",
+  set.par = 1, ylim = c(0, 5), xlim = c(20, 35), cex.lab = par("cex"),
+  cex.axis = par("cex"), scaleY = "auto", lty = 1, ltyCI = 3, lwd = 1,
+  lwdCI = 1, col = "black", col.polygon = "grey", polygon = FALSE,
+  probs = 0.99, colramp = colorRampPalette(c("white", rgb(red = 0.5, green =
+  0.5, blue = 0.5))), bandwidth = c(0.1, 0.01), pch = "", main = "",
+  xlab = expression("Temperature in " * degree * "C"), ylab = NULL,
+  bty = "n", las = 1, by.temperature = 0.1, show.density = FALSE,
+  new = TRUE, show.hist = FALSE, ylimH = NULL, atH = NULL,
+  ylabH = "Temperature density", breaks = "Sturges", log.hist = FALSE,
+  mar = NULL)
 }
 \arguments{
 \item{result}{A result object or a list of result objects}
 
-\item{parameters}{Indicate some parameters if the result object is not supplied}
+\item{resultmcmc}{A result object from GRTN_MHmcmc() function}
 
-\item{fixed.parameters}{Indicate some parameters if the result object is not supplied}
+\item{parameters}{A set of parameters - Has the priority over result}
 
-\item{col}{The color to use for a list of colors if several results}
+\item{fixed.parameters}{A set of fixed parameters}
 
-\item{legend}{Text to show in bottom right legend or a list of text if several results}
+\item{temperatures}{A set of temperatures - Has the priority over result}
 
-\item{show.legend}{Should the legend about several series be shown?}
+\item{curves}{What curves to show: "MCMC quantiles" or "MCMC mean-SD" based on mcmc or "ML" or "ML quantiles" for maximum-likelihood}
 
-\item{SE}{The standard error for the parameters or a list of SE if several results. Use NA to force not use SE}
+\item{set.par}{1 or 2 to designate with set of parameters to show}
 
-\item{x.SE}{The factor used to show the confidence interval envelope}
-
-\item{set.par}{1 or 2 or a list of 1 or 2 to designate with set of parameters to show}
-
-\item{size}{If indicated, will show the growth rate for this size. Useful only for model with two sets of parameters, High and Low and a transition}
+\item{ylim}{Range of values for y-axis}
 
 \item{xlim}{Range of values for x-axis}
 
+\item{cex.lab}{cex value for axis}
+
+\item{cex.axis}{cex value for axis}
+
 \item{scaleY}{Scaling factor for y axis or "auto"}
 
-\item{lty}{The type of line to use if several results as a list}
+\item{lty}{The type of lines}
 
-\item{ltyCI}{The type of line to use for confidence interval as a list}
+\item{ltyCI}{The type of lines}
 
-\item{lwd}{The type of line to use if several results as a list}
+\item{lwd}{The type of lines}
 
-\item{lwdCI}{The type of line to use for confidence interval as a list}
+\item{lwdCI}{The type of lines}
 
-\item{xlimR}{Range of values to be displayed for R curve or vector of values; can be a list if a list of results is used}
+\item{col}{The color of the lines}
 
-\item{xlimSE}{Range of values to be displayed for SE curves; can be a list if a list of results is used}
+\item{col.polygon}{The color of the polygon}
 
-\item{replicate.CI}{Number of replicates to estimate CI}
+\item{polygon}{If TRUE, confidence interval is shown as a polygon with color}
 
-\item{show.box}{If TRUE show a box with "mean" and "confidence interval"}
+\item{probs}{Confidence or credibility interval to show}
 
-\item{local.box}{Position of the box with "mean" and "confidence interval", default="topleft"}
+\item{colramp}{Ramp function accepting an integer as an argument and returning n colors.}
 
-\item{pch.anchors}{Symbol used to show anchors}
+\item{bandwidth}{numeric vector (length 1 or 2) of smoothing bandwidth(s). If missing, a more or less useful default is used. bandwidth is subsequently passed to function bkde2D.}
 
-\item{cex.anchors}{Size of symbol used to show anchors}
+\item{pch}{Character for outlayers}
 
-\item{col.anchors}{Color of symbols used to show anchors}
+\item{main}{Title of the graph}
 
-\item{y.anchors}{Position of anchors in y axis}
+\item{xlab}{Label for x axis}
 
-\item{show.anchors}{Should the anchors been shown}
+\item{ylab}{Label for y axis}
 
-\item{...}{Parameters for plot() such as main= or ylim=}
+\item{bty}{Box around the pot}
+
+\item{las}{Orientation for labels in y axis}
+
+\item{by.temperature}{Step to built the temperatures}
+
+\item{show.density}{TRUE or FALSE}
+
+\item{new}{Should the graphics be a new one (TRUE) or superimposed to a previous one (FALSE)}
+
+\item{show.hist}{TRUE or FALSE}
+
+\item{ylimH}{Scale of histogram using ylimH=c(min, max)}
+
+\item{atH}{Position of ticks for scale of histogram}
+
+\item{ylabH}{Label for histogram scale}
+
+\item{breaks}{See ?hist}
+
+\item{log.hist}{SHould the y scale for hist is log ?}
+
+\item{mar}{The value of par("mar"). If null, it will use default depending on show.dist. If NA, does not change par("mar").}
 }
 \value{
-A list with data.frame with the confidence interval and the average.
+The value of scaleY to be used with other plotR function
 }
 \description{
-To show the growth rate, the syntaxe is:\cr
-plotR(result=res)\cr
-If SE is a matrix with two raws, the row values will use to draw the CI.
+Show the fitted growth rate dependent on temperature and its density.\cr
+The curve "ML quantiles" is based on delta method.\cr
+The curve "ML" just shows the fitted model.\cr
+The curve "MCMC quantiles" uses the mcmc replicates to build the quantiles.\cr
+The curve "MCMC mean-SD" uses the mcmc replicates to build a symetric credibility interval.\cr
+The parameter curves is case insensitive.
 }
 \details{
-plotR shows the fitted growth rate dependent on temperature
+plotR shows the fitted growth rate dependent on temperature and the density of the mcmc
 }
 \examples{
 \dontrun{
 library(embryogrowth)
-data(nest)
-formated <- FormatNests(nest)
-# The initial parameters value can be:
-# "T12H", "DHA",  "DHH", "Rho25"
-# Or
-# "T12L", "DT", "DHA",  "DHH", "DHL", "Rho25"
-x <- structure(c(118.768297442004, 475.750095909406, 306.243694918151, 
-116.055824800264), .Names = c("DHA", "DHH", "T12H", "Rho25"))
-# pfixed <- c(K=82.33) or rK=82.33/39.33
-pfixed <- c(rK=2.093313)
-resultNest_4p <- searchR(parameters=x, fixed.parameters=pfixed, 
-	temperatures=formated, derivate=dydt.Gompertz, M0=1.7, 
-	test=c(Mean=39.33, SD=1.92))
-data(resultNest_4p)
-plotR(resultNest_4p, ylim=c(0,3))
-pMCMC <- TRN_MHmcmc_p(resultNest_4p, accept=TRUE)
-# Take care, it can be very long, sometimes several days
-result_mcmc_4p_80 <- GRTRN_MHmcmc(result=resultNest_4p,  
-	parametersMCMC=pMCMC, n.iter=10000, n.chains = 1, n.adapt = 0,  
-	thin=1, trace=TRUE)
-data(result_mcmc_4p)
-plotR(result=resultNest_4p, SE=result_mcmc_4p$SD,  
- ylim=c(0, 3), x.SE=1)
-x <- structure(c(115.758929130522, 428.649022170996, 503.687251738993, 
-12.2621455821612, 306.308841227278, 116.35048615105), .Names = c("DHA", 
-"DHH", "DHL", "DT", "T12L", "Rho25"))
-plotR(parameters=x, xlim=c(20, 35))
-pfixed <- c(rK=2.093313)
-resultNest_6p <- searchR(parameters=x, fixed.parameters=pfixed, 
-	temperatures=formated, derivate=dydt.Gompertz, M0=1.7, 
-	test=c(Mean=39.33, SD=1.92))
-data(resultNest_6p)
-plotR(list(resultNest_4p, resultNest_6p), ylim=c(0, 3), 
-col=c("black", "red"), legend=c("4 parameters", "6 parameters"))
-##########################################
-# new formulation of parameters using anchors
-data(resultNest_newp)
-# without envelope
-plotR(resultNest_newp, ylim=c(0, 5))
-# with envelope based in 1.96*SE and central curve based on mean
-plotR(result=resultNest_newp, ylim=c(0, 5), 
- SE=result_mcmc_newp$SD)
-# with envelope based on quantiles and central curve based on mean
-plotR(result=resultNest_newp, ylim=c(0, 5), 
- SE=apply(result_mcmc_newp[["resultMCMC"]][[1]], 
-   MARGIN=2, FUN=quantile, probs=c(0.025, 0.975)))
-# with envelope based on quantiles and central curve based on median
-plotR(result=resultNest_newp, ylim=c(0, 5), 
- SE=apply(result_mcmc_newp[["resultMCMC"]][[1]], 
-   MARGIN=2, FUN=quantile, probs=c(0.025, 0.975)),
- parameters=apply(result_mcmc_newp[["resultMCMC"]][[1]], 
-   MARGIN=2, FUN=quantile, probs=c(0.5)))
-# Example to get the results
-(plotR(result=resultNest_newp, ylim=c(0, 5), 
-       SE=apply(result_mcmc_newp[["resultMCMC"]][[1]], 
-                MARGIN=2, FUN=quantile, probs=c(0.025, 0.975)),
-       parameters=apply(result_mcmc_newp[["resultMCMC"]][[1]],
-                       MARGIN=2, FUN=quantile, probs=c(0.5)), 
-       xlimR=as.numeric(names(resultNest_newp$par))-273.15)[[1]])
- ##########################################
- # New Weilbull model
- ##########################################
- x <- c(k=3, lambda=3, theta=290)
- resultNest_4p_Weibull <- searchR(parameters=x, fixed.parameters=pfixed,
-   temperatures=formated, derivate=dydt.Gompertz, M0=1.7,
-   test=c(Mean=39.33, SD=1.92))
- plotR(resultNest_4p_Weibull)
+plotR(result = resultNest_4p_SSM4p, 
+             resultmcmc=resultNest_mcmc_4p_SSM4p, 
+             curves = "MCMC quantiles")
+#################
+plotR(resultmcmc=resultNest_mcmc_4p_SSM4p, 
+             curves = "MCMC quantiles", show.density=TRUE)
+#################
+plotR(resultmcmc=resultNest_mcmc_4p_SSM4p, 
+             curves = "MCMC quantiles", polygon=TRUE)
+#################
+plotR(resultmcmc=resultNest_mcmc_6p_SSM6p, ylim=c(0,4), 
+      curves = "MCMC quantiles", polygon=TRUE, col.polygon = rgb(0, 1, 0, 1))
+plotR(resultmcmc=resultNest_mcmc_4p_SSM4p,
+       curves = "MCMC quantiles", polygon=TRUE, col.polygon = rgb(1, 0, 0, 0.5), new=FALSE)
+legend("topleft", legend=c("SSM 4 parameters", "SSM 6 parameters"), 
+        pch=c(15, 15), col=c(rgb(1, 0, 0, 0.5), rgb(0, 1, 0, 1)))
+#################
+sy <- plotR(resultmcmc=resultNest_mcmc_4p_SSM4p, 
+             curves = "MCMC quantiles", show.density=FALSE)
+plotR(resultmcmc=resultNest_mcmc_6p_SSM6p, col="red",
+             curves = "MCMC quantiles", show.density=FALSE, 
+             new=FALSE, scaleY=sy)
+#################
+sy <- plotR(result=resultNest_6p_SSM6p, curves="ML", 
+             show.hist = TRUE, new = TRUE)
+plotR(result=resultNest_4p_SSM4p, curves="ML", scaleY=sy, 
+             show.hist = FALSE, new = FALSE, col="red")
+#################
+plotR(result=resultNest_6p_SSM6p, curves="ML", 
+             show.hist = TRUE, ylimH=c(0,1), atH=c(0, 0.1, 0.2))
+################
+plotR(result = resultNest_4p_SSM4p, 
+             resultmcmc=resultNest_mcmc_4p_SSM4p, 
+             show.density = TRUE, 
+             curves = "MCMC quantiles")
+#################
+plotR(result=resultNest_4p_SSM4p, 
+             ylim=c(0, 4), curves="ML quantiles", scaleY=1E5)
+#################             
+plotR(result=resultNest_4p_SSM4p, show.hist = TRUE,
+             ylim=c(0, 4), curves="ML quantiles", scaleY=1E5)
+#################
+plotR(resultmcmc=resultNest_mcmc_4p_SSM4p, 
+             ylim=c(0, 4), curves = "MCMC quantiles", show.density=TRUE, scaleY=1E5)
 }
 }
 \author{
 Marc Girondot
 }
-

@@ -3,6 +3,7 @@
 #' @author Marc Girondot \email{marc.girondot@@u-psud.fr}
 #' @docType data
 #' @name stages
+#' @encoding UTF-8
 #' @description Database of embryonic development and thermosensitive period of development for sex 
 #' determination.
 #' @references Pieau, C., Dorizzi, M., 1981. Determination of temperature sensitive 

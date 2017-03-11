@@ -59,11 +59,10 @@ pfixed <- c(rK=2.093313)
 LresultNest_4p <- likelihoodR(parameters=x, fixed.parameters=pfixed,  
 	temperatures=formated, derivate=dydt.Gompertz, M0=1.7,  
 	test=c(Mean=39.33, SD=1.92))
-data(resultNest_4p)
-LresultNest_4p <- likelihoodR(result=resultNest_4p)
+data(resultNest_4p_SSM4p)
+LresultNest_4p <- likelihoodR(result=resultNest_4p_SSM4p)
 }
 }
 \author{
 Marc Girondot
 }
-

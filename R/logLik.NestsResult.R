@@ -8,9 +8,9 @@
 #' @examples
 #' \dontrun{
 #' library(embryogrowth)
-#' data(resultNest_4p)
-#' logLik(resultNest_4p)
-#' AIC(resultNest_4p)
+#' data(resultNest_4p_SSM4p)
+#' logLik(resultNest_4p_SSM4p)
+#' AIC(resultNest_4p_SSM4p)
 #' }
 #' @method logLik NestsResult
 #' @export

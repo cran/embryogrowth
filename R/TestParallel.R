@@ -8,8 +8,8 @@
 #' @examples
 #' \dontrun{
 #' library(embryogrowth)
-#' data(resultNest_4p)
-#' TestParallel(resultNest_4p)
+#' data(resultNest_4p_SSM4p)
+#' TestParallel(resultNest_4p_SSM4p)
 #' }
 #' @export
 

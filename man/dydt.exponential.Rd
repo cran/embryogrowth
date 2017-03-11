@@ -44,4 +44,3 @@ resultNest_4p_exponential <- searchR(parameters=x, fixed.parameters=NULL,
 \author{
 Marc Girondot
 }
-

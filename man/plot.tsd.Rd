@@ -6,8 +6,11 @@
 \usage{
 \method{plot}{tsd}(x, ..., show.observations = TRUE, males.freq = TRUE,
   las.x = 1, las.y = 1, lab.PT = paste("Pivotal ", x$type),
-  lab.TRT = paste0("Transitional range of ", x$type, "s l=", l * 100, "\%"),
-  col.TRT = "gray", col.TRT.CI = rgb(0.8, 0.8, 0.8, 0.5),
+  resultmcmc = NULL, chain = 1, l = 0.05, replicate.CI = 10000,
+  range.CI = 0.95, mar = c(4, 4, 4, 1) + 0.4, temperatures.plot = seq(from
+  = 25, to = 35, by = 0.1), durations.plot = seq(from = 40, to = 70, by =
+  0.1), lab.TRT = paste0("Transitional range of ", x$type, "s l=", x$l * 100,
+  "\%"), col.TRT = "gray", col.TRT.CI = rgb(0.8, 0.8, 0.8, 0.5),
   col.PT.CI = rgb(0.8, 0.8, 0.8, 0.5), show.CI = TRUE)
 }
 \arguments{
@@ -17,13 +20,29 @@
 
 \item{show.observations}{Should the observations be shown}
 
-\item{males.freq}{Should the graph uses males frequency [TRUE] or females [FALSE]}
+\item{males.freq}{Should the graph uses males relative frequency [TRUE] or females [FALSE]}
 
 \item{las.x}{las parameter for x axis}
 
 \item{las.y}{las parameter for y axis}
 
 \item{lab.PT}{Label to describe pivotal temperature}
+
+\item{resultmcmc}{A result of tsd_MHmcmc()}
+
+\item{chain}{What chain to be used is resultmcmc is provided}
+
+\item{l}{Sex ratio limits to define TRT are l and 1-l}
+
+\item{replicate.CI}{replicate.CI replicates from the hessian matrix to estimate CI}
+
+\item{range.CI}{The range of confidence interval for estimation, default=0.95}
+
+\item{mar}{The par("mar") parameter}
+
+\item{temperatures.plot}{Temperatures used for showing curves of sex ratio}
+
+\item{durations.plot}{Durations used for showing curves of sex ratio}
 
 \item{lab.TRT}{Label to describe transitional range of temperature}
 
@@ -54,9 +73,6 @@ tsdL <- with (CC_AtlanticSW, tsd(males=Males, females=Females,
 plot(tsdL)
 }
 }
-\author{
-Marc Girondot
-}
 \references{
 Girondot, M. 1999. Statistical description of temperature-dependent sex determination using maximum likelihood. Evolutionary Ecology Research, 1, 479-486.
 
@@ -66,4 +82,6 @@ Hulin, V., Delmas, V., Girondot, M., Godfrey, M.H., Guillon, J.-M., 2009. Temper
 
 Girondot M., Submited. On the concept of embryological thermosensitive period for sex determination in reptiles.
 }
-
+\author{
+Marc Girondot
+}

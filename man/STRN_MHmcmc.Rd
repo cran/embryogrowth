@@ -5,9 +5,11 @@
 \title{Metropolis-Hastings algorithm for Sexualisation Thermal Reaction Norm}
 \usage{
 STRN_MHmcmc(result = NULL, n.iter = 10000, parametersMCMC = NULL,
-  n.chains = 1, n.adapt = 0, thin = 1, trace = FALSE,
-  batchSize = sqrt(n.iter), dataSTRN = NULL, intermediate = NULL,
-  filename = "intermediate.Rdata", previous = NULL)
+  n.chains = 1, n.adapt = 0, thin = 1, trace = NULL,
+  batchSize = sqrt(n.iter), dataSTRN = NULL, adaptive = FALSE,
+  adaptive.lag = 500, adaptive.fun = function(x) {     ifelse(x > 0.234,
+  1.3, 0.7) }, intermediate = NULL, filename = "intermediate.Rdata",
+  previous = NULL)
 }
 \arguments{
 \item{result}{An object obtained after a STRN fit}
@@ -27,6 +29,12 @@ STRN_MHmcmc(result = NULL, n.iter = 10000, parametersMCMC = NULL,
 \item{batchSize}{Number of observations to include in each batch fo SE estimation}
 
 \item{dataSTRN}{A named list data used to estimate likelihoods (see further in description)}
+
+\item{adaptive}{Should an adaptive process for SDProp be used}
+
+\item{adaptive.lag}{Lag to analyze the SDProp value in an adaptive content}
+
+\item{adaptive.fun}{Function used to change the SDProp}
 
 \item{intermediate}{Period for saving intermediate result, NULL for no save}
 
@@ -79,4 +87,3 @@ library(embryogrowth)
 \author{
 Marc Girondot
 }
-

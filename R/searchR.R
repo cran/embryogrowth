@@ -11,11 +11,21 @@
 #' @param saveAtMaxiter If True, each time number of interation reach maxiter, current data are saved in file with filename name
 #' @param fileName The intermediate results are saved in file with fileName.Rdata name
 #' @param weight A named vector of the weight for each nest for likelihood estimation
-#' @param SE If TRUE, the SE of parameters are estimated.
 #' @param control List for control parameters for optimx
 #' @description Fit the parameters that best represent data.\cr
 #' test can be a data.frame with two columns Mean and SD and rownames with the nest name.\cr
-#' Function to fit thermal reaction norm can be also expressed as a Weibull function with k (shape), lambda (scale) and theta parameters.
+#' Function to fit thermal reaction norm can be also expressed as : \cr
+#' a 4-parameters [Schoolfield, Sharpe, and Magnuson. 1981] model with DHH, DHA, T12H, and Rho25;
+#' a 6-parameters [Schoolfield, Sharpe, and Magnuson. 1981] model with T12L, DT, DHH, DHL, DHA, and Rho25;
+#' Each of these two first models can be combined as low and high sets of parameters by adding the _L and _H suffix.
+#' Then you must add also transition_S and transition_P parameters;\cr
+#' It is possible also to add the parameter epsilon and then the model begins SSM + epsilon;\cr
+#' a Weibull function with k (shape), lambda (scale) and theta parameters.\cr
+#' a normal function with Peak, Scale, and sd parameters.\cr
+#' an asymmetric normal fuction with Peak, Scale, sdH and sdL parameters;\cr
+#' a symmetric trigonometric function with Length, Peak, and Max;\cr
+#' an asymmetric trigonometric function with LengthB, LengthE, Peak, and Max.\cr
+#' 
 #' @examples
 #' \dontrun{
 #' library(embryogrowth)
@@ -27,15 +37,16 @@
 #' # "T12L", "DT", "DHA",  "DHH", "DHL", "Rho25"
 #' # K for Gompertz must be set as fixed parameter or being a constant K  
 #' # or relative to the hatchling size rK
-#' x <- structure(c(106.59891311201, 614.181133951497, 306.267053513175, 
-#' 120.327257089974), .Names = c("DHA", "DHH", "T12H", "Rho25"))
+#' x <- structure(c(105.966881676793, 613.944134764125, 306.449533440186, 
+#'                 118.193882815108), .Names = c("DHA", "DHH", "T12H", "Rho25"))
 #' # pfixed <- c(K=82.33) or rK=82.33/39.33
 #' pfixed <- c(rK=2.093313)
-#' resultNest_4p <- searchR(parameters=x, fixed.parameters=pfixed, 
+#' resultNest_4p_SSM4p <- searchR(parameters=x, fixed.parameters=pfixed, 
 #' 	temperatures=formated, derivate=dydt.Gompertz, M0=1.7, 
 #' 	test=c(Mean=39.33, SD=1.92))
-#' data(resultNest_4p)
-#' plot(resultNest_4p, xlim=c(0,70), ylimT=c(22, 32), ylimS=c(0,45), series=1)
+#' data(resultNest_4p_SSM4p)
+#' plot(resultNest_4p_SSM4p, xlim=c(0,70), ylimT=c(22, 32), ylimS=c(0,45), series=1, 
+#' embryo.stages="Caretta caretta.SCL")
 #' x <- structure(c(106.567809092008, 527.359011254683, 614.208632495199, 
 #' 2720.94506457237, 306.268259715624, 120.336791245212), .Names = c("DHA", 
 #' "DHH", "DHL", "DT", "T12L", "Rho25"))
@@ -45,23 +56,23 @@
 #' ttest <- data.frame(Mean=rep(25.5, formated$IndiceT["NbTS"]), 
 #'                      SD=rep(0.75, formated$IndiceT["NbTS"]), 
 #'                      row.names=names(formated)[1:formated$IndiceT["NbTS"]])
-#' resultNest_6p <- searchR(parameters=x, fixed.parameters=pfixed, 
+#' resultNest_6p_SSM6p <- searchR(parameters=x, fixed.parameters=pfixed, 
 #' 	                        temperatures=formated, derivate=dydt.Gompertz, M0=1.7, 
 #' 	                        test=ttest)
 #' 	                        
-#' data(resultNest_6p)
-#' pMCMC <- TRN_MHmcmc_p(resultNest_6p, accept=TRUE)
+#' data(resultNest_6p_SSM6p)
+#' pMCMC <- TRN_MHmcmc_p(resultNest_6p_SSM6p, accept=TRUE)
 #' # Take care, it can be very long, sometimes several days
-#' result_mcmc_6p <- GRTRN_MHmcmc(result=resultNest_6p,  
+#' resultNest_mcmc_6p_SSM6p <- GRTRN_MHmcmc(result=resultNest_6p_SSM6p,  
 #' 	parametersMCMC=pMCMC, n.iter=10000, n.chains = 1, n.adapt = 0,  
 #' 	thin=1, trace=TRUE)
-#' data(result_mcmc_6p)
+#' data(resultNest_mcmc_6p_SSM6p)
 #' # compare_AIC() is a function from the package "HelpersMG"
-#' compare_AIC(test1=resultNest_4p, test2=resultNest_6p)
+#' compare_AIC(test1=resultNest_4p_SSM4p, test2=resultNest_6p_SSM6p)
 #' ############ with new parametrization
-#' data(resultNest_4p)
-#' x0 <- resultNest_4p$par
-#' t <- hist(resultNest_4p, plot=FALSE)
+#' data(resultNest_4p_SSM4p)
+#' x0 <- resultNest_4p_SSM4p$par
+#' t <- hist(resultNest_4p_SSM4p, plot=FALSE)
 #' x <- c(3.4, 3.6, 5.4, 5.6, 7.6, 7.5, 3.2)
 #' names(x) <- seq(from=range(t$temperatures)[1], to=range(t$temperatures)[2], 
 #'      length.out=7)
@@ -72,25 +83,55 @@
 #' resultNest_newp <- searchR(parameters=newx, fixed.parameters=pfixed,
 #'  temperatures=formated, derivate=dydt.Gompertz, M0=1.7,
 #'  test=c(Mean=39.33, SD=1.92))
-#' plotR_hist(resultNest_newp, ylim=c(0,0.3), xlimR=c(23, 34), ylimH=c(0, 0.3))
-#' compare_AIC(test4p=resultNest_4p, 
-#'             test6p=resultNest_6p, 
+#' plotR(resultNest_newp, ylim=c(0, 3), xlimR=c(23, 34), ylimH=c(0, 0.3), show.hist.TRUE)
+#' compare_AIC(test4p=resultNest_4p_SSM4p, 
+#'             test6p=resultNest_6p_SSM6p, 
 #'             testAnchor=resultNest_newp)
+#'             
 #' ############################################
 #' # example with thermal reaction norm fitted from Weibull function
 #' ############################################
-#' x <- structure(c(298890.11996796, 1229465.06811278, -1229160.54956529, 
-#' 27.2843254770591), .Names = c("k", "lambda", "theta", "scale"))
+#' 
+#'  x <- ChangeSSM(temperatures = (200:350)/10,
+#'                 parameters = resultNest_4p_SSM4p$par,
+#'                 initial.parameters = structure(c(73.4009010417375, 304.142079511996, 
+#'                                                 27.4671689276281), 
+#'                                         .Names = c("k", "lambda", "scale")), 
+#'                 control=list(maxit=1000))
 #' pfixed <- c(rK=2.093313)
-#' x <- ChangeSSM(temperatures = (200:350)/10,
-#'                parameters = resultNest_4p$par,
-#'                initial.parameters = x, 
-#'                control=list(maxit=1000))
-#' resultNest_4p_Weibull <- searchR(parameters=x, fixed.parameters=pfixed, 
+#' resultNest_3p_Weibull <- searchR(parameters=x$par, fixed.parameters=pfixed, 
 #'                          temperatures=formated, derivate=dydt.Gompertz, M0=1.7, 
 #'                          test=c(Mean=39.33, SD=1.92))
-#' plotR(list(resultNest_4p, resultNest_4p_Weibull), ylim=c(0,0.3), col=c("Black", "red"))
-#' compare_AIC(SSM=resultNest_4p, Weibull=resultNest_4p_Weibull)
+#' plotR(list(resultNest_4p_SSM4p, resultNest_3p_Weibull), ylim=c(0,3), col=c("Black", "red"))
+#' compare_AIC(SSM4p=resultNest_4p_SSM4p, Weibull=resultNest_3p_Weibull)
+#' 
+#' ###########################################
+#' # example with thermal reaction norm fitted from asymmetric normal function
+#' ############################################
+#' 
+#' x <- ChangeSSM(temperatures = (200:350)/10,
+#'                parameters = resultNest_4p_SSM4p$par,
+#'                initial.parameters = structure(c(3, 7, 11, 32), 
+#'                                .Names = c("Scale", "sdL", "sdH", "Peak")), 
+#'                control=list(maxit=1000))
+#' pfixed <- c(rK=2.093313)
+#' resultNest_4p_normal <- searchR(parameters=x$par, fixed.parameters=pfixed, 
+#'                          temperatures=formated, derivate=dydt.Gompertz, M0=1.7, 
+#'                          test=c(Mean=39.33, SD=1.92))
+#'                          
+#' ###########################################
+#' # example with thermal reaction norm fitted from trigonometric model
+#' ############################################
+#' 
+#'  x <- ChangeSSM(temperatures = (200:350)/10,
+#'                parameters = resultNest_4p_SSM4p$par,
+#'                initial.parameters = structure(c(3, 20, 40, 32), 
+#'                .Names = c("Max", "LengthB", "LengthE", "Peak")), 
+#'                control=list(maxit=1000))
+#' pfixed <- c(rK=2.093313)
+#' resultNest_4p_trigo <- searchR(parameters=x$par, fixed.parameters=pfixed, 
+#'                          temperatures=formated, derivate=dydt.Gompertz, M0=1.7, 
+#'                          test=c(Mean=39.33, SD=1.92))
 #' }
 #' @export
 
@@ -100,22 +141,21 @@ function(parameters=stop('Initial set of parameters must be provided'),
 	fixed.parameters=NULL, temperatures=stop('Formated temperature must be provided !'), 
 	derivate=dydt.Gompertz, test=c(Mean=39.33, SD=1.92), 
 	M0=1.7, saveAtMaxiter=FALSE, fileName="intermediate", 
-  weight=NULL, SE=FALSE, control=list(trace=1, REPORT=100, maxit=500)) {
+  weight=NULL, control=list(trace=1, REPORT=100, maxit=500)) {
   
-  # parameters <- structure(c(118.768297442004, 475.750095909406, 306.243694918151, 116.055824800264), .Names = c("DHA", "DHH", "T12H", "Rho25")); fixed.parameters <- c(rK=2.093313)
-  # temperatures <- formated
-  # parameters=x; fixed.parameters=pfixed; temperatures=formatedNest; derivate=dydt.Gompertz; M0=1.7;test=c(Mean=39.33, SD=1.92); control=list(trace=1, REPORT=100, maxit=200)
-  # derivate <- dydt.Gompertz;M0 <- 1.7; test=c(Mean=39.33, SD=1.92); saveAtMaxiter=FALSE;fileName="intermediate"; weight=NULL; hessian=TRUE
-  
+  # parameters=NULL; fixed.parameters=NULL; temperatures=NULL; derivate=dydt.Gompertz; test=c(Mean=39.33, SD=1.92); M0=1.7; saveAtMaxiter=FALSE; fileName="intermediate"; weight=NULL; SE=FALSE; control=list(trace=1, REPORT=100, maxit=500)  # temperatures <- formated
+
+  # parameters=x; fixed.parameters=pfixed; temperatures=formated; derivate=dydt.Gompertz; M0=1.7; test=c(Mean=39.33, SD=1.92)
+
   
     if (!requireNamespace("optimx", quietly = TRUE)) {
       stop("optimx package is absent; Please install it first")
     }
-
+    # library("optimx")
     if (!requireNamespace("numDeriv", quietly = TRUE)) {
       stop("numDeriv package is absent; Please install it first")
     }
-
+    # library("numDeriv")
   # dans temperatures il faut que je rajoute une colonne avec les indices de temperatures en K
   
   method <- c("Nelder-Mead","BFGS")
@@ -169,20 +209,19 @@ repeat {
                                  test=testuse, M0=M0, fixed.parameters=fixed.parameters,
                                  gr=grR, method=method, 
                                  control=modifyList(control, list(dowarn=FALSE, follow.on=TRUE, kkt=FALSE)), 
-                                 hessian=SE), silent=TRUE)
-    minL <- dim(result)[1]
+                                 hessian=FALSE), silent=TRUE)
+      
+
+    minL <- length(result[[1]])
     nm <- names(parameters)
-    x <- result[minL, nm]
-    x <- as.numeric(x)
-    names(x) <- nm
+    x <- unlist(result[minL, nm])
     conv <- result[minL, "convcode"]
     value <- result[minL, "value"]
-  
-  
-	if (conv==0) break
-	parameters<-x
-	print("Convergence is not achieved. Optimization continues !")
-	print(dput(parameters))
+    
+	if (conv == 0) break
+	parameters <- x
+	message("Convergence is not achieved. Optimization continues !")
+	message(dput(parameters))
  if (saveAtMaxiter) save(parameters, file=paste0(fileName, ".RData"))
 }
 
@@ -194,51 +233,48 @@ repeat {
 
 print(result$par)
 
-if (SE) {
-  
-  mathessian <- try(numDeriv::hessian(info.nests, 
+  mathessian <- try(numDeriv::hessian(getFromNamespace("info.nests", ns="embryogrowth"), 
                                       x=result$par, 
                                       method="Richardson", 
                                       temperatures=temperatures, 
-                                      derivate=derivate, weight=weight,
-                                      test=testuse, M0=M0, 
+                                      derivate=derivate, 
+                                      weight=weight,
+                                      test=testuse, 
+                                      M0=M0, 
                                       fixed.parameters=fixed.parameters)
                     , silent=TRUE)
   
   if (inherits(mathessian, "try-error")) {
     res <- rep(NA, length(parameters))
   } else {
+    rownames(mathessian) <- colnames(mathessian) <- names(x)
     result$hessian <- mathessian
     inversemathessian <- try(solve(mathessian), silent=TRUE)
     if (inherits(inversemathessian, "try-error")) {
       res <- rep(NA, length(parameters))
     } else {
       res <- diag(inversemathessian)
-      res <- ifelse(res<0, NA, sqrt(res))
+      res <- ifelse(res<0, NA, sqrt(abs(res)))
     }
   }
   
-} else {
-  # pas de hessian donc pas de SE
-  res<-rep(NA, length(parameters))
-}
+  if (any(is.na(res))) {
+    warning("Problem in Hessian estimation. Confidence interval will not be available.")
+    res <- rep(NA, length(parameters))
+  }
+
+
 names(res) <- names(parameters)
 result$SE <- res 
-
-if (any(is.na(res))) {
-  if (all(is.na(res))) {
-    print("SE of parameters cannot be estimated.")
-    print("Probably the model is badly fitted. Try other initial points.")
-  } else {
-    print("Probably flat likelihood is observed around some parameters.")
-    print("Try using GRTRN_MHmcmc() function to get the SE of parameters.")
-  }
-}
 
 result$data <- temperatures
 
 # Avant *5. Correction du 17/7/2012
-result$AIC <- 2*result$value+2*length(parameters)
+k <- length(parameters)
+n <- unname(result$data$IndiceT["NbTS"])
+result$AIC <- 2*result$value+2*k
+result$AICc <- result$AIC + (2*k*(k+1))/(n-k-1)
+result$BIC <- 2*result$value + k * log(n)
 
 result$test <- testuse
 result$derivate <- derivate

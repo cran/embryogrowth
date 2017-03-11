@@ -2,14 +2,15 @@
 #' @title Fit using the nest database
 #' @author Marc Girondot \email{marc.girondot@@u-psud.fr}
 #' @docType data
-#' @name resultNest_4p
+#' @name resultNest_4p_SSM4p
+#' @encoding UTF-8
 #' @description Fit using the nest database
 #' @references Girondot, M., & Kaska, Y. (2014). A model to predict 
 #'             the thermal reaction norm for the embryo growth rate 
 #'             from field data. Journal of Thermal Biology, 45, 96-102. 
 #'             doi: 10.1016/j.jtherbio.2014.08.005
 #' @keywords datasets
-#' @usage resultNest_4p
+#' @usage resultNest_4p_SSM4p
 #' @examples
 #' \dontrun{
 #' library(embryogrowth)
@@ -23,9 +24,11 @@
 #' 118.189669472381), .Names = c("DHA", "DHH", "T12H", "Rho25"))
 #' # pfixed <- c(K=82.33) or rK=82.33/39.33
 #' pfixed <- c(rK=2.093313)
-#' resultNest_4p <- searchR(parameters=x, fixed.parameters=pfixed, 
+#' resultNest_4p_SSM4p <- searchR(parameters=x, fixed.parameters=pfixed, 
 #' 	temperatures=formated, derivate=dydt.Gompertz, M0=1.7, 
 #' 	test=c(Mean=39.33, SD=1.92))
+#' plotR(result=resultNest_4p_SSM4p, show.hist = TRUE,
+#'              ylim=c(0, 4), curves="ML quantiles")
 #' }
 #' @format A list with fitted information about data(nest)
 NULL

@@ -10,6 +10,9 @@
 #' @param thin Number of iterations between each stored output
 #' @param trace True or False, shows progress
 #' @param batchSize Number of observations to include in each batch fo SE estimation
+#' @param adaptive Should an adaptive process for SDProp be used
+#' @param adaptive.lag  Lag to analyze the SDProp value in an adaptive content
+#' @param adaptive.fun Function used to change the SDProp
 #' @param filename If intermediate is not NULL, save intermediate result in this file
 #' @param intermediate Period for saving intermediate result, NULL for no save
 #' @param previous Previous result to be continued. Can be the filename in which intermediate results are saved.
@@ -35,31 +38,47 @@
 #'                                        "Incubation.temperature"))
 #' eo_logistic <- tsd(eo)
 #' pMCMC <- tsd_MHmcmc_p(eo_logistic, accept=TRUE)
-#' # Take care, it can be very long; several days
+#' # Take care, it can be very long
 #' result_mcmc_tsd <- tsd_MHmcmc(result=eo_logistic, 
 #' 		parametersMCMC=pMCMC, n.iter=10000, n.chains = 1,  
-#' 		n.adapt = 0, thin=1, trace=TRUE)
+#' 		n.adapt = 0, thin=1, trace=FALSE, adaptive=TRUE)
 #' # summary() permits to get rapidly the standard errors for parameters
 #' summary(result_mcmc_tsd)
-#' # They are store in the result also. Two SE are estimated using or 
-#' # batch method or time-series SE:
-#' # The batch standard error procedure is usually thought to be not 
-#' # as accurate as the time series methods.
-#' se1 <- result_mcmc_tsd$BatchSE
-#' se2 <- result_mcmc_tsd$TimeSeriesSE
 #' plot(result_mcmc_tsd, parameters="S", scale.prior=TRUE, xlim=c(-3, 3), las=1)
 #' plot(result_mcmc_tsd, parameters="P", scale.prior=TRUE, xlim=c(25, 35), las=1)
-#' plot(eo_logistic, se=se2)
+#' 1-rejectionRate(as.mcmc(result_mcmc_tsd))
+#' raftery.diag(as.mcmc(result_mcmc_tsd))
+#' heidel.diag(as.mcmc(result_mcmc_tsd))
+#' library(car)
+#' o <- P_TRT(x=eo_logistic, resultmcmc=result_mcmc_tsd)
+#' outEo <- dataEllipse(x=o$P_TRT[, "PT"], 
+#'                      y=o$P_TRT[, "TRT"], 
+#'                      levels=c(0.95), 
+#'                      draw=FALSE)
+#' plot(x = o$P_TRT[, "PT"], 
+#'      y=o$P_TRT[, "TRT"], 
+#'      pch=".", las=1, bty="n", 
+#'      xlab="Pivotal temperature", 
+#'      ylab=paste0("TRT ", as.character(100*eo_logistic$l), "%"), 
+#'      xlim=c(28.4, 28.6), 
+#'      ylim=c(0.8, 1.8))
+#' lines(outEo[, 1], outEo[, 2], col="green", lwd=2)
+#' legend("topleft", legend = c("Emys orbicularis", "95% confidence ellipse"), 
+#'        pch=c(19, NA), col=c("black", "green"), lty=c(0, 1), lwd=c(0, 2))
+
+
 #' }
 #' @export
 
 tsd_MHmcmc <- function(result=stop("A result of tsd() fit must be provided"), n.iter=10000, 
 parametersMCMC=NULL, n.chains = 1, n.adapt = 0, 
 thin=1, trace=FALSE, batchSize=sqrt(n.iter), 
+adaptive=FALSE, adaptive.lag=500, adaptive.fun=function(x) {ifelse(x>0.234, 1.3, 0.7)},
 intermediate=NULL, filename="intermediate.Rdata", previous=NULL) {
 
 # result=eo_logistic; parametersMCMC=NULL; 
-# n.iter=10000; n.chains = 1;  n.adapt = 0; thin=1; trace=TRUE; batchSize=sqrt(n.iter);intermediate=NULL; filename="intermediate.Rdata"; previous=NULL
+# n.iter=10000; n.chains = 1;  n.adapt = 0; thin=1; trace=TRUE; batchSize=sqrt(n.iter);intermediate=NULL; filename="intermediate.Rdata"; previous=NULL; adaptive=FALSE; adaptive.lag=500; adaptive.fun=function(x) {ifelse(x>0.234, 1.3, 0.7)}
+
   if (is.character(previous)) {
     itr <- NULL
     load(previous)
@@ -74,9 +93,10 @@ intermediate=NULL, filename="intermediate.Rdata", previous=NULL) {
   # 30/1/2015 Ajout de fixedparameters
   out <- MHalgoGen(n.iter=n.iter, parameters=parametersMCMC, 
                    n.chains = n.chains, n.adapt = n.adapt, thin=thin, trace=trace, 
-                   data=list(males=result$males, N=result$N, temperatures=result$temperatures, 
-                             equation=result$equation, fixed.parameters=result$fixed.parameters), 
+                   males=result$males, N=result$N, temperatures=result$temperatures, 
+                             equation=result$equation, fixed.parameters=result$fixed.parameters, 
                              likelihood=getFromNamespace(".fonctiontsdMCMC", ns="embryogrowth"), 
+                   adaptive=adaptive, adaptive.lag=adaptive.lag, adaptive.fun=adaptive.fun,
                              intermediate=intermediate, filename=filename, previous=previous)
 
 if (batchSize>=n.iter/2) {

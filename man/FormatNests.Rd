@@ -55,4 +55,3 @@ formated <- FormatNests(nest)
 \author{
 Marc Girondot
 }
-

@@ -9,9 +9,9 @@
 #' @examples
 #' \dontrun{
 #' library(embryogrowth)
-#' data(resultNest_4p)
-#' testsize1 <- GenerateTest(resultNest_4p)
-#' testsize2 <- GenerateTest(series=resultNest_4p,  
+#' data(resultNest_4p_SSM4p)
+#' testsize1 <- GenerateTest(resultNest_4p_SSM4p)
+#' testsize2 <- GenerateTest(series=resultNest_4p_SSM4p,  
 #' 	size=c(Mean=39.3, SD=1.92))
 #' }
 #' @export

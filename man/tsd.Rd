@@ -7,11 +7,8 @@
 tsd(df = NULL, males = NULL, females = NULL, N = NULL,
   temperatures = NULL, durations = NULL, l = 0.05,
   parameters.initial = c(P = NA, S = -2, K = 0, K1 = 1, K2 = 0),
-  males.freq = TRUE, fixed.parameters = NULL, SE = NULL,
-  equation = "logistic", replicates = 1000, range.CI = 0.95,
-  limit.low.TRT.minimum = 5, limit.high.TRT.maximum = 90, print = TRUE,
-  temperatures.plot = seq(from = 20, to = 40, by = 0.1),
-  durations.plot = seq(from = 15, to = 100, by = 0.1))
+  males.freq = TRUE, fixed.parameters = NULL, equation = "logistic",
+  replicate.CI = 10000, range.CI = 0.95, print = TRUE)
 }
 \arguments{
 \item{df}{A dataframe with at least two columns named males, females or N and temperatures, Incubation.temperature or durations column}
@@ -26,7 +23,7 @@ tsd(df = NULL, males = NULL, females = NULL, N = NULL,
 
 \item{durations}{The duration of incubation or TSP used to fit sex ratio}
 
-\item{l}{The limit to define TRT (see Girondot, 1999)}
+\item{l}{Sex ratio limits to define TRT are l and 1-l (see Girondot, 1999)}
 
 \item{parameters.initial}{Initial values for P, S or K search as a vector, ex. c(P=29, S=-0.3)}
 
@@ -34,29 +31,25 @@ tsd(df = NULL, males = NULL, females = NULL, N = NULL,
 
 \item{fixed.parameters}{Parameters that will not be changed}
 
-\item{SE}{Standard errors for parameters}
-
 \item{equation}{Could be "logistic", "Hill", "Richards", "Hulin", "Double-Richards" or "GSD"}
 
-\item{replicates}{Number of replicates to estimate confidence intervals}
+\item{replicate.CI}{Number of replicates to estimate confidence intervals}
 
 \item{range.CI}{The range of confidence interval for estimation, default=0.95}
 
-\item{limit.low.TRT.minimum}{Minimum lower limit for TRT}
-
-\item{limit.high.TRT.maximum}{Maximum higher limit for TRT}
-
 \item{print}{Do the results must be printed at screen? TRUE (default) or FALSE}
-
-\item{temperatures.plot}{Sequences of temperatures that will be used for plotting. If NULL, does not estimate them}
-
-\item{durations.plot}{Sequences of durations that will be used for plotting. If NULL, does not estimate them}
 }
 \value{
 A list the pivotal temperature, transitional range of temperatures and their SE
 }
 \description{
-Estimate the parameters that best describe temperature-dependent sex determination
+Estimate the parameters that best describe the thermal reaction norm for sex ratio when temperature-dependent sex determination occurs.\cr
+It can be used also to evaluate the relationship between incubation duration and sex ratio.\cr
+The parameter l was defined in Girondot (1999). The TRT is defined from the difference between the two boundary temperatures giving sex ratios of l and 1 \0x2212 l, respectively:\cr
+TRTl = abs(S.Kl) where Kl is a constant equal to [2.ln(l/(1-l))].\cr
+In Girondot (1999), l was 0.05 and then the TRT was defined as being the range of temperatures producing from 5\% to 95\% of each sex.\cr
+Models Richards, Double-Richards and Hulin are particularly sensitive for K parameters. If you want estimate 
+confidence interval for TRT using these models, it is better to use mcmc.
 }
 \details{
 tsd estimates the parameters that best describe temperature-dependent sex determination
@@ -67,21 +60,23 @@ CC_AtlanticSW <- subset(DatabaseTSD, RMU=="Atlantic, SW" &
                           Species=="Caretta caretta" & Sexed!=0)
 tsdL <- with (CC_AtlanticSW, tsd(males=Males, females=Females, 
                                  temperatures=Incubation.temperature-Correction.factor, 
-                                 equation="logistic"))
+                                 equation="logistic", replicate.CI=NULL))
 tsdH <- with (CC_AtlanticSW, tsd(males=Males, females=Females, 
                                  temperatures=Incubation.temperature-Correction.factor, 
-                                 equation="Hill"))
+                                 equation="Hill", replicate.CI=NULL))
 tsdR <- with (CC_AtlanticSW, tsd(males=Males, females=Females, 
                                  temperatures=Incubation.temperature-Correction.factor, 
-                                 equation="Richards"))
+                                 equation="Richards", replicate.CI=NULL))
 tsdDR <- with (CC_AtlanticSW, tsd(males=Males, females=Females, 
                                  temperatures=Incubation.temperature-Correction.factor, 
-                                 equation="Double-Richards"))
+                                 equation="Double-Richards", replicate.CI=NULL))
 gsd <- with (CC_AtlanticSW, tsd(males=Males, females=Females, 
                                  temperatures=Incubation.temperature-Correction.factor, 
-                                 equation="GSD"))
+                                 equation="GSD", replicate.CI=NULL))
 compare_AIC(Logistic_Model=tsdL, Hill_model=tsdH, Richards_model=tsdR, 
                DoubleRichards_model=tsdDR, GSD_model=gsd)
+compare_AICc(Logistic_Model=tsdL, Hill_model=tsdH, Richards_model=tsdR, 
+               DoubleRichards_model=tsdDR, GSD_model=gsd, factor.value = -1)
 ##############
 eo <- subset(DatabaseTSD, Species=="Emys orbicularis", c("Males", "Females", 
                                        "Incubation.temperature"))
@@ -89,11 +84,11 @@ eo <- subset(DatabaseTSD, Species=="Emys orbicularis", c("Males", "Females",
 eo_Hill <- with(eo, tsd(males=Males, females=Females, 
                                        temperatures=Incubation.temperature,
                                        equation="Hill"))
-eo_Hill <- tsd(df=eo, equation="Hill")
-eo_logistic <- tsd(eo)
+eo_Hill <- tsd(df=eo, equation="Hill", replicate.CI=NULL)
+eo_logistic <- tsd(eo, replicate.CI=NULL)
 eo_Richards <- with(eo, tsd(males=Males, females=Females, 
                                  temperatures=Incubation.temperature, 
-                                 equation="Richards"))
+                                 equation="Richards", replicate.CI=NULL))
 ### The Hulin model is a modification of Richards (See Hulin et al. 2009)
 ### limit.low.TRT and limit.high.TRT must be setup for Hulin equation
 par <- eo_Richards$par
@@ -102,9 +97,7 @@ par <- c(par, K1=0)
 eo_Hulin <- with(eo, tsd(males=Males, females=Females, 
                                  parameters.initial=par, 
                                  temperatures=Incubation.temperature, 
-                                 equation="Hulin", 
-                                 limit.low.TRT.minimum=25, 
-                                 limit.high.TRT.maximum=35))
+                                 equation="Hulin", replicate.CI=NULL))
 ### The Double-Richards model is a Richards model with K1 and K2 using the two values
 ### below and above P
 par <- eo_Richards$par
@@ -114,7 +107,7 @@ par["K1"] <- par["K1"]-0.1
 eo_Double_Richards <- with(eo, tsd(males=Males, females=Females,
                                  parameters.initial=par,
                                  temperatures=Incubation.temperature,
-                                 equation="Double-Richards"))
+                                 equation="Double-Richards", replicate.CI=NULL))
 compare_AIC(Logistic=eo_logistic, Hill=eo_Hill, Richards=eo_Richards, 
              Hulin=eo_Hulin, Double_Richards=eo_Double_Richards)
 ### Note the asymmetry of the Double-Richards model
@@ -126,12 +119,9 @@ CC_AtlanticSW <- subset(DatabaseTSD, RMU=="Atlantic, SW" &
                           Species=="Caretta caretta" & Sexed!=0)
 tsdL_IP <- with (CC_AtlanticSW, tsd(males=Males, females=Females, 
                                  durations=IP.mean, 
-                                 equation="logistic"))
+                                 equation="logistic", replicate.CI=NULL))
 plot(tsdL_IP, xlab="Incubation durations in days")
 }
-}
-\author{
-Marc Girondot
 }
 \references{
 Girondot, M. 1999. Statistical description of temperature-dependent sex determination using maximum likelihood. Evolutionary Ecology Research, 1, 479-486.
@@ -141,9 +131,11 @@ Godfrey, M.H., Delmas, V., Girondot, M., 2003. Assessment of patterns of tempera
 Hulin, V., Delmas, V., Girondot, M., Godfrey, M.H., Guillon, J.-M., 2009. Temperature-dependent sex determination and global change: are some species at greater risk? Oecologia 160, 493-506.
 }
 \seealso{
-Other Functions.for.temperature.dependent.sex.determination: \code{\link{DatabaseTSD}},
-  \code{\link{TSP.list}}, \code{\link{predict.tsd}},
-  \code{\link{stages}}, \code{\link{tsd_MHmcmc_p}},
-  \code{\link{tsd_MHmcmc}}
+Other Functions for temperature-dependent sex determination: \code{\link{DatabaseTSD}},
+  \code{\link{P_TRT}}, \code{\link{TSP.list}},
+  \code{\link{predict.tsd}}, \code{\link{stages}},
+  \code{\link{tsd_MHmcmc_p}}, \code{\link{tsd_MHmcmc}}
 }
-
+\author{
+Marc Girondot
+}

@@ -43,4 +43,3 @@ resultNest_4p_linear <- searchR(parameters=x, fixed.parameters=NULL,
 \author{
 Marc Girondot
 }
-

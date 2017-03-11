@@ -6,8 +6,10 @@
 \usage{
 tsd_MHmcmc(result = stop("A result of tsd() fit must be provided"),
   n.iter = 10000, parametersMCMC = NULL, n.chains = 1, n.adapt = 0,
-  thin = 1, trace = FALSE, batchSize = sqrt(n.iter),
-  intermediate = NULL, filename = "intermediate.Rdata", previous = NULL)
+  thin = 1, trace = FALSE, batchSize = sqrt(n.iter), adaptive = FALSE,
+  adaptive.lag = 500, adaptive.fun = function(x) {     ifelse(x > 0.234,
+  1.3, 0.7) }, intermediate = NULL, filename = "intermediate.Rdata",
+  previous = NULL)
 }
 \arguments{
 \item{result}{An object obtained after a SearchR fit}
@@ -25,6 +27,12 @@ tsd_MHmcmc(result = stop("A result of tsd() fit must be provided"),
 \item{trace}{True or False, shows progress}
 
 \item{batchSize}{Number of observations to include in each batch fo SE estimation}
+
+\item{adaptive}{Should an adaptive process for SDProp be used}
+
+\item{adaptive.lag}{Lag to analyze the SDProp value in an adaptive content}
+
+\item{adaptive.fun}{Function used to change the SDProp}
 
 \item{intermediate}{Period for saving intermediate result, NULL for no save}
 
@@ -61,30 +69,41 @@ eo <- subset(DatabaseTSD, Species=="Emys orbicularis", c("Males", "Females",
                                        "Incubation.temperature"))
 eo_logistic <- tsd(eo)
 pMCMC <- tsd_MHmcmc_p(eo_logistic, accept=TRUE)
-# Take care, it can be very long; several days
+# Take care, it can be very long
 result_mcmc_tsd <- tsd_MHmcmc(result=eo_logistic, 
 		parametersMCMC=pMCMC, n.iter=10000, n.chains = 1,  
-		n.adapt = 0, thin=1, trace=TRUE)
+		n.adapt = 0, thin=1, trace=FALSE, adaptive=TRUE)
 # summary() permits to get rapidly the standard errors for parameters
 summary(result_mcmc_tsd)
-# They are store in the result also. Two SE are estimated using or 
-# batch method or time-series SE:
-# The batch standard error procedure is usually thought to be not 
-# as accurate as the time series methods.
-se1 <- result_mcmc_tsd$BatchSE
-se2 <- result_mcmc_tsd$TimeSeriesSE
 plot(result_mcmc_tsd, parameters="S", scale.prior=TRUE, xlim=c(-3, 3), las=1)
 plot(result_mcmc_tsd, parameters="P", scale.prior=TRUE, xlim=c(25, 35), las=1)
-plot(eo_logistic, se=se2)
+1-rejectionRate(as.mcmc(result_mcmc_tsd))
+raftery.diag(as.mcmc(result_mcmc_tsd))
+heidel.diag(as.mcmc(result_mcmc_tsd))
+library(car)
+o <- P_TRT(x=eo_logistic, resultmcmc=result_mcmc_tsd)
+outEo <- dataEllipse(x=o$P_TRT[, "PT"], 
+                     y=o$P_TRT[, "TRT"], 
+                     levels=c(0.95), 
+                     draw=FALSE)
+plot(x = o$P_TRT[, "PT"], 
+     y=o$P_TRT[, "TRT"], 
+     pch=".", las=1, bty="n", 
+     xlab="Pivotal temperature", 
+     ylab=paste0("TRT ", as.character(100*eo_logistic$l), "\%"), 
+     xlim=c(28.4, 28.6), 
+     ylim=c(0.8, 1.8))
+lines(outEo[, 1], outEo[, 2], col="green", lwd=2)
+legend("topleft", legend = c("Emys orbicularis", "95\% confidence ellipse"), 
+       pch=c(19, NA), col=c("black", "green"), lty=c(0, 1), lwd=c(0, 2))
 }
+}
+\seealso{
+Other Functions for temperature-dependent sex determination: \code{\link{DatabaseTSD}},
+  \code{\link{P_TRT}}, \code{\link{TSP.list}},
+  \code{\link{predict.tsd}}, \code{\link{stages}},
+  \code{\link{tsd_MHmcmc_p}}, \code{\link{tsd}}
 }
 \author{
 Marc Girondot
 }
-\seealso{
-Other Functions.for.temperature.dependent.sex.determination: \code{\link{DatabaseTSD}},
-  \code{\link{TSP.list}}, \code{\link{predict.tsd}},
-  \code{\link{stages}}, \code{\link{tsd_MHmcmc_p}},
-  \code{\link{tsd}}
-}
-

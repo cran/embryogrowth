@@ -4,7 +4,7 @@
 \alias{STRN}
 \title{Estimate the parameters that best describe the sexualisation thermal reaction norm within the TSP}
 \usage{
-STRN(Initial_STRN = NULL,
+STRN(Initial_STRN = NULL, fixed.parameters = NULL,
   EmbryoGrowthTRN = stop("Embryo Growth Thermal Reaction Norm must be provided"),
   tsd = stop("A result from the function tsd() must be provided"),
   Sexed = NULL, Males = NULL, Females = NULL,
@@ -13,6 +13,8 @@ STRN(Initial_STRN = NULL,
 }
 \arguments{
 \item{Initial_STRN}{Values for initial model of Sexualisation Thermal Reaction Norm}
+
+\item{fixed.parameters}{Value for Sexualisation Thermal Reaction Norm model that will not be changed}
 
 \item{EmbryoGrowthTRN}{The Embryo Growth Thermal Reaction Norm obtained with searchR()}
 
@@ -66,30 +68,30 @@ Initial_STRN <- structure(c(1, 143.248982215757, -25.7029976477549, -0.004898430
 -8.94560833594928, 135.781961273868, 71.2176230826628), 
 .Names = c("20", "22.5", "25", "27.5", "30", "32.5", "35"))
 males <- c(7, 0, 0, 0, 0, 5, 6, 3, 5, 3, 2, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0)
-names(males) <- rev(rev(names(resultNest_4p$data))[-(1:2)])
+names(males) <- rev(rev(names(resultNest_4p_SSM4p$data))[-(1:2)])
 sexed <- rep(10, length(males))
-names(sexed) <- rev(rev(names(resultNest_4p$data))[-(1:2)])
-fitSTRN <- STRN(Initial_STRN, EmbryoGrowthTRN=resultNest_4p, tsd=Med_Cc, 
+names(sexed) <- rev(rev(names(resultNest_4p_SSM4p$data))[-(1:2)])
+fitSTRN <- STRN(Initial_STRN, EmbryoGrowthTRN=resultNest_4p_SSM4p, tsd=Med_Cc, 
 Sexed=sexed, Males=males, 
 Temperatures="TSP.MassWeighted.STRNWeighted.temperature.mean")
-CTE <- info.nests(NestsResult=resultNest_4p, 
+CTE <- info.nests(NestsResult=resultNest_4p_SSM4p, 
  SexualisationTRN=fitSTRN$par, out="summary")$summary
 plot_add(x=CTE$TSP.MassWeighted.STRNWeighted.temperature.mean, y=males/sexed, 
  col="red", pch=19)
 legend("topright", legend=c("CTE with Sexualisation TRN"), 
 pch=19, col=c("red"))
 plotR(parameters=fitSTRN$par, main="Sexualisation TRN")
-# Initial_STRN <- resultNest_4p$par
+# Initial_STRN <- resultNest_4p_SSM4p$par
 Initial_STRN <- structure(c(4230.10750319997, 510.543319171189, 1015.78663983953,
 118.189709917707), .Names = c("DHA", "DHH", "T12H", "Rho25"))
 males <- c(7, 0, 0, 0, 0, 5, 6, 3, 5, 3, 2, 3, 0, 0, 0, 0, 0, 0, 0, 0, NA)
-names(males) <- rev(rev(names(resultNest_4p$data))[-(1:2)])
+names(males) <- rev(rev(names(resultNest_4p_SSM4p$data))[-(1:2)])
 sexed <- c(rep(10, length(males)-1), NA)
-names(sexed) <- rev(rev(names(resultNest_4p$data))[-(1:2)])
-fitSTRN <- STRN(Initial_STRN, EmbryoGrowthTRN=resultNest_4p, tsd=Med_Cc, 
+names(sexed) <- rev(rev(names(resultNest_4p_SSM4p$data))[-(1:2)])
+fitSTRN <- STRN(Initial_STRN, EmbryoGrowthTRN=resultNest_4p_SSM4p, tsd=Med_Cc, 
 Sexed=sexed, Males=males, 
 Temperatures="TSP.MassWeighted.STRNWeighted.temperature.mean")
-CTE <- info.nests(NestsResult=resultNest_4p, 
+CTE <- info.nests(NestsResult=resultNest_4p_SSM4p, 
 SexualisationTRN=fitSTRN$par, out="summary")$summary
 plot(Med_Cc, xlim=c(25, 35))
 plot_add(x=CTE$TSP.MassWeighted.STRNWeighted.temperature.mean, y=males/sexed, 
@@ -102,4 +104,3 @@ plotR(parameters=fitSTRN$par, main="Sexualisation TRN")
 \author{
 Marc Girondot
 }
-

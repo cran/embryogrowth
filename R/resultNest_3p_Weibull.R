@@ -1,0 +1,38 @@
+#' Result of the fit using the nest database using Weibull function
+#' @title Result of the fit using the nest database using Weibull function
+#' @author Marc Girondot \email{marc.girondot@@u-psud.fr}
+#' @docType data
+#' @name resultNest_3p_Weibull
+#' @encoding UTF-8
+#' @description Fit using the nest database using Weibull function.
+#' The model is:\cr
+#'     rT <- dweibull(T, shape=abs(parms["k"]), \cr
+#'                    scale=abs(parms["lambda"]))*parms["scale"]*1E-5\cr
+#' @references Girondot, M., & Kaska, Y. (2014). A model to predict 
+#'             the thermal reaction norm for the embryo growth rate 
+#'             from field data. Journal of Thermal Biology, 45, 96-102. 
+#'             doi: 10.1016/j.jtherbio.2014.08.005
+#' @keywords datasets
+#' @usage resultNest_3p_Weibull
+#' @examples
+#' \dontrun{
+#' library(embryogrowth)
+#' data(nest)
+#' formated <- FormatNests(nest)
+#' # Weibull model
+#'  x <- ChangeSSM(temperatures = (200:350)/10,
+#'                 parameters = resultNest_4p_SSM4p$par,
+#'                 initial.parameters = structure(c(73.4009010417375, 304.142079511996, 
+#'                                                 27.4671689276281), 
+#'                                         .Names = c("k", "lambda", "scale")), 
+#'                 control=list(maxit=1000))
+#' pfixed <- c(rK=2.093313)
+#' resultNest_3p_Weibull <- searchR(parameters=x$par, fixed.parameters=pfixed, 
+#'                          temperatures=formated, derivate=dydt.Gompertz, M0=1.7, 
+#'                          test=c(Mean=39.33, SD=1.92))
+#' plotR(resultNest_3p_Weibull, ylim=c(0, 3))
+#' plotR(resultNest_3p_Weibull, ylim=c(0, 3), ylimH = c(0, 0.9), show.hist=TRUE)
+#' compare_AIC(SSM=resultNest_4p_SSM4p, Weibull=resultNest_3p_Weibull)
+#' }
+#' @format A list with fitted information about data(nest)
+NULL

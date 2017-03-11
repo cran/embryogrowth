@@ -35,4 +35,3 @@ temperatures=c(28, 30.5, 30.6),
 \author{
 Marc Girondot
 }
-

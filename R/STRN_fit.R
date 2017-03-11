@@ -1,6 +1,7 @@
-.STRN_fit <- function(par, EmbryoGrowthTRN, tsd, Sexed, Males, Temperatures) {
+.STRN_fit <- function(par, fixed.parameters, EmbryoGrowthTRN, tsd, Sexed, Males, Temperatures) {
 
-  infoall <- info.nests(NestsResult=EmbryoGrowthTRN, SexualisationTRN=par, 
+  infoall <- info.nests(NestsResult=EmbryoGrowthTRN, 
+                        SexualisationTRN=c(par, fixed.parameters), 
                         out="summary", replicate.CI = 1, progress=FALSE)$summary
 
     temp_TSD <- infoall[, Temperatures]

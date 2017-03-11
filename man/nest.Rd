@@ -20,13 +20,12 @@ library(embryogrowth)
 data(nest)
 }
 }
-\author{
-Marc Girondot \email{marc.girondot@u-psud.fr}
-}
 \references{
 Girondot, M. & Kaska, Y. 2014. A model to predict the thermal 
          reaction norm for the embryo growth rate from field data. Journal of
          Thermal Biology. 45, 96-102.
 }
+\author{
+Marc Girondot \email{marc.girondot@u-psud.fr}
+}
 \keyword{datasets}
-

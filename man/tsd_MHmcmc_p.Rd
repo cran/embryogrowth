@@ -32,13 +32,12 @@ eo_logistic <- with(eo, tsd(males=Males, females=Females,
 pMCMC <- tsd_MHmcmc_p(eo_logistic, accept=TRUE)
 }
 }
+\seealso{
+Other Functions for temperature-dependent sex determination: \code{\link{DatabaseTSD}},
+  \code{\link{P_TRT}}, \code{\link{TSP.list}},
+  \code{\link{predict.tsd}}, \code{\link{stages}},
+  \code{\link{tsd_MHmcmc}}, \code{\link{tsd}}
+}
 \author{
 Marc Girondot
 }
-\seealso{
-Other Functions.for.temperature.dependent.sex.determination: \code{\link{DatabaseTSD}},
-  \code{\link{TSP.list}}, \code{\link{predict.tsd}},
-  \code{\link{stages}}, \code{\link{tsd_MHmcmc}},
-  \code{\link{tsd}}
-}
-

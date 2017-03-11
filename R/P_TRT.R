@@ -1,0 +1,215 @@
+#' P_TRT estimates the transitional range of temperatures based on a set of parameters
+#' @title Estimate the transitional range of temperatures based on a set of parameters
+#' @author Marc Girondot
+#' @return A list with a P_TRT object containing a matrix with lower and higher bounds for TRT, TRT and P and a P_TRT_quantiles object with quantiles for each and a sexratio_quantiles object
+#' @param x Set of parameters or a result of tsd()
+#' @param resultmcmc A result of tsd_MHmcmc()
+#' @param chain What chain to be used is resultmcmc is provided
+#' @param temperatures If provided returns the sex ratio and its quantiles for each temperature
+#' @param durations If provided returns the sex ratio and its quantiles for each duration
+#' @param SD.temperatures SD of temperatures
+#' @param SD.durations SD of durations
+#' @param replicate.CI If a result of tsd() is provided, use replicate.CI replicates from the hessian matrix to estimate CI 
+#' @param equation What equation should be used. Must be provided if x is not a result of tsd()
+#' @param l Sex ratio limits to define TRT are l and 1-l
+#' @param probs Probabilities used to estimate quantiles
+#' @description Estimate the parameters that best describe the thermal reaction norm for sex ratio when temperature-dependent sex determination occurs.\cr
+#' It can be used also to evaluate the relationship between incubation duration and sex ratio.\cr
+#' The parameter l was defined in Girondot (1999). The TRT is defined from the difference between the two boundary temperatures giving sex ratios of l and 1 - l.\cr
+#' For logistic equation, exact value is used and precision iterations are used for other equations.\cr
+#' In Girondot (1999), l was 0.05 and then the TRT was defined as being the range of temperatures producing from 5% to 95% of each sex.\cr
+#' If l is null, TRT is not estimated and only sex ratio is estimated.
+#' @references Girondot, M. 1999. Statistical description of temperature-dependent sex determination using maximum likelihood. Evolutionary Ecology Research, 1, 479-486.
+#' @references Godfrey, M.H., Delmas, V., Girondot, M., 2003. Assessment of patterns of temperature-dependent sex determination using maximum likelihood model selection. Ecoscience 10, 265-272.
+#' @references Hulin, V., Delmas, V., Girondot, M., Godfrey, M.H., Guillon, J.-M., 2009. Temperature-dependent sex determination and global change: are some species at greater risk? Oecologia 160, 493-506.
+#' @family Functions for temperature-dependent sex determination
+#' @examples
+#' \dontrun{
+#' CC_AtlanticSW <- subset(DatabaseTSD, RMU=="Atlantic, SW" & 
+#'                           Species=="Caretta caretta" & Sexed!=0)
+#' tsdL <- with (CC_AtlanticSW, tsd(males=Males, females=Females, 
+#'                                  temperatures=Incubation.temperature-Correction.factor, 
+#'                                  equation="logistic"))
+#' P_TRT(tsdL)
+#' P_TRT(tsdL, replicate.CI=1000)
+#' P_TRT(tsdL, replicate.CI=1000, temperatures=20:35)
+#' P_TRT(tsdL$par, equation="logistic")
+#' pMCMC <- tsd_MHmcmc_p(tsdL, accept=TRUE)
+#' # Take care, it can be very long
+#' result_mcmc_tsd <- tsd_MHmcmc(result=tsdL, 
+#' 		parametersMCMC=pMCMC, n.iter=10000, n.chains = 1,  
+#' 		n.adapt = 0, thin=1, trace=FALSE, adaptive=TRUE)
+#' P_TRT(result_mcmc_tsd, equation="logistic")
+#' }
+#' @export
+
+P_TRT <- function(x=NULL, resultmcmc=NULL, chain=1, equation=NULL, l=0.05, 
+                replicate.CI=NULL, temperatures=NULL, durations=NULL,
+                SD.temperatures= NULL, SD.durations=NULL,
+                probs=c(0.025, 0.5, 0.975)) {
+  
+  # resultmcmc=NULL;chain=1;equation=NULL;l=0.05;replicate.CI=NULL; temperatures=NULL; TRT.limits=c(9, 90); precision=15; probs=c(0.025, 0.5, 0.975)  
+  if (is.null(x) & is.null(resultmcmc)) stop("Or x or resultmcmc must be provided")
+  if (!is.null(temperatures) & !is.null(durations)) stop("Temperatures and durations cannot be provided at the same time")
+  
+  temperatures <- c(temperatures, durations)
+  SD <- c(SD.temperatures, SD.durations)
+  
+  if (is.null(SD) & !is.null(temperatures)) SD <- rep(0, length(temperatures))
+  
+  if (length(SD) != length(temperatures)) stop("Same number of SD and temperatures or durations must be provided")
+  
+  par <- NULL
+  
+  # TRT.limits <- c(1, 90)
+  precision <- 15
+  
+  if (class(x)=="mcmcComposite" | class(resultmcmc)=="mcmcComposite") {
+    if (class(x)=="mcmcComposite") par <- x$resultMCMC[[chain]]
+    if (class(resultmcmc)=="mcmcComposite") {
+      par <- resultmcmc$resultMCMC[[chain]]
+    if (class(x)=="tsd") equation <- x$equation
+    }
+  } else {
+  if (class(x)=="tsd") {
+    equation <- x$equation
+    if (!is.null(replicate.CI) & (!is.null(x$hessian))) {
+      if (requireNamespace("lmf")) {
+      vcov <- solve(x$hessian)
+      par <- getFromNamespace("rmnorm", ns="lmf")(n = replicate.CI-1, mean = x$par, vcov)
+      par <- rbind(x$par, par)
+      colnames(par) <- names(x$par)
+      } else {
+        warning("The package lmf is required to estimate confidence interval.")
+        par <- t(as.matrix(x$par))
+      }
+    } else {
+      par <- t(as.matrix(x$par))
+    }
+    
+  } else {
+    if (class(x)=="numeric") {
+    par <- t(as.matrix(x))
+    }
+  }
+  }
+  
+  if (is.null(par))  stop("I don't understand the format of x parameter")
+    
+  # print(equation)
+  
+  if (is.null(equation)) stop("equation parameter must be provided")
+  equation <- tolower(equation)
+  
+  if (!is.null(temperatures)) {
+    srT <- apply(X = par, MARGIN=1, function(xpar) {
+      getFromNamespace(".modelTSD", ns="embryogrowth")(xpar, rnorm(length(temperatures), temperatures, SD), equation)
+    })
+  } else {
+    srT <- NULL
+  }
+  
+  if (!is.null(l)) {
+  
+ ret <- apply(X = par, MARGIN=1, function(xpar) {
+     # for (j in 1:nrow(par)) {
+     #   print(j)
+     #   xpar <- par[j, ]
+  if (equation=="gsd") {
+    limit.low.TRT <- -Inf
+    limit.high.TRT <- +Inf
+  } else {
+  if (equation=="logistic") {
+    # sr <- 1/(1+exp(1/S)(P-T)) 
+    # (1/l) - 1 <- exp(1/S)(P-T)
+    # log((1/l)-1) <- (1/S)(P-T)
+    # log((1/l)-1)*S <- P-T
+    limit.low.TRT <- unname(xpar["P"]-log((1/l)-1)*xpar["S"])
+    limit.high.TRT <- unname(xpar["P"]-log((1/(1-l))-1)*xpar["S"])
+  } else {
+    TRT.limits <- c(xpar["P"]-5, xpar["P"]+5)
+    p <- getFromNamespace(".modelTSD", ns="embryogrowth")(xpar, TRT.limits, equation)
+    if (any(is.infinite(p))) {
+      cpt <-10
+    } else {
+    if (p[1]<p[2]) TRT.limits <- rev(TRT.limits)
+    cpt <- 1
+    repeat {
+      tr <- TRUE
+    p <- getFromNamespace(".modelTSD", ns="embryogrowth")(xpar, TRT.limits, equation)
+    if (is.finite(p[1])) {
+    if (p[1]<=(1-l)) {
+      TRT.limits[1] <- TRT.limits[1]-(TRT.limits[2]-TRT.limits[1])/2
+      tr <- FALSE
+    }
+    } else {
+      cpt <- 10
+    }
+    if (is.finite(p[2])) {
+    if (p[2]>=l) {
+      TRT.limits[2] <- TRT.limits[2]+(TRT.limits[2]-TRT.limits[1])/2
+      tr <- FALSE
+    }
+    } else {
+      cpt <- 10
+    }
+    cpt <- cpt +1
+    if (tr | cpt>=10) break
+    }
+    }
+    if (cpt>=10) {
+      # warning("Something strange occurs; I cannot estimate TRT limits")
+      limit.low.TRT <- NA
+      limit.high.TRT <- NA
+    } else {
+    
+  limit.low.low.TRT <- TRT.limits[1]
+  limit.low.high.TRT <- TRT.limits[2]
+  limit.high.low.TRT <- TRT.limits[1]
+  limit.high.high.TRT <- TRT.limits[2]
+  for (i in 1:precision) {
+    temperatures.se <- seq(from=limit.low.low.TRT, to=limit.low.high.TRT, length=3)
+    p <- getFromNamespace(".modelTSD", ns="embryogrowth")(xpar, temperatures.se, equation)
+    limit.low.high.TRT <- temperatures.se[min(which(p<l))]
+    limit.low.low.TRT <- temperatures.se[max(which(p>l))]
+
+    temperatures.se <- seq(from=limit.high.low.TRT, to=limit.high.high.TRT, length=3)
+    p <- getFromNamespace(".modelTSD", ns="embryogrowth")(xpar, temperatures.se, equation)
+    limit.high.high.TRT <- temperatures.se[min(which(p<(1-l)))]
+    limit.high.low.TRT <- temperatures.se[max(which(p>(1-l)))]
+  }
+  limit.low.TRT <- mean(c(limit.low.low.TRT, limit.low.high.TRT))
+  limit.high.TRT <- mean(c(limit.high.low.TRT, limit.high.high.TRT))
+  }
+  }
+  }
+  
+ return(c(lower.limit.TRT=min(c(limit.low.TRT, limit.high.TRT)), higher.limit.TRT=max(c(limit.low.TRT, limit.high.TRT)), TRT=abs(limit.high.TRT-limit.low.TRT), PT=unname(xpar["P"])))
+ }
+ )
+ 
+ if (any(is.na(ret))) warning("Something strange occurs; I cannot estimate TRT limits for some replicates")
+ 
+  ret <- t(ret)
+  pr <- apply(ret, MARGIN=2, function(xxx) quantile(xxx, probs = probs, na.rm=TRUE))
+  } else {
+    ret <- NULL
+    pr <- NULL
+  }
+  if (!is.null(srT)) {
+    if (is.null(dim(srT))) {
+      prsrT <- quantile(srT, probs = probs)
+      prsrT <- as.matrix(prsrT)
+    } else {
+    prsrT <- apply(t(srT), MARGIN = 2, function(xxx) quantile(xxx, probs = probs))
+    }
+    if (!is.null(names(temperatures))) {
+      colnames(prsrT) <- names(temperatures)
+      } else {
+        colnames(prsrT) <- as.character(temperatures)
+    }
+  } else {
+    prsrT <- NULL
+  }
+  return(list(P_TRT=ret, P_TRT_quantiles=pr, sexratio_quantiles=prsrT))
+}

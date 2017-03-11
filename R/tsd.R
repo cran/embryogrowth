@@ -8,20 +8,21 @@
 #' @param temperatures The constant incubation temperatures used to fit sex ratio
 #' @param durations The duration of incubation or TSP used to fit sex ratio
 #' @param df A dataframe with at least two columns named males, females or N and temperatures, Incubation.temperature or durations column
-#' @param l The limit to define TRT (see Girondot, 1999)
+#' @param l Sex ratio limits to define TRT are l and 1-l (see Girondot, 1999)
 #' @param parameters.initial Initial values for P, S or K search as a vector, ex. c(P=29, S=-0.3)
 #' @param fixed.parameters Parameters that will not be changed
-#' @param SE Standard errors for parameters
 #' @param males.freq If TRUE data are shown as males frequency
 #' @param equation Could be "logistic", "Hill", "Richards", "Hulin", "Double-Richards" or "GSD"
-#' @param replicates Number of replicates to estimate confidence intervals
+#' @param replicate.CI Number of replicates to estimate confidence intervals
 #' @param range.CI The range of confidence interval for estimation, default=0.95
-#' @param limit.low.TRT.minimum Minimum lower limit for TRT
-#' @param limit.high.TRT.maximum Maximum higher limit for TRT
-#' @param temperatures.plot Sequences of temperatures that will be used for plotting. If NULL, does not estimate them
-#' @param durations.plot Sequences of durations that will be used for plotting. If NULL, does not estimate them
 #' @param print Do the results must be printed at screen? TRUE (default) or FALSE
-#' @description Estimate the parameters that best describe temperature-dependent sex determination
+#' @description Estimate the parameters that best describe the thermal reaction norm for sex ratio when temperature-dependent sex determination occurs.\cr
+#' It can be used also to evaluate the relationship between incubation duration and sex ratio.\cr
+#' The parameter l was defined in Girondot (1999). The TRT is defined from the difference between the two boundary temperatures giving sex ratios of l and 1 \0x2212 l, respectively:\cr
+#' TRTl = abs(S.Kl) where Kl is a constant equal to [2.ln(l/(1-l))].\cr
+#' In Girondot (1999), l was 0.05 and then the TRT was defined as being the range of temperatures producing from 5\% to 95\% of each sex.\cr
+#' Models Richards, Double-Richards and Hulin are particularly sensitive for K parameters. If you want estimate 
+#' confidence interval for TRT using these models, it is better to use mcmc.
 #' @references Girondot, M. 1999. Statistical description of temperature-dependent sex determination using maximum likelihood. Evolutionary Ecology Research, 1, 479-486.
 #' @references Godfrey, M.H., Delmas, V., Girondot, M., 2003. Assessment of patterns of temperature-dependent sex determination using maximum likelihood model selection. Ecoscience 10, 265-272.
 #' @references Hulin, V., Delmas, V., Girondot, M., Godfrey, M.H., Guillon, J.-M., 2009. Temperature-dependent sex determination and global change: are some species at greater risk? Oecologia 160, 493-506.
@@ -32,21 +33,23 @@
 #'                           Species=="Caretta caretta" & Sexed!=0)
 #' tsdL <- with (CC_AtlanticSW, tsd(males=Males, females=Females, 
 #'                                  temperatures=Incubation.temperature-Correction.factor, 
-#'                                  equation="logistic"))
+#'                                  equation="logistic", replicate.CI=NULL))
 #' tsdH <- with (CC_AtlanticSW, tsd(males=Males, females=Females, 
 #'                                  temperatures=Incubation.temperature-Correction.factor, 
-#'                                  equation="Hill"))
+#'                                  equation="Hill", replicate.CI=NULL))
 #' tsdR <- with (CC_AtlanticSW, tsd(males=Males, females=Females, 
 #'                                  temperatures=Incubation.temperature-Correction.factor, 
-#'                                  equation="Richards"))
+#'                                  equation="Richards", replicate.CI=NULL))
 #' tsdDR <- with (CC_AtlanticSW, tsd(males=Males, females=Females, 
 #'                                  temperatures=Incubation.temperature-Correction.factor, 
-#'                                  equation="Double-Richards"))
+#'                                  equation="Double-Richards", replicate.CI=NULL))
 #' gsd <- with (CC_AtlanticSW, tsd(males=Males, females=Females, 
 #'                                  temperatures=Incubation.temperature-Correction.factor, 
-#'                                  equation="GSD"))
+#'                                  equation="GSD", replicate.CI=NULL))
 #' compare_AIC(Logistic_Model=tsdL, Hill_model=tsdH, Richards_model=tsdR, 
 #'                DoubleRichards_model=tsdDR, GSD_model=gsd)
+#' compare_AICc(Logistic_Model=tsdL, Hill_model=tsdH, Richards_model=tsdR, 
+#'                DoubleRichards_model=tsdDR, GSD_model=gsd, factor.value = -1)
 #' ##############
 #' eo <- subset(DatabaseTSD, Species=="Emys orbicularis", c("Males", "Females", 
 #'                                        "Incubation.temperature"))
@@ -54,11 +57,11 @@
 #' eo_Hill <- with(eo, tsd(males=Males, females=Females, 
 #'                                        temperatures=Incubation.temperature,
 #'                                        equation="Hill"))
-#' eo_Hill <- tsd(df=eo, equation="Hill")
-#' eo_logistic <- tsd(eo)
+#' eo_Hill <- tsd(df=eo, equation="Hill", replicate.CI=NULL)
+#' eo_logistic <- tsd(eo, replicate.CI=NULL)
 #' eo_Richards <- with(eo, tsd(males=Males, females=Females, 
 #'                                  temperatures=Incubation.temperature, 
-#'                                  equation="Richards"))
+#'                                  equation="Richards", replicate.CI=NULL))
 #' ### The Hulin model is a modification of Richards (See Hulin et al. 2009)
 #' ### limit.low.TRT and limit.high.TRT must be setup for Hulin equation
 #' par <- eo_Richards$par
@@ -67,9 +70,7 @@
 #' eo_Hulin <- with(eo, tsd(males=Males, females=Females, 
 #'                                  parameters.initial=par, 
 #'                                  temperatures=Incubation.temperature, 
-#'                                  equation="Hulin", 
-#'                                  limit.low.TRT.minimum=25, 
-#'                                  limit.high.TRT.maximum=35))
+#'                                  equation="Hulin", replicate.CI=NULL))
 #' ### The Double-Richards model is a Richards model with K1 and K2 using the two values
 #' ### below and above P
 #' par <- eo_Richards$par
@@ -79,7 +80,7 @@
 #' eo_Double_Richards <- with(eo, tsd(males=Males, females=Females,
 #'                                  parameters.initial=par,
 #'                                  temperatures=Incubation.temperature,
-#'                                  equation="Double-Richards"))
+#'                                  equation="Double-Richards", replicate.CI=NULL))
 #' compare_AIC(Logistic=eo_logistic, Hill=eo_Hill, Richards=eo_Richards, 
 #'              Hulin=eo_Hulin, Double_Richards=eo_Double_Richards)
 #' ### Note the asymmetry of the Double-Richards model
@@ -91,7 +92,7 @@
 #'                           Species=="Caretta caretta" & Sexed!=0)
 #' tsdL_IP <- with (CC_AtlanticSW, tsd(males=Males, females=Females, 
 #'                                  durations=IP.mean, 
-#'                                  equation="logistic"))
+#'                                  equation="logistic", replicate.CI=NULL))
 #' plot(tsdL_IP, xlab="Incubation durations in days")
 #' }
 #' @export
@@ -102,33 +103,14 @@ tsd <- function(df=NULL, males=NULL, females=NULL, N=NULL,
                 durations=NULL,
                 l=0.05, parameters.initial=c(P=NA, S=-2, K=0, K1=1, K2=0), 
                 males.freq=TRUE, 
-                fixed.parameters=NULL, SE=NULL,
-                equation="logistic", replicates=1000, range.CI=0.95, 
-                limit.low.TRT.minimum=5, limit.high.TRT.maximum=90, print=TRUE, 
-                temperatures.plot=seq(from=20, to=40, by=0.1), 
-                durations.plot=seq(from=15, to=100, by=0.1)) {
+                fixed.parameters=NULL, 
+                equation="logistic", replicate.CI=10000, range.CI=0.95, 
+                print=TRUE) {
   
-  # df=NULL; males=NULL; females=NULL; N=NULL; temperatures=NULL; durations=NULL; l=0.05; parameters.initial=c(P=NA, S=-0.5, K=0, K1=1, K2=0); males.freq=TRUE; fixed.parameters=NULL; SE=NULL; equation="logistic"; replicates=1000; range.CI=0.95; limit.low.TRT.minimum=5; limit.high.TRT.maximum=90; print=TRUE; temperatures.plot=seq(from=20, to=40, by=0.1); durations.plot=seq(from=15, to=100, by=0.1)
-  # females=females; males=males; durations=durations; parameters.initial=c(P=54.0445435044487, S=0.0567693543096269); equation="Hill"
-  # eo <- subset(STSRE_TSD, Species=="Emys orbicularis", c("Males", "Females","Incubation.temperature"))
-
-  # males=eo$Males; females=eo$Females; N <- Males+Females; temperatures=eo$Incubation.temperature; equation<- "Double-Richards" 
-  
-  # males <- c(10, 14, 7, 4, 3, 0, 0) ; females <- c(0, 1, 2, 4, 15, 10, 13); temperatures <- c(25, 26, 27, 28, 29, 30, 31)
-  
-  # males <- c(15L, 23L, 16L, 0L); females <- c(0L, 1L, 3L, 19L)
-  # temperatures <- c(70.4, 57.7, 53.9, 51.7)
-  # parameters.initial <- c(P=53, S=0.05)
-  # col.TRT="gray"; col.TRT.CI=rgb(0.8, 0.8, 0.8, 0.5); col.PT.CI=rgb(0.8, 0.8, 0.8, 0.5)
-  # N <- NULL; males <- CC_AtlanticSW$Males;females <- CC_AtlanticSW$Females; temperatures <- CC_AtlanticSW$Incubation.temperature-CC_AtlanticSW$Correction.factor
-  # equation <- "Richards"
-  # equation <- "Hill"
-  # equation <- "Double-Richards"
-  # equation <- "logistic"
-  
+  # df=NULL; males=NULL; females=NULL; N=NULL; temperatures=NULL; durations=NULL; l=0.05; parameters.initial=c(P=NA, S=-0.5, K=0, K1=1, K2=0); males.freq=TRUE; fixed.parameters=NULL; equation="logistic"; replicate.CI=1000; range.CI=0.95; print=TRUE
+  # CC_AtlanticSW <- subset(DatabaseTSD, RMU=="Atlantic, SW" & Species=="Caretta caretta" & Sexed!=0)
+  # males=CC_AtlanticSW$Males; females=CC_AtlanticSW$Females; temperatures=CC_AtlanticSW$Incubation.temperature-CC_AtlanticSW$Correction.factor; equation="Richards"
   equation <- tolower(equation)
-  
-  range.CI.qnorm <- qnorm(1-((1-range.CI)/2))
   
   if (!is.null(df)) {
     if (class(df)!="data.frame" & class(df)!="matrix") {
@@ -170,7 +152,6 @@ tsd <- function(df=NULL, males=NULL, females=NULL, N=NULL,
   if (is.null(temperatures)) {
     IP <- TRUE
     temperatures <- durations
-    temperatures.plot <- durations.plot
   } else {
     IP <- FALSE
   }
@@ -228,9 +209,6 @@ tsd <- function(df=NULL, males=NULL, females=NULL, N=NULL,
 
     par <- c(result$par, fixed.parameters)
     
-    if (!is.null(SE)) {
-      res <- SE
-    } else {
       mathessian <- result$hessian
       
       inversemathessian <- try(solve(mathessian), silent=TRUE)
@@ -239,9 +217,10 @@ tsd <- function(df=NULL, males=NULL, females=NULL, N=NULL,
         res <- rep(NA, length(par))
         names(res) <- names(par)
       } else {
-        res <- abs(diag(inversemathessian))
+        res <- diag(inversemathessian)
+        res <- ifelse(res<0, NA, sqrt(abs(res)))
       }
-    }
+    
     
     result$SE <- res
     result$AIC <- 2*result$value+2*length(par)
@@ -249,69 +228,16 @@ tsd <- function(df=NULL, males=NULL, females=NULL, N=NULL,
   
   result$range.CI <- range.CI
   result$l <- l
+  result$equation <- equation
   
   if (equation!="gsd") {
-    l.l.TRT.c <- NULL
-    l.h.TRT.c <- NULL
-    TRT.c <- NULL
-    #   plist <- NULL
-    
-    rep <- replicates-1
-    df_par <- data.frame(P=unname(c(par["P"], rnorm(rep, par["P"], res["P"]))), 
-                         S=unname(c(par["S"], rnorm(rep, par["S"], res["S"]))),
-                         K=unname(ifelse(is.na(par["K"]), rep(NA, replicates), c(par["K"], rnorm(rep, par["K"], ifelse(is.na(res["K"]), 0, res["K"]))))),
-                         K1=unname(ifelse(is.na(par["K1"]), rep(NA, replicates), c(par["K1"], rnorm(rep, par["K1"], ifelse(is.na(res["K1"]), 0, res["K1"]))))),
-                         K2=unname(ifelse(is.na(par["K2"]), rep(NA, replicates), c(par["K2"], rnorm(rep, par["K2"], ifelse(is.na(res["K2"]), 0, res["K2"]))))))
 
-    out_tsd <- apply(df_par, 1, function(par) {
-      # marche en temperatures mais par en IP - corrige 9/9/2014
-      limit.low.TRT <- limit.low.TRT.minimum
-      limit.high.TRT <- limit.high.TRT.maximum
-      for (i in 1:4) {
-        temperatures.se <- seq(from=limit.low.TRT, to=limit.high.TRT, length=20)
-        p <- getFromNamespace(".modelTSD", ns="embryogrowth")(par, temperatures.se, equation)
-        
-        if (sign(par["S"])<0) {
-          limit.low.TRT <- temperatures.se[tail(which(p>(1-l)), n=1)]
-          limit.high.TRT <- temperatures.se[which(p < l)[1]]
-        } else {
-          limit.low.TRT <- temperatures.se[tail(which(p<l), n=1)]
-          limit.high.TRT <- temperatures.se[which(p >(1-l))[1]]
-        }
-        limit.low.TRT <- ifelse(identical(limit.low.TRT, numeric(0)), NA, limit.low.TRT)
-        limit.high.TRT <- ifelse(identical(limit.high.TRT, numeric(0)), NA, limit.high.TRT)
-        if (is.na(limit.low.TRT) | is.na(limit.high.TRT)) break
-      }
-      return(data.frame(l.l.TRT.c=limit.low.TRT, l.h.TRT.c=limit.high.TRT, TRT.c=limit.high.TRT-limit.low.TRT))
-    }
-    )
+    class(result) <- "tsd"
+   # result <<- result
+    o <- P_TRT(result, temperatures=NULL, l=l, 
+               replicate.CI = replicate.CI, probs = c((1-range.CI)/2, 0.5, 1-(1-range.CI)/2))
     
-    out_tsd2 <- t(sapply(out_tsd, c))
-    
-    if (!is.null(temperatures.plot)) {
-      out_tsd_plot <- apply(df_par, 1, function(par) {
-        p <- getFromNamespace(".modelTSD", ns="embryogrowth")(par, temperatures.plot, equation)
-        return(list(sr=p))
-      }
-      )
-      
-      out_tsd2_plot <- sapply(out_tsd_plot, c, simplify = TRUE)
-      # dans un df chaque colonne est une temperature
-      out_tsd3_plot <- t(sapply(out_tsd2_plot, c, simplify = TRUE))
-#      dim(out_tsd3_plot)
-      outquant <- apply(out_tsd3_plot, 2, quantile, probs = c(0.025, 0.975))
-      outquant <- rbind(outquant, mean=out_tsd3_plot[1,], temperatures=temperatures.plot)
-      result$CI <- outquant
-      
-    }
-    
-    
-    result$TRT <- as.numeric(out_tsd2[1, "TRT.c"])
-    result$TRT_limits <- as.numeric(c(out_tsd2[1, "l.l.TRT.c"], out_tsd2[1, "l.h.TRT.c"]))
-    result$SE_TRT <- sd(as.numeric(out_tsd2[, "TRT.c"]), na.rm = TRUE)
-    result$SE_TRT_limits <- c(sd(as.numeric(out_tsd2[, "l.l.TRT.c"]), na.rm = TRUE), sd(as.numeric(out_tsd2[, "l.h.TRT.c"]), na.rm = TRUE))
-    limit.low.TRT <- result$TRT_limits[1]-range.CI.qnorm*result$SE_TRT_limits[1]
-    limit.high.TRT <- result$TRT_limits[2]+range.CI.qnorm*result$SE_TRT_limits[2]
+    result$P_TRT <- o$P_TRT_quantiles
   }
   
   saturated <- 0
@@ -324,8 +250,7 @@ tsd <- function(df=NULL, males=NULL, females=NULL, N=NULL,
   result$N <- N
   result$temperatures <- temperatures
   result$males.freq <- males.freq
-  result$equation <- equation
-  result$l <- l
+
   result$fixed.parameters <- fixed.parameters
   # print(IP)
   result$type <- ifelse(IP, "duration", "temperature")
@@ -333,10 +258,17 @@ tsd <- function(df=NULL, males=NULL, females=NULL, N=NULL,
   if (print) print(paste("The goodness of fit test is", sprintf("%.5f",result$GOF)))
   
   if (equation!="gsd" & print) {
-    print(paste("The pivotal", result$type, "is", sprintf("%.3f",par["P"]), "SE", sprintf("%.3f",res["P"])))
-    print(paste0("The transitional range of ", result$type, "s is ", sprintf("%.3f",result$TRT), " SE ", sprintf("%.3f",result$SE_TRT)))
-    print(paste0("The lower limit of transitional range of ", result$type, "s is ", sprintf("%.3f",result$TRT_limits[1]), " SE ", sprintf("%.3f",result$SE_TRT_limits[1])))
-    print(paste0("The higher limit of transitional range of ", result$type, "s is ", sprintf("%.3f",result$TRT_limits[2]), " SE ", sprintf("%.3f",result$SE_TRT_limits[2])))
+    if (!is.null(replicate.CI)) {
+    print(paste0("The pivotal ", result$type, " is ", sprintf("%.3f",o$P_TRT_quantiles[2, "PT"]), " CI", as.character(range.CI*100), "% ", sprintf("%.3f", min(o$P_TRT_quantiles[1, "PT"], o$P_TRT_quantiles[3, "PT"])), ";", sprintf("%.3f",max(o$P_TRT_quantiles[1, "PT"], o$P_TRT_quantiles[3, "PT"]))))
+    print(paste0("The transitional range of ", result$type, "s is ", sprintf("%.3f",o$P_TRT_quantiles[2, "TRT"]), " CI", as.character(range.CI*100), "% ", sprintf("%.3f",min(o$P_TRT_quantiles[1, "TRT"], o$P_TRT_quantiles[3, "TRT"])), ";", sprintf("%.3f",max(o$P_TRT_quantiles[1, "TRT"], o$P_TRT_quantiles[3, "TRT"]))))
+    print(paste0("The lower limit of transitional range of ", result$type, "s is ", sprintf("%.3f",o$P_TRT_quantiles[2, "lower.limit.TRT"]), " CI", as.character(range.CI*100), "% ", sprintf("%.3f",min(o$P_TRT_quantiles[1, "lower.limit.TRT"], o$P_TRT_quantiles[3, "lower.limit.TRT"])), ";", sprintf("%.3f", max(o$P_TRT_quantiles[1, "lower.limit.TRT"], o$P_TRT_quantiles[3, "lower.limit.TRT"]))))
+    print(paste0("The higher limit of transitional range of ", result$type, "s is ", sprintf("%.3f",o$P_TRT_quantiles[2, "higher.limit.TRT"]), " CI", as.character(range.CI*100), "% ", sprintf("%.3f",min(o$P_TRT_quantiles[1, "higher.limit.TRT"], o$P_TRT_quantiles[3, "higher.limit.TRT"])), ";", sprintf("%.3f",max(o$P_TRT_quantiles[1, "higher.limit.TRT"], o$P_TRT_quantiles[3, "higher.limit.TRT"]))))
+    } else {
+      print(paste0("The pivotal ", result$type, " is ", sprintf("%.3f",o$P_TRT_quantiles[2, "PT"])))
+      print(paste0("The transitional range of ", result$type, "s is ", sprintf("%.3f",o$P_TRT_quantiles[2, "TRT"])))
+      print(paste0("The lower limit of transitional range of ", result$type, "s is ", sprintf("%.3f",o$P_TRT_quantiles[2, "lower.limit.TRT"])))
+      print(paste0("The higher limit of transitional range of ", result$type, "s is ", sprintf("%.3f",o$P_TRT_quantiles[2, "higher.limit.TRT"])))
+    }
   }
   
   class(result) <- "tsd"

@@ -30,19 +30,18 @@ attributes(TSP.list[["Emys_orbicularis.mass"]])$TSP.begin.stages
 attributes(TSP.list[["Emys_orbicularis.mass"]])$TSP.end.stages
 }
 }
-\author{
-Marc Girondot \email{marc.girondot@u-psud.fr}
-}
 \references{
 Mrosovsky, N., Pieau, C., 1991. Transitional range of temperature, pivotal 
 temperatures and thermosensitive stages for sex determination in reptiles. 
 Amphibia-Reptilia 12, 169-179.
 }
 \seealso{
-Other Functions.for.temperature.dependent.sex.determination: \code{\link{DatabaseTSD}},
-  \code{\link{predict.tsd}}, \code{\link{stages}},
-  \code{\link{tsd_MHmcmc_p}}, \code{\link{tsd_MHmcmc}},
-  \code{\link{tsd}}
+Other Functions for temperature-dependent sex determination: \code{\link{DatabaseTSD}},
+  \code{\link{P_TRT}}, \code{\link{predict.tsd}},
+  \code{\link{stages}}, \code{\link{tsd_MHmcmc_p}},
+  \code{\link{tsd_MHmcmc}}, \code{\link{tsd}}
+}
+\author{
+Marc Girondot \email{marc.girondot@u-psud.fr}
 }
 \keyword{datasets}
-

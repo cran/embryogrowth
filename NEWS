@@ -1,8 +1,85 @@
 THIS IS THE CHANGELOG OF THE "embryogrowth" PACKAGE
 
-          CHANGES IN VERSION 6.4    (2016-10-02)
+          CHANGES IN VERSION 6.5    (2017-03-10)
+          
+* New version for CRAN - 6.5
+
+          CHANGES IN VERSION 6.4-6.4.56    (2017-03-09)
           
 * New version for CRAN - 6.4
+* Correction of the y legend for plotR() - 6.4.1 & 6.4.2
+* ylim parameter for plotR() works again - 6.4.2
+* Bug correction : GRTRN_MHmcmc() works also with only one parameter - 6.4.3
+* New parameter for SSM model: epsilon (SSM = SSM + epsilon) - 6.4.4
+* Correct some examples - 6.4.5
+* Nicer arrow for plot - 6.4.6
+* New examples - 6.4.7
+* Separate parameters for plotR and hist in plotR_hist() - 6.4.7
+* New examples - 6.4.8 & 6.4.9
+* Legend for hist() and plotR_hist() has been changed to Temperature density - 6.4.10
+* Arrows in plot() are no more masked - 6.4.11
+* Possibility to setup nonsymmetrical confidence interval using quantiles in ChangeSSM() - 6.4.12
+* The non-symmetrical confidence interval can be used for randomization using info.nests() - 6.4.12
+* New functions plotRdensity() and plotRdensity_hist() - 6.4.12
+* New examples - 6.4.13
+* If a mcmc object is used in info.nests() or plot.NestsResult(), it will be used directly - 6.4.14
+* New asymmetric normal model - 6.4.15
+* trace can be changed during mcmc search after a stop and previous use - 6.4.16
+* New trigonometric model - 6.4.16
+* Correct scaleY for plotRdensity() - 6.4.17
+* Weibull model is correct and functional - 6.4.17
+* BIC is calculated after searchR() - 6.4.17
+* Correct a bug in info.nests() for replicate.CI=1 and resultmcmc - 6.4.18
+* mcmc for normal function in SSM - 6.4.18
+* new function nobs.NestResult() to be used with BIC() - 6.4.18
+* New mcmc results for trigo and Weibull models - 6.4.19
+* Adaptive mcmc is implemented for GTRN and STRN - 6.4.20
+* Adaptive mcmc is implemented for TSD - 6.4.21
+* Parallel computing implemented for windows - 6.4.22 & 6.4.23 & 6.4.24
+* New version of resultNest_mcmc_4p_normal - 6.4.25
+* Prevent an error in rare case in tsd - 6.4.26
+* New examples in resultNest_mcmc_4p_normal - 6.4.26
+* New data for Weibull model with 3 parameters - 6.4.27
+* New data for SSM6p model - 6.4.28
+* Bug correction when metric.end.incubation == NA - 6.4.28
+* Transition parameters work for Weibull model - 6.4.29
+* Can use several size for transition model in the same plot - 6.4.29
+* set.par with plotR works again- 6.4.30
+* cex.lab = 1, cex.axis = 1 for plotRdensity - 6.4.31
+* New plotR2() will be a replacement for plotR, plotR_hist, plotRdensity and plotRdensity_hist - 6.4.32
+* Cleaning the code: remove old SEforR, plotR, plotR_hist, plotRdensity and plotRdensity_hist - 6.4.33
+* MovingIncubation() scheme for parallel is better and mcmc objects can be used instead of SE - 6.4.34
+* Correct some problems with parallel in info.nests() in windows - 6.4.34
+* polygon option for plotR() - 6.4.35
+* mar and breaks parameter for plotR() - 6.4.36
+* correct a bug in info.nests() for windows when parallel=FALSE - 6.4.37
+* Legends are homogenized for various plots - 6.4.37
+* New results in info.nests()$summary: CTEA.TSP_CTEA.2ndT, CTEA.TSP_CTEA.2ndT.se, CTEW.TSP_CTEW.2ndT, CTEW.TSP_CTEW.2ndT.se - 6.4.37
+* New option parallel for MovingIncubation() and plot.NestsResult() to use or not parallel computing - 6.4.37
+* New parameter SexualisationTRN.mcmc to generate variability of SexualisationTRN - 6.4.37
+* If + or -Inf is produced in SSM, does not produce error - 6.4.38
+* Dallwitz 3 parameters is simpler to implement - 6.4.39
+* Correct a problem with mar parameter in plotR() - 6.4.40
+* SE as matrix can be used with plotR()  - 6.4.41
+* New parameter log.hist canbe used to show log axis for histogram - 6.4.42
+* Minor change for plot.tsd() - 6.4.43
+* new parameter fixed.parameters for STRN() - 6.4.44
+* Fix a bug in MovingIncubation() - 6.4.45
+* Implementation of delta method for confidence interval - 6.4.46
+* temperature.heterogeneity accepts a vector of two values being sd_low and sd_high - 6.4.47
+* Change the suggest packages - 6.4.48
+* Better management of curves and polygon in plotR() - 6.4.49
+* Minor change to prevent warnings() in plotR() - 6.4.50
+* Correct tsd_MHmcmc() - 6.4.51
+* SE returns by tsd() was not SE but variance - 6.4.52
+* New parameter mar for plot.tsd() - 6.4.52
+* New function trt() - 6.4.53
+* New function P_TRT() more general than trt(); trt() is removed - 6.4.54
+* Confidence interval for plot.tsd() uses the hessian matrix - 6.4.54
+* durations is added for P_TRT() - 6.4.55
+* SD for temperatures or durations is added for P_TRT() - 6.4.55
+* predict.tsd can use mcmc or hessian matrix - 6.4.55
+* minor change in predict.tsd - 6.4.56
 
           CHANGES IN VERSION 6.3.1-6.3.11    (2016-09-15)
           

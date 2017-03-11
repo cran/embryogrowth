@@ -32,4 +32,3 @@ summary(formated)
 \author{
 Marc Girondot
 }
-

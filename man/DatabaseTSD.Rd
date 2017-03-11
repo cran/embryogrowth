@@ -55,9 +55,6 @@ tot_Lo <- with(totalIncubation_Lo, tsd(males=Males, females=Females,
  predict(tot_Lo)
 }
 }
-\author{
-Marc Girondot \email{marc.girondot@u-psud.fr}
-}
 \references{
 Binckley C.A., Spotila J.R., Wilson K.S. and Paladino F.V. (1998) Sex determination and sex ratios of Pacific Leatherback Turtles, Dermochelys coriacea. Copeia, 1998(2), 291-300.
 
@@ -103,7 +100,7 @@ Mrosovsky N., Bass A., Corliss L.A., Richardson J.I. and Richardson T.H. (1992) 
 
 Rimblot F., Fretey J., Mrosovsky N., Lescure J. and Pieau C. (1985) Sexual differentiation as a function of the incubation temperature of eggs in the sea-turtle Dermochelys coriacea (Vandelli, 1761). Amphibia-Reptilia, 85(6), 83-92.
 
-Rimblot-Baly F., Lescure J., Fretey J. and Pieau C. (1986-1987) Sensibilite a la temperature de la differenciation sexuelle chez la tortue Luth, Dermochelys coriacea (Vandelli, 1761); application des donnees de l'incubation artificielle a l'etude de la sex-ratio dans la nature. Annales des Sciences Naturelles, Zoologie, 8, 277-290.
+Rimblot-Baly F., Lescure J., Fretey J. and Pieau C. (1986-1987) Sensibilité à la température de la differenciation sexuelle chez la tortue Luth, Dermochelys coriacea (Vandelli, 1761); application des données de l'incubation artificielle à l'étude de la sex-ratio dans la nature. Annales des Sciences Naturelles, Zoologie, 8, 277-290.
 
 Ruiz Garcia N.A. (2014) Efectos de la temperatura sobre el desarrollo embrionario y el desempero de crias de la tortuga golfina, Lepidochelys olivacea. Tesis Nivel Maestria.
 
@@ -118,10 +115,12 @@ Yntema C.L. and Mrosovsky N. (1980) Sexual differentiation in hatchling loggerhe
 Yntema C.L. and Mrosovsky N. (1982) Critical periods and pivotal temperatures for sexual differentiation in loggerhead sea turtles. Canadian Journal of Zoology-Revue Canadienne De Zoologie, 60(5), 1012-1016.
 }
 \seealso{
-Other Functions.for.temperature.dependent.sex.determination: \code{\link{TSP.list}},
-  \code{\link{predict.tsd}}, \code{\link{stages}},
-  \code{\link{tsd_MHmcmc_p}}, \code{\link{tsd_MHmcmc}},
-  \code{\link{tsd}}
+Other Functions for temperature-dependent sex determination: \code{\link{P_TRT}},
+  \code{\link{TSP.list}}, \code{\link{predict.tsd}},
+  \code{\link{stages}}, \code{\link{tsd_MHmcmc_p}},
+  \code{\link{tsd_MHmcmc}}, \code{\link{tsd}}
+}
+\author{
+Marc Girondot \email{marc.girondot@u-psud.fr}
 }
 \keyword{datasets}
-

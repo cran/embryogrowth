@@ -11,8 +11,8 @@
 #' @examples
 #' \dontrun{
 #' library(embryogrowth)
-#' data(resultNest_4p)
-#' h <- hist(resultNest_4p, series=c(1:5))
+#' data(resultNest_4p_SSM4p)
+#' h <- hist(resultNest_4p_SSM4p, series=c(1:5))
 #' }
 #' @method hist NestsResult
 #' @export
@@ -22,12 +22,14 @@ hist.NestsResult <- function(x, series="all", ...) {
 # Je prends seulement les donnees de temperature et j'envoie a hist.Nests
 # Ce sera plus simple pour faire les mises a jour - 30/7/2012
 
+p3p <- list(...)
+  
 # j'ai un objet de resultat
 # je prends les donnees
 nids <- x$data
 class(nids) <- "Nests"
 
-L <- modifyList(list(x=nids), list(...))
+L <- modifyList(list(x=nids), p3p)
 L <- modifyList(L, list(series=series))
 
 a <- do.call(hist, L)

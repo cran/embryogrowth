@@ -12,6 +12,9 @@
 #' @param parallel If true, try to use several cores using parallel computing
 #' @param filename If intermediate is not NULL, save intermediate result in this file
 #' @param intermediate Period for saving intermediate result, NULL for no save
+#' @param adaptive Should an adaptive process for SDProp be used
+#' @param adaptive.lag  Lag to analyze the SDProp value in an adaptive content
+#' @param adaptive.fun Function used to change the SDProp
 #' @param previous Previous result to be continued. Can be the filename in which intermediate results are saved.
 #' @description Run the Metropolis-Hastings algorithm for data.\cr
 #' The number of iterations is \code{n.iter+n.adapt+1} because the initial likelihood is also displayed.\cr
@@ -36,45 +39,60 @@
 #' 116.055824800264), .Names = c("DHA", "DHH", "T12H", "Rho25"))
 #' # pfixed <- c(K=82.33) or rK=82.33/39.33
 #' pfixed <- c(rK=2.093313)
-#' resultNest_4p <- searchR(parameters=x, fixed.parameters=pfixed,  
+#' resultNest_4p_SSM4p <- searchR(parameters=x, fixed.parameters=pfixed,  
 #' 	temperatures=formated, derivate=dydt.Gompertz, M0=1.7,  
 #' 	test=c(Mean=39.33, SD=1.92))
-#' data(resultNest_4p)
-#' pMCMC <- TRN_MHmcmc_p(resultNest_4p, accept=TRUE)
+#' data(resultNest_4p_SSM4p)
+#' pMCMC <- TRN_MHmcmc_p(resultNest_4p_SSM4p, accept=TRUE)
 #' # Take care, it can be very long; several days
-#' result_mcmc_4p <- GRTRN_MHmcmc(result=resultNest_4p, 
+#' resultNest_mcmc_4p_SSM4p <- GRTRN_MHmcmc(result=resultNest_4p_SSM4p, 
+#'    adaptive = TRUE,
 #' 		parametersMCMC=pMCMC, n.iter=10000, n.chains = 1,  
 #' 		n.adapt = 0, thin=1, trace=TRUE)
-#' data(result_mcmc_4p)
-#' out <- as.mcmc(result_mcmc_4p)
+#' data(resultNest_mcmc_4p_SSM4p)
+#' out <- as.mcmc(resultNest_mcmc_4p_SSM4p)
 #' # This out can be used with coda package
 #' # Test for stationarity and length of chain
 #' require(coda)
 #' heidel.diag(out)
 #' raftery.diag(out)
 #' # plot() can use the direct output of GRTRN_MHmcmc() function.
-#' plot(result_mcmc_4p, parameters=1, xlim=c(0,550))
-#' plot(result_mcmc_4p, parameters=3, xlim=c(290,320))
+#' plot(resultNest_mcmc_4p_SSM4p, parameters=1, xlim=c(0,550))
+#' plot(resultNest_mcmc_4p_SSM4p, parameters=3, xlim=c(290,320))
 #' # summary() permits to get rapidly the standard errors for parameters
 #' # They are store in the result also.
-#' se <- result_mcmc_4p$SD
+#' se <- result_mcmc_4p_SSM4p$SD
 #' # the confidence interval is better estimated by:
 #' apply(out[[1]], 2, quantile, probs=c(0.025, 0.975))
 #' # The use of the intermediate method is as followed;
 #' # Here the total mcmc iteration is 10000, but every 1000, intermediate
 #' # results are saved in file intermediate1000.Rdata:
-#' result_mcmc_4p <- GRTRN_MHmcmc(result=resultNest_4p, 
+#' resultNest_mcmc_4p_SSM4p <- GRTRN_MHmcmc(result=resultNest_4p_SSM4p, 
 #' parametersMCMC=pMCMC, n.iter=10000, n.chains = 1,  
 #' n.adapt = 0, thin=1, trace=TRUE, 
 #' intermediate=1000, filename="intermediate1000.Rdata")
 #' # If run has been stopped for any reason, it can be resumed with:
-#' result_mcmc_4p <- GRTRN_MHmcmc(previous="intermediate1000.Rdata")
+#' resultNest_mcmc_4p_SSM4p <- GRTRN_MHmcmc(previous="intermediate1000.Rdata")
+#' # Example to use of the epsilon parameter to get confidence level
+#' resultNest_4p_epsilon <- resultNest_4p
+#' resultNest_4p_epsilon$fixed.parameters <- c(resultNest_4p_epsilon$par, 
+#'                    resultNest_4p_epsilon$fixed.parameters)
+#' resultNest_4p_epsilon$par <- c(epsilon = 0)
+#' pMCMC <- TRN_MHmcmc_p(resultNest_4p_epsilon, accept = TRUE)
+#' resultNest_mcmc_4p_epsilon <- GRTRN_MHmcmc(result = resultNest_4p_epsilon, 
+#'            n.iter = 10000, parametersMCMC = pMCMC,
+#'            n.chains = 1, n.adapt = 0, thin = 1, trace = TRUE, parallel = TRUE)
+#' data(resultNest_mcmc_4p_epsilon)
+#' plot(resultNest_mcmc_4p_epsilon, parameters="epsilon", xlim=c(-11, 11), las=1)
+#' plotR(resultNest_4p_epsilon, SE=c(epsilon = unname(resultNest_mcmc_4p_epsilon$SD)), 
+#'            ylim=c(0, 3), las=1)
 #' }
 #' @export
 
 GRTRN_MHmcmc <- function(result=NULL, n.iter=10000, 
 parametersMCMC=NULL, n.chains = 1, n.adapt = 0, 
-thin=1, trace=FALSE, parallel=TRUE, 
+thin=1, trace=NULL, parallel=TRUE, 
+adaptive=FALSE, adaptive.lag=500, adaptive.fun=function(x) {ifelse(x>0.234, 1.3, 0.7)},
 intermediate=NULL, filename="intermediate.Rdata", previous=NULL)
 {
 
@@ -92,11 +110,15 @@ intermediate=NULL, filename="intermediate.Rdata", previous=NULL)
   }
   
   if (is.list(previous)) {
+    
+    if (!is.null(trace)) previous$trace <- trace
+    
     print("Continue previous mcmc run")
     # 29/1/2014; Ajout de result$weight
     out <- MHalgoGen(previous=previous)
     
   } else {
+    if (is.null(trace)) trace <- FALSE
     print(parametersMCMC)
     # 29/1/2014; Ajout de result$weight
     # n.iter=n.iter; parameters=parametersMCMC; n.chains = n.chains; n.adapt = n.adapt; thin=thin; trace=trace; data=list(data=result$data, derivate=result$derivate, test=result$test, M0=result$M0, fixed.parameters=result$fixed.parameters, weight=result$weight); likelihood=getFromNamespace(".fonctionMCMC", ns="embryogrowth"); intermediate=intermediate; filename=filename; previous=previous
@@ -105,14 +127,15 @@ intermediate=NULL, filename="intermediate.Rdata", previous=NULL)
     # weight=result$weight)
     out <- MHalgoGen(n.iter=n.iter, parameters=parametersMCMC, 
                      n.chains = n.chains, n.adapt = n.adapt, thin=thin, trace=trace, 
+                     intermediate=intermediate, filename=filename, previous=previous, 
+                     parallel=parallel, 
+                     adaptive=adaptive, adaptive.lag=adaptive.lag, adaptive.fun=adaptive.fun,
                      temperatures=result$data, derivate=result$derivate, 
                      test=result$test, M0=result$M0, 
                      fixed.parameters=result$fixed.parameters, 
                      weight=result$weight, out="Likelihood", 
                      progress=FALSE, warnings=FALSE, 
-                     likelihood=getFromNamespace("info.nests", ns = "embryogrowth"), 
-                     intermediate=intermediate, filename=filename, previous=previous, 
-                     parallel=parallel)
+                     likelihood=getFromNamespace("info.nests", ns = "embryogrowth"))
     
   }
 
@@ -126,8 +149,13 @@ if (class(fin)=="try-error") {
   out <- c(out, TimeSeriesSE=list(lp))
   out <- c(out, SD=list(lp))
 } else {
-  out <- c(out, TimeSeriesSE=list(fin$statistics[,4]))
-  out <- c(out, SD=list(fin$statistics[,"SD"]))
+  if (is.null(nrow(fin$statistics))) {
+    out <- c(out, TimeSeriesSE=list(fin$statistics[4]))
+    out <- c(out, SD=list(fin$statistics["SD"]))
+  } else {
+    out <- c(out, TimeSeriesSE=list(fin$statistics[,4]))
+    out <- c(out, SD=list(fin$statistics[,"SD"]))
+  }
 }
 
 class(out) <- "mcmcComposite"

@@ -22,11 +22,10 @@ TestParallel estimates the likelihood of a set of parameters for nest incubation
 \examples{
 \dontrun{
 library(embryogrowth)
-data(resultNest_4p)
-TestParallel(resultNest_4p)
+data(resultNest_4p_SSM4p)
+TestParallel(resultNest_4p_SSM4p)
 }
 }
 \author{
 Marc Girondot
 }
-

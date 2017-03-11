@@ -13,6 +13,9 @@
 #' @param dataSTRN A named list data used to estimate likelihoods (see further in description)
 #' @param filename If intermediate is not NULL, save intermediate result in this file
 #' @param intermediate Period for saving intermediate result, NULL for no save
+#' @param adaptive Should an adaptive process for SDProp be used
+#' @param adaptive.lag  Lag to analyze the SDProp value in an adaptive content
+#' @param adaptive.fun Function used to change the SDProp
 #' @param previous Previous result to be continued. Can be the filename in which intermediate results are saved.
 #' @description Run the Metropolis-Hastings algorithm for Sexualisation Thermal Reaction Norm.\cr
 #' The number of iterations is n.iter+n.adapt+1 because the initial likelihood is also displayed.\cr
@@ -51,8 +54,9 @@
 
 STRN_MHmcmc <- function(result=NULL, n.iter=10000, 
 parametersMCMC=NULL, n.chains = 1, n.adapt = 0, 
-thin=1, trace=FALSE, batchSize=sqrt(n.iter), 
+thin=1, trace=NULL, batchSize=sqrt(n.iter), 
 dataSTRN=NULL, 
+adaptive=FALSE, adaptive.lag=500, adaptive.fun=function(x) {ifelse(x>0.234, 1.3, 0.7)},
 intermediate=NULL, filename="intermediate.Rdata", previous=NULL) {
   
   if (is.character(previous)) {
@@ -64,11 +68,16 @@ intermediate=NULL, filename="intermediate.Rdata", previous=NULL) {
   } else {
     print(parametersMCMC)
   }
+  
+  if (!is.null(previous)) if (!is.null(trace)) previous$trace <- trace
+  
+  if (is.null(trace)) trace <- FALSE
 
 # 29/1/2014; Ajout de result$weight
 out <- MHalgoGen(n.iter=n.iter, parameters=parametersMCMC, 
 n.chains = n.chains, n.adapt = n.adapt, thin=thin, trace=trace, 
 	data=dataSTRN, likelihood=get(".fonctionSTRNMCMC"), 
+adaptive=adaptive, adaptive.lag=adaptive.lag, adaptive.fun=adaptive.fun,
 intermediate=intermediate, filename=filename, previous=previous)
 
 if (batchSize>=n.iter/2) {

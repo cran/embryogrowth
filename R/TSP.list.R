@@ -7,9 +7,9 @@
 #' This database can be used with the functions plot() or info.nests().\cr
 #' The attributes TSP.begin.stages and TSP.end.stages for each dataframe give 
 #' respectively the first and the last stages for TSP. Then the metrics for the limits of TSP 
-#' are:\cr
-#' TSP.list[[1]]$metric[TSP.list[[1]]$stages==attributes(TSP.list[[1]])$TSP.begin.stages] and \cr
-#' TSP.list[[1]]$metric[TSP.list[[1]]$stages==1+attributes(TSP.list[[1]])$TSP.end.stages]
+#' are the average sizes before and after the TSP (see example, below).\cr
+#' If the metric for the stages before the TSP or after the TSP is not known, it will use the 
+#' available information.
 #' @references Mrosovsky, N., Pieau, C., 1991. Transitional range of temperature, pivotal 
 #' temperatures and thermosensitive stages for sex determination in reptiles. 
 #' Amphibia-Reptilia 12, 169-179.
@@ -21,9 +21,18 @@
 #' library(embryogrowth)
 #' data(TSP.list)
 #' names(TSP.list)
-#' TSP.list[["Emys_orbicularis.mass"]]
-#' attributes(TSP.list[["Emys_orbicularis.mass"]])$TSP.begin.stages
-#' attributes(TSP.list[["Emys_orbicularis.mass"]])$TSP.end.stages
+#' reference <- "Emys_orbicularis.mass"
+#' metric <- TSP.list[[reference]]
+#' TSP.begin <- attributes(TSP.list[[reference]])$TSP.begin.stages
+#' TSP.end <- attributes(TSP.list[[reference]])$TSP.end.stages
+#' # Metric at the beginning of the TSP
+#' del <- ifelse(all(metric$stages == TSP.begin - 1)==FALSE, 0, 1)
+#' (metric$metric[metric$stages == TSP.begin - del] +
+#'     metric$metric[metric$stages == TSP.begin]) / 2
+#' # Metric at the end of the TSP
+#' del <- ifelse(all(metric$stages == TSP.begin + 1)==FALSE, 0, 1)
+#' (metric$metric[metric$stages == TSP.end] +
+#'         metric$metric[metric$stages == del + TSP.end]) / 2
 #' }
 #' @format A list with dataframes including attributes
 NULL

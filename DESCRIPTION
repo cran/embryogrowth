@@ -1,13 +1,13 @@
 Package: embryogrowth
 Type: Package
 Title: Tools to Analyze the Thermal Reaction Norm of Embryo Growth
-Version: 6.5
-Date: 2017-03-10
+Version: 7.0
+Date: 2017-09-25
 Author: Marc Girondot <marc.girondot@u-psud.fr>
 Maintainer: Marc Girondot <marc.girondot@u-psud.fr>
 Description: Tools to analyze the embryo growth and the sexualisation thermal reaction norms.
-Depends: deSolve, optimx, numDeriv, parallel, HelpersMG (>= 1.8.7),R
-        (>= 2.14.2)
+Depends: deSolve, optimx, numDeriv, parallel, HelpersMG (>= 2.0),R (>=
+        2.14.2)
 Suggests: entropy, shiny, coda, polynom, car, lmf
 License: GPL-2
 LazyData: yes
@@ -15,6 +15,6 @@ LazyLoad: yes
 Encoding: UTF-8
 RoxygenNote: 6.0.1
 NeedsCompilation: no
-Packaged: 2017-03-10 21:17:41 UTC; marcgirondot
+Packaged: 2017-09-25 06:09:04 UTC; marcgirondot
 Repository: CRAN
-Date/Publication: 2017-03-11 09:18:31
+Date/Publication: 2017-09-26 06:29:51 UTC

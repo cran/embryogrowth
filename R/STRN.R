@@ -10,8 +10,11 @@
 #' @param Males The number of males embryos with names identifying timeseries
 #' @param Females The number of females embryos with names identifying timeseries
 #' @param Temperatures The temperature from out of info.nests to be used
-#' @param SE Should standard error of parameters be estimated ? TRUE or FALSE
-#' @param ... Parameters used for control of optimx()
+#' @param SE Should standard error of parameters and Hessian matrix be estimated ? TRUE or FALSE
+#' @param method Methods to be used with optimx
+#' @param itnmax Maximum number of iterations for each method
+#' @param parallel Should parallel computing for info.nests() be used
+#' @param control List for control parameters for optimx
 #' @description Estimate the parameters that best describe the sexualisation thermal reaction norm within the TSP.\cr
 #' The Temperatures parameter is a character string which can be:\cr
 #' \itemize{
@@ -34,43 +37,80 @@
 #' Med_Cc <- with(MedIncubation_Cc, tsd(males=Males, females=Females, 
 #'  temperatures=Incubation.temperature, par=c(P=29.5, S=-0.01)))
 #' plot(Med_Cc, xlim=c(25, 35))
-#' # Initial_STRN <- rep(1, 7)
-#' # names(Initial_STRN) <- as.character(seq(from=20, to=35, length=7))
-#' Initial_STRN <- structure(c(1, 143.248982215757, -25.7029976477549, -0.00489843027318209,
-#' -8.94560833594928, 135.781961273868, 71.2176230826628), 
-#' .Names = c("20", "22.5", "25", "27.5", "30", "32.5", "35"))
 #' males <- c(7, 0, 0, 0, 0, 5, 6, 3, 5, 3, 2, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0)
 #' names(males) <- rev(rev(names(resultNest_4p_SSM4p$data))[-(1:2)])
 #' sexed <- rep(10, length(males))
 #' names(sexed) <- rev(rev(names(resultNest_4p_SSM4p$data))[-(1:2)])
-#' fitSTRN <- STRN(Initial_STRN, EmbryoGrowthTRN=resultNest_4p_SSM4p, tsd=Med_Cc, 
-#' Sexed=sexed, Males=males, 
-#' Temperatures="TSP.MassWeighted.STRNWeighted.temperature.mean")
+#' Initial_STRN <- resultNest_4p_SSM4p$par[c("DHA", "DHH", "T12H")]
+#' Initial_STRN <- structure(c(582.567096666926, 2194.0806711639, 3475.28414940385), 
+#'                           .Names = c("DHA", "DHH", "T12H"))
+#' fp <- c(Rho25=100)
+#' fitSTRN <- STRN(Initial_STRN=Initial_STRN, 
+#'                 EmbryoGrowthTRN=resultNest_4p_SSM4p, tsd=Med_Cc, 
+#'                 Sexed=sexed, Males=males, 
+#'                 fixed.parameters=fp, 
+#'                 SE=TRUE, 
+#'                 Temperatures="TSP.MassWeighted.STRNWeighted.temperature.mean")
+#' plotR(fitSTRN, curves ="ML quantiles", ylim=c(0,2))
 #' CTE <- info.nests(NestsResult=resultNest_4p_SSM4p, 
-#'  SexualisationTRN=fitSTRN$par, out="summary")$summary
-#' plot_add(x=CTE$TSP.MassWeighted.STRNWeighted.temperature.mean, y=males/sexed, 
-#'  col="red", pch=19)
-#' legend("topright", legend=c("CTE with Sexualisation TRN"), 
-#' pch=19, col=c("red"))
-#' plotR(parameters=fitSTRN$par, main="Sexualisation TRN")
-#' # Initial_STRN <- resultNest_4p_SSM4p$par
-#' Initial_STRN <- structure(c(4230.10750319997, 510.543319171189, 1015.78663983953,
-#' 118.189709917707), .Names = c("DHA", "DHH", "T12H", "Rho25"))
-#' males <- c(7, 0, 0, 0, 0, 5, 6, 3, 5, 3, 2, 3, 0, 0, 0, 0, 0, 0, 0, 0, NA)
-#' names(males) <- rev(rev(names(resultNest_4p_SSM4p$data))[-(1:2)])
-#' sexed <- c(rep(10, length(males)-1), NA)
-#' names(sexed) <- rev(rev(names(resultNest_4p_SSM4p$data))[-(1:2)])
-#' fitSTRN <- STRN(Initial_STRN, EmbryoGrowthTRN=resultNest_4p_SSM4p, tsd=Med_Cc, 
-#' Sexed=sexed, Males=males, 
-#' Temperatures="TSP.MassWeighted.STRNWeighted.temperature.mean")
-#' CTE <- info.nests(NestsResult=resultNest_4p_SSM4p, 
-#' SexualisationTRN=fitSTRN$par, out="summary")$summary
+#'                   SexualisationTRN=fitSTRN,
+#'                   SexualisationTRN.CI="Hessian",
+#'                   CI="Hessian", 
+#'                   replicate.CI=100, 
+#'                   progress=TRUE, 
+#'                   warnings=TRUE, 
+#'                   out="summary")$summary
+#' # CTE with growth-weighted temperature average
 #' plot(Med_Cc, xlim=c(25, 35))
-#' plot_add(x=CTE$TSP.MassWeighted.STRNWeighted.temperature.mean, y=males/sexed, 
-#' col="red", pch=19)
+#' points(x=CTE$TSP.MassWeighted.temperature.mean, y=males/sexed, 
+#'          col="red", pch=19)
+#' legend("topright", legend=c("CTE with growth-weighted TRN"), 
+#'          pch=19, col=c("red"))
+#' # CTE with sexualisation TRN and growth-weighted temperature average
+#' plot(Med_Cc, xlim=c(25, 35))
+#' points(x=CTE$TSP.MassWeighted.STRNWeighted.temperature.mean, y=males/sexed, 
+#'          col="red", pch=19)
+#' legend("topright", legend=c("CTE with growth-weighted TRN and Sex. TRN"), 
+#'        pch=19, col=c("red"))
+#' xx <- seq(from=20, to=35, by=0.1)
+#' plot(x=xx, 
+#'          y=log10(getFromNamespace(".SSM", ns="embryogrowth")(xx, 
+#'                             c(fitSTRN$par, fitSTRN$fixed.parameters))[[1]]), 
+#'          type="l", bty="n", xlim=c(20, 35), ylim=c(-20, 20), 
+#'          xlab="Temperature", ylab="Sexualisation thermal reaction norm (log10)")
+#'          
+#' # Using only the sexualisation thermal reaction norm within TSP to calculate CTE
+#' 
+#' Initial_STRN <- resultNest_4p_SSM4p$par[c("DHA", "DHH", "T12H")]
+#' Initial_STRN <- structure(c(3678.94960547096, -301.436485427701, 912.595953854977), 
+#'                           .Names = c("DHA", "DHH", "T12H"))
+#' fp <- c(Rho25=100)
+#' fitSTRN_2 <- STRN(Initial_STRN=Initial_STRN, 
+#'                 EmbryoGrowthTRN=resultNest_4p_SSM4p, tsd=Med_Cc, 
+#'                 Sexed=sexed, Males=males, 
+#'                 fixed.parameters=fp,  
+#'                 Temperatures="TSP.STRNWeighted.temperature.mean")
+#' CTE <- info.nests(NestsResult=resultNest_4p_SSM4p, 
+#'                   SexualisationTRN=fitSTRN_2,
+#'                   SexualisationTRN.CI="Hessian",
+#'                   CI="Hessian", 
+#'                   replicate.CI=100, 
+#'                   progress=TRUE, 
+#'                   warnings=TRUE, 
+#'                   out="summary")$summary
+#' # CTE with sexualisation TRN
+#' plot(Med_Cc, xlim=c(25, 35))
+#' points(x=CTE$TSP.STRNWeighted.temperature.mean, y=males/sexed, 
+#'          col="red", pch=19)
 #' legend("topright", legend=c("CTE with Sexualisation TRN"), 
-#' pch=19, col=c("red"))
-#' plotR(parameters=fitSTRN$par, main="Sexualisation TRN")
+#'        pch=19, col=c("red"))
+#' xx <- seq(from=20, to=35, by=0.1)
+#' plot(x=xx, 
+#'          y=getFromNamespace(".SSM", ns="embryogrowth")(xx, 
+#'                             c(fitSTRN$par, fitSTRN$fixed.parameters))[[1]], 
+#'          type="l", bty="n", xlim=c(20, 35), ylim=c(0, 1E-18), 
+#'          xlab="Temperature", ylab="Sexualisation thermal reaction norm")
+
 #' }
 #' @export
 
@@ -80,10 +120,14 @@ STRN <- function(Initial_STRN=NULL,
                  tsd=stop("A result from the function tsd() must be provided"),
                  Sexed=NULL, Males=NULL, Females=NULL, 
                  Temperatures="TSP.MassWeighted.STRNWeighted.temperature.mean", 
-                 SE=FALSE, 
-                 ...)
+                 SE=TRUE, parallel=TRUE, 
+                 itnmax=1000, 
+                 method = c("Nelder-Mead","BFGS"), 
+                 control=list(trace=1, REPORT=10))
   
 {
+  
+  # Initial_STRN=NULL; fixed.parameters = NULL;EmbryoGrowthTRN=NULL; tsd=NULL; Sexed=NULL; Males=NULL; Females=NULL; Temperatures="TSP.MassWeighted.STRNWeighted.temperature.mean"; SE=TRUE; parallel=TRUE; control=list(trace=1, REPORT=10, maxit=1000)
   
   if (!requireNamespace("optimx", quietly = TRUE)) {
     stop("optimx package is absent; Please install it first")
@@ -93,7 +137,7 @@ STRN <- function(Initial_STRN=NULL,
     stop("numDeriv package is absent; Please install it first")
   }
   
-#  Initial_STRN=NULL;  EmbryoGrowthTRN=NULL; tsd=NULL;  Sexed=NULL; Males=NULL; Females=NULL;  Temperatures="TSP.MassWeighted.STRNWeighted.temperature.mean"; SE=FALSE 
+#  Initial_STRN=NULL;  EmbryoGrowthTRN=NULL; fixed.parameters = NULL; tsd=NULL;  Sexed=NULL; Males=NULL; Females=NULL;  Temperatures="TSP.MassWeighted.STRNWeighted.temperature.mean"; SE=FALSE 
   
   if (is.null(Initial_STRN)) {pSTRN=EmbryoGrowthTRN$par} else {pSTRN=Initial_STRN}
   
@@ -105,31 +149,32 @@ STRN <- function(Initial_STRN=NULL,
     stop("Error in Males, Females or Sexed data")
   }
   
-  method <- c("Nelder-Mead","BFGS")
-  p3p <- list(...)
-  # p3p <- list()
+  nm <- names(pSTRN)
+  minL <- length(method)
   
   repeat {
     
-    L <- list(hessian=SE, method=method, 
+    L <- list(hessian=FALSE, method=method, 
               par=pSTRN, 
               fixed.parameters=fixed.parameters, 
               fn=getFromNamespace(".STRN_fit", ns="embryogrowth"), 
               EmbryoGrowthTRN=EmbryoGrowthTRN, 
               tsd=tsd, Sexed=Sexed, Males=Males, Temperatures=Temperatures, 
-              control=modifyList(list(dowarn=FALSE, follow.on=TRUE, kkt=FALSE), p3p))
+              parallel=parallel, 
+              itnmax=itnmax, 
+              control=modifyList(list(dowarn=FALSE, follow.on=TRUE, kkt=FALSE), control))
+    
+    # getFromNamespace(".STRN_fit", ns="embryogrowth")(par=pSTRN, fixed.parameters=fixed.parameters, EmbryoGrowthTRN=EmbryoGrowthTRN, tsd=tsd, Sexed=Sexed, Males=Males, Temperatures=Temperatures)
     
     result <- do.call(getFromNamespace(x="optimx", ns="optimx"), L)
     
-    minL <- dim(result)[1]
-    nm <- names(pSTRN)
     x <- result[minL, nm]
     x <- as.numeric(x)
     names(x) <- nm
     conv <- result[minL, "convcode"]
     value <- result[minL, "value"]
     
-    if (conv==0) break
+    if (conv != 1) break
     pSTRN <- x
     print("Convergence is not achieved. Optimization continues !")
     print(dput(pSTRN))
@@ -139,31 +184,31 @@ STRN <- function(Initial_STRN=NULL,
   
   if (SE) {
     mathessian <- try(numDeriv::hessian(getFromNamespace(".STRN_fit", ns="embryogrowth"), 
-                                        parameters=result$par, 
-                                        fixed.parameters=fixed.parameters, 
                                         method="Richardson", 
+                                        x=result$par, 
+                                        fixed.parameters=fixed.parameters, 
                                         EmbryoGrowthTRN=EmbryoGrowthTRN, 
                                         tsd=tsd, Sexed=Sexed, Males=Males, 
-                                        Temperatures=Temperatures), silent=TRUE)
+                                        Temperatures=Temperatures
+                                        , parallel=parallel), silent=TRUE)
     
     if (inherits(mathessian, "try-error")) {
       res <- rep(NA, length(x))
+      names(res) <- names(result$par)
+      result$hessian <- NULL
     } else {
-      result$hessian <- mathessian
-      inversemathessian <- try(solve(mathessian), silent=TRUE)
-      if (inherits(inversemathessian, "try-error")) {
-        res <- rep(NA, length(result$par))
-      } else {
-        res <- diag(inversemathessian)
-        res <- ifelse(res<0, NA, sqrt(res))
-      }
+      colnames(mathessian) <- rownames(mathessian) <- names(result$par)
+      rh <- SEfromHessian(mathessian, hessian=TRUE)
+      res <- rh$SE
+      result$hessian <- rh$hessian
     }
     
   } else {
     # pas de hessian donc pas de SE
     res<-rep(NA, length(result$par))
+    names(res) <- names(result$par)
   }
-  names(res) <- names(result$par)
+  
   result$SE <- res 
   
   if (any(is.na(res))) {
@@ -176,12 +221,20 @@ STRN <- function(Initial_STRN=NULL,
     }
   }
   
-  result$value <- value
-  result$AIC <- 2 * value + 2* length(x)
   result$data <- list(Sexed=Sexed, Males=Males, Females=Females, 
                       Temperatures="Temperatures", 
                       EmbryoGrowthTRN=EmbryoGrowthTRN, 
                       tsd=tsd)
+  
+  result$value <- value
+  
+  k <- length(x)
+  n <- length(result$data$Sexed)
+
+  result$AIC <- 2*result$value+2*k
+  result$AICc <- result$AIC + (2*k*(k+1))/(n-k-1)
+  result$BIC <- 2*result$value + k * log(n)
+  
   result$fixed.parameters <- fixed.parameters
   
   class(result) <- "STRN"

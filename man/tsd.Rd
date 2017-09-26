@@ -45,8 +45,9 @@ A list the pivotal temperature, transitional range of temperatures and their SE
 \description{
 Estimate the parameters that best describe the thermal reaction norm for sex ratio when temperature-dependent sex determination occurs.\cr
 It can be used also to evaluate the relationship between incubation duration and sex ratio.\cr
-The parameter l was defined in Girondot (1999). The TRT is defined from the difference between the two boundary temperatures giving sex ratios of l and 1 \0x2212 l, respectively:\cr
-TRTl = abs(S.Kl) where Kl is a constant equal to [2.ln(l/(1-l))].\cr
+The parameter l was defined in Girondot (1999). The TRT is defined from the difference between the two boundary temperatures giving sex ratios of \eqn{l} and \eqn{1 - l}, respectively:\cr
+\deqn{TRT_{l}=abs\left ( S\: K_{l} \right )}{TRTl = abs( S.Kl )}
+where \eqn{K_{l}}{Kl} is a constant equal to \eqn{2\: log\left ( \frac{l}{1-l} \right )}{2 log(l / ( 1 - l))}.\cr
 In Girondot (1999), l was 0.05 and then the TRT was defined as being the range of temperatures producing from 5\% to 95\% of each sex.\cr
 Models Richards, Double-Richards and Hulin are particularly sensitive for K parameters. If you want estimate 
 confidence interval for TRT using these models, it is better to use mcmc.
@@ -56,8 +57,9 @@ tsd estimates the parameters that best describe temperature-dependent sex determ
 }
 \examples{
 \dontrun{
+library(embryogrowth)
 CC_AtlanticSW <- subset(DatabaseTSD, RMU=="Atlantic, SW" & 
-                          Species=="Caretta caretta" & Sexed!=0)
+                          Species=="Caretta caretta" & (!is.na(Sexed) & Sexed!=0))
 tsdL <- with (CC_AtlanticSW, tsd(males=Males, females=Females, 
                                  temperatures=Incubation.temperature-Correction.factor, 
                                  equation="logistic", replicate.CI=NULL))
@@ -77,6 +79,8 @@ compare_AIC(Logistic_Model=tsdL, Hill_model=tsdH, Richards_model=tsdR,
                DoubleRichards_model=tsdDR, GSD_model=gsd)
 compare_AICc(Logistic_Model=tsdL, Hill_model=tsdH, Richards_model=tsdR, 
                DoubleRichards_model=tsdDR, GSD_model=gsd, factor.value = -1)
+compare_BIC(Logistic_Model=tsdL, Hill_model=tsdH, Richards_model=tsdR, 
+               DoubleRichards_model=tsdDR, GSD_model=gsd, factor.value = -1)
 ##############
 eo <- subset(DatabaseTSD, Species=="Emys orbicularis", c("Males", "Females", 
                                        "Incubation.temperature"))
@@ -90,7 +94,6 @@ eo_Richards <- with(eo, tsd(males=Males, females=Females,
                                  temperatures=Incubation.temperature, 
                                  equation="Richards", replicate.CI=NULL))
 ### The Hulin model is a modification of Richards (See Hulin et al. 2009)
-### limit.low.TRT and limit.high.TRT must be setup for Hulin equation
 par <- eo_Richards$par
 names(par)[which(names(par)=="K")] <- "K2"
 par <- c(par, K1=0)

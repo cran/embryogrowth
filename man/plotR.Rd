@@ -6,11 +6,12 @@
 \usage{
 plotR(result = NULL, resultmcmc = NULL, parameters = NULL,
   fixed.parameters = NULL, temperatures = NULL, curves = "ML quantiles",
-  set.par = 1, ylim = c(0, 5), xlim = c(20, 35), cex.lab = par("cex"),
-  cex.axis = par("cex"), scaleY = "auto", lty = 1, ltyCI = 3, lwd = 1,
-  lwdCI = 1, col = "black", col.polygon = "grey", polygon = FALSE,
-  probs = 0.99, colramp = colorRampPalette(c("white", rgb(red = 0.5, green =
-  0.5, blue = 0.5))), bandwidth = c(0.1, 0.01), pch = "", main = "",
+  set.par = 1, ylim = c(0, 5), xlim = c(20, 35), hessian = NULL,
+  replicate.CI = 1000, cex.lab = par("cex"), cex.axis = par("cex"),
+  scaleY = "auto", lty = 1, ltyCI = 3, lwd = 1, lwdCI = 1,
+  col = "black", col.polygon = "grey", polygon = FALSE, probs = 0.95,
+  colramp = colorRampPalette(c("white", rgb(red = 0.5, green = 0.5, blue =
+  0.5))), bandwidth = c(0.1, 0.01), pch = "", main = "",
   xlab = expression("Temperature in " * degree * "C"), ylab = NULL,
   bty = "n", las = 1, by.temperature = 0.1, show.density = FALSE,
   new = TRUE, show.hist = FALSE, ylimH = NULL, atH = NULL,
@@ -35,6 +36,10 @@ plotR(result = NULL, resultmcmc = NULL, parameters = NULL,
 \item{ylim}{Range of values for y-axis}
 
 \item{xlim}{Range of values for x-axis}
+
+\item{hessian}{An hessian matrix}
+
+\item{replicate.CI}{Number of replicates to estimate confidence interval with Hessian if delta method failed}
 
 \item{cex.lab}{cex value for axis}
 
@@ -76,7 +81,7 @@ plotR(result = NULL, resultmcmc = NULL, parameters = NULL,
 
 \item{by.temperature}{Step to built the temperatures}
 
-\item{show.density}{TRUE or FALSE}
+\item{show.density}{TRUE or FALSE for use with Hessian or MCMC}
 
 \item{new}{Should the graphics be a new one (TRUE) or superimposed to a previous one (FALSE)}
 

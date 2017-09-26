@@ -66,7 +66,7 @@ plot.tsd plot result of tsd() that best describe temperature-dependent sex deter
 \examples{
 \dontrun{
 CC_AtlanticSW <- subset(DatabaseTSD, RMU=="Atlantic, SW" & 
-                          Species=="Caretta caretta" & Sexed!=0)
+                          Species=="Caretta caretta" & (!is.na(Sexed) & Sexed!=0))
 tsdL <- with (CC_AtlanticSW, tsd(males=Males, females=Females, 
                                  temperatures=Incubation.temperature-Correction.factor, 
                                  equation="logistic"))

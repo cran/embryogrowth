@@ -3,6 +3,7 @@
 S3method(hist,Nests)
 S3method(hist,NestsResult)
 S3method(logLik,NestsResult)
+S3method(logLik,STRN)
 S3method(logLik,tsd)
 S3method(nobs,NestsResult)
 S3method(plot,NestsResult)

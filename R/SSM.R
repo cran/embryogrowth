@@ -6,7 +6,11 @@
 ## Theoretical Biology, 88, 719-731.
 ##########################################################
 
-.SSM <- function (T, parms) {
+.SSM <- function (T, parms, H=NULL) {
+  
+  # H est l'hygrométrie
+  
+  if (is.null(H)) H <- rep(0, length(T))
   
   # library("embryogrowth"); T <- c(25, 26, 30) ; parms <- resultNest_newp$par
   # getFromNamespace(".SSM", ns="embryogrowth")(c(25, 30), resultNest_newp$par)
@@ -161,6 +165,8 @@
     } else {
       # je suis en model SSM
       
+      if (is.na(parms["Rho25_b"])) {rho25_b <- 0} else {rho25_b <- parms["Rho25_b"]/1E7}
+      
       R <- 8.314472
       epsilon <- parms["epsilon"]/1E7
       if (is.na(epsilon)) epsilon <- 0
@@ -174,17 +180,19 @@
         # Je suis en 4 parametres
         #	"T12H", "DHA",  "DHH", "Rho25"
         t12H=abs(parms["T12H"])
-        rT<-(rho25*(T/298)*exp((dha/R)*(unsur298-unsurT)))/(1+exp((dhh/R)*((1/t12H)-unsurT)))+epsilon
+        rT<-( (rho25 + rho25_b*H) * (T/298)*exp((dha/R)*(unsur298-unsurT)))/(1+exp((dhh/R)*((1/t12H)-unsurT)))+epsilon
       } else {
         # 28/7/2012 - T12H change en DT	
         #	"T12L", "DT", "DHA",  "DHH", "DHL", "Rho25"
         dhl <- parms["DHL"]*1E3
         t12L <- parms["T12L"]
         t12H <- t12L+abs(parms["DT"])
-        rT<-(rho25*(T/298)*exp((dha/R)*(unsur298-unsurT)))/(1+exp((dhl/R)*((1/t12L)-unsurT))+exp((dhh/R)*((1/t12H)-unsurT)))+epsilon
+        rT<-((rho25 + rho25_b*H)*(T/298)*exp((dha/R)*(unsur298-unsurT)))/(1+exp((dhl/R)*((1/t12L)-unsurT))+exp((dhh/R)*((1/t12H)-unsurT)))+epsilon
       }
       
       if (!is.na(parms["Rho25_L"])) {
+        
+        if (is.na(parms["Rho25_b_L"])) {rho25_b_L <- 0} else {rho25_b_L <- parms["Rho25_b_L"]/1E7}
         
         rho25_L <- parms["Rho25_L"]/1E7
         dha_L <- parms["DHA_L"]*1E3
@@ -193,14 +201,14 @@
         if (is.na(parms["DHL_L"])) {
           #	"T12H", "DHA",  "DHH", "Rho25"
           t12H_L <- abs(parms["T12H_L"])
-          rT_L <- (rho25_L*(T/298)*exp((dha_L/R)*(unsur298-unsurT)))/(1+exp((dhh_L/R)*((1/t12H_L)-unsurT)))+epsilon
+          rT_L <- ((rho25_L + rho25_b_L*H)*(T/298)*exp((dha_L/R)*(unsur298-unsurT)))/(1+exp((dhh_L/R)*((1/t12H_L)-unsurT)))+epsilon
         } else {
           # 28/7/2012 - T12H change en DT	
           #	"T12L", "T12H", "DHA",  "DHH", "DHL", "Rho25"
           dhl_L <- parms["DHL_L"]*1E3
           t12L_L <- parms["T12L_L"]
           t12H_L <- t12L+abs(parms["DT_L"])
-          rT_L <- (rho25_L*(T/298)*exp((dha_L/R)*(unsur298-unsurT)))/(1+exp((dhl_L/R)*((1/t12L_L)-unsurT))+exp((dhh_L/R)*((1/t12H_L)-unsurT)))+epsilon
+          rT_L <- ((rho25_L + rho25_b_L*H)*(T/298)*exp((dha_L/R)*(unsur298-unsurT)))/(1+exp((dhl_L/R)*((1/t12L_L)-unsurT))+exp((dhh_L/R)*((1/t12H_L)-unsurT)))+epsilon
         }
       } else {
         rT_L <- rT

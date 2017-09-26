@@ -1,8 +1,40 @@
 THIS IS THE CHANGELOG OF THE "embryogrowth" PACKAGE
 
-          CHANGES IN VERSION 6.5    (2017-03-10)
+          CHANGES IN VERSION 7.0    (2017-09-25)
+          
+* 2D reaction norm - 7.0
+* Cholesky decomposition is used to estimate a pseudo-variance matrix for SE - 7.0
+* AICc and BIC are estimated for the sexualisation thermal reaction norm - 7.0
+* SE or hessian are used for movingincubation - 7.0
+* Podocnemis expansa stages - 7.0
+
+          CHANGES IN VERSION 6.5-6.5.18    (2017-05-09)
           
 * New version for CRAN - 6.5
+* Correction of some examples - 6.5.1
+* Cleaning DatabaseTSD - 6.5.1
+* New parameter pipping_emergence is the number of days between pipping and emergence. It is used to establish the 1/3 and 2/3 of the incubation - 6.5.2
+* predict.tsd() can be used with only one probs - 6.5.3
+* STRN() used the new version of predict.tsd() - 6.5.3
+* STRN_MHmcmc() is corrected to be used with fixed.parameters of STRN() - 6.5.3
+* First tentative to include hygrometry in the model as cofactor of Rho25 parameter. The new parameters are Rho25_b and Rho25_b_L - 6.5.3
+* predict.tsd() works without temperatures or durations - 6.5.4
+* New prallel parameter for STRN() and STRN_MHmcmc() - 6.5.5
+* fixed.parameters from STRN is used now in info.nests() - 6.5.6
+* New examples for STRN() and STRN_MHmcmc() - 6.5.6
+* Minor bug for fixed.parameters in info.nests() - 6.5.7
+* tsd(), P_TRT() and plot.tsd() can be used when some parameters are badly fitted - 6.5.8
+* plot.tsd() is more robust to unusual situations - 6.5.9
+* New outMCMC data - 6.5.10
+* STRN() is faster if some timeseries have no information for sex - 6.5.11
+* Database of embryological stages is more complete - 6.5.12
+* New exemple for stages dataset - 6.5.13
+* plot() of series can use the hessian matrix - 6.5.13
+* Better control of the confidence interval shown is plot() using the CI parameter - 6.5.14
+* Minor change in stages dataset - 6.5.15
+* Hessian matrix for STRN() is estimated - 6.5.16
+* info.nests() can use Hessian matrix for STRN() - 6.5.17
+* Minor change in info.nests() - 6.5.18
 
           CHANGES IN VERSION 6.4-6.4.56    (2017-03-09)
           

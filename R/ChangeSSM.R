@@ -124,7 +124,7 @@ ChangeSSM <- function(result = NULL,
     }
     
     rxxw <- apply(xxw, MARGIN = 2, 
-                  FUN = function(x) c(mean(x), sd(x), quantile(x = x, probs = c(0.025, 0.5, 0.975))))
+                  FUN = function(x) c(mean(x), sd(x), quantile(x = x, probs = c(0.025, 0.5, 0.975), na.rm = TRUE)))
     
     if (outmcmc == "quantiles") {
       newp <- structure(rxxw[4, ], .Names = as.character(x = temperatures+273.15))

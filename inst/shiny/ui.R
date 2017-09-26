@@ -3,7 +3,7 @@
 
 
 library(shiny)
-library(embryogrowth)
+package.embryogrowth <- require('embryogrowth')
 
 # Define UI for application that draws a histogram
 shinyUI(fluidPage(

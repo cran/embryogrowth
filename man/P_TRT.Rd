@@ -7,7 +7,7 @@
 P_TRT(x = NULL, resultmcmc = NULL, chain = 1, equation = NULL,
   l = 0.05, replicate.CI = NULL, temperatures = NULL, durations = NULL,
   SD.temperatures = NULL, SD.durations = NULL, probs = c(0.025, 0.5,
-  0.975))
+  0.975), warn = FALSE)
 }
 \arguments{
 \item{x}{Set of parameters or a result of tsd()}
@@ -18,7 +18,7 @@ P_TRT(x = NULL, resultmcmc = NULL, chain = 1, equation = NULL,
 
 \item{equation}{What equation should be used. Must be provided if x is not a result of tsd()}
 
-\item{l}{Sex ratio limits to define TRT are l and 1-l}
+\item{l}{Sex ratio limits to define TRT are l and 1-l. If NULL, TRT is not estimated.}
 
 \item{replicate.CI}{If a result of tsd() is provided, use replicate.CI replicates from the hessian matrix to estimate CI}
 
@@ -31,6 +31,8 @@ P_TRT(x = NULL, resultmcmc = NULL, chain = 1, equation = NULL,
 \item{SD.durations}{SD of durations}
 
 \item{probs}{Probabilities used to estimate quantiles}
+
+\item{warn}{Do the warnings must be shown ? TRUE or FALSE}
 }
 \value{
 A list with a P_TRT object containing a matrix with lower and higher bounds for TRT, TRT and P and a P_TRT_quantiles object with quantiles for each and a sexratio_quantiles object
@@ -41,13 +43,14 @@ It can be used also to evaluate the relationship between incubation duration and
 The parameter l was defined in Girondot (1999). The TRT is defined from the difference between the two boundary temperatures giving sex ratios of l and 1 - l.\cr
 For logistic equation, exact value is used and precision iterations are used for other equations.\cr
 In Girondot (1999), l was 0.05 and then the TRT was defined as being the range of temperatures producing from 5% to 95% of each sex.\cr
-If l is null, TRT is not estimated and only sex ratio is estimated.
+If l is null, TRT is not estimated and only sex ratio is estimated.\cr
 }
 \details{
 P_TRT estimates the transitional range of temperatures based on a set of parameters
 }
 \examples{
 \dontrun{
+library("embryogrowth")
 CC_AtlanticSW <- subset(DatabaseTSD, RMU=="Atlantic, SW" & 
                           Species=="Caretta caretta" & Sexed!=0)
 tsdL <- with (CC_AtlanticSW, tsd(males=Males, females=Females, 
@@ -56,6 +59,8 @@ tsdL <- with (CC_AtlanticSW, tsd(males=Males, females=Females,
 P_TRT(tsdL)
 P_TRT(tsdL, replicate.CI=1000)
 P_TRT(tsdL, replicate.CI=1000, temperatures=20:35)
+P_TRT_out <- P_TRT(tsdL, replicate.CI=1000, temperatures=c(T1=20, T2=35))
+attributes(P_TRT_out$sexratio_quantiles)$temperatures
 P_TRT(tsdL$par, equation="logistic")
 pMCMC <- tsd_MHmcmc_p(tsdL, accept=TRUE)
 # Take care, it can be very long

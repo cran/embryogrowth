@@ -41,7 +41,8 @@ test can be a data.frame with two columns Mean and SD and rownames with the nest
 Function to fit thermal reaction norm can be also expressed as : \cr
 a 4-parameters [Schoolfield, Sharpe, and Magnuson. 1981] model with DHH, DHA, T12H, and Rho25;
 a 6-parameters [Schoolfield, Sharpe, and Magnuson. 1981] model with T12L, DT, DHH, DHL, DHA, and Rho25;
-Each of these two first models can be combined as low and high sets of parameters by adding the _L and _H suffix.
+Each of these two first models can be combined as low and high sets of parameters by adding the _L suffix to one set.\cr
+The Rho25_b control the effect of hygrometry (or Rho25_b_L).\cr
 Then you must add also transition_S and transition_P parameters;\cr
 It is possible also to add the parameter epsilon and then the model begins SSM + epsilon;\cr
 a Weibull function with k (shape), lambda (scale) and theta parameters.\cr
@@ -49,6 +50,8 @@ a normal function with Peak, Scale, and sd parameters.\cr
 an asymmetric normal fuction with Peak, Scale, sdH and sdL parameters;\cr
 a symmetric trigonometric function with Length, Peak, and Max;\cr
 an asymmetric trigonometric function with LengthB, LengthE, Peak, and Max.\cr
+Dallwitz model can be used using Dallwitz_b1, Dallwitz_b2, Dallwitz_b3, Dallwitz_b4 and Dallwitz_b5 parameters. If Dallwitz_b4 is not included, Dallwitz_b4 = 6 and Dallwitz_b5 = 0.4 will be used instead.\cr
+See Dallwitz, M.J., Higgins, J.P., 1992. User’s guide to DEVAR. A computer program for estimating development rate as a function of temperature. CSIRO Aust Div Entomol Rep 2, 1-23.
 }
 \details{
 searchR fits the parameters that best represent nest incubation data.

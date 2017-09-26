@@ -11,7 +11,6 @@ Nothing
 }
 \description{
 Run a shiny application for basic functions of tsd function.
-It is available also here \url{http://134.158.74.145/tsd/}.
 }
 \details{
 web.tsd runs a shiny application for basic functions of tsd function

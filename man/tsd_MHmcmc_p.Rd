@@ -25,7 +25,7 @@ tsd_MHmcmc_p generates set of parameters to be used with tsd_MHmcmc()
 \examples{
 \dontrun{
 library(embryogrowth)
-eo <- subset(STSRE_TSD, Species=="Emys orbicularis", c("Males", "Females", 
+eo <- subset(Database_TSD, Species=="Emys orbicularis", c("Males", "Females", 
                                        "Incubation.temperature"))
 eo_logistic <- with(eo, tsd(males=Males, females=Females, 
                                  temperatures=Incubation.temperature))

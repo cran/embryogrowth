@@ -30,7 +30,7 @@
 #' @examples
 #' \dontrun{
 #' CC_AtlanticSW <- subset(DatabaseTSD, RMU=="Atlantic, SW" & 
-#'                           Species=="Caretta caretta" & Sexed!=0)
+#'                           Species=="Caretta caretta" & (!is.na(Sexed) & Sexed!=0))
 #' tsdL <- with (CC_AtlanticSW, tsd(males=Males, females=Females, 
 #'                                  temperatures=Incubation.temperature-Correction.factor, 
 #'                                  equation="logistic"))
@@ -61,7 +61,7 @@ plot.tsd <- function(x, ...,
   col.PT.CI=rgb(0.8, 0.8, 0.8, 0.5), 
 	show.CI=TRUE) {
 
-# show.observations=TRUE; males.freq=TRUE; las.x=1; las.y=1; lab.PT=paste("Pivotal ", x$type); resultmcmc = NULL; chain=1; l=0.05; replicate.CI=10000; temperatures.plot=seq(from=20, to=35, by=0.1); TRT.limits=c(9, 90); precision=15; range.CI=0.95; mar=c(4, 4, 6, 1)+0.4; lab.TRT=paste0("Transitional range of ", x$type, "s l=",x$l*100,"%"); col.TRT="gray"; col.TRT.CI=rgb(0.8, 0.8, 0.8, 0.5); col.PT.CI=rgb(0.8, 0.8, 0.8, 0.5); show.CI=TRUE
+# show.observations=TRUE; males.freq=TRUE; las.x=1; las.y=1; lab.PT=paste("Pivotal ", x$type); resultmcmc = NULL; chain=1; l=0.05; replicate.CI=10000; temperatures.plot=seq(from=20, to=35, by=0.1); durations.plot=seq(from=40, to=70, by=0.1);TRT.limits=c(9, 90); precision=15; range.CI=0.95; mar=c(4, 4, 6, 1)+0.4; lab.TRT=paste0("Transitional range of ", x$type, "s l=",x$l*100,"%"); col.TRT="gray"; col.TRT.CI=rgb(0.8, 0.8, 0.8, 0.5); col.PT.CI=rgb(0.8, 0.8, 0.8, 0.5); show.CI=TRUE
   
   males <- x$males
   females <- x$females

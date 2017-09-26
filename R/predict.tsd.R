@@ -13,8 +13,7 @@
 #' @param replicate.CI Number of replicates to estimate CI
 #' @param ... Not used
 #' @description Estimate sex ratio according to constant incubation temperature\cr
-#' The data.frame has the following components:\cr
-#' temperatures, SE, sexratio, CI.minus.sexratio, CI.plus.sexratio, range.CI\cr
+#' The data.frame has the temperatures or durations in columns and the quantiles in rows.\cr
 #' Note that incubation duration is a very bad proxy for sex ratio. See Georges, 
 #' A., Limpus, C. J. & Stoutjesdijk, R. 1994. Hatchling sex in the marine turtle 
 #' Caretta caretta is determined by proportion of development at a temperature, 
@@ -29,7 +28,7 @@
 #' result <- tsd(males=m, females=f, temperatures=t)
 #' plot(result)
 #' predict(result, temperatures=c(25, 31), replicate.CI = 10000)
-#' predict(result, temperatures=c(25, 31), SE=c(1, 2), replicate.CI = 10000)
+#' predict(result, temperatures=c(25, 31), SD.temperatures = c(1, 2), replicate.CI = 10000)
 #' d <- c(72, 70, 65, 63, 62, 60, 59)
 #' result <- tsd(males=m, females=f, durations=d)
 #' predict(result, durations=c(67, 68), replicate.CI = 10000)
@@ -38,13 +37,19 @@
 #' @export
 
 
-predict.tsd <- function(object, resultmcmc=NULL, chain=1, 
-                          replicate.CI=10000, temperatures=NULL, durations=NULL,
+predict.tsd <- function(object, temperatures=NULL, durations=NULL,
                           SD.temperatures= NULL, SD.durations=NULL,
+                        resultmcmc=NULL, chain=1, 
+                        replicate.CI=10000, 
                           probs=c(0.025, 0.5, 0.975), ...) {
   
   # object <- NULL; resultmcmc=NULL; chain=1;replicate.CI=10000; temperatures=NULL; durations=NULL;SD.temperatures= NULL; SD.durations=NULL;probs=c(0.025, 0.5, 0.975)
   
+  temperatures <- c(temperatures, durations)
+  SD.temperatures <- c(SD.temperatures, SD.durations)
+  
+  if (is.null(temperatures)) temperatures <- object$temperatures
+
   o <- P_TRT(x=object, resultmcmc=resultmcmc, chain=chain, l=NULL, 
                 replicate.CI=replicate.CI, temperatures=temperatures, durations=durations,
                 SD.temperatures= SD.temperatures, SD.durations=SD.durations,

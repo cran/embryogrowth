@@ -49,9 +49,11 @@ Database of TSD information for marine turtles
 library(embryogrowth)
 data(DatabaseTSD)
 DatabaseTSD$Version[1]
-totalIncubation_Lo <- subset(DatabaseTSD, Species=="Lepidochelys olivacea" & Sexed!=0)
+totalIncubation_Lo <- subset(DatabaseTSD, 
+         Species=="Lepidochelys olivacea" & (!is.na(Sexed) & Sexed!=0), 
+         select=c("Males", "Females", "Incubation.temperature"))
 tot_Lo <- with(totalIncubation_Lo, tsd(males=Males, females=Females, 
- temperatures=Incubation.temperature, par=c(P=29, S=-0.01), xlim=c(25, 35)))
+ temperatures=Incubation.temperature), parameters.initial = c(P=30.5, S=-0.4))
  predict(tot_Lo)
 }
 }
@@ -78,7 +80,7 @@ Limpus C.J., Reed P.C. and Miller J.D. (1985) Temperature dependent sex determin
 
 Limpus C.J., Reed P. and Miller J.D. (1983) Islands and turtles: the influence of choice of nesting beach on sex ratio. In Baker J.J., Carter R.M., Saurmarco P.W. and Stark K.P. (eds.) Proceedings of the Proceedings of the Inaugural Great Barrier Reef Conference, 29 August-2 September, 1983. James Cook University Press of North Queensland, pp. 397-402.
 
-Lopez Correa, J.Y., 2010. Diferenciacion gonadica en crias de Lepidochelys olivacea (Eschscholtz, 1829) (Testudinata: Cheloniidae), Instituto Politicnico Nacional, Centro Interdisciplinaria de Ciencias Marinas, La Paz, BCS, p. 108.
+López Correa, J.Y., 2010. Diferenciacion gonadica en crias de Lepidochelys olivacea (Eschscholtz, 1829) (Testudinata: Cheloniidae), Instituto Politicnico Nacional, Centro Interdisciplinaria de Ciencias Marinas, La Paz, BCS, p. 108.
 
 Marcovaldi M.A., Godfrey M.H. and Mrosovsky N. (1997) Estimating sex ratios of loggerhead turtles in Brazil from pivotal incubation temperatures. Canadian Journal of Zoology-Revue Canadienne De Zoologie, 75, 755-770.
 
@@ -102,7 +104,7 @@ Rimblot F., Fretey J., Mrosovsky N., Lescure J. and Pieau C. (1985) Sexual diffe
 
 Rimblot-Baly F., Lescure J., Fretey J. and Pieau C. (1986-1987) Sensibilité à la température de la differenciation sexuelle chez la tortue Luth, Dermochelys coriacea (Vandelli, 1761); application des données de l'incubation artificielle à l'étude de la sex-ratio dans la nature. Annales des Sciences Naturelles, Zoologie, 8, 277-290.
 
-Ruiz Garcia N.A. (2014) Efectos de la temperatura sobre el desarrollo embrionario y el desempero de crias de la tortuga golfina, Lepidochelys olivacea. Tesis Nivel Maestria.
+Ruiz Garcia N.A. (2014) Efectos de la temperatura sobre el desarrollo embrionario y el desempeño de crías de la tortuga golfina, Lepidochelys olivacea. Tesis Nivel Maestria.
 
 Valenzuela, N., 2001. Constant, shift, and natural temperature effects on sex determination in Podocnemis expansa. Ecology 82, 3010-3024.
 

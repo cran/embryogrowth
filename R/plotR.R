@@ -7,6 +7,8 @@
 #' @param parameters A set of parameters - Has the priority over result
 #' @param fixed.parameters A set of fixed parameters
 #' @param temperatures A set of temperatures - Has the priority over result
+#' @param hessian An hessian matrix
+#' @param replicate.CI Number of replicates to estimate confidence interval with Hessian if delta method failed
 #' @param curves What curves to show: "MCMC quantiles" or "MCMC mean-SD" based on mcmc or "ML" or "ML quantiles" for maximum-likelihood
 #' @param colramp Ramp function accepting an integer as an argument and returning n colors.
 #' @param bandwidth numeric vector (length 1 or 2) of smoothing bandwidth(s). If missing, a more or less useful default is used. bandwidth is subsequently passed to function bkde2D.
@@ -30,7 +32,7 @@
 #' @param xlim Range of values for x-axis
 #' @param by.temperature Step to built the temperatures
 #' @param scaleY Scaling factor for y axis or "auto"
-#' @param show.density TRUE or FALSE
+#' @param show.density TRUE or FALSE for use with Hessian or MCMC
 #' @param probs Confidence or credibility interval to show
 #' @param new Should the graphics be a new one (TRUE) or superimposed to a previous one (FALSE) 
 #' @param show.hist TRUE or FALSE
@@ -103,9 +105,11 @@ plotR <-
            parameters = NULL, fixed.parameters = NULL, 
            temperatures  = NULL,
            curves = "ML quantiles", set.par=1, ylim=c(0, 5), xlim=c(20,35), 
+           hessian = NULL, 
+           replicate.CI = 1000, 
            cex.lab = par("cex"), cex.axis = par("cex"),
            scaleY="auto", lty=1, ltyCI=3, lwd=1, lwdCI=1, col = "black", 
-           col.polygon="grey", polygon=FALSE, probs=0.99,
+           col.polygon="grey", polygon=FALSE, probs=0.95,
            colramp=colorRampPalette(c("white", rgb(red = 0.5, green = 0.5, blue = 0.5))), 
            bandwidth = c(0.1, 0.01), pch = "", main="",
            xlab = expression("Temperature in "*degree*"C"), 
@@ -116,7 +120,7 @@ plotR <-
            log.hist=FALSE,
            mar=NULL) {
     
-    # result = NULL; resultmcmc=NULL; parameters = NULL; fixed.parameters = NULL; probs=0.99; temperatures  = NULL;curves = "ML quantiles"; set.par=1; ylim=c(0, 5); xlim=c(20,35); cex.lab = 1; cex.axis = 1;scaleY="auto"; lty=1; ltyCI=3; lwd=1; lwdCI=1; colramp=colorRampPalette(c("white", rgb(red = 0.5, green = 0.5, blue = 0.5))); bandwidth = c(0.3, 0.05); pch = ""; main=""; col = "black"; col.polygon="grey"; polygon=FALSE; xlab = expression("Temperature in"*degree*"C"); ylab = NULL; bty = "n"; las = 1; by.temperature=0.1; show.density=FALSE;new=TRUE;show.hist=FALSE; ylimH = NULL; atH = NULL;ylabH="Temperature density";breaks = "Sturges";log.hist=FALSE;mar=NULL
+    # result = NULL; resultmcmc=NULL; parameters = NULL; fixed.parameters = NULL; hessian = NULL; replicate.CI=1000; probs=0.95; temperatures  = NULL;curves = "ML quantiles"; set.par=1; ylim=c(0, 5); xlim=c(20,35); cex.lab = 1; cex.axis = 1;scaleY="auto"; lty=1; ltyCI=3; lwd=1; lwdCI=1; colramp=colorRampPalette(c("white", rgb(red = 0.5, green = 0.5, blue = 0.5))); bandwidth = c(0.3, 0.05); pch = ""; main=""; col = "black"; col.polygon="grey"; polygon=FALSE; xlab = expression("Temperature in"*degree*"C"); ylab = NULL; bty = "n"; las = 1; by.temperature=0.1; show.density=FALSE;new=TRUE;show.hist=FALSE; ylimH = NULL; atH = NULL;ylabH="Temperature density";breaks = "Sturges";log.hist=FALSE;mar=NULL
     # resultmcmc = resultNest_mcmc_4p_SSM4p
     # result = resultNest_4p_SSM4p
     
@@ -134,18 +138,18 @@ plotR <-
       result <- NULL
     }
     
+    if (is.null(hessian) & !is.null(result)) hessian <- result$hessian
     if (is.null(fixed.parameters) & !is.null(result)) fixed.parameters <- result$fixed.parameters
     if (is.null(parameters) & !is.null(result)) parameters <- result$par
     
-    
-    parameters <- c(parameters, fixed.parameters)
-    if (is.null(parameters) & !is.null(result)) parameters <- c(result$par, result$fixed.parameters)
+#    parameters <- c(parameters, fixed.parameters)
+#    if (is.null(parameters) & !is.null(result)) parameters <- c(result$par, result$fixed.parameters)
     if (is.null(parameters) & !is.null(resultmcmc)) parameters <- suppressMessages(as.parameters(resultmcmc))
     
     if (is.null(temperatures) & !is.null(result)) temperatures <- result$data
     
-    if (show.density & is.null(resultmcmc)) {
-      warning("show.density option needs a mcmc object")
+    if (show.density & is.null(resultmcmc) & (is.null(hessian))) {
+      warning("show.density option needs or a mcmc or an Hessian object")
       show.density <- FALSE
     }
     
@@ -193,11 +197,11 @@ plotR <-
     }
     
     # j'ai un hessian qui est fourni
-    if (curves=="ml quantiles" & !is.null(result$hessian)) {
+    if (curves=="ml quantiles" & !is.null(hessian)) {
       
 
-      Scoefs <- result$par
-      hessian <- result$hessian
+      Scoefs <- parameters
+#      hessian <- result$hessian
       # rownames(hessian) <- colnames(hessian) <- names(Scoefs)
       
 
@@ -229,12 +233,13 @@ plotR <-
           # L'inervalle de confiance est nul ou autre probleme dans le genre
           # warning(ic5)
           warn <- TRUE
-          rxxw_ML <- rbind(rxxw_ML, 
-                         data.frame(temperatures=temperature, 
-                                    Mean = vy, sd = NA, 
-                                    "2.5%" = vy, 
-                                    "50%" = vy, 
-                                    "97.5%" = vy))
+          # rxxw_ML <- rbind(rxxw_ML, 
+          #                data.frame(temperatures=temperature, 
+          #                           Mean = vy, sd = NA, 
+          #                           "2.5%" = vy, 
+          #                           "50%" = vy, 
+          #                           "97.5%" = vy))
+          break
         } else {
           rxxw_ML <- rbind(rxxw_ML, 
                            data.frame(temperatures=temperature, 
@@ -244,8 +249,43 @@ plotR <-
                                       "97.5%" = ic5[1, 3]))
         }
       }
-      rxxw_ML <- as.matrix(t(rxxw_ML))
-      if (warn) warning("At least some parts of confidence interval cannot be estimated")
+      if (warn) {
+        # J'ai une erreur avec la méthode delta
+        
+        sigma <- solve(hessian)
+        s. <- svd(sigma)
+        R <- t(s.$v %*% (t(s.$u) * sqrt(pmax(s.$d, 0))))
+        
+        pre0.9_9994 = FALSE
+        
+        dataR <- matrix(rnorm(replicate.CI * ncol(sigma)), nrow = replicate.CI, byrow = !pre0.9_9994) %*% R
+        dataR <- sweep(dataR, 2, parameters[rownames(hessian)], "+")
+        colnames(dataR) <- rownames(hessian)
+        
+        ajouter <- matrix(rep(fixed.parameters, replicate.CI), 
+                          nrow=replicate.CI, byrow=TRUE,
+                          dimnames = list(c(NULL), names(fixed.parameters)))
+        dataR <- cbind(dataR, ajouter)
+        
+        xxw <- matrix(ncol = 2, 
+                      nrow = length(temp)*nrow(dataR))
+        xxw2 <- matrix(data = as.numeric(), ncol = length(temp), 
+                       nrow = nrow(dataR))
+        
+        xxw[, 1] <- rep(temp, nrow(dataR))
+        for (i in 1:nrow(dataR)) {
+          r <- SSM(T=temp, 
+                   parms=c(dataR[i,], fixed.parameters))[[set.par]]
+          jhn <- (1+(i-1)*length(temp)):((i-1)*length(temp)+length(temp))
+          # xxw[jhn, 1] <- temp
+          xxw[jhn, 2] <- r
+          xxw2[i, ] <- r
+        }
+        rxxw_ML <- apply(xxw2, MARGIN = 2, 
+                      FUN = function(x) c(Mean=mean(x), sd=sd(x), quantile(x, probs =c((1-probs)/2, 0.5, 1-(1-probs)/2), na.rm=TRUE)))
+        rxxw_ML <- t(rbind(temperatures=temp, rxxw_ML))
+      }
+    rxxw_ML <- as.matrix(t(rxxw_ML))
     }
     
       
@@ -256,13 +296,16 @@ plotR <-
           rxxw_ML <- as.matrix(t(data.frame(temperatures=temp, Mean=NA, sd=NA, "2.5%"=NA, "50%"=NA, "97.5%"=NA)))
     
     
-    if (!is.null(parameters)) {
+    if (!is.null(c(parameters, fixed.parameters))) {
       r <- SSM(T=temp, 
-               parms=parameters)[[set.par]]
+               parms=c(parameters, fixed.parameters))[[set.par]]
       r[is.infinite(r)] <- NA
-      if (is.null(xxw_ML)) xxw_ML <- data.frame(temperatures=temp, r=r)
+      xxw_ML <- data.frame(temperatures=temp, r=r)
       rxxw_ML <- rbind(rxxw_ML, ML=r)
-    }  
+    }  else {
+      xxw_ML <- data.frame(temperatures=temp, r=NA)
+      rxxw_ML <- rbind(rxxw_ML, ML=NA)
+    }
     
     if (is.null(xxw)) xxw <- xxw_ML
     if (scaleY=="auto") scaleY <- 10^(-floor(log10(max(xxw[, 2], na.rm = TRUE))))

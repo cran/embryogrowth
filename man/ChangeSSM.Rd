@@ -2,7 +2,7 @@
 % Please edit documentation in R/ChangeSSM.R
 \name{ChangeSSM}
 \alias{ChangeSSM}
-\title{Generate set of parameters for Schoolfield-Sharpe-Magnuson model}
+\title{Generate set of parameters for different forms of thermal norm of reaction}
 \usage{
 ChangeSSM(result = NULL, resultmcmc = NULL, temperatures = seq(from = 20,
   to = 35, by = 0.1), parameters = NULL, initial.parameters = NULL,
@@ -15,7 +15,7 @@ ChangeSSM(result = NULL, resultmcmc = NULL, temperatures = seq(from = 20,
 
 \item{temperatures}{A vector with incubation temperatures in degrees Celsius}
 
-\item{parameters}{A vector of parameters for model to be converted (4 or 6 parameters). Not necessary if result is provided.}
+\item{parameters}{A vector of parameters for model to be converted. Not necessary if result is provided.}
 
 \item{initial.parameters}{NULL or a vector of parameters for initial model model to be fited}
 
@@ -31,11 +31,11 @@ ChangeSSM(result = NULL, resultmcmc = NULL, temperatures = seq(from = 20,
 A vector with parameters or a result object formatted with new parameters is result is non null
 }
 \description{
-Generate a set of parameters for Schoolfield-Sharpe-Magnuson model.
+Generate a set of parameters for thermal reaction norm model.\cr
 If initial.parameters is NULL and resultmcmc is not NULL, it will generate parameters and SE based on the average of the curves.
 }
 \details{
-ChangeSSM convert different forms of Schoolfield-Sharpe-Magnuson model
+ChangeSSM convert different forms of thermal norm of reaction
 }
 \examples{
 \dontrun{
@@ -45,9 +45,9 @@ data(resultNest_4p_SSM4p)
 x2 <- resultNest_4p_SSM4p$par
 temperaturesC <- (200:350)/10
 s <- ChangeSSM(temperatures=temperaturesC, parameters=x1, initial.parameters=x2)
-sY <- plotR(resultNest_6p_SSM6p, ylim=c(0,3), col="black")
+sY <- plotR(resultNest_6p_SSM6p, ylim=c(0,3), col="black", curves = "ML")
 plotR(resultNest_4p_SSM4p, col="red", scaleY=sY, new=FALSE)
-plotR(s$par, col="green", scaleY=sY, new=FALSE)
+plotR(s$par, col="green", scaleY=sY, new=FALSE, curves = "ML")
 legend("topleft", legend=c("r function to mimic", "Initial new r function", 
 "Fitted new r function"), lty=c(1, 1, 1), col=c("black", "red", "green"))
 # Other example to fit anchored parameters
@@ -65,10 +65,10 @@ newx <- ChangeSSM(temperatures = (200:350)/10, parameters = x0,
  x <- resultNest_4p_SSM4p$par
  xanchor["294"] <- 0
  xanchor["308"] <- 2.3291035
- xprime <- ChangeSSM(parameters = xanchor,
+ x <- ChangeSSM(parameters = xanchor,
                      initial.parameters = x, control=list(maxit=5000))
- sY <- plotR(resultNest_4p_SSM4p$par, ylim = c(0,3))
- plotR(xprime$par, col="red", scaleY=sY, new=FALSE) 
+ sY <- plotR(resultNest_4p_SSM4p$par, ylim = c(0,3), curves="ML")
+ plotR(xprime$par, col="red", scaleY=sY, new=FALSE, curves="ML") 
  legend("topleft", legend=c("Fitted parameters", "Constrainted parameters"), lty=1, 
         col=c("black", "red"))
  # Weibull model
@@ -98,7 +98,7 @@ new_result <- ChangeSSM(resultmcmc = resultNest_mcmc_4p_SSM4p, result = resultNe
                         outmcmc = "mean-sd", 
                         initial.parameters = NULL)
 
-plotR(new_result$par, ylim=c(0, 3))
+plotR(new_result, ylim=c(0, 3), curves="ML")
  # example with a mcmc object, CI being defined by 2.5\%-97.5\% quantiles
  # Note the asymmetric CI
 data(resultNest_mcmc_4p_SSM4p)
@@ -107,7 +107,7 @@ new_result <- ChangeSSM(resultmcmc = resultNest_mcmc_4p_SSM4p, result = resultNe
                         outmcmc = "quantiles", 
                         initial.parameters = NULL)
  
-plotR(new_result$par, ylim=c(0, 3))
+plotR(new_result, ylim=c(0, 3), curves="ML")
 plotR(new_result, ylim=c(0, 3), curves="ML quantiles")
 }
 }

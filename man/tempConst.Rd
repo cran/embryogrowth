@@ -23,20 +23,35 @@ library(embryogrowth)
 # names = paste0("T",25:35))
 data(tempConst)
 tempConst_f <- FormatNests(tempConst)
-x <- structure(c(118.768297442004, 475.750095909406, 306.243694918151, 
-116.055824800264), .Names = c("DHA", "DHH", "T12H", "Rho25"))
-# pfixed <- c(K=82.33) or rK=82.33/39.33
-pfixed <- c(rK=2.093313)
-resultNest_4p_SSM4p <- searchR(parameters=x, fixed.parameters=pfixed, 
-	temperatures=formated, derivate=dydt.linear, M0=1.7, 
+
+data(nest)
+formated <- FormatNests(nest)
+x <- structure(c(109.683413821537, 614.969219372661, 306.386903812694, 
+ 229.003478775323), .Names = c("DHA", "DHH", "T12H", "Rho25"))
+ 
+ # See the stages dataset examples for justification of M0 and rK
+ 
+pfixed <- c(rK=1.208968)
+resultNest_4p_SSM <- searchR(parameters=x, fixed.parameters=pfixed, 
+	temperatures=formated, derivate=dydt.Gompertz, M0=0.3470893, 
 	test=c(Mean=39.33, SD=1.92))
-data(resultNest_4p_SSM4p)
-# Use the fited parameters from resultNest_4p_SSM4p with  
+	
+plotR(result=resultNest_4p_SSM, show.hist = TRUE,
+             ylim=c(0, 8), curves="ML quantiles")
+
+# Now use the fited parameters from resultNest_4p_SSM with  
 # the constant incubation temperatures:
-plot(resultNest_4p_SSM4p, temperatures=tempConst_f,  
-	stopattest=TRUE, series="all", xlim=c(0,120),  
-	ylimT=c(22, 32), show.stages=FALSE, show.PT=FALSE,  
-	show.temperatures=FALSE, show.TSP=FALSE)
+
+plot(resultNest_4p_SSM, temperatures=tempConst_f,  
+	stopattest=TRUE, series="T30", xlim=c(0,50),  
+	ylimT=c(22, 32), test=c(Mean=39.33, SD=1.92), 
+	embryo.stages="Caretta caretta.SCL")
+	
+plot(resultNest_4p_SSM, temperatures=tempConst_f,  
+	stopattest=TRUE, series="T25", xlim=c(0,120),  
+	ylimT=c(22, 32), test=c(Mean=39.33, SD=1.92), 
+	embryo.stages="Caretta caretta.SCL")
+	
 }
 }
 \references{

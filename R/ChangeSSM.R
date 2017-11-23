@@ -1,17 +1,17 @@
-#' ChangeSSM convert different forms of Schoolfield-Sharpe-Magnuson model
-#' @title Generate set of parameters for Schoolfield-Sharpe-Magnuson model
+#' ChangeSSM convert different forms of thermal norm of reaction
+#' @title Generate set of parameters for different forms of thermal norm of reaction
 #' @author Marc Girondot
 #' @return A vector with parameters or a result object formatted with new parameters is result is non null
 #' @param result A result obtained by searchR()
 #' @param resultmcmc A result obtained by GRTRN_MHmcmc()
 #' @param temperatures A vector with incubation temperatures in degrees Celsius
-#' @param parameters A vector of parameters for model to be converted (4 or 6 parameters). Not necessary if result is provided.
+#' @param parameters A vector of parameters for model to be converted. Not necessary if result is provided.
 #' @param initial.parameters NULL or a vector of parameters for initial model model to be fited
 #' @param fixed.parameters NULL of a vector of parameters to be used but fixed
 #' @param outmcmc What statistic will be estimated if a mcmc is provided. Can be "mean-sd" or "quantiles".
 #' @param progressbar If TRUE, a progressbar is shown
 #' @param ... A control list to be used with optim, see ?optim
-#' @description Generate a set of parameters for Schoolfield-Sharpe-Magnuson model.
+#' @description Generate a set of parameters for thermal reaction norm model.\cr
 #' If initial.parameters is NULL and resultmcmc is not NULL, it will generate parameters and SE based on the average of the curves.
 #' @examples
 #' \dontrun{
@@ -21,9 +21,9 @@
 #' x2 <- resultNest_4p_SSM4p$par
 #' temperaturesC <- (200:350)/10
 #' s <- ChangeSSM(temperatures=temperaturesC, parameters=x1, initial.parameters=x2)
-#' sY <- plotR(resultNest_6p_SSM6p, ylim=c(0,3), col="black")
+#' sY <- plotR(resultNest_6p_SSM6p, ylim=c(0,3), col="black", curves = "ML")
 #' plotR(resultNest_4p_SSM4p, col="red", scaleY=sY, new=FALSE)
-#' plotR(s$par, col="green", scaleY=sY, new=FALSE)
+#' plotR(s$par, col="green", scaleY=sY, new=FALSE, curves = "ML")
 #' legend("topleft", legend=c("r function to mimic", "Initial new r function", 
 #' "Fitted new r function"), lty=c(1, 1, 1), col=c("black", "red", "green"))
 #' # Other example to fit anchored parameters
@@ -41,10 +41,10 @@
 #'  x <- resultNest_4p_SSM4p$par
 #'  xanchor["294"] <- 0
 #'  xanchor["308"] <- 2.3291035
-#'  xprime <- ChangeSSM(parameters = xanchor,
+#'  x <- ChangeSSM(parameters = xanchor,
 #'                      initial.parameters = x, control=list(maxit=5000))
-#'  sY <- plotR(resultNest_4p_SSM4p$par, ylim = c(0,3))
-#'  plotR(xprime$par, col="red", scaleY=sY, new=FALSE) 
+#'  sY <- plotR(resultNest_4p_SSM4p$par, ylim = c(0,3), curves="ML")
+#'  plotR(xprime$par, col="red", scaleY=sY, new=FALSE, curves="ML") 
 #'  legend("topleft", legend=c("Fitted parameters", "Constrainted parameters"), lty=1, 
 #'         col=c("black", "red"))
 #'  # Weibull model
@@ -74,7 +74,7 @@
 #'                         outmcmc = "mean-sd", 
 #'                         initial.parameters = NULL)
 #' 
-#' plotR(new_result$par, ylim=c(0, 3))
+#' plotR(new_result, ylim=c(0, 3), curves="ML")
 #'  # example with a mcmc object, CI being defined by 2.5%-97.5% quantiles
 #'  # Note the asymmetric CI
 #' data(resultNest_mcmc_4p_SSM4p)
@@ -83,7 +83,7 @@
 #'                         outmcmc = "quantiles", 
 #'                         initial.parameters = NULL)
 #'  
-#' plotR(new_result$par, ylim=c(0, 3))
+#' plotR(new_result, ylim=c(0, 3), curves="ML")
 #' plotR(new_result, ylim=c(0, 3), curves="ML quantiles")
 #' }
 #' @export
@@ -107,7 +107,7 @@ ChangeSSM <- function(result = NULL,
     if (!is.null(result)) {
       parameters <- c(result$par, result$fixed.parameters)
     } else {
-        parameters <- structure(as.numeric(resultmcmc$parametersMCMC$parameters[, "Init"]), .Names=rownames(resultmcmc$parametersMCMC$parameters))
+      parameters <- structure(as.numeric(resultmcmc$parametersMCMC$parameters[, "Init"]), .Names=rownames(resultmcmc$parametersMCMC$parameters))
     }
   }
   
@@ -155,7 +155,7 @@ if (length(c)==0) {
   s <- optim(par=initial.parameters, fn=getFromNamespace(".fitSSM", ns="embryogrowth"), temperatures=temperatures, growth.rate=growth.rate, fixed.parameters=fixed.parameters, control=c[[1]])
 }
   if (!is.null(result)) {
-    result$par <- s
+    result$par <- s$par
     return(result)
   } else {
     return(s)

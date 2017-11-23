@@ -1,4 +1,4 @@
-# library(shiny); library("embryogrowh"); runApp("/Users/marc/Documents/Espace_de_travail_R/shiny/tsd")
+# library(shiny); library("embryogrowth"); runApp("/Users/marcgirondot/Documents/Espace_de_travail_R/_shiny/tsd/")
 # library(shiny); runApp("http://max3.ese.u-psud.fr:3838/phenology/")
 
 

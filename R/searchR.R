@@ -14,20 +14,30 @@
 #' @param control List for control parameters for optimx
 #' @description Fit the parameters that best represent data.\cr
 #' test can be a data.frame with two columns Mean and SD and rownames with the nest name.\cr
-#' Function to fit thermal reaction norm can be also expressed as : \cr
-#' a 4-parameters [Schoolfield, Sharpe, and Magnuson. 1981] model with DHH, DHA, T12H, and Rho25;
-#' a 6-parameters [Schoolfield, Sharpe, and Magnuson. 1981] model with T12L, DT, DHH, DHL, DHA, and Rho25;
-#' Each of these two first models can be combined as low and high sets of parameters by adding the _L suffix to one set.\cr
-#' The Rho25_b control the effect of hygrometry (or Rho25_b_L).\cr
-#' Then you must add also transition_S and transition_P parameters;\cr
-#' It is possible also to add the parameter epsilon and then the model begins SSM + epsilon;\cr
-#' a Weibull function with k (shape), lambda (scale) and theta parameters.\cr
-#' a normal function with Peak, Scale, and sd parameters.\cr
-#' an asymmetric normal fuction with Peak, Scale, sdH and sdL parameters;\cr
-#' a symmetric trigonometric function with Length, Peak, and Max;\cr
-#' an asymmetric trigonometric function with LengthB, LengthE, Peak, and Max.\cr
-#' Dallwitz model can be used using Dallwitz_b1, Dallwitz_b2, Dallwitz_b3, Dallwitz_b4 and Dallwitz_b5 parameters. If Dallwitz_b4 is not included, Dallwitz_b4 = 6 and Dallwitz_b5 = 0.4 will be used instead.\cr
-#' See Dallwitz, M.J., Higgins, J.P., 1992. User’s guide to DEVAR. A computer program for estimating development rate as a function of temperature. CSIRO Aust Div Entomol Rep 2, 1-23.
+#' If SD is na, then least squarre criteria is used for fitting.\cr
+#' Function to fit thermal reaction norm can be expressed as : \cr
+#' \itemize{
+#'   \item a 4-parameters Schoolfield, Sharpe, and Magnuson model (1981) with \code{DHH}, \code{DHA}, \code{T12H}, and \code{Rho25};
+#'   \item a 6-parameters Schoolfield, Sharpe, and Magnuson model (1981) with \code{T12L}, \code{DT}, \code{DHH}, \code{DHL}, \code{DHA}, and \code{Rho25};
+#'   \item Each of these two first models can be combined as low and high sets of parameters by adding the \code{_L} suffix to one set. Then you must add also \code{transition_S} and \code{transition_P} parameters and then the growth rate is 1/(1+exp((1/transition_S)*(P-transition_P))) with P being the proportion of development;
+#'   \item The \code{Rho25_b} control the effect of hygrometry (or \code{Rho25_b_L}) (It is not fully functional still);
+#'   \item a Weibull function with \code{k} (shape), \code{lambda} (scale) and \code{theta} parameters;
+#'   \item a normal function with \code{Peak}, \code{Scale}, and \code{sd} parameters;
+#'   \item an asymmetric normal fuction with \code{Peak}, \code{Scale}, \code{sdH} and \code{sdL} parameters;
+#'   \item a symmetric trigonometric function with \code{Length}, \code{Peak}, and \code{Max};
+#'   \item an asymmetric trigonometric function with \code{LengthB}, \code{LengthE}, \code{Peak}, and \code{Max}.
+#'   \item Dallwitz-Higgins model (1992) can be used using \code{Dallwitz_b1}, \code{Dallwitz_b2}, \code{Dallwitz_b3}, \code{Dallwitz_b4} and \code{Dallwitz_b5} parameters.
+#'   \item If \code{Dallwitz_b4} is not included, \code{Dallwitz_b4} = 6 will be used.
+#'   \item If \code{Dallwitz_b5} is not included, \code{Dallwitz_b5} = 0.4 will be used.
+#'   \item It is possible also to add the parameter \code{epsilon} and then the model becomes \code{X + epsilon} with X being any of the above model;
+#'   \item It is possible also to add the parameter \code{epsilon_L} and then the model becomes \code{X_L + epsilon_L} with \code{X_L} being any of the above model with suffix \code{_L};
+#'   \item If the name of the parameter is a number, then the mdel is a polynom anchored with the rate being the parameter value at this temperature (the name). see \code{ChangeSSM()} function.
+#' }
+#' @references Angilletta, M.J., 2006. Estimating and comparing thermal performance curves. Journal of Thermal Biology 31, 541-545.
+#' @references Dallwitz, M.J., Higgins, J.P., 1992. User’s guide to DEVAR. A computer program for estimating development rate as a function of temperature. CSIRO Aust Div Entomol Rep 2, 1-23.
+#' @references Georges, A., Beggs, K., Young, J.E., Doody, J.S., 2005. Modelling development of reptile embryos under fluctuating temperature regimes. Physiological and Biochemical Zoology 78, 18-30.
+#' @references Girondot, M., Kaska, Y., 2014. A model to predict the thermal reaction norm for the embryo growth rate from field data. Journal of Thermal Biology 45, 96-102.
+#' @references Schoolfield, R.M., Sharpe, P.J., Magnuson, C.E., 1981. Non-linear regression of biological temperature-dependent rate models based on absolute reaction-rate theory. Journal of Theoretical Biology 88, 719-731.
 #' @examples
 #' \dontrun{
 #' library(embryogrowth)
@@ -134,6 +144,87 @@
 #' resultNest_4p_trigo <- searchR(parameters=x$par, fixed.parameters=pfixed, 
 #'                          temperatures=formated, derivate=dydt.Gompertz, M0=1.7, 
 #'                          test=c(Mean=39.33, SD=1.92))
+#'                          
+#' ###########################################
+#' # example with thermal reaction norm fitted from Dallwitz model
+#' # From Girondot, M., Monsinjon, J., Guillon, J.-M., Submitted. Delimitation of the 
+#' # embryonic thermosensitive period for sex determination using an embryo growth model 
+#' # reveals a potential bias for sex ratio prediction in turtles.
+#' #  rK = 1.208968 
+#' #  M0 = 0.3470893 
+#' # See the example in stages datasets
+#' ############################################
+#' 
+#' x <- structure(c(4.88677476830268, 20.4051904475743, 31.5173105860335), 
+#' .Names = c("Dallwitz_b1", "Dallwitz_b2", "Dallwitz_b3"))
+#' pfixed <- c(rK=1.208968)
+#' resultNest_3p_Dallwitz <- searchR(parameters=x, fixed.parameters=pfixed, 
+#'                          temperatures=formated, derivate=dydt.Gompertz, M0=0.3470893, 
+#'                          test=c(Mean=39.33, SD=1.92))
+#' plotR(resultNest_3p_Dallwitz, ylim=c(0,8))
+#' 
+#' x <- structure(c(4.91191231405918, 12.7453211281394, 31.2670410811077, 
+#' 5.7449376569153, -0.825689964543813), .Names = c("Dallwitz_b1", 
+#' "Dallwitz_b2", "Dallwitz_b3", "Dallwitz_b4", "Dallwitz_b5"))
+#' pfixed <- c(rK=1.208968)
+#' resultNest_5p_Dallwitz <- searchR(parameters=x, fixed.parameters=pfixed, 
+#'                          temperatures=formated, derivate=dydt.Gompertz, M0=0.3470893, 
+#'                          test=c(Mean=39.33, SD=1.92))
+#' plotR(resultNest_5p_Dallwitz, ylim=c(0,8))
+#' 
+#' xp <- resultNest_6p_SSM6p$par
+#' xp["Rho25"] <- 233
+#' pfixed <- c(rK=1.208968)
+#' resultNest_6p_SSM <- searchR(parameters=xp, fixed.parameters=pfixed, 
+#'                          temperatures=formated, derivate=dydt.Gompertz, M0=0.3470893, 
+#'                          test=c(Mean=39.33, SD=1.92))
+#' plotR(resultNest_6p_SSM, ylim=c(0,8))
+#' 
+#' xp <- ChangeSSM(parameters = resultNest_3p_Dallwitz$par, 
+#'                 initial.parameters = resultNest_4p_SSM4p$par)
+#' pfixed <- c(rK=1.208968)
+#' resultNest_4p_SSM <- searchR(parameters=xp$par, fixed.parameters=pfixed, 
+#'                          temperatures=formated, derivate=dydt.Gompertz, M0=0.3470893, 
+#'                          test=c(Mean=39.33, SD=1.92))
+#' plotR(resultNest_4p_SSM, ylim=c(0,8))
+#' 
+#' compare_AIC(Dallwitz3p=resultNest_3p_Dallwitz, Dallwitz5p=resultNest_5p_Dallwitz, 
+#'              SSM4p=resultNest_4p_SSM, SSM6p=resultNest_6p_SSM)
+#'                          
+#' ###########################################
+#' # Example with thermal reaction norm of proportion of development
+#' # fitted from Dallwitz model
+#' # see Woolgar, L., Trocini, S., Mitchell, N., 2013. Key parameters describing 
+#' # temperature-dependent sex determination in the southernmost population of loggerhead 
+#' # sea turtles. Journal of Experimental Marine Biology and Ecology 449, 77-84.
+#' ############################################
+#' 
+#' x <- structure(c(1.48207559695689, 20.1100310234046, 31.5665036287242), 
+#'  .Names = c("Dallwitz_b1", "Dallwitz_b2", "Dallwitz_b3"))
+#' resultNest_PropDev_3p_Dallwitz <- searchR(parameters=x, fixed.parameters=NULL, 
+#'                          temperatures=formated, derivate=dydt.linear, M0=0, 
+#'                          test=c(Mean=1, SD=NA))
+#'  plotR(resultNest_PropDev_3p_Dallwitz, ylim=c(0, 1.5))
+#'  plot(x=resultNest_PropDev_3p_Dallwitz, ylimS=c(0,1), xlim=c(0,60), series=2, 
+#'          TSP.borders=c(21, 26), 
+#'          embryo.stages=structure(c(0.33, 0.66), .Names=c("21", 26)) )
+#'          
+#' x <- structure(c(1.48904182113431, 10.4170365155993, 31.2591665490154, 
+#' 6.32355497589913, -1.07425378667104), .Names = c("Dallwitz_b1", 
+#' "Dallwitz_b2", "Dallwitz_b3", "Dallwitz_b4", "Dallwitz_b5"))
+#' resultNest_PropDev_5p_Dallwitz <- searchR(parameters=x, fixed.parameters=NULL, 
+#'                          temperatures=formated, derivate=dydt.linear, M0=0, 
+#'                          test=c(Mean=1, SD=NA))
+#'  plotR(resultNest_PropDev_5p_Dallwitz, ylim=c(0, 1.5))
+#'  plot(x=resultNest_PropDev_5p_Dallwitz, ylimS=c(0,1), xlim=c(0,60), series=2, 
+#'          TSP.borders=c(21, 26), 
+#'          embryo.stages=structure(c(0.33, 0.66), .Names=c("21", 26)) )
+#'          
+#'  plotR(resultNest_PropDev_3p_Dallwitz, ylim=c(0, 1.5))
+#'  plotR(resultNest_PropDev_5p_Dallwitz, ylim=c(0, 1.5), new=FALSE, col="red")
+#'  compare_AICc(Dallwitz3p=resultNest_PropDev_3p_Dallwitz, 
+#'               Dallwitz5p=resultNest_PropDev_5p_Dallwitz)
+#' 
 #' }
 #' @export
 
@@ -187,10 +278,18 @@ if (!setequal(names(weight), names(temperatures)[1:NbTS])) {
 ##########################################################
 
 if (is.numeric(test)) {
-	testuse<-data.frame(Mean=rep(test["Mean"], NbTS), SD=rep(test["SD"], NbTS), row.names=names(temperatures[1:NbTS]))
+	testuse <- data.frame(Mean=rep(test["Mean"], NbTS), 
+	                      SD=rep(test["SD"], NbTS), 
+	                      row.names=names(temperatures[1:NbTS]))
 } else {
-	testuse<-test
+	testuse <- test
 }
+  if (any(is.na(testuse[, "SD"]))) {
+    testuse[, "SD"] <- NA
+    message("Fit criteria will be SSE.")
+  } else {
+    message("Fit criteria will be -Ln L.")
+  }
 
 # 25/2/2015
 for (j in 1:NbTS) temperatures[[j]][1, "Mass"] <- M0
@@ -234,8 +333,21 @@ repeat {
   result_list$value <- value
   result_list$convergence <- conv
   result <- result_list
+  
+  print(result$par)
+  
+  
+  if (any(is.na(testuse[, "SD"]))) {
+    result$criteria <- "SSE"
+    result$hessian <- NULL
+    res <- rep(NA, length(parameters))
+    names(res) <- names(parameters)
+    
+  } else {
+    result$criteria <- "-Ln L"
+  
 
-print(result$par)
+
 
   mathessian <- try(numDeriv::hessian(getFromNamespace("info.nests", ns="embryogrowth"), 
                                       x=result$par, 
@@ -263,6 +375,7 @@ print(result$par)
     warning("Problem in Hessian estimation. Confidence interval will not be available.")
     # res <- rep(NA, length(parameters))
   }
+  }
 
 result$SE <- res 
 result$data <- temperatures
@@ -270,9 +383,15 @@ result$data <- temperatures
 # Avant *5. Correction du 17/7/2012
 k <- length(parameters)
 n <- unname(result$data$IndiceT["NbTS"])
-result$AIC <- 2*result$value+2*k
-result$AICc <- result$AIC + (2*k*(k+1))/(n-k-1)
-result$BIC <- 2*result$value + k * log(n)
+if (all(!is.na(testuse[, "SD"]))) {
+    result$AIC <- 2*result$value+2*k
+    result$AICc <- result$AIC + (2*k*(k+1))/(n-k-1)
+    result$BIC <- 2*result$value + k * log(n)
+} else {
+  result$AIC <- n*log(result$value/n)+2*k
+  result$AICc <- result$AIC + (2*k*(k+1))/(n-k-1)
+  result$BIC <- n*log(result$value/n) + k * log(n)
+}
 
 result$test <- testuse
 result$derivate <- derivate

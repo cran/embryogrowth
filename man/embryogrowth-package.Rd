@@ -16,8 +16,8 @@ Fit a parametric function that describes dependency of embryo growth to temperat
 \tabular{ll}{
  Package: \tab embryogrowth\cr
  Type: \tab Package\cr
- Version: \tab 7.0 - build 627\cr
- Date: \tab 2017-09-25\cr
+ Version: \tab 7.1 - build 644\cr
+ Date: \tab 2017-11-23\cr
  License: \tab GPL (>= 2)\cr
  LazyLoad: \tab yes\cr
  }
@@ -40,12 +40,38 @@ x <- structure(c(118.431040984352, 498.205702157603, 306.056280989839,
 118.189669472381), .Names = c("DHA", "DHH", "T12H", "Rho25"))
 # pfixed <- c(K=82.33) or rK=82.33/39.33
 pfixed <- c(rK=2.093313)
+
+################################################################################
+#
+# The values of rK=2.093313 and M0=1.7 were used in 
+# Girondot, M. & Kaska, Y. 2014. A model to predict the thermal 
+# reaction norm for the embryo growth rate from field data. Journal of
+# Thermal Biology. 45, 96-102.
+#
 # Based on recent analysis on table of development for both Emys orbicularis and 
 # Caretta caretta, best value for pfixed should be 1.209 and M0 should be 0.34.
+# Girondot, M., Monsinjon, J., Guillon, J.-M., Submitted. Delimitation of the 
+# embryonic thermosensitive period for sex determination using an embryo growth 
+# model reveals a potential bias for sex ratio prediction in turtles.
+#
+# See the example in the stages datasets
+# 
+################################################################################
+
 resultNest_4p_SSM4p <- searchR(parameters=x, fixed.parameters=pfixed, 
 	temperatures=formated, derivate=dydt.Gompertz, M0=1.7, 
 	test=c(Mean=39.33, SD=1.92))
 data(resultNest_4p_SSM4p)
+par(mar=c(4, 4, 1, 1))
+plot(resultNest_4p_SSM4p$data[[1]][, 1]/60/24,resultNest_4p_SSM4p$data[[1]][, 2], bty="n", las=1, 
+     xlab="Days of incubation", ylab="Temperatures in °C", 
+     type="l", xlim=c(0,70),ylim=c(20, 35))
+for (i in 2:resultNest_4p_SSM4p$data$IndiceT[3]) {
+  par(new=TRUE)
+  plot(resultNest_4p_SSM4p$data[[i]][, 1]/60/24,resultNest_4p_SSM4p$data[[i]][, 2], 
+  bty="n", las=1, xlab="", ylab="", type="l", xlim=c(0,70),ylim=c(20, 35), axes = FALSE)
+}
+par(mar=c(4, 4, 1, 1))
 pMCMC <- TRN_MHmcmc_p(resultNest_4p_SSM4p, accept=TRUE)
 # Take care, it can be very long, sometimes several days
 resultNest_mcmc_4p_SSM4p <- GRTRN_MHmcmc(result=resultNest_4p_SSM4p,  
@@ -68,7 +94,8 @@ plotR(result = resultNest_4p_SSM4p, parameters = new_result$par,
            ylabH = "Temperatures\\ndensity", ylimH=c(0, 0.3), atH=c(0, 0.1, 0.2), 
            ylim=c(0, 3), show.hist=TRUE)
       
-# Beautiful density plot
+# Beautiful density plots
+
 plotR(result = resultNest_4p_SSM4p, 
              resultmcmc=resultNest_mcmc_4p_SSM4p, 
              curves = "MCMC quantiles", show.density=TRUE)

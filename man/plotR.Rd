@@ -108,7 +108,7 @@ The curve "ML quantiles" is based on delta method.\cr
 The curve "ML" just shows the fitted model.\cr
 The curve "MCMC quantiles" uses the mcmc replicates to build the quantiles.\cr
 The curve "MCMC mean-SD" uses the mcmc replicates to build a symetric credibility interval.\cr
-The parameter curves is case insensitive.
+The parameter curves is case insensitive. If only parameters is given, curves must be ML.
 }
 \details{
 plotR shows the fitted growth rate dependent on temperature and the density of the mcmc

@@ -1,8 +1,8 @@
 Package: embryogrowth
 Type: Package
 Title: Tools to Analyze the Thermal Reaction Norm of Embryo Growth
-Version: 7.0
-Date: 2017-09-25
+Version: 7.1
+Date: 2017-11-23
 Author: Marc Girondot <marc.girondot@u-psud.fr>
 Maintainer: Marc Girondot <marc.girondot@u-psud.fr>
 Description: Tools to analyze the embryo growth and the sexualisation thermal reaction norms.
@@ -15,6 +15,6 @@ LazyLoad: yes
 Encoding: UTF-8
 RoxygenNote: 6.0.1
 NeedsCompilation: no
-Packaged: 2017-09-25 06:09:04 UTC; marcgirondot
+Packaged: 2017-11-23 15:05:21 UTC; marcgirondot
 Repository: CRAN
-Date/Publication: 2017-09-26 06:29:51 UTC
+Date/Publication: 2017-11-23 15:21:56 UTC

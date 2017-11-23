@@ -22,6 +22,8 @@
 #' @param series The name or number of the series to be estimated.
 #' @param TSP.borders The limits of TSP in stages. See embryo.stages parameter.
 #' @param embryo.stages The embryo stages. At least TSP.borders stages must be provided to estimate TSP borders. See note.
+#' @param TSP.begin Where TSP begin during the stage of beginning? In relative proportion of the stage.
+#' @param TSP.end Where TSP begin during the stage of ending? In relative proportion of the stage.
 #' @param replicate.CI Number of replicates to estimate CI. If <2, no CI is estimated.
 #' @param metabolic.heating Degrees Celsius to be added at the end of incubation due to metabolic heating.
 #' @param temperature.heterogeneity SD of heterogeneity of temperatures. Can be 2 values, sd_low and sd_high and then HelpersMG::r2norm() is used.
@@ -32,8 +34,11 @@
 #' @param warnings If FALSE, does not show warnings
 #' @param parallel If TRUE use parallel version for nests estimation
 #' @description This function calculates many statistics about nests.\cr
-#' The embryo.stages is a list with stage numbers and relative size as compared to final size at the beginning of the stage.\cr
-#' For example embryo.stages=list(number=21:30, size=c(8.4, 9.4, 13.6, 13.8, 18.9, 23.5, 32.2, 35.2, 35.5, 38.5)/39.33) indicates that the stages 21 begins at the relative size of 8.4/39.33.\cr
+#' The embryo.stages is a named vector with relative size as compared to final size at the beginning of the stage. Names are the stages.\cr
+#' For example for SCL in Caretta caretta:\cr
+#' embryo.stages=structure(c(8.4, 9.4, 13.6, 13.8, 18.9, 23.5, 32.2, 35.2, 35.5, 38.5)/39.33), \cr
+#' .Names = c("21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31"))\cr
+#'  indicates that the stages 21 begins at the relative size of 8.4/39.33.\cr
 #' Series can be indicated as the name of the series, their numbers or series or sucession of TRUE or FALSE. "all" indicates that all series must be analyzed.\cr
 #' The likelihood object is just the total likelihood of the data in the model.\cr
 #' If one parameter is named "pipping_emergence" it is used as the number of days between pipping and emergence to calculate the 1/3 and 2/3 of incubation.\cr
@@ -83,12 +88,13 @@
 #'   \item \code{stopattest} NA if stopattest was false, TRUE if at least one incubation series was longer than hatchling size and FALSE at contrary
 #' }
 #' If you indicate new set of temperatures, you must probably also indicate new test values.\cr
-#' Note: three species have predefined embryo stages. embryo.stages parameter can take the values:\cr
+#' Note: four species have predefined embryo stages. embryo.stages parameter can take the values:\cr
 #' \itemize{
 #'   \item \code{Caretta caretta.SCL}
 #'   \item \code{Chelonia mydas.SCL}
 #'   \item \code{Emys orbicularis.SCL}
 #'   \item \code{Emys orbicularis.mass}
+#'   \item \code{Podocnemis expansa.SCL}
 #'   }
 #' But remember that mass is not the best proxy to describe the growth of an embryo because it can decrease if the subtrate becomes dry.\cr
 #' The progress bar is based on both replicates and timeseries.
@@ -130,8 +136,9 @@ info.nests <- function(x=NULL, parameters=NULL, NestsResult=NULL,
                        fixed.parameters=NULL, 
                        SE=NULL, temperatures=NULL, derivate=NULL, 
                        test=NULL, stopattest=FALSE, M0=NULL, series="all",
-                       TSP.borders=NULL, embryo.stages="Caretta caretta.SCL",
-                       replicate.CI=1, weight=NULL, out="Likelihood", fill=NULL, 
+                       TSP.borders=NULL, embryo.stages=NULL,
+                       TSP.begin=0, TSP.end=0.5, 
+                       replicate.CI=1, weight=NULL, out="likelihood", fill=NULL, 
                        SexualisationTRN=NULL, SexualisationTRN.mcmc=NULL, 
                        SexualisationTRN.CI=NULL, 
                        metric.end.incubation=NA,
@@ -139,9 +146,9 @@ info.nests <- function(x=NULL, parameters=NULL, NestsResult=NULL,
                        temperature.heterogeneity=0, 
                        progress=FALSE, warnings=TRUE, parallel=TRUE) {
   
-  # x=NULL; parameters=NULL; NestsResult=NULL; resultmcmc=NULL; fixed.parameters=NULL; SE=NULL; hessian=NULL; CI=NULL; temperatures=NULL; temperature.heterogeneity=0; metabolic.heating=0; derivate=NULL; test=NULL; stopattest=FALSE; M0=NULL; series="all"; TSP.borders=NULL; embryo.stages="Caretta caretta.SCL"; replicate.CI=1; weight=NULL; out="Likelihood"; fill=NULL; SexualisationTRN.CI=NULL; SexualisationTRN=NULL;SexualisationTRN.mcmc=NULL; metric.end.incubation=NA; progress=TRUE;warnings=TRUE; parallel=TRUE
+  # x=NULL; parameters=NULL; NestsResult=NULL; resultmcmc=NULL; fixed.parameters=NULL; SE=NULL; hessian=NULL; CI=NULL; temperatures=NULL; temperature.heterogeneity=0; metabolic.heating=0; derivate=NULL; test=NULL; stopattest=FALSE; M0=NULL; series="all"; TSP.borders=NULL; embryo.stages=NULL; replicate.CI=1; weight=NULL; out="Likelihood"; fill=NULL; SexualisationTRN.CI=NULL; SexualisationTRN=NULL;SexualisationTRN.mcmc=NULL; metric.end.incubation=NA; progress=TRUE;warnings=TRUE; parallel=TRUE
   #  x=resultNest_4p_SSM4p; resultmcmc = resultNest_mcmc_4p_SSM4p; out <- "summary"
-  
+  # temperatures = formated; parameters = structure(c(4.46266058827153e-03, 26.0095385510809, 35.5257746031439),.Names = c("Dallwitz_b1", "Dallwitz_b2", "Dallwitz_b3")); series = 1; out=c("likelihood"); derivate=dydt.linear; M0=1.7; test=c(Mean=1, SD=0.01)
   #    library("deSolve")
   #    parameters <- x
   
@@ -312,8 +319,6 @@ info.nests <- function(x=NULL, parameters=NULL, NestsResult=NULL,
       embryo.stages <- estages[, "metric"]
       names(embryo.stages) <- estages[, "stages"]
       TSP.borders <- c(attributes(estages)$TSP.begin.stages, attributes(estages)$TSP.end.stages)
-      if (is.na(embryo.stages[as.character(TSP.borders[2]+1)])) embryo.stages <- c(embryo.stages, structure(embryo.stages[as.character(TSP.borders[2])], .Names = as.character(TSP.borders[2]+1)))
-      if (is.na(embryo.stages[as.character(TSP.borders[1]-1)])) embryo.stages <- c(embryo.stages, structure(embryo.stages[as.character(TSP.borders[1])], .Names = as.character(TSP.borders[1]-1)))
     }
   }
   
@@ -321,8 +326,20 @@ info.nests <- function(x=NULL, parameters=NULL, NestsResult=NULL,
   # A mditer
   # C'est resolu le 16/9/2015
   
-  size.begin.TSP <- (unname(embryo.stages[as.character(TSP.borders[1]-1)]) + unname(embryo.stages[as.character(TSP.borders[1])]))/2
-  size.end.TSP <- (unname(mean(embryo.stages[as.character(TSP.borders[2]+1)])) + unname(mean(embryo.stages[as.character(TSP.borders[2])])))/2
+  if (!is.null(embryo.stages) & !is.null(TSP.borders)) {
+    size.begin.TSP <- embryo.stages[as.character(TSP.borders[1])]
+    if (TSP.begin != 0) {
+      size.begin.TSP <- size.begin.TSP+(embryo.stages[as.character(TSP.borders[1]+1)]-size.begin.TSP)*TSP.begin
+    }
+    
+    size.end.TSP <- mean(embryo.stages[as.character(TSP.borders[2])])
+    if (TSP.end != 0) {
+      size.end.TSP <- size.end.TSP+(embryo.stages[as.character(TSP.borders[2]+1)]-size.end.TSP)*TSP.end
+    }
+  } else {
+    size.end.TSP <- NA
+    size.begin.TSP <- NA
+  }
   
   # dans x j'ai les parametres a ajuster
   # Il faut que je rajoute les fixes - 16/7/2012
@@ -1014,8 +1031,12 @@ if (CI == "mcmc") {
       
       stopCluster(cl)
       
+      
+      
     } else {
     
+      # Je suis sur un système UNIX
+      
     AnalyseTraces <- mclapply(mc.cores = papply, X=name, function (xxx) {
       #      AnalyseTraces <- lapply(xx, function (xxx) {
       # xxx <- 1
@@ -1026,8 +1047,10 @@ if (CI == "mcmc") {
       # namets <- names(temperatures_ec)[xxx]
       
       # 1/6/2016:
+      
       if (length(temperature.heterogeneity)==1) {
-        tht <- rnorm(1, 0, temperature.heterogeneity)
+        tht <- 0
+        if (temperature.heterogeneity !=0) tht <- rnorm(1, 0, temperature.heterogeneity)
       } else {
         tht <- r2norm(1, 0, sd_low = temperature.heterogeneity[1], sd_high = temperature.heterogeneity[2])
       }
@@ -1038,7 +1061,7 @@ if (CI == "mcmc") {
       meanSCL <- as.numeric(test[xxx, "Mean"])
       sdSCL <- as.numeric(test[xxx, "SD"])
       
-      if (is.na(meanSCL) | is.na(sdSCL)) stop("Check the test parameter. The size for time series does not exist.")
+      if (is.na(meanSCL)) stop("Check the test parameter. The size for time series does not exist.")
       
       if (!is.na(x["rK"])) {
         Kval <- unname(x["rK"]*meanSCL)
@@ -1219,7 +1242,11 @@ if (CI == "mcmc") {
       if (any(out=="likelihood")) {
         # dans y j'ai une valeur de taille finale
         # print(-dnorm(y, mean=meanSCL, sd=sdSCL, log=TRUE))
-        return(-dnorm(y, mean=meanSCL, sd=sdSCL, log=TRUE))
+        if (!is.na(sdSCL)) {
+          return(-dnorm(y, mean=meanSCL, sd=sdSCL, log=TRUE))
+        } else {
+          return((y-meanSCL)^2)
+        }
       }
       
       

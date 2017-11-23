@@ -1,5 +1,12 @@
 THIS IS THE CHANGELOG OF THE "embryogrowth" PACKAGE
 
+          CHANGES IN VERSION 7.1    (2017-11-19)
+          
+* If no SD for test, use SSE criteria to fit - 7.1
+* New example in searchR to fit data using method of proportion of development - 7.1
+* Small improvment in plot.NestsResult() - 7.1
+* Better control of the beginning and end of the TSP within the corresponding stages - 7.1
+
           CHANGES IN VERSION 7.0    (2017-09-25)
           
 * 2D reaction norm - 7.0

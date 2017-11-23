@@ -19,6 +19,8 @@
 #' @param series The name or number of the series to be displayed. Only one series can be displayed at a time.
 #' @param TSP.borders The limits of TSP in stages. See embryo.stages parameter.
 #' @param embryo.stages The embryo stages. At least TSP.borders stages must be provided to estimate TSP borders. See note.
+#' @param TSP.begin Where TSP begin during the stage of beginning? In relative proportion of the stage.
+#' @param TSP.end Where TSP begin during the stage of ending? In relative proportion of the stage.
 #' @param replicate.CI Number of replicates to estimate CI. If 1, no CI is estimated.
 #' @param metric.end.incubation The expected metric at the end of incubation. Used to calibrate TSP size. If NULL, take the maximum Mean of the test parameter. If NA, use the actual final size. Can be a vector and is recycled if necessary.
 #' @param col.stages The color of the stages
@@ -38,11 +40,13 @@
 #' @param CI How to estimate CI; can be NULL, "SE", "MCMC", or "Hessian"
 #' @param show.temperatures TRUE or FALSE, does the temperatures should be displayed?
 #' @param show.PT TRUE or FALSE, does the pivotal temperature should be displayed?
-#' @param show.fioritures If FALSE, set show.PT, show.temperatures, show.stages, show.TSP, show.third, show.CI to FALSE
+#' @param show.fioritures If FALSE, set show.PT, show.temperatures, show.stages, show.TSP, show.third to FALSE, CI to NULL
 #' @param PT Value for pivotal temperature, mean and SE
 #' @param show.test TRUE or FALSE, does the hatchling size should be displayed
 #' @param lab.third Label for 2nd third of incubation
-#' @param at.lab.third Position of Label for 2nd third of incubation [default=4]
+#' @param at.lab.third Position of Label for 2nd third of incubation [default=10]; y-lim is scaled by at.lab.third
+#' @param at.lab.TSP Position of Label for TSP [default=8]; y-lim is scaled by at.lab.third
+#' @param lab.TSP Label for the TSP
 #' @param lab.PT Label for Pivotal Temperature
 #' @param lab.stages Label for Stages
 #' @param xlab Label for axis
@@ -54,10 +58,13 @@
 #' @param parallel Should parallel computing be used ? TRUE or FALSE
 #' @description Plot the embryo growth from one or several nests.\cr
 #' The embryo.stages is a named vector with relative size as compared to final size at the beginning of the stage. Names are the stages.\cr
-#' For example for SCL in Caretta caretta, embryo.stages=list(number=21:30, size=c(8.4, 9.4, 13.6, 13.8, 18.9, 23.5, 32.2, 35.2, 35.5, 38.5)/39.33) indicates that the stages 21 begins at the relative size of 8.4/39.33.\cr
+#' For example for SCL in Caretta caretta:\cr
+#' embryo.stages=structure(c(8.4, 9.4, 13.6, 13.8, 18.9, 23.5, 32.2, 35.2, 35.5, 38.5)/39.33), \cr
+#' .Names = c("21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31"))\cr
+#'  indicates that the stages 21 begins at the relative size of 8.4/39.33.\cr
 #' Series can be indicated as the name of the series, its number or succesion of TRUE or FALSE. "all" indicates that all series must be printed.\cr
 #' show.fioritures parameter does not affect show.test option.\cr
-#' Note: three species have predefined embryo stages. embryo.stages parameter can take the values:\cr
+#' Note: Four species have predefined embryo stages. embryo.stages parameter can take the values:\cr
 #' \itemize{
 #'   \item \code{Caretta caretta.SCL}
 #'   \item \code{Chelonia mydas.SCL}
@@ -100,6 +107,7 @@ function(x, ..., parameters=NULL, fixed.parameters=NULL,
          SE=NULL, temperatures=NULL, derivate=NULL, 
          test=NULL, stopattest=FALSE, M0=NULL, weight=NULL, series="all",
          TSP.borders=NULL, embryo.stages=NULL,
+         TSP.begin=0, TSP.end=0.5, 
          replicate.CI=100, 
          metric.end.incubation=NULL,
          col.stages="blue", col.PT="red", col.TSP="gray", 
@@ -111,7 +119,8 @@ function(x, ..., parameters=NULL, fixed.parameters=NULL,
          show.fioritures=TRUE, 
          show.temperatures=TRUE, show.PT=TRUE, PT=c(mean=NA, SE=NA), show.test=TRUE, 
          add=FALSE, 
-         lab.third="2nd third of incubation", at.lab.third=4, lab.PT="PT", lab.stages="Stages", 
+         lab.third="2nd third of incubation", at.lab.third=10, lab.PT="PT", lab.stages="Stages", 
+         at.lab.TSP=8, lab.TSP="TSP", 
          mar = c(4, 5, 4, 5) + 0.3, 
          xlab="Days of incubation", ylabT=expression("Temperature in " * degree * "C"), 
          ylabS= "Embryo metric", progress=TRUE, parallel=TRUE) {
@@ -134,13 +143,16 @@ function(x, ..., parameters=NULL, fixed.parameters=NULL,
       embryo.stages <- estages[, "metric"]
       names(embryo.stages) <- estages[, "stages"]
       TSP.borders <- c(attributes(estages)$TSP.begin.stages, attributes(estages)$TSP.end.stages)
-      if (is.na(embryo.stages[as.character(TSP.borders[2]+1)])) embryo.stages <- c(embryo.stages, structure(embryo.stages[as.character(TSP.borders[2])], .Names = as.character(TSP.borders[2]+1)))
-      if (is.na(embryo.stages[as.character(TSP.borders[1]-1)])) embryo.stages <- c(embryo.stages, structure(embryo.stages[as.character(TSP.borders[1])], .Names = as.character(TSP.borders[1]-1)))
-      
     }
   }
   
-
+  embryo.stages_ini <- embryo.stages
+  
+  if (is.null(embryo.stages)) {
+    show.TSP <- FALSE
+    show.stages <- FALSE
+  }
+  
   NestsResult <- x
   
   if (is.null(temperatures)) temperatures <- NestsResult$data
@@ -232,10 +244,13 @@ for(seriesx in 1:NbTS) {
                          SE=SE, temperatures=temperatures, derivate=derivate, 
                          test=test, stopattest=stopattest, M0=M0, series=seriesx,
                          TSP.borders=TSP.borders, embryo.stages=embryo.stages,
+                         TSP.begin=TSP.begin, TSP.end=TSP.end, 
                          replicate.CI=replicate.CI, CI = CI, 
                          weight=NULL, out=c("summary", "metric"), 
                          fill=60, 
-                         SexualisationTRN=NULL, metric.end.incubation=metric.end.incubation,
+                         SexualisationTRN=NULL, SexualisationTRN.mcmc=NULL, 
+                         SexualisationTRN.CI=NULL, 
+                         metric.end.incubation=metric.end.incubation,
                          progress=FALSE, parallel=parallel)
      par(mar=mar)
      
@@ -308,13 +323,13 @@ for(seriesx in 1:NbTS) {
        ty1 <- attributes(metric.summary$metric[[1]])$metric.begin.tsp
        ty2 <- attributes(metric.summary$metric[[1]])$metric.end.tsp
 #       polygon(x=c(x1, x2, x2, x1), y=c(ty1, ty1, ty2, ty2), col=col.TSP, border=NA)
-       text(x=x1+5, y=ty1+(ty2-ty1)/2, labels="TSP")
+       text(x=x1+5, y=ty1+(ty2-ty1)/2, labels=lab.TSP)
        x1 <- attributes(metric.summary$metric[[1]])$time.begin.tsp/(24*60)
        x2 <- attributes(metric.summary$metric[[1]])$time.end.tsp/(24*60)
        ty1 <- ylimS[1]
        ty2 <- ylimS[2]
 #       polygon(x=c(x1, x2, x2, x1), y=c(ty1, ty1, ty2, ty2), col=col.TSP, border=NA)
-       text(x=x1+(x2-x1)/2, y=ty1+5, labels="TSP")
+       text(x=x1+(x2-x1)/2, y=ty1+ty2/at.lab.TSP, labels=lab.TSP, xpd=TRUE)
      }
      
      par(new=TRUE)
@@ -346,31 +361,33 @@ for(seriesx in 1:NbTS) {
        mean.ts <- attributes(metric.summary$metric[[1]])$test.mean
        sd.ts <- attributes(metric.summary$metric[[1]])$test.sd
        segments(0, mean.ts, xlim[2]+0.05*xlim[2], mean.ts, lwd=2, xpd=TRUE)
-       segments(0, mean.ts-2*sd.ts,  xlim[2]+0.05*xlim[2], mean.ts-2*sd.ts, lwd=1, lty=2, xpd=TRUE)
-       segments(0, mean.ts+2*sd.ts,  xlim[2]+0.05*xlim[2], mean.ts+2*sd.ts, lwd=1, lty=2, xpd=TRUE)
+       if (!is.na(sd.ts)) {
+            segments(0, mean.ts-2*sd.ts,  xlim[2]+0.05*xlim[2], mean.ts-2*sd.ts, lwd=1, lty=2, xpd=TRUE)
+            segments(0, mean.ts+2*sd.ts,  xlim[2]+0.05*xlim[2], mean.ts+2*sd.ts, lwd=1, lty=2, xpd=TRUE)
+       }
      }
      
      if (show.third) {
        x1 <- attributes(metric.summary$metric[[1]])$time.begin.middlethird/(24*60)
        x2 <- attributes(metric.summary$metric[[1]])$time.end.middlethird/(24*60)
        ty1 <- ylimS[1]
-       ty2 <- ylimS[2]+1
+       ty2 <- ylimS[2]+ylimS[2]/40
        
            segments(x1, ty1, x1, ty2, lwd=1, lty=3, xpd=TRUE)
            segments(x2, ty1, x2, ty2, lwd=1, lty=3, xpd=TRUE)
            par(xpd=TRUE)
            getFromNamespace(".Arrows", ns="HelpersMG")(x1, ylimS[2]+1, x2, ylimS[2]+1, code=3)
-           text(x1+(x2-x1)/2, ylimS[2]+at.lab.third, labels=lab.third, xpd=TRUE)
+           text(x1+(x2-x1)/2, ylimS[2]+ylimS[2]/at.lab.third, labels=lab.third, xpd=TRUE)
      }
      
      
      if (show.stages) {
        ## on affiche les stades
        
-       for(i in 1:length(embryo.stages)) {
-         y1=embryo.stages[i]*attributes(metric.summary$metric[[1]])$metric.end.incubation
+       for(i in 1:length(embryo.stages_ini)) {
+         y1=embryo.stages_ini[i]*attributes(metric.summary$metric[[1]])$metric.end.incubation
          segments(0, y1, xlim[2]-4, y1, lwd=1, lty=2, col=col.stages)
-         text(xlim[2]-3*(as.numeric(i)%%2), y1, labels=names(embryo.stages[i]), col=col.stages, cex=0.7)
+         text(xlim[2]-3*(as.numeric(i)%%2), y1, labels=names(embryo.stages_ini[i]), col=col.stages, cex=0.7)
        }
        par(xpd=TRUE)
        text(xlim[2]-2, ylimS[2]+3, labels=lab.stages, col=col.stages, cex=0.7)

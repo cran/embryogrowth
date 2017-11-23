@@ -8,12 +8,12 @@ info.nests(x = NULL, parameters = NULL, NestsResult = NULL,
   resultmcmc = NULL, hessian = NULL, CI = NULL, fixed.parameters = NULL,
   SE = NULL, temperatures = NULL, derivate = NULL, test = NULL,
   stopattest = FALSE, M0 = NULL, series = "all", TSP.borders = NULL,
-  embryo.stages = "Caretta caretta.SCL", replicate.CI = 1, weight = NULL,
-  out = "Likelihood", fill = NULL, SexualisationTRN = NULL,
-  SexualisationTRN.mcmc = NULL, SexualisationTRN.CI = NULL,
-  metric.end.incubation = NA, metabolic.heating = 0,
-  temperature.heterogeneity = 0, progress = FALSE, warnings = TRUE,
-  parallel = TRUE)
+  embryo.stages = NULL, TSP.begin = 0, TSP.end = 0.5, replicate.CI = 1,
+  weight = NULL, out = "likelihood", fill = NULL,
+  SexualisationTRN = NULL, SexualisationTRN.mcmc = NULL,
+  SexualisationTRN.CI = NULL, metric.end.incubation = NA,
+  metabolic.heating = 0, temperature.heterogeneity = 0, progress = FALSE,
+  warnings = TRUE, parallel = TRUE)
 }
 \arguments{
 \item{x}{A set of parameters to model the embryo growth thermal reaction norm or a NestsResult object.}
@@ -48,6 +48,10 @@ info.nests(x = NULL, parameters = NULL, NestsResult = NULL,
 
 \item{embryo.stages}{The embryo stages. At least TSP.borders stages must be provided to estimate TSP borders. See note.}
 
+\item{TSP.begin}{Where TSP begin during the stage of beginning? In relative proportion of the stage.}
+
+\item{TSP.end}{Where TSP begin during the stage of ending? In relative proportion of the stage.}
+
 \item{replicate.CI}{Number of replicates to estimate CI. If <2, no CI is estimated.}
 
 \item{weight}{Weights of the different nests to estimate likelihood. It will replace the one in NestsResult.}
@@ -79,8 +83,11 @@ Return or the total likelihood or a list with $metric and $summary depending on 
 }
 \description{
 This function calculates many statistics about nests.\cr
-The embryo.stages is a list with stage numbers and relative size as compared to final size at the beginning of the stage.\cr
-For example embryo.stages=list(number=21:30, size=c(8.4, 9.4, 13.6, 13.8, 18.9, 23.5, 32.2, 35.2, 35.5, 38.5)/39.33) indicates that the stages 21 begins at the relative size of 8.4/39.33.\cr
+The embryo.stages is a named vector with relative size as compared to final size at the beginning of the stage. Names are the stages.\cr
+For example for SCL in Caretta caretta:\cr
+embryo.stages=structure(c(8.4, 9.4, 13.6, 13.8, 18.9, 23.5, 32.2, 35.2, 35.5, 38.5)/39.33), \cr
+.Names = c("21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31"))\cr
+ indicates that the stages 21 begins at the relative size of 8.4/39.33.\cr
 Series can be indicated as the name of the series, their numbers or series or sucession of TRUE or FALSE. "all" indicates that all series must be analyzed.\cr
 The likelihood object is just the total likelihood of the data in the model.\cr
 If one parameter is named "pipping_emergence" it is used as the number of days between pipping and emergence to calculate the 1/3 and 2/3 of incubation.\cr
@@ -130,12 +137,13 @@ The metric object is a list composed of data.frames which have the following att
   \item \code{stopattest} NA if stopattest was false, TRUE if at least one incubation series was longer than hatchling size and FALSE at contrary
 }
 If you indicate new set of temperatures, you must probably also indicate new test values.\cr
-Note: three species have predefined embryo stages. embryo.stages parameter can take the values:\cr
+Note: four species have predefined embryo stages. embryo.stages parameter can take the values:\cr
 \itemize{
   \item \code{Caretta caretta.SCL}
   \item \code{Chelonia mydas.SCL}
   \item \code{Emys orbicularis.SCL}
   \item \code{Emys orbicularis.mass}
+  \item \code{Podocnemis expansa.SCL}
   }
 But remember that mass is not the best proxy to describe the growth of an embryo because it can decrease if the subtrate becomes dry.\cr
 The progress bar is based on both replicates and timeseries.

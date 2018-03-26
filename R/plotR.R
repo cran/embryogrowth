@@ -196,6 +196,11 @@ plotR <-
     rxxw <- rbind(temperatures=temp, rxxw)
     }
     
+    if (curves=="ml quantiles" & is.null(hessian)) {
+      curves <- "ml"
+      warning("ml quantiles need an hessian matrix")
+    }
+    
     # j'ai un hessian qui est fourni
     if (curves=="ml quantiles" & !is.null(hessian)) {
       

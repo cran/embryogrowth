@@ -3,8 +3,8 @@
 #' \tabular{ll}{
 #'  Package: \tab embryogrowth\cr
 #'  Type: \tab Package\cr
-#'  Version: \tab 7.1 - build 644\cr
-#'  Date: \tab 2017-11-23\cr
+#'  Version: \tab 7.4 build 712\cr
+#'  Date: \tab 2018-03-26\cr
 #'  License: \tab GPL (>= 2)\cr
 #'  LazyLoad: \tab yes\cr
 #'  }
@@ -33,6 +33,19 @@
 #' @seealso Girondot, M., & Kaska, Y. (2014). Nest temperatures in a loggerhead-
 #'          nesting beach in Turkey is more determined by sea surface temperature 
 #'          than air temperature. Journal of Thermal Biology, 47, 13-18.
+#' @references Fuentes, M.M.P.B., Monsinjon, J., Lopez, M., Lara, P., Santos, A., 
+#'             dei Marcovaldi, M.A.G., Girondot, M., 2017. Sex ratio estimates for 
+#'             species with temperature-dependent sex determination differ according 
+#'             to the proxy used. Ecological Modelling 365, 55-67.
+#' @references Girondot, M., Monsinjon, J., Guillon, J.-M., 2018. Delimitation of 
+#'             the embryonic thermosensitive period for sex determination using an 
+#'             embryo growth model reveals a potential bias for sex ratio prediction 
+#'             in turtles. Journal of Thermal Biology 73, 32-40.
+#' @references Monsinjon, J., Jribi, I., Hamza, A., Ouerghi, A., Kaska, Y., 
+#'             Girondot, M., 2017. Embryonic growth rate thermal reaction norm of 
+#'             Mediterranean Caretta caretta embryos from two different thermal 
+#'             habitats, Turkey and Libya. Chelonian Conservation and 
+#'             Biology 16, 172-179.
 #' @keywords Temperature Embryo Ecology Growth Gompertz Sex-determination
 #' @examples
 #' \dontrun{

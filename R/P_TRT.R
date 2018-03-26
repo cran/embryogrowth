@@ -132,6 +132,7 @@ P_TRT <- function(x=NULL, resultmcmc=NULL, chain=1, equation=NULL, l=0.05,
       p <- modelTSD(xpar, rnorm(length(temperatures)+3, c(xpar["P"]-20, xpar["P"], xpar["P"]+20, temperatures), c(0, 0, 0, SD)), equation)
 
       if (all(is.finite(p))) {
+        # C'est quoi ça ?
       if ((abs(p[1]-p[2])<0.1) | (abs(p[2] - p[3])<0.1) | (abs(p[2]-0.5) > 0.1)) { #| (p[1] < 0.95) | (p[3] > 0.05)
         return(rep(NA, length(temperatures)))
       } else {

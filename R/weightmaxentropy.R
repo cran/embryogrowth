@@ -45,8 +45,7 @@ weightmaxentropy <- function(temperatures=stop('Temperature data must be provide
 # 	weight= NULL; entropy.method=entropy.empirical; plot=TRUE; control_optim=list(trace=0, maxit=500); control_plot=NULL; control_entropy=NULL
 
   if (!requireNamespace("entropy", quietly = TRUE)) {
-    warning("entropy package is necessary for this function")
-    return()
+    stop("entropy package is necessary for this function")
   }
   
   

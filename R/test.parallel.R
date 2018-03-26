@@ -1,4 +1,4 @@
-#' TestParallel estimates the likelihood of a set of parameters for nest incubation data with or without parallel computing option 
+#' test.parallel estimates the likelihood of a set of parameters for nest incubation data with or without parallel computing option 
 #' @title Estimate the likelihood of a set of parameters for nest incubation data with or without parallel computing option
 #' @author Marc Girondot
 #' @return The gain or loss of computing time using parallel version
@@ -9,12 +9,12 @@
 #' \dontrun{
 #' library(embryogrowth)
 #' data(resultNest_4p_SSM4p)
-#' TestParallel(resultNest_4p_SSM4p)
+#' test.parallel(resultNest_4p_SSM4p)
 #' }
 #' @export
 
 
-TestParallel <-
+test.parallel <-
 	function(result=stop("A ResultNest object must be provided")) {
 
 print("Run with parallel computing")

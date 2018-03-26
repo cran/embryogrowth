@@ -44,6 +44,7 @@
 #' If one parameter is named "pipping_emergence" it is used as the number of days between pipping and emergence to calculate the 1/3 and 2/3 of incubation.\cr
 #' The summary object is a data.frame composed of these elements:
 #' \itemize{
+#'   \item \code{Temperature.max} Maximum temperature recorded during incubation
 #'   \item \code{TimeWeighted.temperature.mean} Average temperature weigthed by the time at each temperature for all incubation
 #'   \item \code{TimeWeighted.temperature.se} Standard error for the average temperature weigthed by the time at each temperature for all incubation
 #'   \item \code{MassWeighted.temperature.mean} Average temperature weigthed by the growth of embryo for all incubation
@@ -95,6 +96,7 @@
 #'   \item \code{Emys orbicularis.SCL}
 #'   \item \code{Emys orbicularis.mass}
 #'   \item \code{Podocnemis expansa.SCL}
+#'   \item \code{Generic.ProportionDevelopment}
 #'   }
 #' But remember that mass is not the best proxy to describe the growth of an embryo because it can decrease if the subtrate becomes dry.\cr
 #' The progress bar is based on both replicates and timeseries.
@@ -102,27 +104,37 @@
 #' \dontrun{
 #' library(embryogrowth)
 #' data(resultNest_4p_SSM4p)
-#' summary.nests <- info.nests(resultNest_4p_SSM4p, out="summary", replicate.CI=100, 
+#' summary.nests <- info.nests(resultNest_4p_SSM4p, out="summary", 
+#'   embryo.stages="Caretta caretta.SCL", 
+#'   replicate.CI=100, 
 #'   resultmcmc=resultNest_mcmc_4p_SSM4p, 
 #'   CI="MCMC", 
 #'   progress=TRUE)
 #'   # Result is in summary.nests$summary
 #' infoall <- info.nests(resultNest_4p_SSM4p)
 #'   # Result is a value
-#' infoall.df <- info.nests(resultNest_4p_SSM4p, out="metric", replicate.CI=100, 
+#' infoall.df <- info.nests(resultNest_4p_SSM4p, out="metric", 
+#'   embryo.stages="Caretta caretta.SCL", 
+#'   replicate.CI=100, 
 #'   resultmcmc=resultNest_mcmc_4p_SSM4p, 
 #'   CI="MCMC", 
 #'   progress=TRUE)
 #' # Result is in summary.nests$metric
-#' infoall.both <- info.nests(resultNest_4p_SSM4p, out=c("metric", "summary"), replicate.CI=100, 
+#' infoall.both <- info.nests(resultNest_4p_SSM4p, 
+#'   embryo.stages="Caretta caretta.SCL", 
+#'   out=c("metric", "summary"), replicate.CI=100, 
 #'   resultmcmc=resultNest_mcmc_4p_SSM4p, 
 #'   CI="MCMC", 
 #'   progress=TRUE)
 #' # Results are in summary.nests$summary and in summary.nests$metric
-#' infoall.both <- info.nests(resultNest_4p_SSM4p, out=c("metric", "summary"), replicate.CI=100, 
+#' infoall.both <- info.nests(resultNest_4p_SSM4p, 
+#'   embryo.stages="Caretta caretta.SCL", 
+#'   out=c("metric", "summary"), replicate.CI=100, 
 #'   CI="Hessian", 
 #'   progress=TRUE)
-#' infoall.both <- info.nests(resultNest_4p_SSM4p, out=c("metric", "summary"), replicate.CI=100, 
+#' infoall.both <- info.nests(resultNest_4p_SSM4p, 
+#'   embryo.stages="Caretta caretta.SCL", 
+#'   out=c("metric", "summary"), replicate.CI=100, 
 #'   CI="SE", 
 #'   progress=TRUE)
 #' }
@@ -188,6 +200,7 @@ info.nests <- function(x=NULL, parameters=NULL, NestsResult=NULL,
     # soit c'est null soit c'est numérique
     SexualisationTRN.fixed.parameters <- NULL
     SexualisationTRN.hessian <- NULL
+    SexualisationTRN.SE <- NULL
   }
   
   if (!is.null(SexualisationTRN.mcmc)) {
@@ -1569,6 +1582,7 @@ if (CI == "mcmc") {
       if (any(unlist(lapply(AnalyseTraces, function(x) {attributes(x) <- NULL; identical(x = x, y=FALSE)})))) {
         if (warnings) warning("replicate ", sp, ": Something goes wrong")
         summarydf <- data.frame(
+          Temperature.max=NA,
           TimeWeighted.temperature.mean=NA,
           MassWeighted.temperature.mean=NA,
           TSP.TimeWeighted.temperature.mean=NA,
@@ -1589,7 +1603,7 @@ if (CI == "mcmc") {
         )
         returntotal.summary <- c(returntotal.summary, list(summarydf))
       } else {
-        
+        Temperature.max <- unlist(lapply(AnalyseTraces, function(x) max(x[, "TempC"])))
         TimeWeighted.temperature.mean <- unlist(lapply(AnalyseTraces, function(x) sum(x[, "TempC"]*x[, "DeltaT"])/sum(x[, "DeltaT"])))
         MassWeighted.temperature.mean <- unlist(lapply(AnalyseTraces, 
                                                        function(x) {
@@ -1722,6 +1736,7 @@ if (CI == "mcmc") {
         CTEW.TSP_CTEW.2ndT <- TSP.MassWeighted.temperature.mean-MiddleThird.MassWeighted.temperature.mean
         
         summarydf <- data.frame(
+          Temperature.max=Temperature.max,
           TimeWeighted.temperature.mean=TimeWeighted.temperature.mean, 
           MassWeighted.temperature.mean=MassWeighted.temperature.mean, 
           TSP.TimeWeighted.temperature.mean=TSP.TimeWeighted.temperature.mean,

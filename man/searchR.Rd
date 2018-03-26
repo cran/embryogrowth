@@ -227,10 +227,9 @@ x <- structure(c(1.48207559695689, 20.1100310234046, 31.5665036287242),
 resultNest_PropDev_3p_Dallwitz <- searchR(parameters=x, fixed.parameters=NULL, 
                          temperatures=formated, derivate=dydt.linear, M0=0, 
                          test=c(Mean=1, SD=NA))
- plotR(resultNest_PropDev_3p_Dallwitz, ylim=c(0, 1.5))
+ plotR(resultNest_PropDev_3p_Dallwitz, ylim=c(0, 1.5), curves="ML")
  plot(x=resultNest_PropDev_3p_Dallwitz, ylimS=c(0,1), xlim=c(0,60), series=2, 
-         TSP.borders=c(21, 26), 
-         embryo.stages=structure(c(0.33, 0.66), .Names=c("21", 26)) )
+         embryo.stages="Generic.ProportionDevelopment")
          
 x <- structure(c(1.48904182113431, 10.4170365155993, 31.2591665490154, 
 6.32355497589913, -1.07425378667104), .Names = c("Dallwitz_b1", 
@@ -240,11 +239,10 @@ resultNest_PropDev_5p_Dallwitz <- searchR(parameters=x, fixed.parameters=NULL,
                          test=c(Mean=1, SD=NA))
  plotR(resultNest_PropDev_5p_Dallwitz, ylim=c(0, 1.5))
  plot(x=resultNest_PropDev_5p_Dallwitz, ylimS=c(0,1), xlim=c(0,60), series=2, 
-         TSP.borders=c(21, 26), 
-         embryo.stages=structure(c(0.33, 0.66), .Names=c("21", 26)) )
+         embryo.stages="Generic.ProportionDevelopment")
          
- plotR(resultNest_PropDev_3p_Dallwitz, ylim=c(0, 1.5))
- plotR(resultNest_PropDev_5p_Dallwitz, ylim=c(0, 1.5), new=FALSE, col="red")
+ plotR(resultNest_PropDev_3p_Dallwitz, ylim=c(0, 1.5), curves="ML")
+ plotR(resultNest_PropDev_5p_Dallwitz, ylim=c(0, 1.5), curves="ML", new=FALSE, col="red")
  compare_AICc(Dallwitz3p=resultNest_PropDev_3p_Dallwitz, 
               Dallwitz5p=resultNest_PropDev_5p_Dallwitz)
 

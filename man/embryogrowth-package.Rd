@@ -16,8 +16,8 @@ Fit a parametric function that describes dependency of embryo growth to temperat
 \tabular{ll}{
  Package: \tab embryogrowth\cr
  Type: \tab Package\cr
- Version: \tab 7.1 - build 644\cr
- Date: \tab 2017-11-23\cr
+ Version: \tab 7.4 build 712\cr
+ Date: \tab 2018-03-26\cr
  License: \tab GPL (>= 2)\cr
  LazyLoad: \tab yes\cr
  }
@@ -110,6 +110,22 @@ plotR(resultNest_6p_SSM6p, resultmcmc=resultNest_mcmc_6p_SSM6p,
 Girondot, M. & Kaska, Y. 2014. A model to predict the thermal 
          reaction norm for the embryo growth rate from field data. Journal of
          Thermal Biology. 45, 96-102.
+
+Fuentes, M.M.P.B., Monsinjon, J., Lopez, M., Lara, P., Santos, A., 
+            dei Marcovaldi, M.A.G., Girondot, M., 2017. Sex ratio estimates for 
+            species with temperature-dependent sex determination differ according 
+            to the proxy used. Ecological Modelling 365, 55-67.
+
+Girondot, M., Monsinjon, J., Guillon, J.-M., 2018. Delimitation of 
+            the embryonic thermosensitive period for sex determination using an 
+            embryo growth model reveals a potential bias for sex ratio prediction 
+            in turtles. Journal of Thermal Biology 73, 32-40.
+
+Monsinjon, J., Jribi, I., Hamza, A., Ouerghi, A., Kaska, Y., 
+            Girondot, M., 2017. Embryonic growth rate thermal reaction norm of 
+            Mediterranean Caretta caretta embryos from two different thermal 
+            habitats, Turkey and Libya. Chelonian Conservation and 
+            Biology 16, 172-179.
 }
 \seealso{
 Delmas, V., Prevot-Julliard, A.-C., Pieau, C. & Girondot, M. 2008. 

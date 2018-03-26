@@ -64,11 +64,15 @@ Crastz F. (1982) Embryological stages of the marine turtle Lepidochelys olivacea
 
 De Souza, R.R., Vogt, R.C., 1994. Incubation temperature influences sex and hatchling size in the neotropical turtle Podocnemis unifilis. Journal of Herpetology 28, 453-464.
 
+Emer, S.A., 2007. Temperature-dependent sex determination in Manouria emys emys, the asian forest tortoise, College of Arts and Sciences. Georgia State University, Atlanta, GE, p. 60.
+
 Georges A., Limpus C.J. and Stoutjesdijk R. (1994) Hatchling sex in the marine turtle Caretta caretta is determined by proportion of development at a temperature, not daily duration of exposure. Journal of Experimental Zoology, 270(5), 432-444.
 
 Girondot M. 1999 Statistical description of temperature-dependent sex determination using maximum likelihood. Evolutionary Ecology Research, 1(3), 479-486.
 
 Gutzke, W. H. N., & Paukstis, G. L. (1983). Influence of the hydric environment on sexual differentiation in turtles. J. Exp. Zool., 226, 467-469. [Chrysemys picta]
+
+Hernández-Montoya V, Páez VP, Ceballos CP (2017) Effects of temperature on sex determination and embryonic development in the red-footed tortoise, Chelonoidis carbonarius. Chelonian Conservation and Biology 16:164-171
 
 Hewavisenthi, S. (1999) Influence of incubation environment on the development of the flatback turtle (Natator depressus). Ph.D. Thesis, Central Queensland University.
 
@@ -78,9 +82,11 @@ Hulin, V., Delmas, V., Girondot, M., Godfrey, M. H. and Guillon, J.-M. 2009. Tem
 
 Limpus C.J., Reed P.C. and Miller J.D. (1985) Temperature dependent sex determination in Queensland sea turtles: Intraspecific variation in Caretta caretta. In Grigg G., Shine R. and Ehmann H. (eds) Biology of Australian frogs and reptiles. New South Wales, Australia: Royal Zoological Society, pp 343-351.
 
-Limpus C.J., Reed P. and Miller J.D. (1983) Islands and turtles: the influence of choice of nesting beach on sex ratio. In Baker J.J., Carter R.M., Saurmarco P.W. and Stark K.P. (eds.) Proceedings of the Proceedings of the Inaugural Great Barrier Reef Conference, 29 August-2 September, 1983. James Cook University Press of North Queensland, pp. 397-402.
+Limpus C.J., Reed P. and Miller J.D. (1983) Islands and turtles: the influence of choice of nesting beach on sex ratio. In Baker J.J., Carter R.M., Saurmarco P.W. and Stark K.P. (eds.) Proceedings of the Inaugural Great Barrier Reef Conference, 29 August-2 September, 1983. James Cook University Press of North Queensland, pp. 397-402.
 
 López Correa, J.Y., 2010. Diferenciacion gonadica en crias de Lepidochelys olivacea (Eschscholtz, 1829) (Testudinata: Cheloniidae), Instituto Politicnico Nacional, Centro Interdisciplinaria de Ciencias Marinas, La Paz, BCS, p. 108.
+
+Lubiana, A.l., Júnior, P.D.F., 2009. Pivotal temperature and sexual dimorphism of Podocnemis expansa hatchlings (Testudines: Podocnemididae) from Bananal Island, Brazil. Zoologia 26, 527-533.
 
 Marcovaldi M.A., Godfrey M.H. and Mrosovsky N. (1997) Estimating sex ratios of loggerhead turtles in Brazil from pivotal incubation temperatures. Canadian Journal of Zoology-Revue Canadienne De Zoologie, 75, 755-770.
 

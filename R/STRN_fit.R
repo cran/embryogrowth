@@ -1,13 +1,12 @@
-.STRN_fit <- function(par, fixed.parameters=NULL, EmbryoGrowthTRN, tsd, Sexed, Males, Temperatures, parallel) {
+.STRN_fit <- function(par, fixed.parameters=NULL, 
+                      embryo.stages, 
+                      EmbryoGrowthTRN, tsd, Sexed, Males, Temperatures, 
+                      parallel) {
   
   serafaire <- names(Sexed[!is.na(Sexed)])
   
   infoall <- info.nests(NestsResult=EmbryoGrowthTRN, series=serafaire, 
-                        SexualisationTRN=c(par, fixed.parameters), 
-                        out="summary", replicate.CI = 1, progress=FALSE, 
-                        parallel=parallel)$summary
-  
-  infoall2 <- info.nests(NestsResult=EmbryoGrowthTRN, series=serafaire, 
+                        embryo.stages=embryo.stages, 
                         SexualisationTRN=c(par, fixed.parameters), 
                         out="summary", replicate.CI = 1, progress=FALSE, 
                         parallel=parallel)$summary

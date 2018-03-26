@@ -23,6 +23,7 @@
 #' @param embryo.stages The embryo stages. At least TSP.borders stages must be provided to estimate TSP length
 #' @param replicate.CI Number of randomizations to estimate CI
 #' @param parallel Should parallel computing be used. TRUE or FALSE
+#' @param progressbar Show a progress bar in unix system is pbmclapply package is installed
 #' @description Simulate incubation of a nest with the beginning varying day by day\cr
 #' Temperatures must be in a data.frame with one column (Time) being the time and the second the temperatures (Temperature). A third columns can indicate the temperature at the end of incubation (Temperature.end.incubation). Do not use FormatNests() for this dataframe.
 #' @examples
@@ -46,7 +47,7 @@
 #' with(out, plot(Time/(60*24), Incubation.length.mean/(60*24), 
 #'      xlab="Days along the season", 
 #'      ylab="Incubation duration", 
-#'      type="l", bty="n", las=1, ylim=c(72, 75)))
+#'      type="l", bty="n", las=1, ylim=c(74, 76)))
 #' with(out, plot(Time/(60*24), TSP.MassWeighted.STRNWeighted.temperature.mean, 
 #'      xlab="Days along the season", 
 #'      ylab=expression("CTE for sex ratio in "*degree*"C"), 
@@ -72,9 +73,16 @@ MovingIncubation <-
            SexualisationTRN=NULL,
            SexualisationTRN.CI="Hessian",
            replicate.CI=1, 
-           parallel=TRUE) {
+           parallel=TRUE, 
+           progressbar=TRUE) {
 
-# NestsResult=NULL; resultmcmc=NULL;temperatures.df=NULL; metabolic.heating=0;temperature.heterogeneity=0;average.incubation.duration=60*1440; skip = 1; parameters=NULL; fixed.parameters=NULL; SE=NULL; hessian=NULL; derivate=NULL; test=NULL; M0=NULL; TSP.borders=c(21, 26); embryo.stages="Caretta caretta.SCL"; SexualisationTRN=NULL; replicate.CI=1; parallel=TRUE
+# NestsResult=NULL; resultmcmc=NULL;temperatures.df=NULL; 
+# metabolic.heating=0;CI="Hessian"; temperature.heterogeneity=0;
+# average.incubation.duration=60*1440; skip = 1; parameters=NULL; 
+# fixed.parameters=NULL; SE=NULL; hessian=NULL; derivate=NULL; test=NULL; 
+# M0=NULL; TSP.borders=c(21, 26); embryo.stages="Caretta caretta.SCL"; 
+# SexualisationTRN=NULL; SexualisationTRN.CI="Hessian"; 
+# replicate.CI=1; parallel=TRUE
 
 # maintenant il n'est plus possible qu'il n'y ait pas de temperatures
 #  
@@ -190,8 +198,14 @@ if (.Platform$OS.type == "windows" & parallel) {
   stopCluster(cl)  
   
 } else {
+  
+  if (any(rownames(installed.packages())=="pbmcapply") & progressbar) {
+    mcl <-  getFromNamespace("pbmclapply", ns="pbmcapply")
+  } else {
+    mcl <- getFromNamespace("parallel", ns="mclapply")
+  }
 
-result.out <- mclapply(seq_along(temptotal), FUN=function(xxx) {
+result.out <- mcl(seq_along(temptotal), FUN=function(xxx) {
 
   temp <- temptotal[xxx]
    # for (temp in seq(from=1, to=nbtp-2, by=skip)) {
@@ -223,14 +237,14 @@ result.out <- mclapply(seq_along(temptotal), FUN=function(xxx) {
     
     # metric.end.incubation=c(Temp=test$Mean),
     return(cbind(Time=times[temp], out.incubation, row.names=NULL))
-}, mc.cores = ifelse(parallel, detectCores(), 1), mc.preschedule=TRUE)
+}, mc.cores = ifelse(parallel, detectCores(), 1))
 
 }
     
 # result.out2 <- lapply(result.out, function(xxx) xxx[[1]])
 # result.out3 <- result.out[unlist(lapply(result.out, length))==31]
 
-df <- data.frame(matrix(unlist(result.out), ncol=35, byrow=TRUE))
+df <- data.frame(matrix(unlist(result.out), ncol=37, byrow=TRUE))
 colnames(df) <- colnames(result.out[[1]])
 
 return(df)

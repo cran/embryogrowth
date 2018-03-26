@@ -95,6 +95,23 @@
 #' plot(resultNest_4p_SSM4p, xlim=c(0,70), ylimT=c(22, 32), ylimS=c(0,45), add=TRUE, 
 #' 	    series="all", show.fioritures=FALSE, col.S=c(rep("black", 5), rep("red", 6)), 
 #' 	    embryo.stages="Caretta caretta.SCL")
+#' 	    
+#' # to plot all the temperature profiles
+#' 
+#' par(mar=c(4, 4, 1, 1))
+#' plot(resultNest_4p_SSM4p$data[[1]][, 1]/60/24,
+#'      resultNest_4p_SSM4p$data[[1]][, 2], bty="n", 
+#'      las=1, xlab="Days of incubation", 
+#'      ylab=expression("Temperatures in "*degree*"C"), 
+#'      type="l", xlim=c(0,70),ylim=c(20, 35))
+#'      
+#'      for (i in 2:21) {
+#'           par(new=TRUE)
+#'           plot(resultNest_4p_SSM4p$data[[i]][, 1]/60/24,
+#'           resultNest_4p_SSM4p$data[[i]][, 2], bty="n", 
+#'           las=1, xlab="", ylab="", type="l", xlim=c(0,70),
+#'           ylim=c(20, 35), axes = FALSE)
+#'      }
 #' }
 #' @method plot NestsResult
 #' @export
@@ -125,7 +142,7 @@ function(x, ..., parameters=NULL, fixed.parameters=NULL,
          xlab="Days of incubation", ylabT=expression("Temperature in " * degree * "C"), 
          ylabS= "Embryo metric", progress=TRUE, parallel=TRUE) {
 
-#  parameters=NULL; fixed.parameters=NULL; resultmcmc = NULL; SE=NULL; temperatures=NULL; derivate=NULL; test=NULL; stopattest=FALSE; M0=NULL; weight=NULL; series="all"; TSP.borders=NULL; embryo.stages="Caretta caretta.SCL"; replicate.CI=100; metric.end.incubation=NULL; col.stages="blue"; col.PT="red"; col.TSP="gray"; col.temperatures="green"; col.S="black"; lty.temperatures=1; lwd.temperatures=2; ylimT=NULL; ylimS=NULL; xlim=NULL; show.stages=TRUE; show.TSP=TRUE; show.third=TRUE; CI=NULL;  show.metric=TRUE; show.fioritures=TRUE; show.temperatures=TRUE; show.PT=TRUE; PT=c(mean=NA, SE=NA); show.test=TRUE; add=FALSE; lab.third="2nd third of incubation"; at.lab.third=4; lab.PT="PT"; lab.stages="Stages"; mar = c(4, 5, 4, 5) + 0.3; xlab="Days of incubation"; ylabT=expression("Temperatures in " * degree * "C"); ylabS= "Embryo metric"; progress=TRUE;parallel=TRUE
+#  parameters=NULL; fixed.parameters=NULL; resultmcmc = NULL; SE=NULL; temperatures=NULL; derivate=NULL; test=NULL; stopattest=FALSE; M0=NULL; weight=NULL; series="all"; TSP.borders=NULL; embryo.stages="Caretta caretta.SCL"; TSP.begin=0; TSP.end=0.5; replicate.CI=100; metric.end.incubation=NULL; col.stages="blue"; col.PT="red"; col.TSP="gray"; col.temperatures="green"; col.S="black"; lty.temperatures=1; lwd.temperatures=2; ylimT=NULL; ylimS=NULL; xlim=NULL; show.stages=TRUE; show.TSP=TRUE; show.third=TRUE; CI=NULL;  show.metric=TRUE; show.fioritures=TRUE; show.temperatures=TRUE; show.PT=TRUE; PT=c(mean=NA, SE=NA); show.test=TRUE; add=FALSE; lab.third="2nd third of incubation"; at.lab.third=4; lab.PT="PT"; lab.stages="Stages"; mar = c(4, 5, 4, 5) + 0.3; xlab="Days of incubation"; ylabT=expression("Temperatures in " * degree * "C"); ylabS= "Embryo metric"; progress=TRUE;parallel=TRUE
 #  x <- resultNest_4p_SSM4p; xlim=c(0,70); ylimT=c(22, 32); ylimS=c(0,45); series=1; resultmcmc = result_mcmc_4p; embryo.stages="Caretta caretta.SCL"; replicate.CI = 100
   
   TSP.list <- embryogrowth::TSP.list
@@ -166,7 +183,9 @@ function(x, ..., parameters=NULL, fixed.parameters=NULL,
   if (is.null(hessian)) hessian <- NestsResult$hessian
   
   
-  if (!is.null(SE[1])) if (all(is.na(SE[])))  SE <- NULL
+  if (!is.null(SE[1])) if (all(is.na(SE[])))  {
+    SE <- NULL
+  }
   if (!is.null(CI)) {
     if (CI == "mcmc" & is.null(resultmcmc)) CI <- NULL
     if (CI == "se" & is.null(SE)) CI <- NULL

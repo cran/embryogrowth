@@ -178,6 +178,23 @@ plot(resultNest_4p_SSM4p, xlim=c(0,70), ylimT=c(22, 32), ylimS=c(0,45),
 plot(resultNest_4p_SSM4p, xlim=c(0,70), ylimT=c(22, 32), ylimS=c(0,45), add=TRUE, 
 	    series="all", show.fioritures=FALSE, col.S=c(rep("black", 5), rep("red", 6)), 
 	    embryo.stages="Caretta caretta.SCL")
+	    
+# to plot all the temperature profiles
+
+par(mar=c(4, 4, 1, 1))
+plot(resultNest_4p_SSM4p$data[[1]][, 1]/60/24,
+     resultNest_4p_SSM4p$data[[1]][, 2], bty="n", 
+     las=1, xlab="Days of incubation", 
+     ylab=expression("Temperatures in "*degree*"C"), 
+     type="l", xlim=c(0,70),ylim=c(20, 35))
+     
+     for (i in 2:21) {
+          par(new=TRUE)
+          plot(resultNest_4p_SSM4p$data[[i]][, 1]/60/24,
+          resultNest_4p_SSM4p$data[[i]][, 2], bty="n", 
+          las=1, xlab="", ylab="", type="l", xlim=c(0,70),
+          ylim=c(20, 35), axes = FALSE)
+     }
 }
 }
 \author{

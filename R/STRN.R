@@ -5,6 +5,7 @@
 #' @param Initial_STRN Values for initial model of Sexualisation Thermal Reaction Norm
 #' @param fixed.parameters Value for Sexualisation Thermal Reaction Norm model that will not be changed
 #' @param EmbryoGrowthTRN The Embryo Growth Thermal Reaction Norm obtained with searchR()
+#' @param embryo.stages The embryo stages. At least TSP.borders stages must be provided to estimate TSP borders. See note.
 #' @param tsd The model used to predict sex ratio, obtained from tsd()
 #' @param Sexed The number of sexed embryos with names identifying timeseries
 #' @param Males The number of males embryos with names identifying timeseries
@@ -29,6 +30,15 @@
 #' Sexed, Males and Females must be vectors with names. The names must be the same as 
 #' the names of timeseries of temperatures in EmbryoGrowthTRN.\cr
 #' Only two of these 3 parameters are required: Males, Females and Sexed\cr
+#' Note: four species have predefined embryo stages. embryo.stages parameter can take the values:\cr
+#' \itemize{
+#'   \item \code{Caretta caretta.SCL}
+#'   \item \code{Chelonia mydas.SCL}
+#'   \item \code{Emys orbicularis.SCL}
+#'   \item \code{Emys orbicularis.mass}
+#'   \item \code{Podocnemis expansa.SCL}
+#'   \item \code{Generic.ProportionDevelopment}
+#' }
 #' @examples
 #' \dontrun{
 #' library(embryogrowth)
@@ -47,6 +57,7 @@
 #' fp <- c(Rho25=100)
 #' fitSTRN <- STRN(Initial_STRN=Initial_STRN, 
 #'                 EmbryoGrowthTRN=resultNest_4p_SSM4p, tsd=Med_Cc, 
+#'                 embryo.stages="Caretta caretta.SCL", 
 #'                 Sexed=sexed, Males=males, 
 #'                 fixed.parameters=fp, 
 #'                 SE=TRUE, 
@@ -55,6 +66,7 @@
 #' CTE <- info.nests(NestsResult=resultNest_4p_SSM4p, 
 #'                   SexualisationTRN=fitSTRN,
 #'                   SexualisationTRN.CI="Hessian",
+#'                   embryo.stages="Caretta caretta.SCL", 
 #'                   CI="Hessian", 
 #'                   replicate.CI=100, 
 #'                   progress=TRUE, 
@@ -87,12 +99,14 @@
 #' fp <- c(Rho25=100)
 #' fitSTRN_2 <- STRN(Initial_STRN=Initial_STRN, 
 #'                 EmbryoGrowthTRN=resultNest_4p_SSM4p, tsd=Med_Cc, 
+#'                 embryo.stages="Caretta caretta.SCL", 
 #'                 Sexed=sexed, Males=males, 
 #'                 fixed.parameters=fp,  
 #'                 Temperatures="TSP.STRNWeighted.temperature.mean")
 #' CTE <- info.nests(NestsResult=resultNest_4p_SSM4p, 
 #'                   SexualisationTRN=fitSTRN_2,
 #'                   SexualisationTRN.CI="Hessian",
+#'                   embryo.stages="Caretta caretta.SCL", 
 #'                   CI="Hessian", 
 #'                   replicate.CI=100, 
 #'                   progress=TRUE, 
@@ -117,6 +131,7 @@
 STRN <- function(Initial_STRN=NULL, 
                  fixed.parameters = NULL, 
                  EmbryoGrowthTRN=stop("Embryo Growth Thermal Reaction Norm must be provided"), 
+                 embryo.stages=NULL, 
                  tsd=stop("A result from the function tsd() must be provided"),
                  Sexed=NULL, Males=NULL, Females=NULL, 
                  Temperatures="TSP.MassWeighted.STRNWeighted.temperature.mean", 
@@ -127,7 +142,11 @@ STRN <- function(Initial_STRN=NULL,
   
 {
   
-  # Initial_STRN=NULL; fixed.parameters = NULL;EmbryoGrowthTRN=NULL; tsd=NULL; Sexed=NULL; Males=NULL; Females=NULL; Temperatures="TSP.MassWeighted.STRNWeighted.temperature.mean"; SE=TRUE; parallel=TRUE; control=list(trace=1, REPORT=10, maxit=1000)
+  # Initial_STRN=NULL; fixed.parameters = NULL;EmbryoGrowthTRN=NULL; embryo.stages=NULL; tsd=NULL; Sexed=NULL; Males=NULL; Females=NULL; Temperatures="TSP.MassWeighted.STRNWeighted.temperature.mean"; SE=TRUE; parallel=TRUE; control=list(trace=1, REPORT=10, maxit=1000)
+  
+  if (is.null(embryo.stages)) {
+    stop("embryo.stages must be defined")
+  }
   
   if (!requireNamespace("optimx", quietly = TRUE)) {
     stop("optimx package is absent; Please install it first")
@@ -159,6 +178,7 @@ STRN <- function(Initial_STRN=NULL,
               fixed.parameters=fixed.parameters, 
               fn=getFromNamespace(".STRN_fit", ns="embryogrowth"), 
               EmbryoGrowthTRN=EmbryoGrowthTRN, 
+              embryo.stages=embryo.stages, 
               tsd=tsd, Sexed=Sexed, Males=Males, Temperatures=Temperatures, 
               parallel=parallel, 
               itnmax=itnmax, 
@@ -188,6 +208,7 @@ STRN <- function(Initial_STRN=NULL,
                                         x=result$par, 
                                         fixed.parameters=fixed.parameters, 
                                         EmbryoGrowthTRN=EmbryoGrowthTRN, 
+                                        embryo.stages=embryo.stages, 
                                         tsd=tsd, Sexed=Sexed, Males=Males, 
                                         Temperatures=Temperatures
                                         , parallel=parallel), silent=TRUE)
@@ -236,6 +257,8 @@ STRN <- function(Initial_STRN=NULL,
   result$BIC <- 2*result$value + k * log(n)
   
   result$fixed.parameters <- fixed.parameters
+  
+  result$Temperatures <- Temperatures
   
   class(result) <- "STRN"
   

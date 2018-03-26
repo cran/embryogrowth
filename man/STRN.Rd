@@ -6,6 +6,7 @@
 \usage{
 STRN(Initial_STRN = NULL, fixed.parameters = NULL,
   EmbryoGrowthTRN = stop("Embryo Growth Thermal Reaction Norm must be provided"),
+  embryo.stages = NULL,
   tsd = stop("A result from the function tsd() must be provided"),
   Sexed = NULL, Males = NULL, Females = NULL,
   Temperatures = "TSP.MassWeighted.STRNWeighted.temperature.mean",
@@ -18,6 +19,8 @@ STRN(Initial_STRN = NULL, fixed.parameters = NULL,
 \item{fixed.parameters}{Value for Sexualisation Thermal Reaction Norm model that will not be changed}
 
 \item{EmbryoGrowthTRN}{The Embryo Growth Thermal Reaction Norm obtained with searchR()}
+
+\item{embryo.stages}{The embryo stages. At least TSP.borders stages must be provided to estimate TSP borders. See note.}
 
 \item{tsd}{The model used to predict sex ratio, obtained from tsd()}
 
@@ -57,6 +60,15 @@ If information for sex is not known for some timeseries, set NA for Sexed.\cr
 Sexed, Males and Females must be vectors with names. The names must be the same as 
 the names of timeseries of temperatures in EmbryoGrowthTRN.\cr
 Only two of these 3 parameters are required: Males, Females and Sexed\cr
+Note: four species have predefined embryo stages. embryo.stages parameter can take the values:\cr
+\itemize{
+  \item \code{Caretta caretta.SCL}
+  \item \code{Chelonia mydas.SCL}
+  \item \code{Emys orbicularis.SCL}
+  \item \code{Emys orbicularis.mass}
+  \item \code{Podocnemis expansa.SCL}
+  \item \code{Generic.ProportionDevelopment}
+}
 }
 \details{
 STRN estimates the parameters that best describe the sexualisation thermal reaction norm within the TSP
@@ -79,6 +91,7 @@ Initial_STRN <- structure(c(582.567096666926, 2194.0806711639, 3475.28414940385)
 fp <- c(Rho25=100)
 fitSTRN <- STRN(Initial_STRN=Initial_STRN, 
                 EmbryoGrowthTRN=resultNest_4p_SSM4p, tsd=Med_Cc, 
+                embryo.stages="Caretta caretta.SCL", 
                 Sexed=sexed, Males=males, 
                 fixed.parameters=fp, 
                 SE=TRUE, 
@@ -87,6 +100,7 @@ plotR(fitSTRN, curves ="ML quantiles", ylim=c(0,2))
 CTE <- info.nests(NestsResult=resultNest_4p_SSM4p, 
                   SexualisationTRN=fitSTRN,
                   SexualisationTRN.CI="Hessian",
+                  embryo.stages="Caretta caretta.SCL", 
                   CI="Hessian", 
                   replicate.CI=100, 
                   progress=TRUE, 
@@ -119,12 +133,14 @@ Initial_STRN <- structure(c(3678.94960547096, -301.436485427701, 912.59595385497
 fp <- c(Rho25=100)
 fitSTRN_2 <- STRN(Initial_STRN=Initial_STRN, 
                 EmbryoGrowthTRN=resultNest_4p_SSM4p, tsd=Med_Cc, 
+                embryo.stages="Caretta caretta.SCL", 
                 Sexed=sexed, Males=males, 
                 fixed.parameters=fp,  
                 Temperatures="TSP.STRNWeighted.temperature.mean")
 CTE <- info.nests(NestsResult=resultNest_4p_SSM4p, 
                   SexualisationTRN=fitSTRN_2,
                   SexualisationTRN.CI="Hessian",
+                  embryo.stages="Caretta caretta.SCL", 
                   CI="Hessian", 
                   replicate.CI=100, 
                   progress=TRUE, 

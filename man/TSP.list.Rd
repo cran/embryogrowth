@@ -53,4 +53,5 @@ Other Functions for temperature-dependent sex determination: \code{\link{Databas
 \author{
 Marc Girondot \email{marc.girondot@u-psud.fr}
 }
+\concept{Functions for temperature-dependent sex determination}
 \keyword{datasets}

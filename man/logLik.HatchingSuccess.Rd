@@ -62,3 +62,4 @@ Other Hatching success: \code{\link{fitHS}},
 \author{
 Marc Girondot
 }
+\concept{Hatching success}

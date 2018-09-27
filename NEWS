@@ -1,13 +1,14 @@
 THIS IS THE CHANGELOG OF THE "embryogrowth" PACKAGE
 
-            CHANGES IN VERSION 7.4 (2018-03-26)
+            CHANGES IN VERSION 7.4.1 (2018-09-26)
           
-* New function to study data logger precision: precision.datalogger - 7.3
+* New function to study data logger precision: uncertainty.datalogger - 7.3
 * Correct a bug in predict.HatchingSuccess - 7.3
 * Correct a bug in STRN - 7.3.1
 * Add the temperatures object in STRN output - 7.3.2
 * New functions calibrate.datalogger - 7.3.3
-* Simplification of calibrate.datalogger and precision.datalogger - 7.3.4
+* Simplification of calibrate.datalogger() and uncertainty.datalogger() - 7.3.4
+* uncertainty.datalogger() by default uses only one measurement - 7.4.1
 
             CHANGES IN VERSION 7.2.3 (2018-02-07)
           

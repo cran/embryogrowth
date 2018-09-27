@@ -4,12 +4,13 @@
 \alias{plot.tsd}
 \title{Plot results of tsd() that best describe temperature-dependent sex determination}
 \usage{
-\method{plot}{tsd}(x, ..., show.observations = TRUE, males.freq = TRUE,
-  las.x = 1, las.y = 1, lab.PT = paste("Pivotal ", x$type),
-  resultmcmc = NULL, chain = 1, l = 0.05, replicate.CI = 10000,
-  range.CI = 0.95, mar = c(4, 4, 4, 1) + 0.4, temperatures.plot = seq(from
-  = 25, to = 35, by = 0.1), durations.plot = seq(from = 40, to = 70, by =
-  0.1), lab.TRT = paste0("Transitional range of ", x$type, "s l=", x$l * 100,
+\method{plot}{tsd}(x, ..., show.observations = TRUE, show.model = TRUE,
+  males.freq = TRUE, show.PTRT = TRUE, las.x = 1, las.y = 1,
+  lab.PT = paste("Pivotal ", x$type), resultmcmc = NULL, chain = 1,
+  l = 0.05, replicate.CI = 10000, range.CI = 0.95, mar = c(4, 4, 4,
+  1) + 0.4, temperatures.plot = seq(from = 25, to = 35, by = 0.1),
+  durations.plot = seq(from = 40, to = 70, by = 0.1),
+  lab.TRT = paste0("Transitional range of ", x$type, "s l=", x$l * 100,
   "\%"), col.TRT = "gray", col.TRT.CI = rgb(0.8, 0.8, 0.8, 0.5),
   col.PT.CI = rgb(0.8, 0.8, 0.8, 0.5), show.CI = TRUE)
 }
@@ -20,7 +21,11 @@
 
 \item{show.observations}{Should the observations be shown}
 
+\item{show.model}{Should the model be shown}
+
 \item{males.freq}{Should the graph uses males relative frequency [TRUE] or females [FALSE]}
+
+\item{show.PTRT}{Should the P and TRT information be shown}
 
 \item{las.x}{las parameter for x axis}
 

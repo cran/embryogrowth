@@ -6,10 +6,10 @@
 \usage{
 tsd_MHmcmc(result = stop("A result of tsd() fit must be provided"),
   n.iter = 10000, parametersMCMC = NULL, n.chains = 1, n.adapt = 0,
-  thin = 1, trace = FALSE, batchSize = sqrt(n.iter), adaptive = FALSE,
-  adaptive.lag = 500, adaptive.fun = function(x) {     ifelse(x > 0.234,
-  1.3, 0.7) }, intermediate = NULL, filename = "intermediate.Rdata",
-  previous = NULL)
+  thin = 1, trace = FALSE, batchSize = sqrt(n.iter),
+  adaptive = FALSE, adaptive.lag = 500, adaptive.fun = function(x) { 
+     ifelse(x > 0.234, 1.3, 0.7) }, intermediate = NULL,
+  filename = "intermediate.Rdata", previous = NULL)
 }
 \arguments{
 \item{result}{An object obtained after a SearchR fit}
@@ -107,3 +107,4 @@ Other Functions for temperature-dependent sex determination: \code{\link{Databas
 \author{
 Marc Girondot
 }
+\concept{Functions for temperature-dependent sex determination}

@@ -10,8 +10,9 @@ STRN(Initial_STRN = NULL, fixed.parameters = NULL,
   tsd = stop("A result from the function tsd() must be provided"),
   Sexed = NULL, Males = NULL, Females = NULL,
   Temperatures = "TSP.MassWeighted.STRNWeighted.temperature.mean",
-  SE = TRUE, parallel = TRUE, itnmax = 1000, method = c("Nelder-Mead",
-  "BFGS"), control = list(trace = 1, REPORT = 10))
+  SE = TRUE, parallel = TRUE, itnmax = 1000,
+  method = c("Nelder-Mead", "BFGS"), control = list(trace = 1, REPORT =
+  10))
 }
 \arguments{
 \item{Initial_STRN}{Values for initial model of Sexualisation Thermal Reaction Norm}

@@ -4,10 +4,12 @@
 \alias{weightmaxentropy}
 \title{Search for the weights of the nests which maximize the entropy of nest temperatures distribution}
 \usage{
-weightmaxentropy(temperatures = stop("Temperature data must be provided !"),
-  weight = NULL, entropy.method = entropy::entropy.empirical, plot = TRUE,
-  control_optim = list(trace = 0, maxit = 500), control_plot = NULL,
-  control_entropy = NULL, col = c("black", "red"))
+
+  weightmaxentropy(temperatures = stop("Temperature data must be provided !"),
+  weight = NULL, entropy.method = entropy::entropy.empirical,
+  plot = TRUE, control_optim = list(trace = 0, maxit = 500),
+  control_plot = NULL, control_entropy = NULL, col = c("black",
+  "red"))
 }
 \arguments{
 \item{temperatures}{Timeseries of temperatures formated using FormatNests()}

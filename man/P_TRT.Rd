@@ -5,9 +5,9 @@
 \title{Estimate the transitional range of temperatures based on a set of parameters}
 \usage{
 P_TRT(x = NULL, resultmcmc = NULL, chain = 1, equation = NULL,
-  l = 0.05, replicate.CI = NULL, temperatures = NULL, durations = NULL,
-  SD.temperatures = NULL, SD.durations = NULL, probs = c(0.025, 0.5,
-  0.975), warn = FALSE)
+  l = 0.05, replicate.CI = NULL, temperatures = NULL,
+  durations = NULL, SD.temperatures = NULL, SD.durations = NULL,
+  probs = c(0.025, 0.5, 0.975), warn = FALSE)
 }
 \arguments{
 \item{x}{Set of parameters or a result of tsd()}
@@ -86,3 +86,4 @@ Other Functions for temperature-dependent sex determination: \code{\link{Databas
 \author{
 Marc Girondot
 }
+\concept{Functions for temperature-dependent sex determination}

@@ -6,10 +6,11 @@
 \usage{
 MovingIncubation(NestsResult = NULL, resultmcmc = NULL,
   temperatures.df = stop("A data.frame with timeseries of temperatures must be provided"),
-  metabolic.heating = 0, CI = "Hessian", temperature.heterogeneity = 0,
-  average.incubation.duration = 60 * 1440, skip = 1, parameters = NULL,
-  fixed.parameters = NULL, SE = NULL, hessian = NULL, derivate = NULL,
-  test = NULL, M0 = NULL, TSP.borders = c(21, 26),
+  metabolic.heating = 0, CI = "Hessian",
+  temperature.heterogeneity = 0, average.incubation.duration = 60 *
+  1440, skip = 1, parameters = NULL, fixed.parameters = NULL,
+  SE = NULL, hessian = NULL, derivate = NULL, test = NULL,
+  M0 = NULL, TSP.borders = c(21, 26),
   embryo.stages = "Caretta caretta.SCL", SexualisationTRN = NULL,
   SexualisationTRN.CI = "Hessian", replicate.CI = 1, parallel = TRUE,
   progressbar = TRUE)

@@ -7,9 +7,9 @@
 searchR(parameters = stop("Initial set of parameters must be provided"),
   fixed.parameters = NULL,
   temperatures = stop("Formated temperature must be provided !"),
-  derivate = dydt.Gompertz, test = c(Mean = 39.33, SD = 1.92), M0 = 1.7,
-  saveAtMaxiter = FALSE, fileName = "intermediate", weight = NULL,
-  control = list(trace = 1, REPORT = 100, maxit = 500))
+  derivate = dydt.Gompertz, test = c(Mean = 39.33, SD = 1.92),
+  M0 = 1.7, saveAtMaxiter = FALSE, fileName = "intermediate",
+  weight = NULL, control = list(trace = 1, REPORT = 100, maxit = 500))
 }
 \arguments{
 \item{parameters}{A set of parameters used as initial point for searching}

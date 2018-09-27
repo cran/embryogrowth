@@ -4,8 +4,8 @@
 \alias{FormatNests}
 \title{Create a dataset of class Nests to be used with searchR}
 \usage{
-FormatNests(data = stop("A dataset must be provided !"), previous = NULL,
-  simplify = TRUE, weight = NULL)
+FormatNests(data = stop("A dataset must be provided !"),
+  previous = NULL, simplify = TRUE, weight = NULL)
 }
 \arguments{
 \item{data}{Data to be newly formated}

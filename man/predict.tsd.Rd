@@ -67,3 +67,4 @@ Other Functions for temperature-dependent sex determination: \code{\link{Databas
 \author{
 Marc Girondot
 }
+\concept{Functions for temperature-dependent sex determination}

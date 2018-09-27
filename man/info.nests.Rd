@@ -5,15 +5,16 @@
 \title{Calculte statistics about nests}
 \usage{
 info.nests(x = NULL, parameters = NULL, NestsResult = NULL,
-  resultmcmc = NULL, hessian = NULL, CI = NULL, fixed.parameters = NULL,
-  SE = NULL, temperatures = NULL, derivate = NULL, test = NULL,
-  stopattest = FALSE, M0 = NULL, series = "all", TSP.borders = NULL,
-  embryo.stages = NULL, TSP.begin = 0, TSP.end = 0.5, replicate.CI = 1,
-  weight = NULL, out = "likelihood", fill = NULL,
-  SexualisationTRN = NULL, SexualisationTRN.mcmc = NULL,
-  SexualisationTRN.CI = NULL, metric.end.incubation = NA,
-  metabolic.heating = 0, temperature.heterogeneity = 0, progress = FALSE,
-  warnings = TRUE, parallel = TRUE)
+  resultmcmc = NULL, hessian = NULL, CI = NULL,
+  fixed.parameters = NULL, SE = NULL, temperatures = NULL,
+  derivate = NULL, test = NULL, stopattest = FALSE, M0 = NULL,
+  series = "all", TSP.borders = NULL, embryo.stages = NULL,
+  TSP.begin = 0, TSP.end = 0.5, replicate.CI = 1, weight = NULL,
+  out = "likelihood", fill = NULL, SexualisationTRN = NULL,
+  SexualisationTRN.mcmc = NULL, SexualisationTRN.CI = NULL,
+  metric.end.incubation = NA, metabolic.heating = 0,
+  temperature.heterogeneity = 0, progress = FALSE, warnings = TRUE,
+  parallel = TRUE)
 }
 \arguments{
 \item{x}{A set of parameters to model the embryo growth thermal reaction norm or a NestsResult object.}

@@ -63,3 +63,4 @@ Other Hatching success: \code{\link{lnLHS}},
 \author{
 Marc Girondot
 }
+\concept{Hatching success}

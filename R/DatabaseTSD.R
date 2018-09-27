@@ -11,17 +11,14 @@
 #' * Area: Name of the beach or region the eggs come from\cr
 #' * RMU: For marine turtles, name of the RMU for this population; see Wallace, B.P., DiMatteo, A.D., Hurley, B.J., Finkbeiner, E.M., Bolten, A.B., Chaloupka, M.Y., Hutchinson, B.J., Abreu-Grobois, F.A., Amorocho, D., Bjorndal, K.A., Bourjea, J., Bowen, B.W., Duenas, R.B., Casale, P., Choudhury, B.C., Costa, A., Dutton, P.H., Fallabrino, A., Girard, A., Girondot, M., Godfrey, M.H., Hamann, M., Lopez-Mendilaharsu, M., Marcovaldi, M.A., Mortimer, J.A., Musick, J.A., Nel, R., Seminoff, J.A., Troeng, S., Witherington, B., Mast, R.B., 2010. Regional management units for marine turtles: a novel framework for prioritizing conservation and research across multiple scales. Plos One 5, e15465.\cr
 #' * Incubation.temperature: Nominal incubation temperature\cr
-#' * Fluctuation: How much the temperature could fluctuate around nominal temperature\cr
-#' * Precision: What is the precision of the measure of temperature\cr
+#' * Incubation.temperature.Accuracy: What is the accuracy of the measure of temperature\cr
+#' * Incubation.temperature.SD: Experimental SD of incubation temperatures\cr
+#' * Incubation.temperature.Amplitude: How much the temperature could fluctuate around nominal temperature\cr
 #' * Correction.factor: Difference between the incubator temperature and the eggs temperature\cr
 #' * IP.min: Shorter incubation period\cr
 #' * IP.max: Longer incubation period\cr
-#' * IP.amplitude: IP.max-IP.min if available\cr
 #' * IP.mean: Mean incubation periods\cr
-#' * IP.mode: Mode for incubation periods\cr
-#' * IP.SE: Standard error for incubation periods\cr
 #' * IP.SD: Standard deviation for incubation periods\cr
-#' * IP.pm: If incubation period are indicated with a plus-minus term with no more precision\cr
 #' * Total: Total number of eggs incubated\cr
 #' * Hatched: Number of hatchlings\cr
 #' * Undeveloped: Number of embryos showing no devlopment\cr
@@ -37,6 +34,7 @@
 #' @references Binckley C.A., Spotila J.R., Wilson K.S. and Paladino F.V. (1998) Sex determination and sex ratios of Pacific Leatherback Turtles, Dermochelys coriacea. Copeia, 1998(2), 291-300.
 #' @references Crastz F. (1982) Embryological stages of the marine turtle Lepidochelys olivacea (Eschscholtz). Rev. Biol. Trop., 30, 113-120.
 #' @references De Souza, R.R., Vogt, R.C., 1994. Incubation temperature influences sex and hatchling size in the neotropical turtle Podocnemis unifilis. Journal of Herpetology 28, 453-464.
+#' @references Dimond, M.T., 1985. Some effects of temperature on turtle egg incubation, in: Goel, S.C., Srivastava, C.B.L. (Eds.), Recent Advances in Developmental Biology of Animals. Indian Society of Developmental Biologists, Poona, India, pp. 35-39.
 #' @references Emer, S.A., 2007. Temperature-dependent sex determination in Manouria emys emys, the asian forest tortoise, College of Arts and Sciences. Georgia State University, Atlanta, GE, p. 60.
 #' @references Georges A., Limpus C.J. and Stoutjesdijk R. (1994) Hatchling sex in the marine turtle Caretta caretta is determined by proportion of development at a temperature, not daily duration of exposure. Journal of Experimental Zoology, 270(5), 432-444.
 #' @references Girondot M. 1999 Statistical description of temperature-dependent sex determination using maximum likelihood. Evolutionary Ecology Research, 1(3), 479-486.
@@ -45,6 +43,7 @@
 #' @references Hewavisenthi, S. (1999) Influence of incubation environment on the development of the flatback turtle (Natator depressus). Ph.D. Thesis, Central Queensland University.
 #' @references Hewavisenthi, S. & Parmenter, C.J. (2000) Hydric environment and sex determination in the flatback turtle (Natator depressus Garman) (Chelonia : Cheloniidae). Australian Journal of Zoology, 48, 653-659.
 #' @references Hulin, V., Delmas, V., Girondot, M., Godfrey, M. H. and Guillon, J.-M. 2009. Temperature-dependent sex determination and global change: are some species at greater risk? Oecologia, 160, 493-506.
+#' @references LeBlanc, A.M., Wibbels, T., Shaver, D., Walker, J.S., 2012. Temperature-dependent sex determination in the Kemp’s ridley sea turtle: effects of incubation temperatures on sex ratios. Endangered Species Research 19, 123-128.
 #' @references Limpus C.J., Reed P.C. and Miller J.D. (1985) Temperature dependent sex determination in Queensland sea turtles: Intraspecific variation in Caretta caretta. In Grigg G., Shine R. and Ehmann H. (eds) Biology of Australian frogs and reptiles. New South Wales, Australia: Royal Zoological Society, pp 343-351.
 #' @references Limpus C.J., Reed P. and Miller J.D. (1983) Islands and turtles: the influence of choice of nesting beach on sex ratio. In Baker J.J., Carter R.M., Saurmarco P.W. and Stark K.P. (eds.) Proceedings of the Inaugural Great Barrier Reef Conference, 29 August-2 September, 1983. James Cook University Press of North Queensland, pp. 397-402.
 #' @references López Correa, J.Y., 2010. Diferenciacion gonadica en crias de Lepidochelys olivacea (Eschscholtz, 1829) (Testudinata: Cheloniidae), Instituto Politicnico Nacional, Centro Interdisciplinaria de Ciencias Marinas, La Paz, BCS, p. 108.
@@ -55,12 +54,17 @@
 #' @references Merchant-Larios, H., Villalpando-Fierro, I. & Centeno-Urruiza, B. 1989. Gonadal morphogenesis under controlled temperature in the sea turtle Lepidochelys olivacea. Herpetol. Monographs, 3, 43-61.
 #' @references Merchant-Larios, H., Ruiz-Ramirez, S., Moreno-Mendoza, N. & Marmolejo-Valencia, A. 1997. Correlation among thermosensitive period, estradiol response, and gonad differentiation in the sea turtle Lepidochelys olivacea. General and Comparative Endocrinology, 107, 373-385.
 #' @references Michel-Morfinu J.E., Gomez Munoz V.M. and Navarro Rodriguez C. (2001) Morphometric model for sex assessment in hatchling olive ridley sea turtles. Chelonian Conservation and Biology, 40(1), 53-58.
+#' @references Mohanty-Hejmadi, P., Behra, M., Dimond, M.T., 1985. Temperature dependent sex differentiation in the olive ridley Lepidochelys olivacea and its implications for conservation, Symposium on Endangered Marine Animals and Marine Parks. Marine Biological Association of India, Cochin., pp. 1-5.
 #' @references Mrosovsky N., Kamel S., Rees A.F. and Margaritoulis D. (2002) Pivotal temperature for loggerhead turtles (Caretta caretta) from Kyparissia Bay, Greece. Canadian Journal of Zoology-Revue Canadienne De Zoologie, 80(12), 2118-2124.
 #' @references Mrosovsky N., Dutton P.H. and Whitmore C.P. (1984) Sex ratios of two species of sea turtle nesting in Suriname. Can. J. Zool., 62, 2227-2239.
 #' @references Mrosovsky N., Bass A., Corliss L.A., Richardson J.I. and Richardson T.H. (1992) Pivotal and beach temperature for hawksbill turtles nesting in Antigua. Can. J. Zool., 70, 1920-1925.
 #' @references Rimblot F., Fretey J., Mrosovsky N., Lescure J. and Pieau C. (1985) Sexual differentiation as a function of the incubation temperature of eggs in the sea-turtle Dermochelys coriacea (Vandelli, 1761). Amphibia-Reptilia, 85(6), 83-92.
 #' @references Rimblot-Baly F., Lescure J., Fretey J. and Pieau C. (1986-1987) Sensibilité à la température de la differenciation sexuelle chez la tortue Luth, Dermochelys coriacea (Vandelli, 1761); application des données de l'incubation artificielle à l'étude de la sex-ratio dans la nature. Annales des Sciences Naturelles, Zoologie, 8, 277-290.
 #' @references Ruiz Garcia N.A. (2014) Efectos de la temperatura sobre el desarrollo embrionario y el desempeño de crías de la tortuga golfina, Lepidochelys olivacea. Tesis Nivel Maestria.
+#' @references Shaver, D.J., 2007. Padre Island National Seashore, Texas sea turtle nesting and stranding 2006 report. U.S. Department of the Interior, National Park Service Publication, p. 30.
+#' @references Shaver, D.J., 2008. Padre Island National Seashore, Texas sea turtle nesting and stranding 2007 report. U.S. Department of the Interior, National Park Service Publication, p. 33.
+#' @references Shaver, D.J., 2009. Padre Island National Seashore, Texas sea turtle nesting and stranding 2008 report. U.S. Department of the Interior, National Park Service Publication, p. 38.
+#' @references Shaver, D.J., Owens, D.W., Chaney, A.H., Caillouet, C.W., Burchfield Jr., P., Marquez, R., 1988. Styrofoam box and beach temperatures in relation to incubation and sex ratios of kemp's ridley sea turtles, in: Schroeder, B.A. (Ed.), Proceedings of the Eighth Annual Workshop on Sea Turtle Conservation and Biology. NOAA Technical Memorandum NMFS-SEFC-214, Fort Fisher, North Carolina, USA, pp. 103-108.
 #' @references Valenzuela, N., 2001. Constant, shift, and natural temperature effects on sex determination in Podocnemis expansa. Ecology 82, 3010-3024.
 #' @references Tokunaga, S., Iwakiri, Y., Nakajima, Y., (1999). Temperature-dependent sex determination of a sea turtle, Caretta caretta, from Miyazaki,Japan. Bull. Kitakyushu Mus. Nat. Hist. 18, 147-156.
 #' @references Wibbels T., Rostal D.C. and Byles R. (1998) High pivotal temperature in the sex determination of the olive ridley sea turtle, Lepidochelys olivacea, from Playa Nancite, Costa Rica. Copeia, 1998(4), 1086-1088.

@@ -11,6 +11,10 @@ shinyUI(fluidPage(
   # Application title
   
   wellPanel(
+    wellPanel(
+      HTML("<small><i><font color='#006699'>The Virtual Data initiative, run by LABEX P2IO and supported by Université Paris-Sud, is thanked for providing computing resources on its cloud infrastructure.</font></i></small>")
+    ), 
+    
     h1("Temperature-dependent sex determination", align = "center")
     , h2("at constant temperature", align = "center")
     , p(em("Temperature-dependent sex determination (TSD) is a type of environmental 

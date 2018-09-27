@@ -38,8 +38,9 @@ calibrate.datalogger(control.temperatures=20:30,
 }
 }
 \seealso{
-Other Data loggers utilities: \code{\link{precision.datalogger}}
+Other Data loggers utilities: \code{\link{uncertainty.datalogger}}
 }
 \author{
 Marc Girondot
 }
+\concept{Data loggers utilities}

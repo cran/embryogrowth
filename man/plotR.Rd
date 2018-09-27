@@ -5,18 +5,19 @@
 \title{Show the fitted growth rate dependent on temperature and its density}
 \usage{
 plotR(result = NULL, resultmcmc = NULL, parameters = NULL,
-  fixed.parameters = NULL, temperatures = NULL, curves = "ML quantiles",
-  set.par = 1, ylim = c(0, 5), xlim = c(20, 35), hessian = NULL,
-  replicate.CI = 1000, cex.lab = par("cex"), cex.axis = par("cex"),
-  scaleY = "auto", lty = 1, ltyCI = 3, lwd = 1, lwdCI = 1,
-  col = "black", col.polygon = "grey", polygon = FALSE, probs = 0.95,
-  colramp = colorRampPalette(c("white", rgb(red = 0.5, green = 0.5, blue =
-  0.5))), bandwidth = c(0.1, 0.01), pch = "", main = "",
+  fixed.parameters = NULL, temperatures = NULL,
+  curves = "ML quantiles", set.par = 1, ylim = c(0, 5),
+  xlim = c(20, 35), hessian = NULL, replicate.CI = 1000,
+  cex.lab = par("cex"), cex.axis = par("cex"), scaleY = "auto",
+  lty = 1, ltyCI = 3, lwd = 1, lwdCI = 1, col = "black",
+  col.polygon = "grey", polygon = FALSE, probs = 0.95,
+  colramp = colorRampPalette(c("white", rgb(red = 0.5, green = 0.5, blue
+  = 0.5))), bandwidth = c(0.1, 0.01), pch = "", main = "",
   xlab = expression("Temperature in " * degree * "C"), ylab = NULL,
   bty = "n", las = 1, by.temperature = 0.1, show.density = FALSE,
   new = TRUE, show.hist = FALSE, ylimH = NULL, atH = NULL,
-  ylabH = "Temperature density", breaks = "Sturges", log.hist = FALSE,
-  mar = NULL)
+  ylabH = "Temperature density", breaks = "Sturges",
+  log.hist = FALSE, mar = NULL)
 }
 \arguments{
 \item{result}{A result object or a list of result objects}

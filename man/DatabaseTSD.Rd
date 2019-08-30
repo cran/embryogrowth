@@ -27,7 +27,8 @@ The columns are:\cr
 * IP.SD: Standard deviation for incubation periods\cr
 * Total: Total number of eggs incubated\cr
 * Hatched: Number of hatchlings\cr
-* Undeveloped: Number of embryos showing no devlopment\cr
+* NotHatched: Number of embryos with development visible but dead during incubation\cr
+* Undeveloped: Number of embryos showing no development\cr
 * Intersexes: Number of individuals intersexes or ambiguous for sex phenotype\cr
 * Males: Number of individuals indentified as males\cr
 * Females: Number of individuals indentified as females\cr
@@ -57,6 +58,8 @@ tot_Lo <- with(totalIncubation_Lo, tsd(males=Males, females=Females,
 \references{
 Binckley C.A., Spotila J.R., Wilson K.S. and Paladino F.V. (1998) Sex determination and sex ratios of Pacific Leatherback Turtles, Dermochelys coriacea. Copeia, 1998(2), 291-300.
 
+Castheloge, V.D., de D. dos Santos, M.R., de Castilhos, J.C., de J. Filho, P.R., de C. Gomes, L., Clemente-Carvalho, R.B.G., Ferreira, P.D., 2018. Pivotal temperature and hatcHling sex ratio of olive ridley sea turtles Lepidochelys olivacea from the South Atlantic coast of Brazil. Herpetological Conservation and Biology 13, 488-496.
+
 Crastz F. (1982) Embryological stages of the marine turtle Lepidochelys olivacea (Eschscholtz). Rev. Biol. Trop., 30, 113-120.
 
 De Souza, R.R., Vogt, R.C., 1994. Incubation temperature influences sex and hatchling size in the neotropical turtle Podocnemis unifilis. Journal of Herpetology 28, 453-464.
@@ -69,7 +72,11 @@ Georges A., Limpus C.J. and Stoutjesdijk R. (1994) Hatchling sex in the marine t
 
 Girondot M. 1999 Statistical description of temperature-dependent sex determination using maximum likelihood. Evolutionary Ecology Research, 1(3), 479-486.
 
+Gu, H.-X., Xia, Z.-R., Li, P.-P., Duan, J.-X., Ye, M.-B., Zhang, F.-Y., Chen, H.-L., Lin, R.-J., 2010. Sex identification and pivotal temperature for sex determination in hatchling green sea turtle. Chinese J. Zool. 45, 81-88.
+
 Gutzke, W. H. N., & Paukstis, G. L. (1983). Influence of the hydric environment on sexual differentiation in turtles. J. Exp. Zool., 226, 467-469. [Chrysemys picta]
+
+Harry, J.L., Limpus, C.J., 1989. Low temperature protection of marine turtle eggs during long-distance relocation. Aust. Wildl. Res. 16.
 
 Hernández-Montoya V, Páez VP, Ceballos CP (2017) Effects of temperature on sex determination and embryonic development in the red-footed tortoise, Chelonoidis carbonarius. Chelonian Conservation and Biology 16:164-171
 
@@ -135,9 +142,10 @@ Yntema C.L. and Mrosovsky N. (1982) Critical periods and pivotal temperatures fo
 }
 \seealso{
 Other Functions for temperature-dependent sex determination: \code{\link{P_TRT}},
-  \code{\link{TSP.list}}, \code{\link{predict.tsd}},
-  \code{\link{stages}}, \code{\link{tsd_MHmcmc_p}},
-  \code{\link{tsd_MHmcmc}}, \code{\link{tsd}}
+  \code{\link{TSP.list}}, \code{\link{plot.tsd}},
+  \code{\link{predict.tsd}}, \code{\link{stages}},
+  \code{\link{tsd_MHmcmc_p}}, \code{\link{tsd_MHmcmc}},
+  \code{\link{tsd}}
 }
 \author{
 Marc Girondot \email{marc.girondot@u-psud.fr}

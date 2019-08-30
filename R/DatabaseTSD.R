@@ -21,7 +21,8 @@
 #' * IP.SD: Standard deviation for incubation periods\cr
 #' * Total: Total number of eggs incubated\cr
 #' * Hatched: Number of hatchlings\cr
-#' * Undeveloped: Number of embryos showing no devlopment\cr
+#' * NotHatched: Number of embryos with development visible but dead during incubation\cr
+#' * Undeveloped: Number of embryos showing no development\cr
 #' * Intersexes: Number of individuals intersexes or ambiguous for sex phenotype\cr
 #' * Males: Number of individuals indentified as males\cr
 #' * Females: Number of individuals indentified as females\cr
@@ -32,13 +33,16 @@
 #' * Version: Date of the version of this database\cr
 #' Initial version of this database has been built by Maria Sousa Martins.
 #' @references Binckley C.A., Spotila J.R., Wilson K.S. and Paladino F.V. (1998) Sex determination and sex ratios of Pacific Leatherback Turtles, Dermochelys coriacea. Copeia, 1998(2), 291-300.
+#' @references Castheloge, V.D., de D. dos Santos, M.R., de Castilhos, J.C., de J. Filho, P.R., de C. Gomes, L., Clemente-Carvalho, R.B.G., Ferreira, P.D., 2018. Pivotal temperature and hatcHling sex ratio of olive ridley sea turtles Lepidochelys olivacea from the South Atlantic coast of Brazil. Herpetological Conservation and Biology 13, 488-496.
 #' @references Crastz F. (1982) Embryological stages of the marine turtle Lepidochelys olivacea (Eschscholtz). Rev. Biol. Trop., 30, 113-120.
 #' @references De Souza, R.R., Vogt, R.C., 1994. Incubation temperature influences sex and hatchling size in the neotropical turtle Podocnemis unifilis. Journal of Herpetology 28, 453-464.
 #' @references Dimond, M.T., 1985. Some effects of temperature on turtle egg incubation, in: Goel, S.C., Srivastava, C.B.L. (Eds.), Recent Advances in Developmental Biology of Animals. Indian Society of Developmental Biologists, Poona, India, pp. 35-39.
 #' @references Emer, S.A., 2007. Temperature-dependent sex determination in Manouria emys emys, the asian forest tortoise, College of Arts and Sciences. Georgia State University, Atlanta, GE, p. 60.
 #' @references Georges A., Limpus C.J. and Stoutjesdijk R. (1994) Hatchling sex in the marine turtle Caretta caretta is determined by proportion of development at a temperature, not daily duration of exposure. Journal of Experimental Zoology, 270(5), 432-444.
 #' @references Girondot M. 1999 Statistical description of temperature-dependent sex determination using maximum likelihood. Evolutionary Ecology Research, 1(3), 479-486.
+#' @references Gu, H.-X., Xia, Z.-R., Li, P.-P., Duan, J.-X., Ye, M.-B., Zhang, F.-Y., Chen, H.-L., Lin, R.-J., 2010. Sex identification and pivotal temperature for sex determination in hatchling green sea turtle. Chinese J. Zool. 45, 81-88.
 #' @references Gutzke, W. H. N., & Paukstis, G. L. (1983). Influence of the hydric environment on sexual differentiation in turtles. J. Exp. Zool., 226, 467-469. [Chrysemys picta]
+#' @references Harry, J.L., Limpus, C.J., 1989. Low temperature protection of marine turtle eggs during long-distance relocation. Aust. Wildl. Res. 16.
 #' @references Hernández-Montoya V, Páez VP, Ceballos CP (2017) Effects of temperature on sex determination and embryonic development in the red-footed tortoise, Chelonoidis carbonarius. Chelonian Conservation and Biology 16:164-171 
 #' @references Hewavisenthi, S. (1999) Influence of incubation environment on the development of the flatback turtle (Natator depressus). Ph.D. Thesis, Central Queensland University.
 #' @references Hewavisenthi, S. & Parmenter, C.J. (2000) Hydric environment and sex determination in the flatback turtle (Natator depressus Garman) (Chelonia : Cheloniidae). Australian Journal of Zoology, 48, 653-659.

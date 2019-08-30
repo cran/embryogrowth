@@ -25,18 +25,46 @@ tsd_MHmcmc_p generates set of parameters to be used with tsd_MHmcmc()
 \examples{
 \dontrun{
 library(embryogrowth)
-eo <- subset(Database_TSD, Species=="Emys orbicularis", c("Males", "Females", 
+eo <- subset(DatabaseTSD, Species=="Emys orbicularis", c("Males", "Females", 
                                        "Incubation.temperature"))
 eo_logistic <- with(eo, tsd(males=Males, females=Females, 
                                  temperatures=Incubation.temperature))
 pMCMC <- tsd_MHmcmc_p(eo_logistic, accept=TRUE)
+# Take care, it can be very long
+result_mcmc_tsd <- tsd_MHmcmc(result=eo_logistic, 
+		parametersMCMC=pMCMC, n.iter=10000, n.chains = 1,  
+		n.adapt = 0, thin=1, trace=FALSE, adaptive=TRUE)
+# summary() permits to get rapidly the standard errors for parameters
+summary(result_mcmc_tsd)
+plot(result_mcmc_tsd, parameters="S", scale.prior=TRUE, xlim=c(-3, 3), las=1)
+plot(result_mcmc_tsd, parameters="P", scale.prior=TRUE, xlim=c(25, 35), las=1)
+
+eo_flexit <- with(eo, tsd(males=Males, females=Females,
+                                 parameters.initial=c(eo_logistic$par["P"], 
+                                 1/(4*eo_logistic$par["S"]), 
+                                 K1=1, K2=1), 
+                                 temperatures=Incubation.temperature,
+                                 equation="flexit", replicate.CI=NULL))
+pMCMC <- tsd_MHmcmc_p(eo_flexit, accept=TRUE)
+result_mcmc_tsd <- tsd_MHmcmc(result=eo_flexit, 
+		parametersMCMC=pMCMC, n.iter=10000, n.chains = 1,  
+		n.adapt = 0, thin=1, trace=FALSE, adaptive=TRUE)
+# summary() permits to get rapidly the standard errors for parameters
+summary(result_mcmc_tsd)
+plot(result_mcmc_tsd, parameters="S", scale.prior=TRUE, xlim=c(-3, 3), las=1)
+plot(result_mcmc_tsd, parameters="P", scale.prior=TRUE, xlim=c(25, 35), las=1)
+plot(result_mcmc_tsd, parameters="K1", scale.prior=TRUE, xlim=c(-10, 10), las=1)
+plot(result_mcmc_tsd, parameters="K2", scale.prior=TRUE, xlim=c(-10, 10), las=1)
+
+plot(eo_flexit, resultmcmc = result_mcmc_tsd)
 }
 }
 \seealso{
 Other Functions for temperature-dependent sex determination: \code{\link{DatabaseTSD}},
   \code{\link{P_TRT}}, \code{\link{TSP.list}},
-  \code{\link{predict.tsd}}, \code{\link{stages}},
-  \code{\link{tsd_MHmcmc}}, \code{\link{tsd}}
+  \code{\link{plot.tsd}}, \code{\link{predict.tsd}},
+  \code{\link{stages}}, \code{\link{tsd_MHmcmc}},
+  \code{\link{tsd}}
 }
 \author{
 Marc Girondot

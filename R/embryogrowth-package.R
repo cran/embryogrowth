@@ -3,8 +3,8 @@
 #' \tabular{ll}{
 #'  Package: \tab embryogrowth\cr
 #'  Type: \tab Package\cr
-#'  Version: \tab 7.4.1 build 739\cr
-#'  Date: \tab 2018-09-26\cr
+#'  Version: \tab 7.6 build 994\cr
+#'  Date: \tab 2019-08-30\cr
 #'  License: \tab GPL (>= 2)\cr
 #'  LazyLoad: \tab yes\cr
 #'  }
@@ -14,8 +14,8 @@
 #' @name embryogrowth-package
 #' @description Tools to analyze the embryo growth and the sexualisation thermal reaction norms.\cr
 #' The lastest version of this package can always been installed using:\cr
-#' install.packages("http://www.ese.u-psud.fr/epc/conservation/CRAN/HelpersMG.tar.gz", repos=NULL, type="source")\cr
-#' install.packages("http://www.ese.u-psud.fr/epc/conservation/CRAN/embryogrowth.tar.gz", repos=NULL, type="source")
+#' install.packages("http:///max2.ese.u-psud.fr/epc/conservation/CRAN/HelpersMG.tar.gz", repos=NULL, type="source")\cr
+#' install.packages("http:///max2.ese.u-psud.fr/epc/conservation/CRAN/embryogrowth.tar.gz", repos=NULL, type="source")
 #' @references Girondot, M. & Kaska, Y. 2014. A model to predict the thermal 
 #'          reaction norm for the embryo growth rate from field data. Journal of
 #'          Thermal Biology. 45, 96-102.

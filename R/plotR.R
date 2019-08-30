@@ -391,15 +391,15 @@ plotR <-
         polygon(x=vx, y=vy, col=col.polygon, border = NA)
       }
       
-    dxy <- data.frame(x=rxxw["temperatures", ], y=ifelse(rxxw["X50", ]>ylim[1] & rxxw["X50", ]<ylim[2], rxxw["X50", ], NA))
+    dxy <- data.frame(x=rxxw["temperatures", ], y=ifelse(rxxw["X50", ]>=ylim[1] & rxxw["X50", ]<=ylim[2], rxxw["X50", ], NA))
     dxy <- na.omit(dxy)
     lines(x = dxy$x, y=dxy$y, lty=lty, lwd=lwd, col=col)
     
-    dxy <- data.frame(x=rxxw["temperatures", ], y=ifelse(rxxw["X2.5", ]>ylim[1] & rxxw["X2.5", ]<ylim[2], rxxw["X2.5", ], NA))
+    dxy <- data.frame(x=rxxw["temperatures", ], y=ifelse(rxxw["X2.5", ]>=ylim[1] & rxxw["X2.5", ]<=ylim[2], rxxw["X2.5", ], NA))
     dxy <- na.omit(dxy)
     lines(x = dxy$x, y=dxy$y, lty=ltyCI, lwd=lwdCI, col=col)
     
-    dxy <- data.frame(x=rxxw["temperatures", ], y=ifelse(rxxw["X97.5", ]>ylim[1] & rxxw["X97.5", ]<ylim[2], rxxw["X97.5", ], NA))
+    dxy <- data.frame(x=rxxw["temperatures", ], y=ifelse(rxxw["X97.5", ]>=ylim[1] & rxxw["X97.5", ]<=ylim[2], rxxw["X97.5", ], NA))
     dxy <- na.omit(dxy)
     lines(x = dxy$x, y=dxy$y, lty=ltyCI, lwd=lwdCI, col=col)
     }
@@ -412,20 +412,20 @@ plotR <-
         polygon(x=vx, y=vy, col=col.polygon, border = NA)
       }
       
-      dxy <- data.frame(x=rxxw["temperatures", ], y=ifelse(rxxw["Mean", ]>ylim[1] & rxxw["Mean", ]<ylim[2], rxxw["Mean", ], NA))
+      dxy <- data.frame(x=rxxw["temperatures", ], y=ifelse(rxxw["Mean", ]>=ylim[1] & rxxw["Mean", ]<=ylim[2], rxxw["Mean", ], NA))
       dxy <- na.omit(dxy)
       lines(x = dxy$x, y=dxy$y, lty=lty, lwd=lwd, col=col)
       
-      dxy <- data.frame(x=rxxw["temperatures", ], y=ifelse((rxxw["Mean", ]-1.96*rxxw["sd", ])>ylim[1] & (rxxw["Mean", ]-1.96*rxxw["sd", ])<ylim[2], rxxw["Mean", ]-1.96*rxxw["sd", ], NA))
+      dxy <- data.frame(x=rxxw["temperatures", ], y=ifelse((rxxw["Mean", ]-1.96*rxxw["sd", ])>=ylim[1] & (rxxw["Mean", ]-1.96*rxxw["sd", ])<=ylim[2], rxxw["Mean", ]-1.96*rxxw["sd", ], NA))
       dxy <- na.omit(dxy)
       lines(x = dxy$x, y=dxy$y, lty=ltyCI, lwd=lwdCI, col=col)
       
-      dxy <- data.frame(x=rxxw["temperatures", ], y=ifelse((rxxw["Mean", ]+1.96*rxxw["sd", ])>ylim[1] & (rxxw["Mean", ]+1.96*rxxw["sd", ])<ylim[2], rxxw["Mean", ]+1.96*rxxw["sd", ], NA))
+      dxy <- data.frame(x=rxxw["temperatures", ], y=ifelse((rxxw["Mean", ]+1.96*rxxw["sd", ])>=ylim[1] & (rxxw["Mean", ]+1.96*rxxw["sd", ])<=ylim[2], rxxw["Mean", ]+1.96*rxxw["sd", ], NA))
       dxy <- na.omit(dxy)
       lines(x = dxy$x, y=dxy$y, lty=ltyCI, lwd=lwdCI, col=col)
     }
     if (any(curves == "ml") & !is.null(parameters) & any(!is.na(rxxw_ML[c("ML"), ]))) {
-      dxy <- data.frame(x=rxxw_ML["temperatures", ], y=ifelse(rxxw_ML["ML", ]>ylim[1] & rxxw_ML["ML", ]<ylim[2], rxxw_ML["ML", ], NA))
+      dxy <- data.frame(x=rxxw_ML["temperatures", ], y=ifelse(rxxw_ML["ML", ]>=ylim[1] & rxxw_ML["ML", ]<=ylim[2], rxxw_ML["ML", ], NA))
       dxy <- na.omit(dxy)
       lines(x = dxy$x, y=dxy$y, lty=lty, lwd=lwd, col=col)
     }
@@ -438,15 +438,15 @@ plotR <-
         polygon(x=vx, y=vy, col=col.polygon, border = NA)
       }
       
-      dxy <- data.frame(x=rxxw_ML["temperatures", ], y=ifelse(rxxw_ML["X50", ]>ylim[1] & rxxw_ML["X50", ]<ylim[2], rxxw_ML["X50", ], NA))
+      dxy <- data.frame(x=rxxw_ML["temperatures", ], y=ifelse(rxxw_ML["X50", ]>=ylim[1] & rxxw_ML["X50", ]<=ylim[2], rxxw_ML["X50", ], NA))
       dxy <- na.omit(dxy)
       lines(x = dxy$x, y=dxy$y, lty=lty, lwd=lwd, col=col)
       
-      dxy <- data.frame(x=rxxw_ML["temperatures", ], y=ifelse(rxxw_ML["X2.5", ]>ylim[1] & rxxw_ML["X2.5", ]<ylim[2], rxxw_ML["X2.5", ], NA))
+      dxy <- data.frame(x=rxxw_ML["temperatures", ], y=ifelse(rxxw_ML["X2.5", ]>=ylim[1] & rxxw_ML["X2.5", ]<=ylim[2], rxxw_ML["X2.5", ], NA))
       dxy <- na.omit(dxy)
       lines(x = dxy$x, y=dxy$y, lty=ltyCI, lwd=lwdCI, col=col)
       
-      dxy <- data.frame(x=rxxw_ML["temperatures", ], y=ifelse(rxxw_ML["X97.5", ]>ylim[1] & rxxw_ML["X97.5", ]<ylim[2], rxxw_ML["X97.5", ], NA))
+      dxy <- data.frame(x=rxxw_ML["temperatures", ], y=ifelse(rxxw_ML["X97.5", ]>=ylim[1] & rxxw_ML["X97.5", ]<=ylim[2], rxxw_ML["X97.5", ], NA))
       dxy <- na.omit(dxy)
       lines(x = dxy$x, y=dxy$y, lty=ltyCI, lwd=lwdCI, col=col)
     }

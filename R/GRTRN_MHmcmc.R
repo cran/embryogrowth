@@ -8,7 +8,8 @@
 #' @param n.chains Number of replicates
 #' @param n.adapt Number of iterations before to store outputs
 #' @param thin Number of iterations between each stored output
-#' @param trace True or False, shows progress
+#' @param trace TRUE or FALSE or period, shows progress
+#' @param traceML TRUE or FALSE to show ML
 #' @param parallel If true, try to use several cores using parallel computing
 #' @param filename If intermediate is not NULL, save intermediate result in this file
 #' @param intermediate Period for saving intermediate result, NULL for no save
@@ -90,12 +91,12 @@
 #' @export
 
 GRTRN_MHmcmc <- function(result=NULL, n.iter=10000, 
-parametersMCMC=NULL, n.chains = 1, n.adapt = 0, 
-thin=1, trace=NULL, parallel=TRUE, 
-adaptive=FALSE, adaptive.lag=500, adaptive.fun=function(x) {ifelse(x>0.234, 1.3, 0.7)},
-intermediate=NULL, filename="intermediate.Rdata", previous=NULL)
+                         parametersMCMC=NULL, n.chains = 1, n.adapt = 0, 
+                         thin=1, trace=NULL, traceML=FALSE, parallel=TRUE, 
+                         adaptive=FALSE, adaptive.lag=500, adaptive.fun=function(x) {ifelse(x>0.234, 1.3, 0.7)},
+                         intermediate=NULL, filename="intermediate.Rdata", previous=NULL)
 {
-
+  
   # result=NULL; n.iter=10000; parametersMCMC=NULL; n.chains = 1; n.adapt = 0; thin=1; trace=FALSE; batchSize=sqrt(n.iter); parallel=TRUE; intermediate=NULL; filename="intermediate.Rdata"; previous=NULL
   # previous <- "/Users/marc/Dropbox/DropBoxPerso/_Package_HelpersMG/previous_result_mcmc_AtlMed_simplify_2.RData"
   # result=resultNest_4p; parametersMCMC=pMCMC; n.iter=100; n.chains = 1; n.adapt = 0; thin=1; trace=TRUE; intermediate = 10
@@ -127,6 +128,7 @@ intermediate=NULL, filename="intermediate.Rdata", previous=NULL)
     # weight=result$weight)
     out <- MHalgoGen(n.iter=n.iter, parameters=parametersMCMC, 
                      n.chains = n.chains, n.adapt = n.adapt, thin=thin, trace=trace, 
+                     traceML=traceML, 
                      intermediate=intermediate, filename=filename, previous=previous, 
                      parallel=parallel, 
                      adaptive=adaptive, adaptive.lag=adaptive.lag, adaptive.fun=adaptive.fun,
@@ -138,27 +140,27 @@ intermediate=NULL, filename="intermediate.Rdata", previous=NULL)
                      likelihood=getFromNamespace("info.nests", ns = "embryogrowth"))
     
   }
-
-class(out) <- "mcmcComposite"
-
-fin <- try(summary(out), silent=TRUE)
-
-if (class(fin)=="try-error") {
-  lp <- rep(NA, nrow(out$parametersMCMC$parameters))
-  names(lp) <- rownames(out$parametersMCMC$parameters)
-  out <- c(out, TimeSeriesSE=list(lp))
-  out <- c(out, SD=list(lp))
-} else {
-  if (is.null(nrow(fin$statistics))) {
-    out <- c(out, TimeSeriesSE=list(fin$statistics[4]))
-    out <- c(out, SD=list(fin$statistics["SD"]))
+  
+  class(out) <- "mcmcComposite"
+  
+  fin <- try(summary(out), silent=TRUE)
+  
+  if (class(fin)=="try-error") {
+    lp <- rep(NA, nrow(out$parametersMCMC$parameters))
+    names(lp) <- rownames(out$parametersMCMC$parameters)
+    out <- c(out, TimeSeriesSE=list(lp))
+    out <- c(out, SD=list(lp))
   } else {
-    out <- c(out, TimeSeriesSE=list(fin$statistics[,4]))
-    out <- c(out, SD=list(fin$statistics[,"SD"]))
+    if (is.null(nrow(fin$statistics))) {
+      out <- c(out, TimeSeriesSE=list(fin$statistics[4]))
+      out <- c(out, SD=list(fin$statistics["SD"]))
+    } else {
+      out <- c(out, TimeSeriesSE=list(fin$statistics[,4]))
+      out <- c(out, SD=list(fin$statistics[,"SD"]))
+    }
   }
-}
-
-class(out) <- "mcmcComposite"
-
-return(out)
+  
+  class(out) <- "mcmcComposite"
+  
+  return(out)
 }

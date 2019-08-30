@@ -6,13 +6,13 @@
 \usage{
 STRN(Initial_STRN = NULL, fixed.parameters = NULL,
   EmbryoGrowthTRN = stop("Embryo Growth Thermal Reaction Norm must be provided"),
-  embryo.stages = NULL,
-  tsd = stop("A result from the function tsd() must be provided"),
-  Sexed = NULL, Males = NULL, Females = NULL,
+  TSP.borders = NULL, embryo.stages = "Generic.ProportionDevelopment",
+  tsd = NULL, equation = "logistic", Sexed = NULL, Males = NULL,
+  Females = NULL,
   Temperatures = "TSP.MassWeighted.STRNWeighted.temperature.mean",
   SE = TRUE, parallel = TRUE, itnmax = 1000,
   method = c("Nelder-Mead", "BFGS"), control = list(trace = 1, REPORT =
-  10))
+  10), zero = 1e-09)
 }
 \arguments{
 \item{Initial_STRN}{Values for initial model of Sexualisation Thermal Reaction Norm}
@@ -21,9 +21,13 @@ STRN(Initial_STRN = NULL, fixed.parameters = NULL,
 
 \item{EmbryoGrowthTRN}{The Embryo Growth Thermal Reaction Norm obtained with searchR()}
 
+\item{TSP.borders}{The limits of TSP in stages. See embryo.stages parameter.}
+
 \item{embryo.stages}{The embryo stages. At least TSP.borders stages must be provided to estimate TSP borders. See note.}
 
 \item{tsd}{The model used to predict sex ratio, obtained from tsd()}
+
+\item{equation}{If tsd parameter is not provided, equation and parameters for tsd model must be provided.}
 
 \item{Sexed}{The number of sexed embryos with names identifying timeseries}
 
@@ -42,6 +46,8 @@ STRN(Initial_STRN = NULL, fixed.parameters = NULL,
 \item{method}{Methods to be used with optimx}
 
 \item{control}{List for control parameters for optimx}
+
+\item{zero}{The value to replace a null sex ratio}
 }
 \value{
 The list with object return by optim()
@@ -86,10 +92,10 @@ males <- c(7, 0, 0, 0, 0, 5, 6, 3, 5, 3, 2, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0)
 names(males) <- rev(rev(names(resultNest_4p_SSM4p$data))[-(1:2)])
 sexed <- rep(10, length(males))
 names(sexed) <- rev(rev(names(resultNest_4p_SSM4p$data))[-(1:2)])
-Initial_STRN <- resultNest_4p_SSM4p$par[c("DHA", "DHH", "T12H")]
+Initial_STRN <- resultNest_4p_SSM4p$par[c("DHA_STRN", "DHH_STRN", "T12H_STRN")]
 Initial_STRN <- structure(c(582.567096666926, 2194.0806711639, 3475.28414940385), 
-                          .Names = c("DHA", "DHH", "T12H"))
-fp <- c(Rho25=100)
+                          .Names = c("DHA_STRN", "DHH_STRN", "T12H_STRN"))
+fp <- c(Rho25_STRN=100)
 fitSTRN <- STRN(Initial_STRN=Initial_STRN, 
                 EmbryoGrowthTRN=resultNest_4p_SSM4p, tsd=Med_Cc, 
                 embryo.stages="Caretta caretta.SCL", 
@@ -128,10 +134,10 @@ plot(x=xx,
          
 # Using only the sexualisation thermal reaction norm within TSP to calculate CTE
 
-Initial_STRN <- resultNest_4p_SSM4p$par[c("DHA", "DHH", "T12H")]
+Initial_STRN <- resultNest_4p_SSM4p$par[c("DHA_STRN", "DHH_STRN", "T12H_STRN")]
 Initial_STRN <- structure(c(3678.94960547096, -301.436485427701, 912.595953854977), 
-                          .Names = c("DHA", "DHH", "T12H"))
-fp <- c(Rho25=100)
+                          .Names = c("DHA_STRN", "DHH_STRN", "T12H_STRN"))
+fp <- c(Rho25_STRN=100)
 fitSTRN_2 <- STRN(Initial_STRN=Initial_STRN, 
                 EmbryoGrowthTRN=resultNest_4p_SSM4p, tsd=Med_Cc, 
                 embryo.stages="Caretta caretta.SCL", 

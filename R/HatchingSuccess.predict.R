@@ -1,13 +1,16 @@
-#' predict.HatchingSuccess returns prediction based on a model fitted with fitHS
-#' @title Return prediction based on a model fitted with fitHS
+#' predict.HatchingSuccess returns prediction based on a model fitted with HatchingSuccessfit()
+#' @title Return prediction based on a model fitted with HatchingSuccess.fit()
 #' @author Marc Girondot
-#' @return Return a matrix with prediction based on a model fitted with fitHS
+#' @return Return a matrix with prediction based on a model fitted with HatchingSuccess.fit()
 #' @param temperature A vector of temperatures.
 #' @param probs Quantiles.
 #' @param replicates Number of replicates to estimate the confidence interval.
-#' @param object The return of a fit done with fitHS.
+#' @param object The return of a fit done with HatchingSuccesss.fit().
+#' @param resultmcmc Results obtained using HatchingSuccesss.MHmcmc()
+
 #' @param ... Not used
 #' @description Set of functions to study the hatching success.\cr
+#' If replicates is NULL or 0, it returns the fitted model.\cr
 #' @family Hatching success
 #' @examples
 #' \dontrun{
@@ -20,26 +23,13 @@
 #' par <- c(S.low=0.5, S.high=0.3, 
 #'          P.low=25, deltaP=10, MaxHS=logit(0.8))
 #'          
-#' lnLHS(x=par, data=totalIncubation_Cc)
+#' HatchingSuccess.lnL(x=par, data=totalIncubation_Cc)
 #' 
-#' g <- fitHS(par=par, data=totalIncubation_Cc)
+#' g <- HatchingSuccess.fit(par=par, data=totalIncubation_Cc)
 #' 
-#' lnLHS(x=g$par, data=totalIncubation_Cc)
+#' HatchingSuccess.lnL(par=g$par, data=totalIncubation_Cc)
 #' 
-#' t <- seq(from=20, to=40, by=0.1)
-#' CIq <- predict(g, temperature=t)
-#' 
-#' par(mar=c(4, 4, 1, 1), +0.4)
-#' plot(x=t, 
-#'      y=modelHS(x=g$par, temperature = t), 
-#'      bty="n", las=1, type="n", ylim=c(0,1), xlim=c(20, 40), 
-#'      xlab="Incubation temperature", ylab="Hatching success")
-#' with(totalIncubation_Cc, points(x = Incubation.temperature, 
-#'      y = Hatched/(Hatched+NotHatched), 
-#'      col="red", pch=19))
-#' lines(x = t, y=CIq["2.5%", ], lty=2)
-#' lines(x = t, y=CIq["97.5%", ], lty=2)
-#' lines(x = t, y=CIq["50%", ], lty=1)
+#' plot(g)
 #' }
 #' @method predict HatchingSuccess
 #' @export
@@ -50,22 +40,65 @@
 predict.HatchingSuccess <- function(object, ..., 
                                     temperature=NULL, 
                                     probs=c(0.025, 0.5, 0.975), 
-                                    replicates=1000) {
-  SE <- object$SE
-  par <- object$par
+                                    replicates=NULL, resultmcmc=NULL) {
+  
+  par <- c(object$par, object$fixed.parameters)
   
   # mathessian <- object$hessian
-  if (is.null(replicates)) replicates <- 1
-  if (is.null(temperature)) temperature <- object$data$Incubation.temperature
-
-  CI <- matrix(data = NA , ncol=replicates, nrow=length(temperature))
-  
-  CI[, 1] <- modelHS(par, temperature)
-  if (replicates >1) {
-  for (c in 2:replicates) {
-    x <- structure(rnorm(n = 5, mean=par, sd=SE), .Names=names(par))
-    CI[, c] <- modelHS(x, temperature)
+  if (is.null(replicates) & is.null(resultmcmc)) {
+    replicates <- 0
   }
+  
+  if (is.null(temperature)) temperature <- object$data[, object$column.Incubation.temperature]
+  
+  if (!is.null(resultmcmc)) {
+    
+    par <- resultmcmc$resultMCMC[[1]]
+    if (!is.null(replicates)) {
+      if (replicates<nrow(par)) {
+        par <- par[sample(x=1:nrow(par), size = replicates)]
+      }
+    }
+    replicates <- nrow(par)
+    CI <- matrix(data = NA , ncol=replicates, nrow=length(temperature))
+    
+    for (c in 1:replicates) {
+      CI[, c] <- HatchingSuccess.model(par=par[c, ], temperature)
+    }
+    
+  } else {
+    
+    if (replicates >0) {
+      
+      CI <- matrix(data = NA , ncol=replicates, nrow=length(temperature))
+      
+      if (requireNamespace("lmf")) {
+        vcov <- solve(object$hessian)
+        # 2019-05-31 : if replicate.CI == 1, renvoie quand même un nombre random
+        par <- getFromNamespace("rmnorm", ns="lmf")(n = replicates, mean = object$par, vcov)
+        # par <- getFromNamespace("rmnorm", ns="lmf")(n = replicate.CI-1, mean = x$par, vcov)
+        # par <- rbind(x$par, par)
+        if (!is.matrix(par)) {
+          par <- matrix(par, nrow = 1)
+          colnames(par) <- names(object$par)
+        }
+        
+        for (c in 1:replicates) {
+          CI[, c] <- HatchingSuccess.model(par=par[c, ], temperature)
+        }
+      } else {
+        warning("The package lmf should be present to better estimate confidence interval taking into account covariances.")
+        for (c in 1:replicates) {
+          SE <- object$SE
+          x <- structure(rnorm(n = 5, mean=par, sd=SE), .Names=names(par))
+          CI[, c] <- HatchingSuccess.model(par=x, temperature)
+        }
+        
+      }
+    } else {
+      CI <- matrix(data = NA , ncol=1, nrow=length(temperature))
+      CI[, 1] <- HatchingSuccess.model(par, temperature)
+    }
   }
   
   CIq <- apply(CI, MARGIN = 1, FUN = function(x) {quantile(x, probs = probs)})

@@ -1,68 +1,72 @@
-#' tsd_MHmcmc_p generates set of parameters to be used with tsd_MHmcmc()
-#' @title Generates set of parameters to be used with tsd_MHmcmc()
+#' HatchingSuccess.MHmcmc_p generates set of parameters to be used with HatchingSuccess.MHmcmc()
+#' @title Generates set of parameters to be used with HatchingSuccess.MHmcmc()
 #' @author Marc Girondot
 #' @return A matrix with the parameters
-#' @param result An object obtained after a tsd fit
+#' @param result An object obtained after a HatchingSuccess.fit() fit
+#' @param parameters A set of parameters. Replace the one from result
+#' @param fixed.parameters A set of fixed parameters. Replace the one from result
 #' @param accept If TRUE, the script does not wait user information
-#' @description Interactive script used to generate set of parameters to be 
-#' used with tsd_MHmcmc().
-#' @family Functions for temperature-dependent sex determination
+#' @description Interactive script used to generate set of parameters to be used with HatchingSuccess.MHmcmc().\cr
+#' @family Hatching success
 #' @examples 
 #' \dontrun{
 #' library(embryogrowth)
-#' eo <- subset(DatabaseTSD, Species=="Emys orbicularis", c("Males", "Females", 
-#'                                        "Incubation.temperature"))
-#' eo_logistic <- with(eo, tsd(males=Males, females=Females, 
-#'                                  temperatures=Incubation.temperature))
-#' pMCMC <- tsd_MHmcmc_p(eo_logistic, accept=TRUE)
-#' # Take care, it can be very long
-#' result_mcmc_tsd <- tsd_MHmcmc(result=eo_logistic, 
-#' 		parametersMCMC=pMCMC, n.iter=10000, n.chains = 1,  
-#' 		n.adapt = 0, thin=1, trace=FALSE, adaptive=TRUE)
-#' # summary() permits to get rapidly the standard errors for parameters
-#' summary(result_mcmc_tsd)
-#' plot(result_mcmc_tsd, parameters="S", scale.prior=TRUE, xlim=c(-3, 3), las=1)
-#' plot(result_mcmc_tsd, parameters="P", scale.prior=TRUE, xlim=c(25, 35), las=1)
+#' totalIncubation_Cc <- subset(DatabaseTSD, 
+#'                              Species=="Caretta caretta" & 
+#'                                Note != "Sinusoidal pattern" & 
+#'                                !is.na(Total) & Total != 0)
 #' 
-#' eo_flexit <- with(eo, tsd(males=Males, females=Females,
-#'                                  parameters.initial=c(eo_logistic$par["P"], 
-#'                                  1/(4*eo_logistic$par["S"]), 
-#'                                  K1=1, K2=1), 
-#'                                  temperatures=Incubation.temperature,
-#'                                  equation="flexit", replicate.CI=NULL))
-#' pMCMC <- tsd_MHmcmc_p(eo_flexit, accept=TRUE)
-#' result_mcmc_tsd <- tsd_MHmcmc(result=eo_flexit, 
-#' 		parametersMCMC=pMCMC, n.iter=10000, n.chains = 1,  
-#' 		n.adapt = 0, thin=1, trace=FALSE, adaptive=TRUE)
-#' # summary() permits to get rapidly the standard errors for parameters
-#' summary(result_mcmc_tsd)
-#' plot(result_mcmc_tsd, parameters="S", scale.prior=TRUE, xlim=c(-3, 3), las=1)
-#' plot(result_mcmc_tsd, parameters="P", scale.prior=TRUE, xlim=c(25, 35), las=1)
-#' plot(result_mcmc_tsd, parameters="K1", scale.prior=TRUE, xlim=c(-10, 10), las=1)
-#' plot(result_mcmc_tsd, parameters="K2", scale.prior=TRUE, xlim=c(-10, 10), las=1)
-#' 
-#' plot(eo_flexit, resultmcmc = result_mcmc_tsd)
+#' par <- c(S.low=0.5, S.high=0.3, 
+#'          P.low=25, deltaP=10, MaxHS=logit(0.8))
+#'          
+#' g <- HatchingSuccess.fit(par=par, data=totalIncubation_Cc)
+#' pMCMC <- HatchingSuccess.MHmcmc_p(g, accept=TRUE)
+#' mcmc <- HatchingSuccesss.MHmcmc(result=g, parameters = pMCMC, 
+#'                   adaptive=TRUE, n.iter=100000, trace=1000)
 #' }
 #' @export
 
+# Algo Metropolis-Hastings
+# ------------------------
 
-tsd_MHmcmc_p<-function(result=stop("An output from tsd() must be provided"), 
-                       accept=FALSE) {
+HatchingSuccess.MHmcmc_p<-function(result=NULL, parameters=NULL, fixed.parameters=NULL, 
+                                accept=FALSE) {
 
-# d'abord je sors les paramtres  utiliser
+  # result=NULL; parameters=NULL; fixed.parameters=NULL; accept=TRUE
+  
+# d'abord je sors les parametres a utiliser
+  
+  if (is.null(result) & is.null(parameters)) {
+    stop("Or result or parameters must be provided")
+  }
 
-par <- result$par
+# 26/4/2015
+  if (is.null(parameters)) parameters <- result$par
+  if (is.null(fixed.parameters)) fixed.parameters <- result$fixed.parameters
+  
+  par <- parameters
+  allpar <- c(parameters, fixed.parameters)
 
-# "P"
-
-P <- c("dnorm", par["P"], 2, 2, 25, 35, ifelse(is.na(par["P"]), 29.5, par["P"]))
-S <- c("dnorm", par["S"], 1, 0.5, -2, 2, ifelse(is.na(par["S"]), 0.01, par["S"]))
-K <- c("dnorm", par["K"], 3, 0.5, -20, 20, ifelse(is.na(par["K"]), 0, par["K"]))
-K1 <- c("dnorm", par["K1"], 20, 0.5, min(-100, par["K1"]-100), max(100, par["K1"]+100), ifelse(is.na(par["K1"]), 1, par["K1"]))
-K2 <- c("dnorm", par["K2"], 20, 0.5, min(-100, par["K2"]-100), max(100, par["K2"]+100), ifelse(is.na(par["K2"]), 1, par["K2"]))
-
-
-priors <- list(P=P, S=S, K=K, K1=K1, K2=K2)
+# 7/2/2014, ajout de la nouvelle version des parametres
+# #' par <- c(S.low=0.5, S.high=0.3,  P.low=25, deltaP=10, MaxHS=logit(0.8)) 
+  
+  # S.low
+  S.low <- c("dunif", 0, par["S.low"]*2, 2, 0, par["S.low"]*2, par["S.low"])
+  
+  # S.high
+  S.high <- c("dunif", 0, par["S.high"]*2, 2, 0, par["S.high"]*2, par["S.high"])
+  
+  # P.low
+  P.low <- c("dunif", 0, par["P.low"]*2, 2, 0, par["P.low"]*2, par["P.low"])
+  
+  # deltaP
+  deltaP <- c("dunif", 0, par["deltaP"]*2, 2, 0, par["deltaP"]*2, par["deltaP"])
+  
+  # MaxHS
+  MaxHS <- c("dunif", min(-5, par["MaxHS"]*2), max(5, par["MaxHS"]*2), 2, min(-5, par["MaxHS"]*2), max(5, par["MaxHS"]*2), par["MaxHS"])
+  
+  
+priors <- list(S.low=S.low, S.high=S.high, P.low=P.low, deltaP=deltaP, MaxHS=MaxHS)
 
 prencours <- NULL
 
@@ -114,10 +118,10 @@ if (f=="q") {
 	
 	if (density == "dunif") {
 	
-	cat(paste("Distribution of the prior, Minimum (Enter for default ", parameters[variable, "Prior1"], "):", sep=""))
+	cat(paste("Distribution of the prior, Minimum (Enter for default ",parameters[variable, "Prior1"], "):", sep=""))
 	f<-scan(nmax=1, quiet=TRUE, what=character())
 	if (length(f)!=0) parameters[variable, "Prior1"] <- f
-	cat(paste("Distribution of the prior, Maximum (Enter for default ", parameters[variable, "Prior2"], "):", sep=""))
+	cat(paste("Distribution of the prior, Maximum (Enter for default ",parameters[variable, "Prior2"], "):", sep=""))
 	f<-scan(nmax=1, quiet=TRUE, what=character())
 	if (length(f)!=0) parameters[variable, "Prior2"] <- f
 	
@@ -125,7 +129,7 @@ if (f=="q") {
 	
 	if (density == "dnorm") {
 	
-	cat(paste("Distribution of the prior, Mean (Enter for default ", parameters[variable, "Prior1"], "):", sep=""))
+	cat(paste("Distribution of the prior, Mean (Enter for default ",parameters[variable, "Prior1"], "):", sep=""))
 	f<-scan(nmax=1, quiet=TRUE, what=character())
 	if (length(f)!=0) parameters[variable, "Prior1"] <- f
 	cat(paste("Distribution of the prior, Standard deviation (Enter for default ",parameters[variable, "Prior2"], "):", sep=""))

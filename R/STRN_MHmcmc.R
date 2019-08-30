@@ -8,7 +8,8 @@
 #' @param n.chains Number of replicates
 #' @param n.adapt Number of iterations before to store outputs
 #' @param thin Number of iterations between each stored output
-#' @param trace True or False, shows progress
+#' @param trace TRUE or FALSE or period, shows progress
+#' @param traceML TRUE or FALSE to show ML
 #' @param batchSize Number of observations to include in each batch fo SE estimation
 #' @param dataSTRN A named list data used to estimate likelihoods (see further in description)
 #' @param filename If intermediate is not NULL, save intermediate result in this file
@@ -76,6 +77,7 @@
 #'                 dataSTRN = list(EmbryoGrowthTRN = resultNest_4p_SSM4p, 
 #'                    Temperatures = "TSP.STRNWeighted.temperature.mean", 
 #'                    fixed.parameters=fitSTRN$fixed.parameters,
+#'                    zero=1E-9, 
 #'                    tsd=Med_Cc, 
 #'                    Sexed=sexed, Males=males), 
 #'                 adaptive = TRUE, adaptive.lag = 500, 
@@ -93,7 +95,7 @@
 #'                 dataSTRN = list(EmbryoGrowthTRN = resultNest_4p_SSM4p, 
 #'                    Temperatures = "TSP.STRNWeighted.temperature.mean", 
 #'                    fixed.parameters=fitSTRN$fixed.parameters,
-#'                    tsd=Med_Cc, 
+#'                    tsd=Med_Cc, zero=1E-9, 
 #'                    Sexed=sexed, Males=males), 
 #'                 parallel=FALSE, 
 #'                 adaptive = TRUE, adaptive.lag = 500, 
@@ -115,12 +117,12 @@
 #' @export
 
 STRN_MHmcmc <- function(result=NULL, n.iter=10000, 
-parametersMCMC=NULL, n.chains = 1, n.adapt = 0, 
-thin=1, trace=NULL, batchSize=sqrt(n.iter), 
-dataSTRN=NULL, 
-adaptive=FALSE, adaptive.lag=500, adaptive.fun=function(x) {ifelse(x>0.234, 1.3, 0.7)},
-parallel=TRUE, 
-intermediate=NULL, filename="intermediate.Rdata", previous=NULL) {
+                        parametersMCMC=NULL, n.chains = 1, n.adapt = 0, 
+                        thin=1, trace=NULL, traceML=FALSE, batchSize=sqrt(n.iter), 
+                        dataSTRN=NULL, 
+                        adaptive=FALSE, adaptive.lag=500, adaptive.fun=function(x) {ifelse(x>0.234, 1.3, 0.7)},
+                        parallel=TRUE, 
+                        intermediate=NULL, filename="intermediate.Rdata", previous=NULL) {
   
   # result=NULL; n.iter=10000; parametersMCMC=NULL; n.chains = 1; n.adapt = 0; thin=1; trace=NULL; batchSize=sqrt(n.iter); dataSTRN=NULL; adaptive=FALSE; adaptive.lag=500; adaptive.fun=function(x) {ifelse(x>0.234, 1.3, 0.7)}; intermediate=NULL; filename="intermediate.Rdata"; previous=NULL
   
@@ -139,38 +141,41 @@ intermediate=NULL, filename="intermediate.Rdata", previous=NULL) {
   if (!is.null(previous)) if (!is.null(trace)) previous$trace <- trace
   
   if (is.null(trace)) trace <- FALSE
-
-# 29/1/2014; Ajout de result$weight
-out <- MHalgoGen(n.iter=n.iter, parameters=parametersMCMC, 
-  n.chains = n.chains, n.adapt = n.adapt, thin=thin, trace=trace, 
-	data=dataSTRN, likelihood=get(".fonctionSTRNMCMC"),
-  adaptive=adaptive, adaptive.lag=adaptive.lag, adaptive.fun=adaptive.fun,
-  intermediate=intermediate, filename=filename, previous=previous)
-
-if (batchSize>=n.iter/2) {
-  print("batchSize cannot be larger than half the number of iterations.")
-  rese <- rep(NA, dim(parametersMCMC)[1])
-  names(rese) <- rownames(parametersMCMC)
-  out <- c(out, SE=list(rese))
-} else {
-  out <- c(out, BatchSE=list(coda::batchSE(out$resultMCMC, batchSize=batchSize)))
-}
-
-class(out) <- "mcmcComposite"
-
-fin <- try(summary(out), silent=TRUE)
-
-if (class(fin)=="try-error") {
-  lp <- rep(NA, nrow(out$parametersMCMC$parameters))
-  names(lp) <- rownames(out$parametersMCMC$parameters)
-  out <- c(out, TimeSeriesSE=list(lp))
-  out <- c(out, SD=list(lp))
-} else {
-  out <- c(out, TimeSeriesSE=list(fin$statistics[,4]))
-  out <- c(out, SD=list(fin$statistics[,"SD"]))
-}
-
-class(out) <- "mcmcComposite"
-
-return(out)
+  
+  # 29/1/2014; Ajout de result$weight
+  out <- MHalgoGen(n.iter=n.iter, parameters=parametersMCMC, 
+                   parameters_name="x", 
+                   n.chains = n.chains, n.adapt = n.adapt, thin=thin, 
+                   trace=trace, traceML=traceML, 
+                   data=dataSTRN, 
+                   likelihood=getFromNamespace(".fonctionSTRNMCMC", ns="embryogrowth"),
+                   adaptive=adaptive, adaptive.lag=adaptive.lag, adaptive.fun=adaptive.fun,
+                   intermediate=intermediate, filename=filename, previous=previous)
+  
+  if (batchSize>=n.iter/2) {
+    print("batchSize cannot be larger than half the number of iterations.")
+    rese <- rep(NA, dim(parametersMCMC)[1])
+    names(rese) <- rownames(parametersMCMC)
+    out <- c(out, SE=list(rese))
+  } else {
+    out <- c(out, BatchSE=list(coda::batchSE(out$resultMCMC, batchSize=batchSize)))
+  }
+  
+  class(out) <- "mcmcComposite"
+  
+  fin <- try(summary(out), silent=TRUE)
+  
+  if (class(fin)=="try-error") {
+    lp <- rep(NA, nrow(out$parametersMCMC$parameters))
+    names(lp) <- rownames(out$parametersMCMC$parameters)
+    out <- c(out, TimeSeriesSE=list(lp))
+    out <- c(out, SD=list(lp))
+  } else {
+    out <- c(out, TimeSeriesSE=list(fin$statistics[,4]))
+    out <- c(out, SD=list(fin$statistics[,"SD"]))
+  }
+  
+  class(out) <- "mcmcComposite"
+  
+  return(out)
 }

@@ -46,9 +46,10 @@ Amphibia-Reptilia 12, 169-179.
 }
 \seealso{
 Other Functions for temperature-dependent sex determination: \code{\link{DatabaseTSD}},
-  \code{\link{P_TRT}}, \code{\link{predict.tsd}},
-  \code{\link{stages}}, \code{\link{tsd_MHmcmc_p}},
-  \code{\link{tsd_MHmcmc}}, \code{\link{tsd}}
+  \code{\link{P_TRT}}, \code{\link{plot.tsd}},
+  \code{\link{predict.tsd}}, \code{\link{stages}},
+  \code{\link{tsd_MHmcmc_p}}, \code{\link{tsd_MHmcmc}},
+  \code{\link{tsd}}
 }
 \author{
 Marc Girondot \email{marc.girondot@u-psud.fr}

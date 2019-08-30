@@ -24,6 +24,7 @@
 #' @param col.TRT.CI The color of CI of TRT based on range.CI
 #' @param col.PT.CI The color of CI of PT based on range.CI
 #' @param show.CI Do the CI for the curve should be shown
+#' @param warn Do the warnings must be shown ? TRUE or FALSE
 #' @description Plot the estimates that best describe temperature-dependent sex determination.
 #' @references Girondot, M. 1999. Statistical description of temperature-dependent sex determination using maximum likelihood. Evolutionary Ecology Research, 1, 479-486.
 #' @references Godfrey, M.H., Delmas, V., Girondot, M., 2003. Assessment of patterns of temperature-dependent sex determination using maximum likelihood model selection. Ecoscience 10, 265-272.
@@ -38,6 +39,7 @@
 #'                                  equation="logistic"))
 #' plot(tsdL)
 #' }
+#' @family Functions for temperature-dependent sex determination
 #' @method plot tsd
 #' @export
 
@@ -48,24 +50,25 @@ plot.tsd <- function(x, ...,
                      show.model=TRUE, 
                      males.freq=TRUE, 
                      show.PTRT=TRUE, 
-	las.x=1, 
-	las.y=1, 
-	lab.PT=paste("Pivotal ", x$type), 
-	resultmcmc = NULL,
-	chain=1, 
-	l=0.05, 
-	replicate.CI=10000, 
-	range.CI=0.95, 
-	mar=c(4, 4, 4, 1)+0.4,
-	temperatures.plot=seq(from=25, to=35, by=0.1), 
-	durations.plot=seq(from=40, to=70, by=0.1), 
-	lab.TRT=paste0("Transitional range of ",  x$type, "s l=",x$l*100,"%"), 
-	col.TRT="gray", 
-	col.TRT.CI=rgb(0.8, 0.8, 0.8, 0.5), 
-  col.PT.CI=rgb(0.8, 0.8, 0.8, 0.5), 
-	show.CI=TRUE) {
-
-# show.observations=TRUE; males.freq=TRUE; las.x=1; las.y=1; lab.PT=paste("Pivotal ", x$type); resultmcmc = NULL; chain=1; l=0.05; replicate.CI=10000; temperatures.plot=seq(from=20, to=35, by=0.1); durations.plot=seq(from=40, to=70, by=0.1);TRT.limits=c(9, 90); precision=15; range.CI=0.95; mar=c(4, 4, 6, 1)+0.4; lab.TRT=paste0("Transitional range of ", x$type, "s l=",x$l*100,"%"); col.TRT="gray"; col.TRT.CI=rgb(0.8, 0.8, 0.8, 0.5); col.PT.CI=rgb(0.8, 0.8, 0.8, 0.5); show.CI=TRUE
+                     las.x=1, 
+                     las.y=1, 
+                     lab.PT=paste("Pivotal ", x$type), 
+                     resultmcmc = NULL,
+                     chain=1, 
+                     l=0.05, 
+                     replicate.CI=10000, 
+                     range.CI=0.95, 
+                     mar=c(4, 4, 4, 1)+0.4,
+                     temperatures.plot=seq(from=25, to=35, by=0.1), 
+                     durations.plot=seq(from=40, to=70, by=0.1), 
+                     lab.TRT=paste0("Transitional range of ",  x$type, "s l=",x$l*100,"%"), 
+                     col.TRT="gray", 
+                     col.TRT.CI=rgb(0.8, 0.8, 0.8, 0.5), 
+                     col.PT.CI=rgb(0.8, 0.8, 0.8, 0.5), 
+                     show.CI=TRUE, 
+                     warn = TRUE) {
+  
+  # show.observations=TRUE; males.freq=TRUE; show.PTRT = TRUE; las.x=1; las.y=1; lab.PT=paste("Pivotal ", x$type); resultmcmc = NULL; chain=1; l=0.05; replicate.CI=10000; temperatures.plot=seq(from=20, to=35, by=0.1); durations.plot=seq(from=40, to=70, by=0.1);TRT.limits=c(9, 90); precision=15; range.CI=0.95; mar=c(4, 4, 6, 1)+0.4; lab.TRT=paste0("Transitional range of ", x$type, "s l=",x$l*100,"%"); col.TRT="gray"; col.TRT.CI=rgb(0.8, 0.8, 0.8, 0.5); col.PT.CI=rgb(0.8, 0.8, 0.8, 0.5); show.CI=TRUE; warn=TRUE
   
   males <- x$males
   females <- x$females
@@ -75,7 +78,7 @@ plot.tsd <- function(x, ...,
   
   if (x$type != "temperature") temperatures.plot <- durations.plot
   
-  L <- list(...) # L <- list(NULL)
+  L <- list(...) # L <- list()
   par(mar=mar)
   
   xlll <- ifelse(x$type=="temperature", expression("Temperature in " * degree * "C"), 
@@ -98,7 +101,7 @@ plot.tsd <- function(x, ...,
   
   o <- P_TRT(x=x, resultmcmc=resultmcmc, chain=chain, l=l, 
              replicate.CI=replicate.CI, temperatures=temperatures.plot, 
-             probs = c((1-range.CI)/2, 0.5, 1-(1-range.CI)/2))
+             probs = c((1-range.CI)/2, 0.5, 1-(1-range.CI)/2), warn=warn)
   
   
   L2 <- L1[!(names(L1) %in% c("errbar.tick", "errbar.lwd"
@@ -126,7 +129,7 @@ plot.tsd <- function(x, ...,
     # limites de la limite haute de la TRT
     polygon(c(o$P_TRT_quantiles[1, "higher.limit.TRT"], o$P_TRT_quantiles[1, "higher.limit.TRT"], o$P_TRT_quantiles[3, "higher.limit.TRT"], o$P_TRT_quantiles[3, "higher.limit.TRT"]), c(0,1,1,0), border=NA, col=col.TRT.CI)
     # limites de la PT
-    polygon(c(o$P_TRT_quantiles[1, "PT"], o$P_TRT_quantiles[1, "PT"], o$P_TRT_quantiles[3, "PT"], o$P_TRT_quantiles[3, "PT"]), c(0,1,1,0), border=NA, col=col.TRT.CI)  
+    polygon(c(o$P_TRT_quantiles[1, "PT"], o$P_TRT_quantiles[1, "PT"], o$P_TRT_quantiles[3, "PT"], o$P_TRT_quantiles[3, "PT"]), c(0,1,1,0), border=NA, col=col.PT.CI)  
     par(xpd=TRUE)
     segments(o$P_TRT_quantiles[2, "PT"], 0, o$P_TRT_quantiles[2, "PT"], 1.05, lty=4)
     segments(o$P_TRT_quantiles[2, "lower.limit.TRT"], 0, o$P_TRT_quantiles[2, "lower.limit.TRT"], 1.15, lty=3)
@@ -210,10 +213,10 @@ plot.tsd <- function(x, ...,
       
     }
   }
-
+  
 }
-  
-  
+
+
 
 
 

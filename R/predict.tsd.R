@@ -17,7 +17,8 @@
 #' Note that incubation duration is a very bad proxy for sex ratio. See Georges, 
 #' A., Limpus, C. J. & Stoutjesdijk, R. 1994. Hatchling sex in the marine turtle 
 #' Caretta caretta is determined by proportion of development at a temperature, 
-#' not daily duration of exposure. J. Exp. Zool., 270, 432-444.
+#' not daily duration of exposure. J. Exp. Zool., 270, 432-444.\cr
+#' If replicate.CI is 0 or NULL, point estimate for maximum likelihood is returned.
 #' @family Functions for temperature-dependent sex determination
 #' @examples
 #' \dontrun{

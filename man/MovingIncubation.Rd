@@ -58,7 +58,7 @@ MovingIncubation(NestsResult = NULL, resultmcmc = NULL,
 
 \item{parallel}{Should parallel computing be used. TRUE or FALSE}
 
-\item{progressbar}{Show a progress bar in unix system is pbmclapply package is installed}
+\item{progressbar}{Should a progress bar be shown ? TRUE or FALSE}
 }
 \value{
 A dataframe with informations about thermosensitive period length and incubation length day by day of incubation

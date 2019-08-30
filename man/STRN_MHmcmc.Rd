@@ -6,10 +6,11 @@
 \usage{
 STRN_MHmcmc(result = NULL, n.iter = 10000, parametersMCMC = NULL,
   n.chains = 1, n.adapt = 0, thin = 1, trace = NULL,
-  batchSize = sqrt(n.iter), dataSTRN = NULL, adaptive = FALSE,
-  adaptive.lag = 500, adaptive.fun = function(x) {     ifelse(x >
-  0.234, 1.3, 0.7) }, parallel = TRUE, intermediate = NULL,
-  filename = "intermediate.Rdata", previous = NULL)
+  traceML = FALSE, batchSize = sqrt(n.iter), dataSTRN = NULL,
+  adaptive = FALSE, adaptive.lag = 500, adaptive.fun = function(x) { 
+     ifelse(x > 0.234, 1.3, 0.7) }, parallel = TRUE,
+  intermediate = NULL, filename = "intermediate.Rdata",
+  previous = NULL)
 }
 \arguments{
 \item{result}{An object obtained after a STRN fit}
@@ -24,7 +25,9 @@ STRN_MHmcmc(result = NULL, n.iter = 10000, parametersMCMC = NULL,
 
 \item{thin}{Number of iterations between each stored output}
 
-\item{trace}{True or False, shows progress}
+\item{trace}{TRUE or FALSE or period, shows progress}
+
+\item{traceML}{TRUE or FALSE to show ML}
 
 \item{batchSize}{Number of observations to include in each batch fo SE estimation}
 
@@ -110,6 +113,7 @@ outMCMC <- STRN_MHmcmc(result = fitSTRN, n.iter = 50000, parametersMCMC = pMCMC,
                 dataSTRN = list(EmbryoGrowthTRN = resultNest_4p_SSM4p, 
                    Temperatures = "TSP.STRNWeighted.temperature.mean", 
                    fixed.parameters=fitSTRN$fixed.parameters,
+                   zero=1E-9, 
                    tsd=Med_Cc, 
                    Sexed=sexed, Males=males), 
                 adaptive = TRUE, adaptive.lag = 500, 
@@ -127,7 +131,7 @@ outMCMC_parallel <- parallel::mclapply(1:detectCores(), function(x) {
                 dataSTRN = list(EmbryoGrowthTRN = resultNest_4p_SSM4p, 
                    Temperatures = "TSP.STRNWeighted.temperature.mean", 
                    fixed.parameters=fitSTRN$fixed.parameters,
-                   tsd=Med_Cc, 
+                   tsd=Med_Cc, zero=1E-9, 
                    Sexed=sexed, Males=males), 
                 parallel=FALSE, 
                 adaptive = TRUE, adaptive.lag = 500, 

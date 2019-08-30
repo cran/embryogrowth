@@ -6,7 +6,9 @@
 #' @param fixed.parameters Value for Sexualisation Thermal Reaction Norm model that will not be changed
 #' @param EmbryoGrowthTRN The Embryo Growth Thermal Reaction Norm obtained with searchR()
 #' @param embryo.stages The embryo stages. At least TSP.borders stages must be provided to estimate TSP borders. See note.
+#' @param TSP.borders The limits of TSP in stages. See embryo.stages parameter.
 #' @param tsd The model used to predict sex ratio, obtained from tsd()
+#' @param equation If tsd parameter is not provided, equation and parameters for tsd model must be provided.
 #' @param Sexed The number of sexed embryos with names identifying timeseries
 #' @param Males The number of males embryos with names identifying timeseries
 #' @param Females The number of females embryos with names identifying timeseries
@@ -16,6 +18,7 @@
 #' @param itnmax Maximum number of iterations for each method
 #' @param parallel Should parallel computing for info.nests() be used
 #' @param control List for control parameters for optimx
+#' @param zero The value to replace a null sex ratio
 #' @description Estimate the parameters that best describe the sexualisation thermal reaction norm within the TSP.\cr
 #' The Temperatures parameter is a character string which can be:\cr
 #' \itemize{
@@ -51,10 +54,10 @@
 #' names(males) <- rev(rev(names(resultNest_4p_SSM4p$data))[-(1:2)])
 #' sexed <- rep(10, length(males))
 #' names(sexed) <- rev(rev(names(resultNest_4p_SSM4p$data))[-(1:2)])
-#' Initial_STRN <- resultNest_4p_SSM4p$par[c("DHA", "DHH", "T12H")]
+#' Initial_STRN <- resultNest_4p_SSM4p$par[c("DHA_STRN", "DHH_STRN", "T12H_STRN")]
 #' Initial_STRN <- structure(c(582.567096666926, 2194.0806711639, 3475.28414940385), 
-#'                           .Names = c("DHA", "DHH", "T12H"))
-#' fp <- c(Rho25=100)
+#'                           .Names = c("DHA_STRN", "DHH_STRN", "T12H_STRN"))
+#' fp <- c(Rho25_STRN=100)
 #' fitSTRN <- STRN(Initial_STRN=Initial_STRN, 
 #'                 EmbryoGrowthTRN=resultNest_4p_SSM4p, tsd=Med_Cc, 
 #'                 embryo.stages="Caretta caretta.SCL", 
@@ -93,10 +96,10 @@
 #'          
 #' # Using only the sexualisation thermal reaction norm within TSP to calculate CTE
 #' 
-#' Initial_STRN <- resultNest_4p_SSM4p$par[c("DHA", "DHH", "T12H")]
+#' Initial_STRN <- resultNest_4p_SSM4p$par[c("DHA_STRN", "DHH_STRN", "T12H_STRN")]
 #' Initial_STRN <- structure(c(3678.94960547096, -301.436485427701, 912.595953854977), 
-#'                           .Names = c("DHA", "DHH", "T12H"))
-#' fp <- c(Rho25=100)
+#'                           .Names = c("DHA_STRN", "DHH_STRN", "T12H_STRN"))
+#' fp <- c(Rho25_STRN=100)
 #' fitSTRN_2 <- STRN(Initial_STRN=Initial_STRN, 
 #'                 EmbryoGrowthTRN=resultNest_4p_SSM4p, tsd=Med_Cc, 
 #'                 embryo.stages="Caretta caretta.SCL", 
@@ -131,18 +134,21 @@
 STRN <- function(Initial_STRN=NULL, 
                  fixed.parameters = NULL, 
                  EmbryoGrowthTRN=stop("Embryo Growth Thermal Reaction Norm must be provided"), 
-                 embryo.stages=NULL, 
-                 tsd=stop("A result from the function tsd() must be provided"),
+                 TSP.borders=NULL, 
+                 embryo.stages="Generic.ProportionDevelopment", 
+                 tsd=NULL,
+                 equation="logistic", 
                  Sexed=NULL, Males=NULL, Females=NULL, 
                  Temperatures="TSP.MassWeighted.STRNWeighted.temperature.mean", 
                  SE=TRUE, parallel=TRUE, 
                  itnmax=1000, 
                  method = c("Nelder-Mead","BFGS"), 
-                 control=list(trace=1, REPORT=10))
+                 control=list(trace=1, REPORT=10), 
+                 zero=1E-9)
   
 {
   
-  # Initial_STRN=NULL; fixed.parameters = NULL;EmbryoGrowthTRN=NULL; embryo.stages=NULL; tsd=NULL; Sexed=NULL; Males=NULL; Females=NULL; Temperatures="TSP.MassWeighted.STRNWeighted.temperature.mean"; SE=TRUE; parallel=TRUE; control=list(trace=1, REPORT=10, maxit=1000)
+  # Initial_STRN=NULL; fixed.parameters = NULL; EmbryoGrowthTRN=NULL; TSP.borders=NULL; embryo.stages=NULL; tsd=NULL; equation="logistic"; Sexed=NULL; Males=NULL; Females=NULL; Temperatures="TSP.MassWeighted.STRNWeighted.temperature.mean"; SE=TRUE; parallel=TRUE; itnmax=1000; method = c("Nelder-Mead","BFGS"); control=list(trace=1, REPORT=10)
   
   if (is.null(embryo.stages)) {
     stop("embryo.stages must be defined")
@@ -179,12 +185,17 @@ STRN <- function(Initial_STRN=NULL,
               fn=getFromNamespace(".STRN_fit", ns="embryogrowth"), 
               EmbryoGrowthTRN=EmbryoGrowthTRN, 
               embryo.stages=embryo.stages, 
+              TSP.borders=TSP.borders, 
+              equation=equation, 
               tsd=tsd, Sexed=Sexed, Males=Males, Temperatures=Temperatures, 
               parallel=parallel, 
               itnmax=itnmax, 
+              zero=zero, 
               control=modifyList(list(dowarn=FALSE, follow.on=TRUE, kkt=FALSE), control))
     
-    # getFromNamespace(".STRN_fit", ns="embryogrowth")(par=pSTRN, fixed.parameters=fixed.parameters, EmbryoGrowthTRN=EmbryoGrowthTRN, tsd=tsd, Sexed=Sexed, Males=Males, Temperatures=Temperatures)
+    # getFromNamespace(".STRN_fit", ns="embryogrowth")(par=pSTRN, fixed.parameters=fixed.parameters, 
+    # EmbryoGrowthTRN=EmbryoGrowthTRN, embryo.stages=embryo.stages, TSP.borders=TSP.borders, 
+    # equation=equation, tsd=tsd, Sexed=Sexed, Males=Males, Temperatures=Temperatures, parallel=parallel)
     
     result <- do.call(getFromNamespace(x="optimx", ns="optimx"), L)
     
@@ -209,6 +220,8 @@ STRN <- function(Initial_STRN=NULL,
                                         fixed.parameters=fixed.parameters, 
                                         EmbryoGrowthTRN=EmbryoGrowthTRN, 
                                         embryo.stages=embryo.stages, 
+                                        TSP.borders=TSP.borders, 
+                                        equation=equation, 
                                         tsd=tsd, Sexed=Sexed, Males=Males, 
                                         Temperatures=Temperatures
                                         , parallel=parallel), silent=TRUE)

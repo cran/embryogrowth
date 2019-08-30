@@ -31,7 +31,7 @@ function(series=stop("A result object or names of series must be provided"), siz
 	
 	if (class(series)=="Nests") {
 		series <- names(series)
-		series <- series[1:(length(series)-2)]
+		series <- series[1:(series$IndiceT["NbTS"])]
 	}
 	
 	

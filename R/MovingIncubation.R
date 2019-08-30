@@ -23,7 +23,7 @@
 #' @param embryo.stages The embryo stages. At least TSP.borders stages must be provided to estimate TSP length
 #' @param replicate.CI Number of randomizations to estimate CI
 #' @param parallel Should parallel computing be used. TRUE or FALSE
-#' @param progressbar Show a progress bar in unix system is pbmclapply package is installed
+#' @param progressbar Should a progress bar be shown ? TRUE or FALSE
 #' @description Simulate incubation of a nest with the beginning varying day by day\cr
 #' Temperatures must be in a data.frame with one column (Time) being the time and the second the temperatures (Temperature). A third columns can indicate the temperature at the end of incubation (Temperature.end.incubation). Do not use FormatNests() for this dataframe.
 #' @examples
@@ -142,76 +142,9 @@ if ((is.null(hessian)) & (CI == "hessian")) {
 
 nbtp <- length(temperatures)
 
-# if (progress) pb<-txtProgressBar(min=0, max=(nbtp-3), style=3)
+result.out <- universalmclapply(seq(from=1, to=nbtp-2, by=skip), 
+                                FUN=function(temp) {
 
-
-
-temptotal <- seq(from=1, to=nbtp-2, by=skip)
-
-if (.Platform$OS.type == "windows" & parallel) {
-  cl <- makeCluster(detectCores())
-  s<- clusterEvalQ(cl = cl , library(embryogrowth))
-  clusterExport(cl = cl, 
-                varlist=c("nbtp", "temptotal", "times", 
-                          "temperatures", "metabolic.heating", 
-                          "temperatures.end.incubation", "average.incubation.duration", 
-                          "resultmcmc", "replicate.CI", "parameters", "fixed.parameters", 
-                          "SE", "derivate", "test", "M0", "TSP.borders", "embryo.stages", 
-                          "temperature.heterogeneity", "SexualisationTRN", "skip"), 
-                envir = environment())
-
-  result.out <- parLapply(cl=cl, X=seq_along(temptotal), fun=function (xxx) {
-    
-    temp <- temptotal[xxx]
-    # for (temp in seq(from=1, to=nbtp-2, by=skip)) {
-    # print(temp)
-    # if (progress) 	setTxtProgressBar(pb, (temp-1))
-    
-    dt <- floor(as.numeric(times[temp:nbtp]-times[temp]))
-    
-    tempencours <- temperatures[temp:(temp+length(dt)-1)]
-    if (metabolic.heating ==0) {
-      tempnid2 <- temperatures.end.incubation[temp:(temp+length(dt)-1)]
-      # et dans dt j ai le temps
-      tempencours <- tempencours + (tempnid2-tempencours)*(dt/average.incubation.duration)
-    }
-    df <- data.frame(Time=dt, temp=tempencours)
-    formated <- FormatNests(df)
-    
-    out.incubation <- info.nests(resultmcmc=resultmcmc, replicate.CI=replicate.CI, 
-                                 parameters=parameters, fixed.parameters = fixed.parameters,
-                                 SE=SE, temperatures = formated, derivate=derivate, test=test, 
-                                 M0=M0, TSP.borders=TSP.borders, 
-                                 embryo.stages=embryo.stages, 
-                                 CI=CI, 
-                                 SexualisationTRN.CI=SexualisationTRN.CI, 
-                                 metabolic.heating=metabolic.heating, 
-                                 temperature.heterogeneity=temperature.heterogeneity, 
-                                 SexualisationTRN=SexualisationTRN, 
-                                 stopattest = TRUE, progress = FALSE, 
-                                 out="summary", warnings=FALSE, 
-                                 parallel=FALSE)$summary
-    
-    # metric.end.incubation=c(Temp=test$Mean),
-    return(cbind(Time=times[temp], out.incubation, row.names=NULL))
-  })
-  stopCluster(cl)  
-  
-} else {
-  
-  if (any(rownames(installed.packages())=="pbmcapply") & progressbar) {
-    mcl <-  getFromNamespace("pbmclapply", ns="pbmcapply")
-  } else {
-    mcl <- getFromNamespace("parallel", ns="mclapply")
-  }
-
-result.out <- mcl(seq_along(temptotal), FUN=function(xxx) {
-
-  temp <- temptotal[xxx]
-   # for (temp in seq(from=1, to=nbtp-2, by=skip)) {
-   # print(temp)
-   # if (progress) 	setTxtProgressBar(pb, (temp-1))
-  
     dt <- floor(as.numeric(times[temp:nbtp]-times[temp]))
 
     tempencours <- temperatures[temp:(temp+length(dt)-1)]
@@ -227,6 +160,7 @@ result.out <- mcl(seq_along(temptotal), FUN=function(xxx) {
                SE=SE, temperatures = formated, derivate=derivate, test=test, 
                stopattest = TRUE, M0=M0, TSP.borders=TSP.borders, 
                CI=CI, 
+               hessian = hessian, 
                SexualisationTRN.CI=SexualisationTRN.CI, 
                embryo.stages=embryo.stages, 
                metabolic.heating=metabolic.heating, 
@@ -237,12 +171,18 @@ result.out <- mcl(seq_along(temptotal), FUN=function(xxx) {
     
     # metric.end.incubation=c(Temp=test$Mean),
     return(cbind(Time=times[temp], out.incubation, row.names=NULL))
-}, mc.cores = ifelse(parallel, detectCores(), 1))
+    }, 
+  mc.cores = ifelse(parallel, detectCores(), 1), 
+clusterEvalQ=expression(library(embryogrowth)), 
+clusterExport=list(varlist=c("nbtp", "times", 
+                             "temperatures", "metabolic.heating", 
+                             "temperatures.end.incubation", "average.incubation.duration", 
+                             "resultmcmc", "replicate.CI", "parameters", "fixed.parameters", 
+                             "SE", "derivate", "test", "M0", "TSP.borders", "embryo.stages", 
+                             "temperature.heterogeneity", "SexualisationTRN", "skip"), 
+                   envir = environment()), 
+progressbar = progressbar)
 
-}
-    
-# result.out2 <- lapply(result.out, function(xxx) xxx[[1]])
-# result.out3 <- result.out[unlist(lapply(result.out, length))==31]
 
 df <- data.frame(matrix(unlist(result.out), ncol=37, byrow=TRUE))
 colnames(df) <- colnames(result.out[[1]])

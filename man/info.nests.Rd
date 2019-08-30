@@ -8,13 +8,14 @@ info.nests(x = NULL, parameters = NULL, NestsResult = NULL,
   resultmcmc = NULL, hessian = NULL, CI = NULL,
   fixed.parameters = NULL, SE = NULL, temperatures = NULL,
   derivate = NULL, test = NULL, stopattest = FALSE, M0 = NULL,
-  series = "all", TSP.borders = NULL, embryo.stages = NULL,
-  TSP.begin = 0, TSP.end = 0.5, replicate.CI = 1, weight = NULL,
+  series = "all", TSP.borders = NULL,
+  embryo.stages = "Generic.ProportionDevelopment", TSP.begin = 0,
+  TSP.end = 0.5, replicate.CI = 100, weight = NULL,
   out = "likelihood", fill = NULL, SexualisationTRN = NULL,
   SexualisationTRN.mcmc = NULL, SexualisationTRN.CI = NULL,
   metric.end.incubation = NA, metabolic.heating = 0,
   temperature.heterogeneity = 0, progress = FALSE, warnings = TRUE,
-  parallel = TRUE)
+  parallel = TRUE, tsd = NULL)
 }
 \arguments{
 \item{x}{A set of parameters to model the embryo growth thermal reaction norm or a NestsResult object.}
@@ -78,6 +79,8 @@ info.nests(x = NULL, parameters = NULL, NestsResult = NULL,
 \item{warnings}{If FALSE, does not show warnings}
 
 \item{parallel}{If TRUE use parallel version for nests estimation}
+
+\item{tsd}{A object from tsd() that describe the thermal react norm of sex ratio at constant temperatures}
 }
 \value{
 Return or the total likelihood or a list with $metric and $summary depending on out parameter
@@ -113,6 +116,10 @@ The summary object is a data.frame composed of these elements:
   \item \code{TSP.begin.se} Standard error for the beginning of the TSP
   \item \code{TSP.end.mean} Average time of the endd of the TSP
   \item \code{TSP.end.se} Standard error for the end of the TSP
+  \item \code{PM.mean} Proportion of males based on Massey et al. 2019
+  \item \code{PM.se} Standard error for the proportion of males based on Massey et al. 2019
+  \item \code{PM.TimeWeighted.mean} Proportion of males with time effect
+  \item \code{PM.TimeWeighted.se} Standard error for the proportion of males with time effect
   \item \code{Incubation.length.mean} Average number of days for the incubation length
   \item \code{Incubation.length.se} Standard error for number of days for the incubation length
   \item \code{Middlethird.begin.mean} Average day at which the middle third incubation begins
@@ -191,6 +198,60 @@ infoall.both <- info.nests(resultNest_4p_SSM4p,
   out=c("metric", "summary"), replicate.CI=100, 
   CI="SE", 
   progress=TRUE)
+# Example of use of embryo.stages and TSP.borders:
+  summary.nests <- info.nests(resultNest_4p_SSM4p, out="summary", 
+                            embryo.stages=c("10"=0.33, "11"=0.33, "12"=0.66, "13"=0.66), 
+                            TSP.borders = c(10, 12), 
+                            replicate.CI=100,
+                            progress=TRUE)
+                            
+#########################################
+# Sex ratio using Massey et al. method PM
+#########################################
+
+# Massey, M.D., Holt, S.M., Brooks, R.J., Rollinson, N., 2019. Measurement 
+# and modelling of primary sex ratios for species with temperature-dependent 
+# sex determination. J Exp Biol 222, 1-9.
+  
+CC_Mediterranean <- subset(DatabaseTSD, RMU=="Mediterranean" & 
+Species=="Caretta caretta" & (!is.na(Sexed) & Sexed!=0))
+tsdL <- with (CC_Mediterranean, tsd(males=Males, females=Females, 
+                                    temperatures=Incubation.temperature, 
+                                    equation="logistic", replicate.CI=NULL))
+                                    
+PM <- info.nests(resultNest_4p_SSM4p, 
+  embryo.stages="Caretta caretta.SCL", replicate.CI=100, 
+  CI="Hessian", 
+  out="summary", progress=TRUE, tsd=tsdL)
+  
+sr_TSP_SCLW <- predict(tsdL, temperatures=PM$summary[, "TSP.MassWeighted.temperature.mean"], 
+              temperature.se=PM$summary[, "TSP.MassWeighted.temperature.se"])
+
+plot_errbar(x=sr_TSP_SCLW["50\%", ], y=PM$summary[, "PM.mean"], 
+            x.minus=sr_TSP_SCLW["2.5\%", ], 
+            x.plus=sr_TSP_SCLW["97.5\%", ], 
+            errbar.y=2*PM$summary[, "PM.se"], xlab="CTE SCL growth", 
+            ylab="PM Massey et al. 2016", xlim=c(0, 1), ylim=c(0, 1), las=1)
+segments(x0=0, y0=0, x1=1, y1=1, lty=2, col="red")
+
+sr_TSP_TW <- predict(tsdL, temperatures=PM$summary[, "TSP.TimeWeighted.temperature.mean"], 
+              temperature.se=PM$summary[, "TSP.TimeWeighted.temperature.se"])
+              
+plot_errbar(x=sr_TSP_TW["50\%", ], y=PM$summary[, "PM.mean"], 
+            x.minus=sr_TSP_TW["2.5\%", ], 
+            x.plus=sr_TSP_TW["97.5\%", ], 
+            errbar.y=2*PM$summary[, "PM.se"], xlab="CTE Time", 
+            ylab="PM Massey et al. 2016", xlim=c(0, 1), ylim=c(0, 1), las=1)
+segments(x0=0, y0=0, x1=1, y1=1, lty=2, col="red")
+
+plot_errbar(x=sr_TSP_TW["50\%", ], y=sr_TSP_SCLW["50\%", ], 
+            x.minus=sr_TSP_TW["2.5\%", ], 
+            x.plus=sr_TSP_TW["97.5\%", ], 
+            y.minus=sr_TSP_SCLW["2.5\%", ], 
+            y.plus=sr_TSP_SCLW["97.5\%", ], xlab="CTE Time", 
+            ylab="CTE SCL", xlim=c(0, 1), ylim=c(0, 1), las=1)
+segments(x0=0, y0=0, x1=1, y1=1, lty=2, col="red")
+  
 }
 }
 \author{

@@ -7,7 +7,7 @@
 P_TRT(x = NULL, resultmcmc = NULL, chain = 1, equation = NULL,
   l = 0.05, replicate.CI = NULL, temperatures = NULL,
   durations = NULL, SD.temperatures = NULL, SD.durations = NULL,
-  probs = c(0.025, 0.5, 0.975), warn = FALSE)
+  probs = c(0.025, 0.5, 0.975), warn = TRUE)
 }
 \arguments{
 \item{x}{Set of parameters or a result of tsd()}
@@ -79,9 +79,10 @@ Hulin, V., Delmas, V., Girondot, M., Godfrey, M.H., Guillon, J.-M., 2009. Temper
 }
 \seealso{
 Other Functions for temperature-dependent sex determination: \code{\link{DatabaseTSD}},
-  \code{\link{TSP.list}}, \code{\link{predict.tsd}},
-  \code{\link{stages}}, \code{\link{tsd_MHmcmc_p}},
-  \code{\link{tsd_MHmcmc}}, \code{\link{tsd}}
+  \code{\link{TSP.list}}, \code{\link{plot.tsd}},
+  \code{\link{predict.tsd}}, \code{\link{stages}},
+  \code{\link{tsd_MHmcmc_p}}, \code{\link{tsd_MHmcmc}},
+  \code{\link{tsd}}
 }
 \author{
 Marc Girondot

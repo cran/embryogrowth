@@ -219,8 +219,9 @@ Podocnemis expansa (Testudines: Podocnemididae). Zoomorphology.
 \seealso{
 Other Functions for temperature-dependent sex determination: \code{\link{DatabaseTSD}},
   \code{\link{P_TRT}}, \code{\link{TSP.list}},
-  \code{\link{predict.tsd}}, \code{\link{tsd_MHmcmc_p}},
-  \code{\link{tsd_MHmcmc}}, \code{\link{tsd}}
+  \code{\link{plot.tsd}}, \code{\link{predict.tsd}},
+  \code{\link{tsd_MHmcmc_p}}, \code{\link{tsd_MHmcmc}},
+  \code{\link{tsd}}
 }
 \author{
 Marc Girondot \email{marc.girondot@u-psud.fr}

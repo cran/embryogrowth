@@ -1,6 +1,6 @@
 THIS IS THE CHANGELOG OF THE "embryogrowth" PACKAGE
 
-            CHANGES IN VERSION 7.4.1 (2018-09-26)
+            CHANGES IN VERSION 7.6 (2019-08-30)
           
 * New function to study data logger precision: uncertainty.datalogger - 7.3
 * Correct a bug in predict.HatchingSuccess - 7.3
@@ -9,6 +9,38 @@ THIS IS THE CHANGELOG OF THE "embryogrowth" PACKAGE
 * New functions calibrate.datalogger - 7.3.3
 * Simplification of calibrate.datalogger() and uncertainty.datalogger() - 7.3.4
 * uncertainty.datalogger() by default uses only one measurement - 7.4.1
+* New version of TSD database - 7.4.2
+* Better fit control in tsd() - 7.4.3
+* New algorithm to search for confidence interval of TRT bounds in tsd() - 7.4.4
+* New approximation for Hulin, Richards, and double-Richards equations in tsd() - 7.4.5
+* New example in info.nests() - 7.4.6
+* fixed.parameters in fitHS() - 7.4.7
+* TSP.borders parameter in STRN() - 7.4.8
+* Correct a bug when weights were used - 7.4.9
+* STRN can fit the TSD model - 7.5, 7.5.1, 7.5.2, 7.5.3
+* movingincubation() can show again a progress bar - 7.5.4
+* P_TRT() can manipulate very large TRT - 7.5.5
+* New example in info.nests() to use the PM method of Massey et al. 2019 - 7.5.6
+* info.nests() returns PM.mean and PM.se from Massey et al. 2019 - 7.5.7
+* Correct a bug in info.nests()$metric when more than one nest were used - 7.5.7
+* New outputs for summary of info.nests() PM.TimeWeight.mean and PM.TimeWeight.se - 7.5.8
+* Bug correction in info.nests() - 7.5.9
+* New flexit model for tsd() - 7.5.10
+* New mcmc function for hatching success - 7.5.11
+* Rename all Hatching Success functions for better homogeneity; new plot function - 7.5.12
+* Better implementation of flexit model for tsd - 7.5.14-7.5.15
+* Solve a case when predict.tsd() returns 0 or 1 whereas some observations are present - 7.5.16
+* Better implementation of flexit model for tsd - 7.5.17
+* Fix a bug in STRN_MHmcmc - 7.5.18
+* Better implementation of flexit model for tsd - 7.5.19
+* flexit model for tsd comes from HelpersMG package - 7.5.20
+* traceML parameter for GRTRN_MHmcmc, HatchingSuccess.MHmcmc, tsd_MHmcmc, and STRN_MHmcmc- 7.5.21 (2019-08-20)
+* Solve a problem in plot.tsd() when SE for S, K1 or K2 are very high - 7.5.22 & 7.5.23 (2019-08-22)
+* TRT is no more estimated for Hulin and Double-A-logistic models of tsd() - 7.5.24
+* Add deviance test for tsd() - 7.5.25
+* Correct deviance estimation for tsd() - 7.5.26
+* Correct TRT estimation for A-logistic model for extrem K value- 7.5.27
+* New CRAN version - 7.6
 
             CHANGES IN VERSION 7.2.3 (2018-02-07)
           

@@ -115,7 +115,8 @@ shinyServer(function(input, output) {
         ztsd.out <- gsub("\\[1\\] \\\"", "", ztsd.out)
         ztsd.out <- gsub("\\\"", "", ztsd.out)
         
-        output$resultsInfo <- renderText({paste0(ztsd.out[-1], "\n", collapse = "")})
+        output$resultsInfo <- renderText({paste0(ztsd.out, "\n", collapse = "")})
+        # output$resultsInfo <- renderText({paste0(ztsd.out[-1], "\n", collapse = "")})
         } else {
           if (nrow(zdf) == 0) {
           output$references <- renderText({"No available data"})

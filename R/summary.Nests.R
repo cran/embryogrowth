@@ -20,8 +20,8 @@
 
 summary.Nests <- function(object, ...) {
 
-	cat(paste("Number of timeseries: ", length(object)-2, "\n", sep=""))
-	for (i in 1:(length(object)-2)) {
+	cat(paste("Number of timeseries: ", object$IndiceT["NbTS"], "\n", sep=""))
+	for (i in 1:(object$IndiceT["NbTS"])) {
 		nm <- paste(names(object)[i], "               " , sep="")
 		pt <- paste(substr(nm, 1, 15), ":", sprintf("%.3f", max(object[[i]][,1])/1440), " days\n", sep="")
 		cat(pt)

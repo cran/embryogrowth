@@ -71,6 +71,7 @@
 #'   \item \code{Emys orbicularis.SCL}
 #'   \item \code{Emys orbicularis.mass}
 #'   \item \code{Podocnemis expansa.SCL}
+#'   \item \code{Generic.ProportionDevelopment}
 #'   }
 #' @examples
 #' \dontrun{

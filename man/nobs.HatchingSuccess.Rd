@@ -31,33 +31,23 @@ totalIncubation_Cc <- subset(DatabaseTSD,
 par <- c(S.low=0.5, S.high=0.3, 
          P.low=25, deltaP=10, MaxHS=logit(0.8))
          
-lnLHS(x=par, data=totalIncubation_Cc)
+HatchingSuccesss.lnL(par=par, data=totalIncubation_Cc)
 
-g <- fitHS(par=par, data=totalIncubation_Cc)
+g <- HatchingSuccesss.fit(par=par, data=totalIncubation_Cc)
 
-lnLHS(x=g$par, data=totalIncubation_Cc)
+HatchingSuccesss.lnL(par=g$par, data=totalIncubation_Cc)
 
-t <- seq(from=20, to=40, by=0.1)
-CIq <- predict(g, temperature=t)
-
-par(mar=c(4, 4, 1, 1), +0.4)
-plot(x=t, 
-     y=modelHS(x=g$par, temperature = t), 
-     bty="n", las=1, type="n", ylim=c(0,1), xlim=c(20, 40), 
-     xlab="Incubation temperature", ylab="Hatching success")
-with(totalIncubation_Cc, points(x = Incubation.temperature, 
-     y = Hatched/(Hatched+NotHatched), 
-     col="red", pch=19))
-lines(x = t, y=CIq["2.5\%", ], lty=2)
-lines(x = t, y=CIq["97.5\%", ], lty=2)
-lines(x = t, y=CIq["50\%", ], lty=1)
+plot(g)
 }
 }
 \seealso{
-Other Hatching success: \code{\link{fitHS}},
-  \code{\link{lnLHS}},
+Other Hatching success: \code{\link{HatchingSuccess.MHmcmc_p}},
+  \code{\link{HatchingSuccess.MHmcmc}},
+  \code{\link{HatchingSuccess.fit}},
+  \code{\link{HatchingSuccess.lnL}},
+  \code{\link{HatchingSuccess.model}},
   \code{\link{logLik.HatchingSuccess}},
-  \code{\link{modelHS}},
+  \code{\link{plot.HatchingSuccess}},
   \code{\link{predict.HatchingSuccess}}
 }
 \author{

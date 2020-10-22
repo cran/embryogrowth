@@ -4,8 +4,10 @@
 \alias{tsd_MHmcmc_p}
 \title{Generates set of parameters to be used with tsd_MHmcmc()}
 \usage{
-tsd_MHmcmc_p(result = stop("An output from tsd() must be provided"),
-  accept = FALSE)
+tsd_MHmcmc_p(
+  result = stop("An output from tsd() must be provided"),
+  accept = FALSE
+)
 }
 \arguments{
 \item{result}{An object obtained after a tsd fit}
@@ -60,11 +62,16 @@ plot(eo_flexit, resultmcmc = result_mcmc_tsd)
 }
 }
 \seealso{
-Other Functions for temperature-dependent sex determination: \code{\link{DatabaseTSD}},
-  \code{\link{P_TRT}}, \code{\link{TSP.list}},
-  \code{\link{plot.tsd}}, \code{\link{predict.tsd}},
-  \code{\link{stages}}, \code{\link{tsd_MHmcmc}},
-  \code{\link{tsd}}
+Other Functions for temperature-dependent sex determination: 
+\code{\link{DatabaseTSD.version}()},
+\code{\link{DatabaseTSD}},
+\code{\link{P_TRT}()},
+\code{\link{TSP.list}},
+\code{\link{plot.tsd}()},
+\code{\link{predict.tsd}()},
+\code{\link{stages}},
+\code{\link{tsd_MHmcmc}()},
+\code{\link{tsd}()}
 }
 \author{
 Marc Girondot

@@ -4,10 +4,13 @@
 \alias{calibrate.datalogger}
 \title{Calibrate data loggers and correct time series of temperatures}
 \usage{
-
-  calibrate.datalogger(control.temperatures = stop("Control temperatures is missing"),
+calibrate.datalogger(
+  control.temperatures = stop("Control temperatures is missing"),
   read.temperatures = stop("Read temperatures must be indicated"),
-  temperatures.series = NULL, gam = TRUE, se.fit = TRUE)
+  temperatures.series = NULL,
+  gam = TRUE,
+  se.fit = TRUE
+)
 }
 \arguments{
 \item{control.temperatures}{The true temperatures during the calibration process}
@@ -38,7 +41,9 @@ calibrate.datalogger(control.temperatures=20:30,
 }
 }
 \seealso{
-Other Data loggers utilities: \code{\link{uncertainty.datalogger}}
+Other Data loggers utilities: 
+\code{\link{movement}()},
+\code{\link{uncertainty.datalogger}()}
 }
 \author{
 Marc Girondot

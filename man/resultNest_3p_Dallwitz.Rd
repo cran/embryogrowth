@@ -5,7 +5,9 @@
 \name{resultNest_3p_Dallwitz}
 \alias{resultNest_3p_Dallwitz}
 \title{Fit using the nest database}
-\format{A list with fitted information about data(nest)}
+\format{
+A list with fitted information about data(nest)
+}
 \usage{
 resultNest_3p_Dallwitz
 }

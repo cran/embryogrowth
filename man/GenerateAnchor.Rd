@@ -4,8 +4,12 @@
 \alias{GenerateAnchor}
 \title{Generate a set of anchored parameters}
 \usage{
-GenerateAnchor(temperatures = NULL, nests = NULL, parameters = NULL,
-  number.anchors = 7)
+GenerateAnchor(
+  temperatures = NULL,
+  nests = NULL,
+  parameters = NULL,
+  number.anchors = 7
+)
 }
 \arguments{
 \item{temperatures}{A vector with temperatures to serve as anchors}

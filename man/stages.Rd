@@ -5,7 +5,9 @@
 \name{stages}
 \alias{stages}
 \title{Database of of embryonic development and thermosensitive period of development for sex determination}
-\format{A list with dataframes including attributes}
+\format{
+A list with dataframes including attributes
+}
 \usage{
 stages
 }
@@ -217,11 +219,16 @@ de Moura, C.E.B., 2017. Embryonic development of the Giant South American River 
 Podocnemis expansa (Testudines: Podocnemididae). Zoomorphology.
 }
 \seealso{
-Other Functions for temperature-dependent sex determination: \code{\link{DatabaseTSD}},
-  \code{\link{P_TRT}}, \code{\link{TSP.list}},
-  \code{\link{plot.tsd}}, \code{\link{predict.tsd}},
-  \code{\link{tsd_MHmcmc_p}}, \code{\link{tsd_MHmcmc}},
-  \code{\link{tsd}}
+Other Functions for temperature-dependent sex determination: 
+\code{\link{DatabaseTSD.version}()},
+\code{\link{DatabaseTSD}},
+\code{\link{P_TRT}()},
+\code{\link{TSP.list}},
+\code{\link{plot.tsd}()},
+\code{\link{predict.tsd}()},
+\code{\link{tsd_MHmcmc_p}()},
+\code{\link{tsd_MHmcmc}()},
+\code{\link{tsd}()}
 }
 \author{
 Marc Girondot \email{marc.girondot@u-psud.fr}

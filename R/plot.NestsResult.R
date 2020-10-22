@@ -37,10 +37,10 @@
 #' @param show.stages TRUE or FALSE, does the embryo stages should be displayed?
 #' @param show.TSP TRUE or FALSE, does the TSP boders should be displayed?
 #' @param show.third TRUE or FALSE, does the first and second third boders should be displayed?
-#' @param CI How to estimate CI; can be NULL, "SE", "MCMC", or "Hessian"
+#' @param GTRN.CI How to estimate CI; can be NULL, "SE", "MCMC", or "Hessian"
 #' @param show.temperatures TRUE or FALSE, does the temperatures should be displayed?
 #' @param show.PT TRUE or FALSE, does the pivotal temperature should be displayed?
-#' @param show.fioritures If FALSE, set show.PT, show.temperatures, show.stages, show.TSP, show.third to FALSE, CI to NULL
+#' @param show.fioritures If FALSE, set show.PT, show.temperatures, show.stages, show.TSP, show.third to FALSE, GTRN.CI to NULL
 #' @param PT Value for pivotal temperature, mean and SE
 #' @param show.test TRUE or FALSE, does the hatchling size should be displayed
 #' @param lab.third Label for 2nd third of incubation
@@ -79,14 +79,14 @@
 #' data(resultNest_4p_SSM4p)
 #' plot(resultNest_4p_SSM4p, xlim=c(0,70), ylimT=c(22, 32), ylimS=c(0,45), series=1,  
 #' 	    SE=c(DHA=1.396525, DHH=4.101217, T12H=0.04330405, Rho25=1.00479), 
-#' 	    CI = "SE", replicate.CI = 100, 
+#' 	    GTRN.CI = "SE", replicate.CI = 100, 
 #' 	    embryo.stages="Caretta caretta.SCL")
 #' plot(resultNest_4p_SSM4p, xlim=c(0,70), ylimT=c(22, 32), ylimS=c(0,45), series=1, 
-#' 	    CI = "Hessian", replicate.CI = 100, 
+#' 	    GTRN.CI = "Hessian", replicate.CI = 100, 
 #' 	    embryo.stages="Caretta caretta.SCL")
 #' plot(resultNest_4p_SSM4p, xlim=c(0,70), ylimT=c(22, 32), ylimS=c(0,45), series=1,  
 #'      resultmcmc = resultNest_mcmc_4p_SSM4p, 
-#' 	    CI = "MCMC", replicate.CI = 100, 
+#' 	    GTRN.CI = "MCMC", replicate.CI = 100, 
 #'      embryo.stages="Caretta caretta.SCL")
 #' # to plot all the nest at the same time, use
 #' plot(resultNest_4p_SSM4p, xlim=c(0,70), ylimT=c(22, 32), ylimS=c(0,45),  
@@ -132,7 +132,7 @@ function(x, ..., parameters=NULL, fixed.parameters=NULL,
          col.temperatures="green", col.S="black", 
          lty.temperatures=1, lwd.temperatures=2, ylimT=NULL, ylimS=NULL, xlim=NULL,
          show.stages=TRUE, show.TSP=TRUE, show.third=TRUE, 
-         CI=NULL,  
+         GTRN.CI=NULL,  
          show.metric=TRUE, 
          show.fioritures=TRUE, 
          show.temperatures=TRUE, show.PT=TRUE, PT=c(mean=NA, SE=NA), show.test=TRUE, 
@@ -147,7 +147,7 @@ function(x, ..., parameters=NULL, fixed.parameters=NULL,
 #  x <- resultNest_4p_SSM4p; xlim=c(0,70); ylimT=c(22, 32); ylimS=c(0,45); series=1; resultmcmc = result_mcmc_4p; embryo.stages="Caretta caretta.SCL"; replicate.CI = 100
   
   TSP.list <- embryogrowth::TSP.list
-  if (!is.null(CI)) CI <- tolower(CI)
+  if (!is.null(GTRN.CI)) GTRN.CI <- tolower(GTRN.CI)
   
   if(is.null(embryo.stages) & ((show.stages) | (show.TSP))) {
     stop("You must indicate embryo stages.")
@@ -187,11 +187,11 @@ function(x, ..., parameters=NULL, fixed.parameters=NULL,
   if (!is.null(SE[1])) if (all(is.na(SE[])))  {
     SE <- NULL
   }
-  if (!is.null(CI)) {
-    if (CI == "mcmc" & is.null(resultmcmc)) CI <- NULL
-    if (CI == "se" & is.null(SE)) CI <- NULL
-    if (CI == "hessian" & is.null(hessian)) CI <- NULL
-    if (replicate.CI <= 1) CI <- NULL
+  if (!is.null(GTRN.CI)) {
+    if (GTRN.CI == "mcmc" & is.null(resultmcmc)) GTRN.CI <- NULL
+    if (GTRN.CI == "se" & is.null(SE)) GTRN.CI <- NULL
+    if (GTRN.CI == "hessian" & is.null(hessian)) GTRN.CI <- NULL
+    if (replicate.CI <= 1) GTRN.CI <- NULL
   }
 
   
@@ -201,12 +201,12 @@ function(x, ..., parameters=NULL, fixed.parameters=NULL,
     show.temperatures <- FALSE
     show.stages <- FALSE
     show.TSP <- FALSE
-    CI <- NULL
+    GTRN.CI <- NULL
     show.third <- FALSE
   }
   
-  if (is.null(CI)) {
-    CI <- "null"
+  if (is.null(GTRN.CI)) {
+    GTRN.CI <- "null"
     replicate.CI <- 1
   }
   
@@ -265,7 +265,7 @@ for(seriesx in 1:NbTS) {
                          test=test, stopattest=stopattest, M0=M0, series=seriesx,
                          TSP.borders=TSP.borders, embryo.stages=embryo.stages,
                          TSP.begin=TSP.begin, TSP.end=TSP.end, 
-                         replicate.CI=replicate.CI, CI = CI, 
+                         replicate.CI=replicate.CI, GTRN.CI = GTRN.CI, 
                          weight=NULL, out=c("summary", "metric"), 
                          fill=60, 
                          SexualisationTRN=NULL, SexualisationTRN.mcmc=NULL, 
@@ -366,7 +366,7 @@ for(seriesx in 1:NbTS) {
       do.call(plot_add, modifyList(L1, L2) )
      }
      
-     if (CI != "null") {
+     if (GTRN.CI != "null") {
        yp <- y+2*metric.summary$metric[[1]]$se.SCL
        L2 <- c(list(x=x, y=yp, lty=2), as.list(troispoints))
        do.call(plot_add, modifyList(L1, L2) )

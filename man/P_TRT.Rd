@@ -4,15 +4,28 @@
 \alias{P_TRT}
 \title{Estimate the transitional range of temperatures based on a set of parameters}
 \usage{
-P_TRT(x = NULL, resultmcmc = NULL, chain = 1, equation = NULL,
-  l = 0.05, replicate.CI = NULL, temperatures = NULL,
-  durations = NULL, SD.temperatures = NULL, SD.durations = NULL,
-  probs = c(0.025, 0.5, 0.975), warn = TRUE)
+P_TRT(
+  x = NULL,
+  resultmcmc = NULL,
+  fixed.parameters = NULL,
+  chain = 1,
+  equation = NULL,
+  l = 0.05,
+  replicate.CI = NULL,
+  temperatures = NULL,
+  durations = NULL,
+  SD.temperatures = NULL,
+  SD.durations = NULL,
+  probs = c(0.025, 0.5, 0.975),
+  warn = TRUE
+)
 }
 \arguments{
 \item{x}{Set of parameters or a result of tsd()}
 
 \item{resultmcmc}{A result of tsd_MHmcmc()}
+
+\item{fixed.parameters}{Set of fixed parameters}
 
 \item{chain}{What chain to be used is resultmcmc is provided}
 
@@ -41,9 +54,12 @@ A list with a P_TRT object containing a matrix with lower and higher bounds for 
 Estimate the parameters that best describe the thermal reaction norm for sex ratio when temperature-dependent sex determination occurs.\cr
 It can be used also to evaluate the relationship between incubation duration and sex ratio.\cr
 The parameter l was defined in Girondot (1999). The TRT is defined from the difference between the two boundary temperatures giving sex ratios of l and 1 - l.\cr
-For logistic equation, exact value is used and precision iterations are used for other equations.\cr
 In Girondot (1999), l was 0.05 and then the TRT was defined as being the range of temperatures producing from 5% to 95% of each sex.\cr
 If l is null, TRT is not estimated and only sex ratio is estimated.\cr
+if replicate.CI is null or 0, no replicate is used and only point estimate is done.\cr
+Standard error is calculated using resampling based on the Hessian matrix with Cholesky decomposition 
+or using MCMC chain if resultmcmc is provided. In the former case, a replicate.CI random sample of the 
+MCMC results will be used.\cr
 }
 \details{
 P_TRT estimates the transitional range of temperatures based on a set of parameters
@@ -78,11 +94,16 @@ Godfrey, M.H., Delmas, V., Girondot, M., 2003. Assessment of patterns of tempera
 Hulin, V., Delmas, V., Girondot, M., Godfrey, M.H., Guillon, J.-M., 2009. Temperature-dependent sex determination and global change: are some species at greater risk? Oecologia 160, 493-506.
 }
 \seealso{
-Other Functions for temperature-dependent sex determination: \code{\link{DatabaseTSD}},
-  \code{\link{TSP.list}}, \code{\link{plot.tsd}},
-  \code{\link{predict.tsd}}, \code{\link{stages}},
-  \code{\link{tsd_MHmcmc_p}}, \code{\link{tsd_MHmcmc}},
-  \code{\link{tsd}}
+Other Functions for temperature-dependent sex determination: 
+\code{\link{DatabaseTSD.version}()},
+\code{\link{DatabaseTSD}},
+\code{\link{TSP.list}},
+\code{\link{plot.tsd}()},
+\code{\link{predict.tsd}()},
+\code{\link{stages}},
+\code{\link{tsd_MHmcmc_p}()},
+\code{\link{tsd_MHmcmc}()},
+\code{\link{tsd}()}
 }
 \author{
 Marc Girondot

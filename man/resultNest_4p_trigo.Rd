@@ -5,7 +5,9 @@
 \name{resultNest_4p_trigo}
 \alias{resultNest_4p_trigo}
 \title{Result of the fit using the nest database using trigonometric function}
-\format{A list with fitted information about data(nest)}
+\format{
+A list with fitted information about data(nest)
+}
 \usage{
 resultNest_4p_trigo
 }

@@ -117,12 +117,19 @@ plot.tsd <- function(x, ...,
   cex.x <- par("cex.axis")
   if (!is.null(L$cex.axis)) cex.x <- L$cex.axis
   
-  axis(1, at=x1:x2, las=las.x, cex.axis=cex.x)
+  ptax <- TRUE
+  if (!is.null(L[["axes"]])) if (isFALSE(L[["axes"]])) ptax <- FALSE
+  if (!is.null(L[["xaxt"]])) if (L[["xaxt"]] == "n") ptax <- FALSE
+  
+  
+  if (ptax) axis(1, at=x1:x2, las=las.x, cex.axis=cex.x)
   
   # je trace la TRT centree sur P
   
+  par(xpd=FALSE)
   
   if ((equation!="GSD") & (show.PTRT)) {
+    if (any(colnames(o$P_TRT_quantiles)=="PT")) {
     polygon(c(o$P_TRT_quantiles[2, "lower.limit.TRT"], o$P_TRT_quantiles[2, "lower.limit.TRT"], o$P_TRT_quantiles[2, "higher.limit.TRT"], o$P_TRT_quantiles[2, "higher.limit.TRT"]), c(0,1,1,0), border=NA, col=col.TRT)  
     # limites de la limite basse de la TRT
     polygon(c(o$P_TRT_quantiles[1, "lower.limit.TRT"], o$P_TRT_quantiles[1, "lower.limit.TRT"], o$P_TRT_quantiles[3, "lower.limit.TRT"], o$P_TRT_quantiles[3, "lower.limit.TRT"]), c(0,1,1,0), border=NA, col=col.TRT.CI)
@@ -136,7 +143,35 @@ plot.tsd <- function(x, ...,
     segments(o$P_TRT_quantiles[2, "higher.limit.TRT"], 0, o$P_TRT_quantiles[2, "higher.limit.TRT"], 1.15, lty=3)
     text(x=o$P_TRT_quantiles[2, "PT"], y=1.1, lab.PT)
     text(x=o$P_TRT_quantiles[2, "PT"], y=1.2, lab.TRT)
-    
+    } else {
+      polygon(c(o$P_TRT_quantiles[2, "lower.limit.TRT_low"], o$P_TRT_quantiles[2, "lower.limit.TRT_low"], o$P_TRT_quantiles[2, "higher.limit.TRT_low"], o$P_TRT_quantiles[2, "higher.limit.TRT_low"]), c(0,1,1,0), border=NA, col=col.TRT)  
+      # limites de la limite basse de la TRT
+      polygon(c(o$P_TRT_quantiles[1, "lower.limit.TRT_low"], o$P_TRT_quantiles[1, "lower.limit.TRT_low"], o$P_TRT_quantiles[3, "lower.limit.TRT_low"], o$P_TRT_quantiles[3, "lower.limit.TRT_low"]), c(0,1,1,0), border=NA, col=col.TRT.CI)
+      # limites de la limite haute de la TRT
+      polygon(c(o$P_TRT_quantiles[1, "higher.limit.TRT_low"], o$P_TRT_quantiles[1, "higher.limit.TRT_low"], o$P_TRT_quantiles[3, "higher.limit.TRT_low"], o$P_TRT_quantiles[3, "higher.limit.TRT_low"]), c(0,1,1,0), border=NA, col=col.TRT.CI)
+      # limites de la PT
+      polygon(c(o$P_TRT_quantiles[1, "PT_low"], o$P_TRT_quantiles[1, "PT_low"], o$P_TRT_quantiles[3, "PT_low"], o$P_TRT_quantiles[3, "PT_low"]), c(0,1,1,0), border=NA, col=col.PT.CI)  
+      par(xpd=TRUE)
+      segments(o$P_TRT_quantiles[2, "PT_low"], 0, o$P_TRT_quantiles[2, "PT_low"], 1.05, lty=4)
+      segments(o$P_TRT_quantiles[2, "lower.limit.TRT_low"], 0, o$P_TRT_quantiles[2, "lower.limit.TRT_low"], 1.15, lty=3)
+      segments(o$P_TRT_quantiles[2, "higher.limit.TRT_low"], 0, o$P_TRT_quantiles[2, "higher.limit.TRT_low"], 1.15, lty=3)
+      text(x=o$P_TRT_quantiles[2, "PT_low"], y=1.1, lab.PT)
+      text(x=o$P_TRT_quantiles[2, "PT_low"], y=1.2, lab.TRT)
+      
+      polygon(c(o$P_TRT_quantiles[2, "lower.limit.TRT_high"], o$P_TRT_quantiles[2, "lower.limit.TRT_high"], o$P_TRT_quantiles[2, "higher.limit.TRT_high"], o$P_TRT_quantiles[2, "higher.limit.TRT_high"]), c(0,1,1,0), border=NA, col=col.TRT)  
+      # limites de la limite basse de la TRT
+      polygon(c(o$P_TRT_quantiles[1, "lower.limit.TRT_high"], o$P_TRT_quantiles[1, "lower.limit.TRT_high"], o$P_TRT_quantiles[3, "lower.limit.TRT_high"], o$P_TRT_quantiles[3, "lower.limit.TRT_high"]), c(0,1,1,0), border=NA, col=col.TRT.CI)
+      # limites de la limite haute de la TRT
+      polygon(c(o$P_TRT_quantiles[1, "higher.limit.TRT_high"], o$P_TRT_quantiles[1, "higher.limit.TRT_high"], o$P_TRT_quantiles[3, "higher.limit.TRT_high"], o$P_TRT_quantiles[3, "higher.limit.TRT_high"]), c(0,1,1,0), border=NA, col=col.TRT.CI)
+      # limites de la PT
+      polygon(c(o$P_TRT_quantiles[1, "PT_high"], o$P_TRT_quantiles[1, "PT_high"], o$P_TRT_quantiles[3, "PT_high"], o$P_TRT_quantiles[3, "PT_high"]), c(0,1,1,0), border=NA, col=col.PT.CI)  
+      par(xpd=TRUE)
+      segments(o$P_TRT_quantiles[2, "PT_high"], 0, o$P_TRT_quantiles[2, "PT_high"], 1.05, lty=4)
+      segments(o$P_TRT_quantiles[2, "lower.limit.TRT_high"], 0, o$P_TRT_quantiles[2, "lower.limit.TRT_high"], 1.15, lty=3)
+      segments(o$P_TRT_quantiles[2, "higher.limit.TRT_high"], 0, o$P_TRT_quantiles[2, "higher.limit.TRT_high"], 1.15, lty=3)
+      text(x=o$P_TRT_quantiles[2, "PT_high"], y=1.1, lab.PT)
+      text(x=o$P_TRT_quantiles[2, "PT_high"], y=1.2, lab.TRT)
+    }
   }
   
   if (show.observations) {
@@ -147,7 +182,8 @@ plot.tsd <- function(x, ...,
       b <- getFromNamespace(".BinomialConfidence", ns="HelpersMG")(females,N)
       L1 <- modifyList(list(x=temperatures, y=females/N, bty="n", type="p", ylim=c(0,1), y.plus = b[,3], y.minus = b[,2]), L)
     }
-    L1 <- modifyList(L1, list(ylim=c(0,1), xlab="", ylab="", main="", axes=FALSE, xlim=c(x1, x2)))
+    L1 <- modifyList(L1, list(ylim=c(0,1), xlab="", ylab="", 
+                              main="", axes=FALSE, xlim=c(x1, x2)))
     
     par(xpd=FALSE)
     

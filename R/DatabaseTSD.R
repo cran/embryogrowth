@@ -33,10 +33,12 @@
 #' * Version: Date of the version of this database\cr
 #' Initial version of this database has been built by Maria Sousa Martins.
 #' @references Binckley C.A., Spotila J.R., Wilson K.S. and Paladino F.V. (1998) Sex determination and sex ratios of Pacific Leatherback Turtles, Dermochelys coriacea. Copeia, 1998(2), 291-300.
+#' @references Booth DT (1998) Incubation of turtle eggs at different temperatures: do embryos compensate for temperature during development? Physiological Zoology 71: 23-26 
 #' @references Castheloge, V.D., de D. dos Santos, M.R., de Castilhos, J.C., de J. Filho, P.R., de C. Gomes, L., Clemente-Carvalho, R.B.G., Ferreira, P.D., 2018. Pivotal temperature and hatcHling sex ratio of olive ridley sea turtles Lepidochelys olivacea from the South Atlantic coast of Brazil. Herpetological Conservation and Biology 13, 488-496.
 #' @references Crastz F. (1982) Embryological stages of the marine turtle Lepidochelys olivacea (Eschscholtz). Rev. Biol. Trop., 30, 113-120.
 #' @references De Souza, R.R., Vogt, R.C., 1994. Incubation temperature influences sex and hatchling size in the neotropical turtle Podocnemis unifilis. Journal of Herpetology 28, 453-464.
 #' @references Dimond, M.T., 1985. Some effects of temperature on turtle egg incubation, in: Goel, S.C., Srivastava, C.B.L. (Eds.), Recent Advances in Developmental Biology of Animals. Indian Society of Developmental Biologists, Poona, India, pp. 35-39.
+#' @references Dobbs KA, Miller JD, Limpus C, Landry AM, Jr (2010) Hawksbill turtle hatchling sex ratios and incubation and pivotal temperatures from Milman Island, Great Barrier Reef, Australia. Marine Turtle Newsletter 128: 12-16 
 #' @references Emer, S.A., 2007. Temperature-dependent sex determination in Manouria emys emys, the asian forest tortoise, College of Arts and Sciences. Georgia State University, Atlanta, GE, p. 60.
 #' @references Georges A., Limpus C.J. and Stoutjesdijk R. (1994) Hatchling sex in the marine turtle Caretta caretta is determined by proportion of development at a temperature, not daily duration of exposure. Journal of Experimental Zoology, 270(5), 432-444.
 #' @references Girondot M. 1999 Statistical description of temperature-dependent sex determination using maximum likelihood. Evolutionary Ecology Research, 1(3), 479-486.
@@ -62,6 +64,7 @@
 #' @references Mrosovsky N., Kamel S., Rees A.F. and Margaritoulis D. (2002) Pivotal temperature for loggerhead turtles (Caretta caretta) from Kyparissia Bay, Greece. Canadian Journal of Zoology-Revue Canadienne De Zoologie, 80(12), 2118-2124.
 #' @references Mrosovsky N., Dutton P.H. and Whitmore C.P. (1984) Sex ratios of two species of sea turtle nesting in Suriname. Can. J. Zool., 62, 2227-2239.
 #' @references Mrosovsky N., Bass A., Corliss L.A., Richardson J.I. and Richardson T.H. (1992) Pivotal and beach temperature for hawksbill turtles nesting in Antigua. Can. J. Zool., 70, 1920-1925.
+#' @references NNavarro Sánchez, E.J., 2015. Efecto de la temperatura de incubación y la diferenciación sexual sobre la morfología de crías de tortuga marina Lepidochelys olivacea, Ciencias del mar y limnología. Universidad Nacional Autónoma de México, México, D.F., p. 89.
 #' @references Rimblot F., Fretey J., Mrosovsky N., Lescure J. and Pieau C. (1985) Sexual differentiation as a function of the incubation temperature of eggs in the sea-turtle Dermochelys coriacea (Vandelli, 1761). Amphibia-Reptilia, 85(6), 83-92.
 #' @references Rimblot-Baly F., Lescure J., Fretey J. and Pieau C. (1986-1987) Sensibilité à la température de la differenciation sexuelle chez la tortue Luth, Dermochelys coriacea (Vandelli, 1761); application des données de l'incubation artificielle à l'étude de la sex-ratio dans la nature. Annales des Sciences Naturelles, Zoologie, 8, 277-290.
 #' @references Ruiz Garcia N.A. (2014) Efectos de la temperatura sobre el desarrollo embrionario y el desempeño de crías de la tortuga golfina, Lepidochelys olivacea. Tesis Nivel Maestria.
@@ -81,7 +84,7 @@
 #' \dontrun{
 #' library(embryogrowth)
 #' data(DatabaseTSD)
-#' DatabaseTSD$Version[1]
+#' DatabaseTSD.version()
 #' totalIncubation_Lo <- subset(DatabaseTSD, 
 #'          Species=="Lepidochelys olivacea" & (!is.na(Sexed) & Sexed!=0), 
 #'          select=c("Males", "Females", "Incubation.temperature"))

@@ -5,7 +5,9 @@
 \name{result_mcmc_newp}
 \alias{result_mcmc_newp}
 \title{Result of the mcmc using the nest database with anchored parameters}
-\format{A list of class mcmcComposite with mcmc result for data(nest) with anchored parameters}
+\format{
+A list of class mcmcComposite with mcmc result for data(nest) with anchored parameters
+}
 \usage{
 result_mcmc_newp
 }

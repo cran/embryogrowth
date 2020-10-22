@@ -7,6 +7,8 @@
 #' @param EmbryoGrowthTRN The Embryo Growth Thermal Reaction Norm obtained with searchR()
 #' @param embryo.stages The embryo stages. At least TSP.borders stages must be provided to estimate TSP borders. See note.
 #' @param TSP.borders The limits of TSP in stages. See embryo.stages parameter.
+#' @param TSP.begin Where TSP begin during the stage of beginning? In relative proportion of the stage.
+#' @param TSP.end Where TSP begin during the stage of ending? In relative proportion of the stage.
 #' @param tsd The model used to predict sex ratio, obtained from tsd()
 #' @param equation If tsd parameter is not provided, equation and parameters for tsd model must be provided.
 #' @param Sexed The number of sexed embryos with names identifying timeseries
@@ -23,11 +25,17 @@
 #' The Temperatures parameter is a character string which can be:\cr
 #' \itemize{
 #'   \item \code{TimeWeighted.temperature.mean}
+#'   \item \code{GrowthWeighted.temperature.mean}
+#'   \item \code{GrowthRateWeighted.temperature.mean}
 #'   \item \code{TSP.TimeWeighted.temperature.mean}
-#'   \item \code{TSP.MassWeighted.temperature.mean}
+#'   \item \code{TSP.GrowthWeighted.temperature.mean}
+#'   \item \code{TSP.GrowthRateWeighted.temperature.mean}
 #'   \item \code{TSP.STRNWeighted.temperature.mean}
-#'   \item \code{TSP.MassWeighted.STRNWeighted.temperature.mean}
+#'   \item \code{TSP.GrowthWeighted.STRNWeighted.temperature.mean}
+#'   \item \code{TSP.GrowthRateWeighted.STRNWeighted.temperature.mean}
 #'   \item \code{MiddleThird.TimeWeighted.temperature.mean}
+#'   \item \code{MiddleThird.GrowthWeighted.temperature.mean}
+#'   \item \code{MiddleThird.GrowthRateWeighted.temperature.mean}
 #'   }
 #' If information for sex is not known for some timeseries, set NA for Sexed.\cr
 #' Sexed, Males and Females must be vectors with names. The names must be the same as 
@@ -64,7 +72,7 @@
 #'                 Sexed=sexed, Males=males, 
 #'                 fixed.parameters=fp, 
 #'                 SE=TRUE, 
-#'                 Temperatures="TSP.MassWeighted.STRNWeighted.temperature.mean")
+#'                 Temperatures="TSP.GrowthWeighted.STRNWeighted.temperature.mean")
 #' plotR(fitSTRN, curves ="ML quantiles", ylim=c(0,2))
 #' CTE <- info.nests(NestsResult=resultNest_4p_SSM4p, 
 #'                   SexualisationTRN=fitSTRN,
@@ -77,13 +85,13 @@
 #'                   out="summary")$summary
 #' # CTE with growth-weighted temperature average
 #' plot(Med_Cc, xlim=c(25, 35))
-#' points(x=CTE$TSP.MassWeighted.temperature.mean, y=males/sexed, 
+#' points(x=CTE$TSP.GrowthWeighted.temperature.mean, y=males/sexed, 
 #'          col="red", pch=19)
 #' legend("topright", legend=c("CTE with growth-weighted TRN"), 
 #'          pch=19, col=c("red"))
 #' # CTE with sexualisation TRN and growth-weighted temperature average
 #' plot(Med_Cc, xlim=c(25, 35))
-#' points(x=CTE$TSP.MassWeighted.STRNWeighted.temperature.mean, y=males/sexed, 
+#' points(x=CTE$TSP.GrowthWeighted.STRNWeighted.temperature.mean, y=males/sexed, 
 #'          col="red", pch=19)
 #' legend("topright", legend=c("CTE with growth-weighted TRN and Sex. TRN"), 
 #'        pch=19, col=c("red"))
@@ -136,10 +144,12 @@ STRN <- function(Initial_STRN=NULL,
                  EmbryoGrowthTRN=stop("Embryo Growth Thermal Reaction Norm must be provided"), 
                  TSP.borders=NULL, 
                  embryo.stages="Generic.ProportionDevelopment", 
+                 TSP.begin=0, 
+                 TSP.end=0.5, 
                  tsd=NULL,
                  equation="logistic", 
                  Sexed=NULL, Males=NULL, Females=NULL, 
-                 Temperatures="TSP.MassWeighted.STRNWeighted.temperature.mean", 
+                 Temperatures="TSP.GrowthWeighted.STRNWeighted.temperature.mean", 
                  SE=TRUE, parallel=TRUE, 
                  itnmax=1000, 
                  method = c("Nelder-Mead","BFGS"), 
@@ -148,7 +158,7 @@ STRN <- function(Initial_STRN=NULL,
   
 {
   
-  # Initial_STRN=NULL; fixed.parameters = NULL; EmbryoGrowthTRN=NULL; TSP.borders=NULL; embryo.stages=NULL; tsd=NULL; equation="logistic"; Sexed=NULL; Males=NULL; Females=NULL; Temperatures="TSP.MassWeighted.STRNWeighted.temperature.mean"; SE=TRUE; parallel=TRUE; itnmax=1000; method = c("Nelder-Mead","BFGS"); control=list(trace=1, REPORT=10)
+  # Initial_STRN=NULL; fixed.parameters = NULL; EmbryoGrowthTRN=NULL; TSP.borders=NULL; embryo.stages=NULL; tsd=NULL; equation="logistic"; Sexed=NULL; Males=NULL; Females=NULL; Temperatures="TSP.GrowthWeighted.STRNWeighted.temperature.mean"; SE=TRUE; parallel=TRUE; itnmax=1000; method = c("Nelder-Mead","BFGS"); control=list(trace=1, REPORT=10)
   
   if (is.null(embryo.stages)) {
     stop("embryo.stages must be defined")
@@ -162,7 +172,7 @@ STRN <- function(Initial_STRN=NULL,
     stop("numDeriv package is absent; Please install it first")
   }
   
-#  Initial_STRN=NULL;  EmbryoGrowthTRN=NULL; fixed.parameters = NULL; tsd=NULL;  Sexed=NULL; Males=NULL; Females=NULL;  Temperatures="TSP.MassWeighted.STRNWeighted.temperature.mean"; SE=FALSE 
+#  Initial_STRN=NULL;  EmbryoGrowthTRN=NULL; fixed.parameters = NULL; tsd=NULL;  Sexed=NULL; Males=NULL; Females=NULL;  Temperatures="TSP.GrowthWeighted.STRNWeighted.temperature.mean"; SE=FALSE 
   
   if (is.null(Initial_STRN)) {pSTRN=EmbryoGrowthTRN$par} else {pSTRN=Initial_STRN}
   
@@ -186,6 +196,7 @@ STRN <- function(Initial_STRN=NULL,
               EmbryoGrowthTRN=EmbryoGrowthTRN, 
               embryo.stages=embryo.stages, 
               TSP.borders=TSP.borders, 
+              TSP.begin=TSP.begin, TSP.end=TSP.end, 
               equation=equation, 
               tsd=tsd, Sexed=Sexed, Males=Males, Temperatures=Temperatures, 
               parallel=parallel, 
@@ -221,6 +232,7 @@ STRN <- function(Initial_STRN=NULL,
                                         EmbryoGrowthTRN=EmbryoGrowthTRN, 
                                         embryo.stages=embryo.stages, 
                                         TSP.borders=TSP.borders, 
+                                        TSP.begin=TSP.begin, TSP.end=TSP.end, 
                                         equation=equation, 
                                         tsd=tsd, Sexed=Sexed, Males=Males, 
                                         Temperatures=Temperatures
@@ -255,7 +267,11 @@ STRN <- function(Initial_STRN=NULL,
     }
   }
   
+  #22/2/2020, ajout de TSP; pas sûr si ca sert
   result$data <- list(Sexed=Sexed, Males=Males, Females=Females, 
+                      TSP.begin=TSP.begin, TSP.end=TSP.end, 
+                      embryo.stages=embryo.stages, 
+                      TSP.borders=TSP.borders, 
                       Temperatures="Temperatures", 
                       EmbryoGrowthTRN=EmbryoGrowthTRN, 
                       tsd=tsd)

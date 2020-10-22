@@ -4,10 +4,11 @@
 \alias{GenerateConstInc}
 \title{Generate a data.frame with constant incubation temperature and incubation duration}
 \usage{
-
-  GenerateConstInc(durations = stop("At least one incubation length must be provided"),
+GenerateConstInc(
+  durations = stop("At least one incubation length must be provided"),
   temperatures = stop("At least one incubation temperature must be provided"),
-  names = NULL)
+  names = NULL
+)
 }
 \arguments{
 \item{durations}{A vector with incubation durations}

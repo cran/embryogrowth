@@ -3,13 +3,13 @@
 #' \tabular{ll}{
 #'  Package: \tab embryogrowth\cr
 #'  Type: \tab Package\cr
-#'  Version: \tab 7.6 build 994\cr
-#'  Date: \tab 2019-08-30\cr
+#'  Version: \tab 8.0 build 1133\cr
+#'  Date: \tab 2020-10-22\cr
 #'  License: \tab GPL (>= 2)\cr
 #'  LazyLoad: \tab yes\cr
 #'  }
 #' @title The package embryogrowth
-#' @author Marc Girondot \email{marc.girondot@@u-psud.fr}
+#' @author Marc Girondot \email{marc.girondot@universite-paris-saclay.fr}
 #' @docType package
 #' @name embryogrowth-package
 #' @description Tools to analyze the embryo growth and the sexualisation thermal reaction norms.\cr

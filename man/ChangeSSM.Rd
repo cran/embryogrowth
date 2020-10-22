@@ -4,10 +4,17 @@
 \alias{ChangeSSM}
 \title{Generate set of parameters for different forms of thermal norm of reaction}
 \usage{
-ChangeSSM(result = NULL, resultmcmc = NULL, temperatures = seq(from =
-  20, to = 35, by = 0.1), parameters = NULL, initial.parameters = NULL,
-  fixed.parameters = NULL, outmcmc = "quantiles", progressbar = TRUE,
-  ...)
+ChangeSSM(
+  result = NULL,
+  resultmcmc = NULL,
+  temperatures = seq(from = 20, to = 35, by = 0.1),
+  parameters = NULL,
+  initial.parameters = NULL,
+  fixed.parameters = NULL,
+  outmcmc = "quantiles",
+  progressbar = TRUE,
+  ...
+)
 }
 \arguments{
 \item{result}{A result obtained by searchR()}

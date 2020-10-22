@@ -4,12 +4,18 @@
 \alias{searchR}
 \title{Fit the parameters that best represent nest incubation data.}
 \usage{
-searchR(parameters = stop("Initial set of parameters must be provided"),
+searchR(
+  parameters = stop("Initial set of parameters must be provided"),
   fixed.parameters = NULL,
   temperatures = stop("Formated temperature must be provided !"),
-  derivate = dydt.Gompertz, test = c(Mean = 39.33, SD = 1.92),
-  M0 = 1.7, saveAtMaxiter = FALSE, fileName = "intermediate",
-  weight = NULL, control = list(trace = 1, REPORT = 100, maxit = 500))
+  derivate = dydt.Gompertz,
+  test = c(Mean = 39.33, SD = 1.92),
+  M0 = 1.7,
+  saveAtMaxiter = FALSE,
+  fileName = "intermediate",
+  weight = NULL,
+  control = list(trace = 1, REPORT = 100, maxit = 500)
+)
 }
 \arguments{
 \item{parameters}{A set of parameters used as initial point for searching}
@@ -101,7 +107,6 @@ pMCMC <- TRN_MHmcmc_p(resultNest_6p_SSM6p, accept=TRUE)
 resultNest_mcmc_6p_SSM6p <- GRTRN_MHmcmc(result=resultNest_6p_SSM6p,  
 	parametersMCMC=pMCMC, n.iter=10000, n.chains = 1, n.adapt = 0,  
 	thin=1, trace=TRUE)
-data(resultNest_mcmc_6p_SSM6p)
 # compare_AIC() is a function from the package "HelpersMG"
 compare_AIC(test1=resultNest_4p_SSM4p, test2=resultNest_6p_SSM6p)
 ############ with new parametrization

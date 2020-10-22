@@ -4,9 +4,15 @@
 \alias{HatchingSuccess.fit}
 \title{Fit a hatching success model to data using maximum likelihood}
 \usage{
-HatchingSuccess.fit(par, data, fixed.parameters = NULL,
+HatchingSuccess.fit(
+  par = NULL,
+  data = stop("data must be provided"),
+  fixed.parameters = NULL,
   column.Incubation.temperature = "Incubation.temperature",
-  column.Hatched = "Hatched", column.NotHatched = "NotHatched")
+  column.Hatched = "Hatched",
+  column.NotHatched = "NotHatched",
+  hessian = TRUE
+)
 }
 \arguments{
 \item{par}{A set of parameters.}
@@ -20,12 +26,23 @@ HatchingSuccess.fit(par, data, fixed.parameters = NULL,
 \item{column.Hatched}{Name of the column with hatched number}
 
 \item{column.NotHatched}{Name of the column with not hatched number}
+
+\item{hessian}{Should Hessian matrix be estimated?}
 }
 \value{
 Return a object of class HatchingSuccess
 }
 \description{
 Set of functions to study the hatching success.\cr
+The first version of the model was published in:\cr
+Laloë, J.-O., Monsinjon, J., Gaspar, C., Touron, M., Genet, Q., Stubbs, J., Girondot, M. 
+& Hays, G.C. (2020) Production of male hatchlings at a remote South Pacific green sea turtle 
+rookery: conservation implications in a female-dominated world. Marine Biology, 167, 70.\cr
+The version available here is enhanced by using a double flexit model rather than a double 
+logistic model. The flexit model is described here:\cr
+Abreu-Grobois, F.A., Morales-Mérida, B.A., Hart, C.E., Guillon, J.-M., Godfrey, M.H., 
+Navarro, E. & Girondot, M. (2020) Recent advances on the estimation of the thermal 
+reaction norm for sex ratios. PeerJ, 8, e8451.\cr
 }
 \details{
 HatchingSuccess.fit fits a hatching success model to data
@@ -39,27 +56,52 @@ totalIncubation_Cc <- subset(DatabaseTSD,
                                !is.na(Total) & Total != 0)
 
 par <- c(S.low=0.5, S.high=0.3, 
-         P.low=25, deltaP=10, MaxHS=logit(0.8))
+         P.low=25, deltaP=10, MaxHS=0.8)
          
-HatchingSuccess.lnL(par=par, data=totalIncubation_Cc)
+g.logistic <- HatchingSuccess.fit(par=par, data=totalIncubation_Cc)
+         
+HatchingSuccess.lnL(par=g.logistic$par, data=totalIncubation_Cc)
 
-g <- HatchingSuccess.fit(par=par, data=totalIncubation_Cc)
+plot(g.logistic)
 
-HatchingSuccess.lnL(par=g$par, data=totalIncubation_Cc)
+par <- c(S.low=0.5, S.high=0.3, 
+         P.low=25, deltaP=10, 
+         K1.low=1, K2.low=-1, K1.high=1, K2.high=-1, 
+         MaxHS=0.8)
 
-par(mar=c(4, 4, 1, 1), +0.4)
-plot(g)
+g.flexit <- HatchingSuccess.fit(par=par, data=totalIncubation_Cc)
+
+HatchingSuccess.lnL(par=g.flexit$par, data=totalIncubation_Cc)
+
+compare_AICc(logistic=g.logistic, flexit=g.flexit)
+plot(x=g.logistic, what = c("observations", "ML", "CI"), replicates=10000)
+
+pMCMC <- HatchingSuccess.MHmcmc_p(result = g.logistic, accept = TRUE)
+MCMC <- HatchingSuccess.MHmcmc(result = g.logistic, parametersMCMC = pMCMC,
+                            n.iter = 100000, 
+                           adaptive = TRUE)
+
+plot(MCMC, parameters = "S.low")
+plot(MCMC, parameters = "S.high")
+plot(MCMC, parameters = "P.low")
+plot(MCMC, parameters = "deltaP")
+plot(MCMC, parameters = "MaxHS")
+
+plot(x=g.logistic, what = c("observations", "ML", "CI"), 
+        replicates=10000, resultmcmc=MCMC)
+
 }
 }
 \seealso{
-Other Hatching success: \code{\link{HatchingSuccess.MHmcmc_p}},
-  \code{\link{HatchingSuccess.MHmcmc}},
-  \code{\link{HatchingSuccess.lnL}},
-  \code{\link{HatchingSuccess.model}},
-  \code{\link{logLik.HatchingSuccess}},
-  \code{\link{nobs.HatchingSuccess}},
-  \code{\link{plot.HatchingSuccess}},
-  \code{\link{predict.HatchingSuccess}}
+Other Hatching success: 
+\code{\link{HatchingSuccess.MHmcmc_p}()},
+\code{\link{HatchingSuccess.MHmcmc}()},
+\code{\link{HatchingSuccess.lnL}()},
+\code{\link{HatchingSuccess.model}()},
+\code{\link{logLik.HatchingSuccess}()},
+\code{\link{nobs.HatchingSuccess}()},
+\code{\link{plot.HatchingSuccess}()},
+\code{\link{predict.HatchingSuccess}()}
 }
 \author{
 Marc Girondot

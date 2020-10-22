@@ -4,13 +4,25 @@
 \alias{STRN_MHmcmc}
 \title{Metropolis-Hastings algorithm for Sexualisation Thermal Reaction Norm}
 \usage{
-STRN_MHmcmc(result = NULL, n.iter = 10000, parametersMCMC = NULL,
-  n.chains = 1, n.adapt = 0, thin = 1, trace = NULL,
-  traceML = FALSE, batchSize = sqrt(n.iter), dataSTRN = NULL,
-  adaptive = FALSE, adaptive.lag = 500, adaptive.fun = function(x) { 
-     ifelse(x > 0.234, 1.3, 0.7) }, parallel = TRUE,
-  intermediate = NULL, filename = "intermediate.Rdata",
-  previous = NULL)
+STRN_MHmcmc(
+  result = NULL,
+  n.iter = 10000,
+  parametersMCMC = NULL,
+  n.chains = 1,
+  n.adapt = 0,
+  thin = 1,
+  trace = NULL,
+  traceML = FALSE,
+  batchSize = sqrt(n.iter),
+  dataSTRN = NULL,
+  adaptive = FALSE,
+  adaptive.lag = 500,
+  adaptive.fun = function(x) {     ifelse(x > 0.234, 1.3, 0.7) },
+  parallel = TRUE,
+  intermediate = NULL,
+  filename = "intermediate.Rdata",
+  previous = NULL
+)
 }
 \arguments{
 \item{result}{An object obtained after a STRN fit}
@@ -70,9 +82,9 @@ The Temperatures text for CTE can be:
 \itemize{
   \item \code{TimeWeighted.temperature.mean}
   \item \code{TSP.TimeWeighted.temperature.mean}
-  \item \code{TSP.MassWeighted.temperature.mean}
+  \item \code{TSP.GrowthWeighted.temperature.mean}
   \item \code{TSP.STRNWeighted.temperature.mean}
-  \item \code{TSP.MassWeighted.STRNWeighted.temperature.mean}
+  \item \code{TSP.GrowthWeighted.STRNWeighted.temperature.mean}
   \item \code{MiddleThird.TimeWeighted.temperature.mean}
 }
 They are explained in the \code{\link{info.nests}} function.\cr
@@ -103,7 +115,7 @@ fp <- c(Rho25=100)
 fitSTRN <- STRN(Initial_STRN, EmbryoGrowthTRN=resultNest_4p_SSM4p, tsd=Med_Cc, 
                 Sexed=sexed, Males=males, 
                 fixed.parameters=fp,  
-                Temperatures="TSP.MassWeighted.STRNWeighted.temperature.mean")
+                Temperatures="TSP.GrowthWeighted.STRNWeighted.temperature.mean")
 pMCMC <- TRN_MHmcmc_p(fitSTRN, accept=TRUE)
 pMCMC[, "Density"] <- "dunif"
 pMCMC[, "Prior2"] <- pMCMC[, "Max"]<- 10000

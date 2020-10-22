@@ -4,8 +4,12 @@
 \alias{HatchingSuccess.MHmcmc_p}
 \title{Generates set of parameters to be used with HatchingSuccess.MHmcmc()}
 \usage{
-HatchingSuccess.MHmcmc_p(result = NULL, parameters = NULL,
-  fixed.parameters = NULL, accept = FALSE)
+HatchingSuccess.MHmcmc_p(
+  result = NULL,
+  parameters = NULL,
+  fixed.parameters = NULL,
+  accept = FALSE
+)
 }
 \arguments{
 \item{result}{An object obtained after a HatchingSuccess.fit() fit}
@@ -34,7 +38,7 @@ totalIncubation_Cc <- subset(DatabaseTSD,
                                !is.na(Total) & Total != 0)
 
 par <- c(S.low=0.5, S.high=0.3, 
-         P.low=25, deltaP=10, MaxHS=logit(0.8))
+         P.low=25, deltaP=10, MaxHS=0.8)
          
 g <- HatchingSuccess.fit(par=par, data=totalIncubation_Cc)
 pMCMC <- HatchingSuccess.MHmcmc_p(g, accept=TRUE)
@@ -43,14 +47,15 @@ mcmc <- HatchingSuccesss.MHmcmc(result=g, parameters = pMCMC,
 }
 }
 \seealso{
-Other Hatching success: \code{\link{HatchingSuccess.MHmcmc}},
-  \code{\link{HatchingSuccess.fit}},
-  \code{\link{HatchingSuccess.lnL}},
-  \code{\link{HatchingSuccess.model}},
-  \code{\link{logLik.HatchingSuccess}},
-  \code{\link{nobs.HatchingSuccess}},
-  \code{\link{plot.HatchingSuccess}},
-  \code{\link{predict.HatchingSuccess}}
+Other Hatching success: 
+\code{\link{HatchingSuccess.MHmcmc}()},
+\code{\link{HatchingSuccess.fit}()},
+\code{\link{HatchingSuccess.lnL}()},
+\code{\link{HatchingSuccess.model}()},
+\code{\link{logLik.HatchingSuccess}()},
+\code{\link{nobs.HatchingSuccess}()},
+\code{\link{plot.HatchingSuccess}()},
+\code{\link{predict.HatchingSuccess}()}
 }
 \author{
 Marc Girondot

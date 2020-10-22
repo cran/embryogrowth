@@ -4,9 +4,11 @@
 \alias{GenerateTest}
 \title{Generate a data.frame that can be used as test value for searchR()}
 \usage{
-
-  GenerateTest(series = stop("A result object or names of series must be provided"),
-  size = NULL, previous = NULL)
+GenerateTest(
+  series = stop("A result object or names of series must be provided"),
+  size = NULL,
+  previous = NULL
+)
 }
 \arguments{
 \item{series}{Name of series or object from searchR()}

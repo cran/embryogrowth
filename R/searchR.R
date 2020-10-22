@@ -78,7 +78,6 @@
 #' resultNest_mcmc_6p_SSM6p <- GRTRN_MHmcmc(result=resultNest_6p_SSM6p,  
 #' 	parametersMCMC=pMCMC, n.iter=10000, n.chains = 1, n.adapt = 0,  
 #' 	thin=1, trace=TRUE)
-#' data(resultNest_mcmc_6p_SSM6p)
 #' # compare_AIC() is a function from the package "HelpersMG"
 #' compare_AIC(test1=resultNest_4p_SSM4p, test2=resultNest_6p_SSM6p)
 #' ############ with new parametrization

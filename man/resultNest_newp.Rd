@@ -5,7 +5,9 @@
 \name{resultNest_newp}
 \alias{resultNest_newp}
 \title{Fit using the nest database with anchored parameters}
-\format{A list with fitted information from data(nest) with anchored parameters}
+\format{
+A list with fitted information from data(nest) with anchored parameters
+}
 \usage{
 resultNest_newp
 }

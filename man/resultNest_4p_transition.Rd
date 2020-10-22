@@ -5,7 +5,9 @@
 \name{resultNest_4p_transition}
 \alias{resultNest_4p_transition}
 \title{Result of the fit using the nest database using transition}
-\format{A list with fitted information about data(nest)}
+\format{
+A list with fitted information about data(nest)
+}
 \usage{
 resultNest_4p_transition
 }

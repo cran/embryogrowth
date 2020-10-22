@@ -5,7 +5,9 @@
 \name{resultNest_6p_SSM6p}
 \alias{resultNest_6p_SSM6p}
 \title{Fit using the nest database}
-\format{A list with fitted information about data(nest)}
+\format{
+A list with fitted information about data(nest)
+}
 \usage{
 resultNest_6p_SSM6p
 }

@@ -16,8 +16,8 @@ Fit a parametric function that describes dependency of embryo growth to temperat
 \tabular{ll}{
  Package: \tab embryogrowth\cr
  Type: \tab Package\cr
- Version: \tab 7.6 build 994\cr
- Date: \tab 2019-08-30\cr
+ Version: \tab 8.0 build 1133\cr
+ Date: \tab 2020-10-22\cr
  License: \tab GPL (>= 2)\cr
  LazyLoad: \tab yes\cr
  }
@@ -91,7 +91,7 @@ new_result <- ChangeSSM(resultmcmc = resultNest_mcmc_4p_SSM4p, result = resultNe
 par(mar=c(4, 4, 1, 5)+0.4)
 
 plotR(result = resultNest_4p_SSM4p, parameters = new_result$par, 
-           ylabH = "Temperatures\\ndensity", ylimH=c(0, 0.3), atH=c(0, 0.1, 0.2), 
+           ylabH = "Temperatures\ndensity", ylimH=c(0, 0.3), atH=c(0, 0.1, 0.2), 
            ylim=c(0, 3), show.hist=TRUE)
       
 # Beautiful density plots
@@ -147,7 +147,7 @@ Girondot, M., & Kaska, Y. (2014). Nest temperatures in a loggerhead-
          than air temperature. Journal of Thermal Biology, 47, 13-18.
 }
 \author{
-Marc Girondot \email{marc.girondot@u-psud.fr}
+Marc Girondot \email{marc.girondot@universite-paris-saclay.fr}
 }
 \keyword{Ecology}
 \keyword{Embryo}

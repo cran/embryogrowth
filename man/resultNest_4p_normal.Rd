@@ -5,7 +5,9 @@
 \name{resultNest_4p_normal}
 \alias{resultNest_4p_normal}
 \title{Result of the fit using the nest database using asymmetric normal function}
-\format{A list with fitted information about data(nest)}
+\format{
+A list with fitted information about data(nest)
+}
 \usage{
 resultNest_4p_normal
 }

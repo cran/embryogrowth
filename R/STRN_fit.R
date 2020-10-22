@@ -1,6 +1,7 @@
 .STRN_fit <- function(par, fixed.parameters=NULL, 
                       equation=equation, 
                       TSP.borders, embryo.stages, 
+                      TSP.begin=0, TSP.end=0.5, 
                       EmbryoGrowthTRN, tsd, Sexed, Males, Temperatures, 
                       zero = 1E-9, 
                       parallel) {
@@ -18,6 +19,7 @@
                         series=serafaire, 
                         embryo.stages=embryo.stages, 
                         TSP.borders=TSP.borders, 
+                        TSP.begin=TSP.begin, TSP.end=TSP.end, 
                         SexualisationTRN=parSTRN, 
                         out="summary", replicate.CI = 0, 
                         progress=FALSE, 

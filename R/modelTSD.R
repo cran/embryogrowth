@@ -3,7 +3,13 @@
   #  names(parx) <- colnames(par)
   #  par <- parx
   # embryogrowth:::.modelTSD(par, temperatures, equation)
-  if (equation=="logistic")	p <- 1/(1+exp((1/par["S"])*(par["P"]-temperatures)))
+  if (equation=="logistic")	{
+    if (any(names(par)=="P_low")) {
+      p <- 1/(1+exp((1/par["S_low"])*(par["P_low"]-temperatures))) * 1/(1+exp((1/par["S_high"])*(par["P_high"]-temperatures)))
+    } else {
+      p <- 1/(1+exp((1/par["S"])*(par["P"]-temperatures)))
+    }
+  }
   
   if (equation=="a-logistic") {
     
@@ -37,9 +43,17 @@
   }
   
   if (equation=="flexit") {
+    if (any(names(par)=="P_low")) {
+      par_low <- unname(par[c("P_low", "S_low", "K1_low", "K2_low")])
+      names(par_low) <- c("P", "S", "K1", "K2")
+      par_high <- unname(par[c("P_high", "S_high", "K1_high", "K2_high")])
+      names(par_high) <- c("P", "S", "K1", "K2")
+      p <- flexit(x=temperatures, par=par_low)*flexit(x=temperatures, par=par_high)
+    } else {
     p <- flexit(x=temperatures, par=par)
+    }
   }
-  
+
   if (equation == "hill") if (par["P"] <= 0) {p <- rep(Inf, length(temperatures))} else {p <- 1/(1+exp((1/par["S"])*(log(par["P"])-log(temperatures))))}
   if (equation=="hulin") {
     Kx <- par["K1"]*temperatures+par["K2"]

@@ -60,9 +60,19 @@ S <- c("dnorm", par["S"], 1, 0.5, -2, 2, ifelse(is.na(par["S"]), 0.01, par["S"])
 K <- c("dnorm", par["K"], 3, 0.5, -20, 20, ifelse(is.na(par["K"]), 0, par["K"]))
 K1 <- c("dnorm", par["K1"], 20, 0.5, min(-100, par["K1"]-100), max(100, par["K1"]+100), ifelse(is.na(par["K1"]), 1, par["K1"]))
 K2 <- c("dnorm", par["K2"], 20, 0.5, min(-100, par["K2"]-100), max(100, par["K2"]+100), ifelse(is.na(par["K2"]), 1, par["K2"]))
+P_low <- c("dnorm", par["P_low"], 2, 2, 25, 35, ifelse(is.na(par["P_low"]), 29.5, par["P_low"]))
+S_low <- c("dnorm", par["S_low"], 1, 0.5, -2, 2, ifelse(is.na(par["S_low"]), 0.01, par["S_low"]))
+K1_low <- c("dnorm", par["K1_low"], 20, 0.5, min(-100, par["K1_low"]-100), max(100, par["K1_low"]+100), ifelse(is.na(par["K1_low"]), 1, par["K1_low"]))
+K2_low <- c("dnorm", par["K2_low"], 20, 0.5, min(-100, par["K2_low"]-100), max(100, par["K2_low"]+100), ifelse(is.na(par["K2_low"]), 1, par["K2_low"]))
+P_high <- c("dnorm", par["P_high"], 2, 2, 25, 35, ifelse(is.na(par["P_high"]), 29.5, par["P_high"]))
+S_high <- c("dnorm", par["S_high"], 1, 0.5, -2, 2, ifelse(is.na(par["S_high"]), 0.01, par["S_high"]))
+K1_high <- c("dnorm", par["K1_high"], 20, 0.5, min(-100, par["K1_high"]-100), max(100, par["K1_high"]+100), ifelse(is.na(par["K1_high"]), 1, par["K1_high"]))
+K2_high <- c("dnorm", par["K2_high"], 20, 0.5, min(-100, par["K2_high"]-100), max(100, par["K2_high"]+100), ifelse(is.na(par["K2_high"]), 1, par["K2_high"]))
 
 
-priors <- list(P=P, S=S, K=K, K1=K1, K2=K2)
+priors <- list(P=P, S=S, K=K, K1=K1, K2=K2, 
+               P_low=P_low, S_low=S_low, K1_low=K1_low, K2_low=K2_low, 
+               P_high=P_high, S_high=S_high, K1_high=K1_high, K2_high=K2_high)
 
 prencours <- NULL
 

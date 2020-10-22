@@ -14,8 +14,9 @@
 #' @param fixed.parameters Another set of parameters if result is not provided.
 #' @param SE Standard error for each parameter if not present in result is not provided
 #' @param hessian A hessian matrix
-#' @param CI How to estimate CI for embryo growth thermal reaction norm; can be NULL, "SE", "MCMC", or "Hessian".
+#' @param GTRN.CI How to estimate CI for embryo growth thermal reaction norm; can be NULL, "SE", "MCMC", or "Hessian".
 #' @param SexualisationTRN.CI How to estimate CI of sexualisation thermal reaction norm. Can be NULL, "SE", "MCMC", or "Hessian".
+#' @param SexualisationTRN.mcmc MCMC object for STRN.
 #' @param derivate Function used to fit embryo growth: dydt.Gompertz, dydt.exponential or dydt.linear
 #' @param test Mean and SD of size of hatchlings as a vector ie test=c(Mean=xx, SD=yy)
 #' @param M0 Measure of hatchling size proxi at laying date
@@ -47,8 +48,8 @@
 #' with(out, plot(Time/(60*24), Incubation.length.mean/(60*24), 
 #'      xlab="Days along the season", 
 #'      ylab="Incubation duration", 
-#'      type="l", bty="n", las=1, ylim=c(74, 76)))
-#' with(out, plot(Time/(60*24), TSP.MassWeighted.STRNWeighted.temperature.mean, 
+#'      type="l", bty="n", las=1, ylim=c(70, 80)))
+#' with(out, plot(Time/(60*24), TSP.GrowthWeighted.STRNWeighted.temperature.mean, 
 #'      xlab="Days along the season", 
 #'      ylab=expression("CTE for sex ratio in "*degree*"C"), 
 #'       type="l", bty="n", las=1, ylim=c(30, 31)))
@@ -61,9 +62,9 @@
 MovingIncubation <-
   function(NestsResult=NULL, 
            resultmcmc=NULL,
-           temperatures.df=stop("A data.frame with timeseries of temperatures must be provided"),
+           temperatures.df=stop("A data.frame must be provided"),
            metabolic.heating=0, 
-           CI="Hessian",
+           GTRN.CI="Hessian",
            temperature.heterogeneity=0, 
            average.incubation.duration=60*1440,
            skip = 1, parameters=NULL, fixed.parameters=NULL, SE=NULL, 
@@ -72,121 +73,129 @@ MovingIncubation <-
            embryo.stages="Caretta caretta.SCL", 
            SexualisationTRN=NULL,
            SexualisationTRN.CI="Hessian",
+           SexualisationTRN.mcmc=NULL,
            replicate.CI=1, 
            parallel=TRUE, 
            progressbar=TRUE) {
-
-# NestsResult=NULL; resultmcmc=NULL;temperatures.df=NULL; 
-# metabolic.heating=0;CI="Hessian"; temperature.heterogeneity=0;
-# average.incubation.duration=60*1440; skip = 1; parameters=NULL; 
-# fixed.parameters=NULL; SE=NULL; hessian=NULL; derivate=NULL; test=NULL; 
-# M0=NULL; TSP.borders=c(21, 26); embryo.stages="Caretta caretta.SCL"; 
-# SexualisationTRN=NULL; SexualisationTRN.CI="Hessian"; 
-# replicate.CI=1; parallel=TRUE
-
-# maintenant il n'est plus possible qu'il n'y ait pas de temperatures
-#  
-    if (!is.null(CI)) CI <- tolower(CI)
-    if (!is.null(SexualisationTRN.CI)) SexualisationTRN.CI <- tolower(SexualisationTRN.CI)
+    
+    # NestsResult=NULL; resultmcmc=NULL;temperatures.df=NULL; 
+    # metabolic.heating=0;GTRN.CI="Hessian"; temperature.heterogeneity=0;
+    # average.incubation.duration=60*1440; skip = 1; parameters=NULL; 
+    # fixed.parameters=NULL; SE=NULL; hessian=NULL; derivate=NULL; test=NULL; 
+    # M0=NULL; TSP.borders=c(21, 26); embryo.stages="Caretta caretta.SCL"; 
+    # SexualisationTRN=NULL; SexualisationTRN.CI="Hessian"; SexualisationTRN.mcmc=NULL
+    # replicate.CI=1; parallel=TRUE
+    
+    # maintenant il n'est plus possible qu'il n'y ait pas de temperatures
+    #  
+    if (!is.null(GTRN.CI)) {
+      GTRN.CI <- tolower(GTRN.CI)
+      GTRN.CI <- match.arg(GTRN.CI, choices = c("se", "mcmc", "hessian"))
+    }
+    if (!is.null(SexualisationTRN.CI)) {
+      SexualisationTRN.CI <- tolower(SexualisationTRN.CI)
+      SexualisationTRN.CI <- match.arg(SexualisationTRN.CI, choices = c("se", "mcmc", "hessian"))
+    }
     
     if (is.list(SexualisationTRN)) SexualisationTRN <- SexualisationTRN$par
-
-
-if (is.null(test)) {
-# si tous sont pareils, je reprends les memes
-# Correction d'un bug, rajout de [[1]] dans result$test["Mean"][[1]][1] 30/7/2012
-	if (all(NestsResult$test["Mean"]==NestsResult$test["Mean"][[1]][1]) & all(NestsResult$test["SD"]==NestsResult$test["SD"][[1]][1])) {
-		test <- c(Mean=NestsResult$test["Mean"][[1]][1], SD=NestsResult$test["SD"][[1]][1])
-	} else {	
-		stop("The size at hatching must be provided.")
-	}
-}
-
-times <- temperatures.df$Time
-temperatures <- temperatures.df$Temperature
-if (metabolic.heating == 0) {
-if (is.null(temperatures.df$Temperature.end.incubation)) {
-  temperatures.end.incubation <- temperatures
-} else {
-  temperatures.end.incubation <- temperatures.df$Temperature.end.incubation
-}
-}
-
-if (is.null(derivate)) derivate <- NestsResult$derivate
-if (is.null(M0))	M0 <- NestsResult$M0
-if (is.null(fixed.parameters)) fixed.parameters <- NestsResult$fixed.parameters
-if (is.null(parameters)) parameters <- NestsResult$par
-
-if (is.null(SexualisationTRN)) SexualisationTRN <- NestsResult$SexualisationTRN
-
-# je peux indiquer des SE en plus de ceux de result
-if (is.null(hessian)) {
-  hessian <- NestsResult$hessian
-  if (is.null(hessian)) {
-    SE <- SEfromHessian(hessian = hessian)
-  }
-}
-if (is.null(SE)) SE <- NestsResult$SE
-
-if (is.null(resultmcmc) & (CI=="mcmc")) {
-  CI <- NULL
-}
-if ((is.null(SE)) & (CI == "se")) {
-  CI <- NULL
-}
-if ((is.null(hessian)) & (CI == "hessian")) {
-  CI <- NULL
-}
-
-# if(all(is.na(SE))) replicate.CI <- 1
-
-nbtp <- length(temperatures)
-
-result.out <- universalmclapply(seq(from=1, to=nbtp-2, by=skip), 
-                                FUN=function(temp) {
-
-    dt <- floor(as.numeric(times[temp:nbtp]-times[temp]))
-
-    tempencours <- temperatures[temp:(temp+length(dt)-1)]
-    if (metabolic.heating ==0 ) {
-    tempnid2 <- temperatures.end.incubation[temp:(temp+length(dt)-1)]
-    # et dans dt j ai le temps
-    tempencours <- tempencours + (tempnid2-tempencours)*(dt/average.incubation.duration)
+    
+    
+    if (is.null(test)) {
+      # si tous sont pareils, je reprends les memes
+      # Correction d'un bug, rajout de [[1]] dans result$test["Mean"][[1]][1] 30/7/2012
+      if (all(NestsResult$test["Mean"]==NestsResult$test["Mean"][[1]][1]) & all(NestsResult$test["SD"]==NestsResult$test["SD"][[1]][1])) {
+        test <- c(Mean=NestsResult$test["Mean"][[1]][1], SD=NestsResult$test["SD"][[1]][1])
+      } else {	
+        stop("The size at hatching must be provided.")
+      }
     }
-    df <- data.frame(Time=dt, temp=tempencours)
-    formated <- FormatNests(df)
     
-    out.incubation <- info.nests(parameters=parameters, fixed.parameters = fixed.parameters,
-               SE=SE, temperatures = formated, derivate=derivate, test=test, 
-               stopattest = TRUE, M0=M0, TSP.borders=TSP.borders, 
-               CI=CI, 
-               hessian = hessian, 
-               SexualisationTRN.CI=SexualisationTRN.CI, 
-               embryo.stages=embryo.stages, 
-               metabolic.heating=metabolic.heating, 
-               temperature.heterogeneity=temperature.heterogeneity, 
-               SexualisationTRN=SexualisationTRN, progress = FALSE, 
-               replicate.CI=replicate.CI, out="summary", warnings=FALSE, 
-               resultmcmc=resultmcmc, parallel=FALSE)$summary
+    times <- temperatures.df$Time
+    temperatures <- temperatures.df$Temperature
+    if (metabolic.heating == 0) {
+      if (is.null(temperatures.df$Temperature.end.incubation)) {
+        temperatures.end.incubation <- temperatures
+      } else {
+        temperatures.end.incubation <- temperatures.df$Temperature.end.incubation
+      }
+    }
     
-    # metric.end.incubation=c(Temp=test$Mean),
-    return(cbind(Time=times[temp], out.incubation, row.names=NULL))
-    }, 
-  mc.cores = ifelse(parallel, detectCores(), 1), 
-clusterEvalQ=expression(library(embryogrowth)), 
-clusterExport=list(varlist=c("nbtp", "times", 
-                             "temperatures", "metabolic.heating", 
-                             "temperatures.end.incubation", "average.incubation.duration", 
-                             "resultmcmc", "replicate.CI", "parameters", "fixed.parameters", 
-                             "SE", "derivate", "test", "M0", "TSP.borders", "embryo.stages", 
-                             "temperature.heterogeneity", "SexualisationTRN", "skip"), 
-                   envir = environment()), 
-progressbar = progressbar)
-
-
-df <- data.frame(matrix(unlist(result.out), ncol=37, byrow=TRUE))
-colnames(df) <- colnames(result.out[[1]])
-
-return(df)
-
-}
+    if (is.null(derivate)) derivate <- NestsResult$derivate
+    if (is.null(M0))	M0 <- NestsResult$M0
+    if (is.null(fixed.parameters)) fixed.parameters <- NestsResult$fixed.parameters
+    if (is.null(parameters)) parameters <- NestsResult$par
+    
+    if (is.null(SexualisationTRN)) SexualisationTRN <- NestsResult$SexualisationTRN
+    
+    # je peux indiquer des SE en plus de ceux de result
+    if (is.null(hessian)) {
+      hessian <- NestsResult$hessian
+      if (is.null(hessian)) {
+        SE <- SEfromHessian(hessian = hessian)
+      }
+    }
+    if (is.null(SE)) SE <- NestsResult$SE
+    
+    if (is.null(resultmcmc) & (GTRN.CI=="mcmc")) {
+      GTRN.CI <- NULL
+    }
+    if ((is.null(SE)) & (GTRN.CI == "se")) {
+      GTRN.CI <- NULL
+    }
+    if ((is.null(hessian)) & (GTRN.CI == "hessian")) {
+      GTRN.CI <- NULL
+    }
+    
+    # if(all(is.na(SE))) replicate.CI <- 1
+    
+    nbtp <- length(temperatures)
+    
+    result.out <- universalmclapply(seq(from=1, to=nbtp-2, by=skip), 
+                                    FUN=function(temp) {
+                                      
+                                      dt <- floor(as.numeric(times[temp:nbtp]-times[temp]))
+                                      
+                                      tempencours <- temperatures[temp:(temp+length(dt)-1)]
+                                      if (metabolic.heating == 0) {
+                                        tempnid2 <- temperatures.end.incubation[temp:(temp+length(dt)-1)]
+                                        # et dans dt j ai le temps
+                                        tempencours <- tempencours + (tempnid2-tempencours)*(dt/average.incubation.duration)
+                                      }
+                                      df <- data.frame(Time=dt, temp=tempencours)
+                                      formated <- FormatNests(df)
+                                      
+                                      out.incubation <- info.nests(parameters=parameters, fixed.parameters = fixed.parameters,
+                                                                   SE=SE, temperatures = formated, derivate=derivate, test=test, 
+                                                                   stopattest = TRUE, M0=M0, TSP.borders=TSP.borders, 
+                                                                   GTRN.CI=GTRN.CI, 
+                                                                   hessian = hessian, 
+                                                                   SexualisationTRN.CI=SexualisationTRN.CI, 
+                                                                   embryo.stages=embryo.stages, 
+                                                                   metabolic.heating=metabolic.heating, 
+                                                                   temperature.heterogeneity=temperature.heterogeneity, 
+                                                                   SexualisationTRN=SexualisationTRN, SexualisationTRN.mcmc=SexualisationTRN.mcmc, 
+                                                                   progress = FALSE, 
+                                                                   replicate.CI=replicate.CI, out="summary", warnings=FALSE, 
+                                                                   resultmcmc=resultmcmc, parallel=FALSE)$summary
+                                      
+                                      # metric.end.incubation=c(Temp=test$Mean),
+                                      return(cbind(Time=times[temp], out.incubation, row.names=NULL))
+                                    }, 
+                                    mc.cores = ifelse(parallel, detectCores(), 1), 
+                                    clusterEvalQ=expression(library(embryogrowth)), 
+                                    clusterExport=list(varlist=c("nbtp", "times", 
+                                                                 "temperatures", "metabolic.heating", 
+                                                                 "temperatures.end.incubation", "average.incubation.duration", 
+                                                                 "resultmcmc", "replicate.CI", "parameters", "fixed.parameters", 
+                                                                 "SE", "derivate", "test", "M0", "TSP.borders", "embryo.stages", 
+                                                                 "temperature.heterogeneity", "SexualisationTRN", "skip"), 
+                                                       envir = environment()), 
+                                    progressbar = progressbar)
+    
+    
+    df <- data.frame(matrix(unlist(result.out), ncol=41, byrow=TRUE))
+    colnames(df) <- colnames(result.out[[1]])
+    
+    return(df)
+    
+  }

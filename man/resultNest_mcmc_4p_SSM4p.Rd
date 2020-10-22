@@ -5,7 +5,9 @@
 \name{resultNest_mcmc_4p_SSM4p}
 \alias{resultNest_mcmc_4p_SSM4p}
 \title{Result of the mcmc using the nest database}
-\format{A list of class mcmcComposite with mcmc result for data(nest) with 4 parameters and Gompertz model of growth}
+\format{
+A list of class mcmcComposite with mcmc result for data(nest) with 4 parameters and Gompertz model of growth
+}
 \usage{
 resultNest_mcmc_4p_SSM4p
 }

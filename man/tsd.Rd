@@ -4,13 +4,24 @@
 \alias{tsd}
 \title{Estimate the parameters that best describe temperature-dependent sex determination}
 \usage{
-tsd(df = NULL, males = NULL, females = NULL, N = NULL,
-  temperatures = NULL, durations = NULL, l = 0.05,
+tsd(
+  df = NULL,
+  males = NULL,
+  females = NULL,
+  N = NULL,
+  temperatures = NULL,
+  durations = NULL,
+  l = 0.05,
   parameters.initial = c(P = NA, S = -2, K = 0, K1 = 1, K2 = 0),
-  males.freq = TRUE, fixed.parameters = NULL, equation = "logistic",
-  replicate.CI = 10000, range.CI = 0.95,
-  replicate.NullDeviance = 1000, control = list(maxit = 1000),
-  print = TRUE)
+  males.freq = TRUE,
+  fixed.parameters = NULL,
+  equation = "logistic",
+  replicate.CI = 10000,
+  range.CI = 0.95,
+  replicate.NullDeviance = 1000,
+  control = list(maxit = 1000),
+  print = TRUE
+)
 }
 \arguments{
 \item{df}{A dataframe with at least two columns named males, females or N and temperatures, Incubation.temperature or durations column}
@@ -153,7 +164,7 @@ compare_AIC(Logistic=eo_logistic, Hill=eo_Hill, Alogistic=eo_Alogistic,
              flexit=eo_flexit)
 ## Note that SE for lower limit of TRT is wrong
 plot(eo_flexit)
-## To get correct confidence interval, check \\code{tsd_MHmcmc()}. 
+## To get correct confidence interval, check \code{tsd_MHmcmc()}. 
              
 ### Note the asymmetry of the Double-A-logistic and flexit models
 predict(eo_Double_Alogistic, 
@@ -178,7 +189,95 @@ cm <- subset(DatabaseTSD, Species=="Chelonia mydas" & !is.na(Sexed), c("Males", 
 tsd(subset(cm, subset=RMU=="Pacific, SW"))
 tsd(subset(cm, subset=RMU=="Pacific, Northwest"))
 tsd(subset(cm, subset=RMU=="Atlantic, S Caribbean"))
-                                       
+
+### Eretmochelys imbricata
+Ei_PacificSW <- subset(DatabaseTSD, RMU=="Pacific, SW" & 
+                       Species=="Eretmochelys imbricata")
+Ei_AtlanticW <- subset(DatabaseTSD, RMU=="Atlantic, W (Caribbean and E USA)" & 
+                       Species=="Eretmochelys imbricata")
+Ei_AtlanticSW <- subset(DatabaseTSD, RMU=="Atlantic, SW" & 
+                       Species=="Eretmochelys imbricata")
+Ei_PacSW <- tsd(Ei_PacificSW)
+Ei_AtlW <- tsd(Ei_AtlanticW)
+Ei_AtlSW <- tsd(Ei_AtlanticSW)
+
+plot(Ei_PacSW, xlim=c(27, 33), show.PTRT = FALSE, main=expression(italic("Eretmochelys imbricata")))
+par(new=TRUE)
+plot(Ei_AtlW, xlim=c(27, 33), col="red", xlab="", ylab="", 
+     axes=FALSE, xaxt="n", show.PTRT = FALSE, errbar.col="red")
+par(new=TRUE)
+plot(Ei_AtlSW, xlim=c(27, 33), col="blue", xlab="", ylab="", axes=FALSE, 
+     xaxt="n", show.PTRT = FALSE, errbar.col="blue")
+legend("topright", legend=c("Pacific, SW", "Atlantic, W", "Atlantic, SW"), lty=1, 
+col=c("black", "red", "blue"))
+
+### Chelonia mydas
+Cm_PacificSW <- subset(DatabaseTSD, RMU=="Pacific, SW" & !is.na(Sexed) & 
+                       Species=="Chelonia mydas")
+Cm_PacificNW <- subset(DatabaseTSD, RMU=="Pacific, NW" &  !is.na(Sexed) & 
+                       Species=="Chelonia mydas")
+Cm_AtlanticSC <- subset(DatabaseTSD, RMU=="Atlantic, S Caribbean" &  !is.na(Sexed) & 
+                       Species=="Chelonia mydas")
+Cm_IndianSE <- subset(DatabaseTSD, RMU=="Indian, SE" &  !is.na(Sexed) & 
+                       Species=="Chelonia mydas")
+Cm_PacSW <- tsd(Cm_PacificSW)
+Cm_PacNW <- tsd(Cm_PacificNW)
+Cm_IndSE <- tsd(Cm_IndianSE)
+Cm_AtlSC <- tsd(Cm_AtlanticSC)
+
+plot(Cm_PacSW, xlim=c(24, 34), show.PTRT = FALSE, main=expression(italic("Chelonia mydas")))
+par(new=TRUE)
+plot(Cm_PacNW, xlim=c(24, 34), col="red", xlab="", ylab="", 
+     axes=FALSE, xaxt="n", show.PTRT = FALSE, errbar.col="red")
+par(new=TRUE)
+plot(Cm_IndSE, xlim=c(24, 34), col="blue", xlab="", ylab="", 
+     axes=FALSE, xaxt="n", show.PTRT = FALSE, errbar.col="blue")
+par(new=TRUE)
+plot(Cm_AtlSC, xlim=c(24, 34), col="green", xlab="", ylab="", 
+     axes=FALSE, xaxt="n", show.PTRT = FALSE, errbar.col="green")
+
+# To fit a TSDII or FMF TSD pattern, you must indicate P_low, S_low, P_high, and S_high
+# for logistic model and P_low, S_low, K1_low, K2_low, P_high, S_high, K1_high, and K2_high for 
+# flexit model
+# The model must be 0-1 for low and 1-0 for high with P_low < P_high
+
+Chelydra_serpentina <- subset(DatabaseTSD, !is.na(Sexed) & (Sexed != 0) & 
+                       Species=="Chelydra serpentina")
+                       
+model_TSDII <- tsd(Chelydra_serpentina, males.freq=FALSE, 
+                   parameters.initial=c(P_low=21, S_low=0.3, P_high=28, S_high=-0.4), 
+                   equation="logistic")
+plot(model_TSDII, lab.TRT = "TRT l = 5 \%")
+priors <- tsd_MHmcmc_p(result=model_TSDII, accept=TRUE)
+out_mcmc <- tsd_MHmcmc(result=model_TSDII, n.iter=10000, parametersMCMC=priors)
+plot(model_TSDII, resultmcmc=out_mcmc, lab.TRT = "TRT l = 5 \%")
+predict(model_TSDII, temperatures=25:35)
+
+# Podocnemis expansa
+Podocnemis_expansa <- subset(DatabaseTSD, !is.na(Sexed) & (Sexed != 0) & 
+                       Species=="Podocnemis expansa")
+Podocnemis_expansa_Valenzuela_2001 <- subset(Podocnemis_expansa, 
+                   Reference=="Valenzuela, 2001")
+PeL2001 <- tsd(df=Podocnemis_expansa_Valenzuela_2001)
+# The pivotal temperature is 32.133 °C (CI 95\% 31.495;32.766)
+# In Valenzuela, 2001: "Using data from the present study alone, 
+# the critical temperature was 32.2 °C by both methods and the 95\% 
+# confidence limits were 31.4 °C and 32.9 °C."
+# Data are close but not identical to what was published.
+
+# The pivotal temperature calculated by maximum likelihood and by inverse 
+# prediction from logistic regression, was 32.6°C using raw data from 
+# 1991 (N. Valenzuela, unpublished data) and from this study. The lower 
+# and upper 95\% confidence limits of the pivotal temperature were 32.2°C 
+# and 33.2°C,
+
+Podocnemis_expansa_Valenzuela_1997 <- subset(Podocnemis_expansa, 
+                   subset=(((Reference=="Lance et al., 1992; Valenzuela et al., 1997") | 
+                   (Reference=="Valenzuela, 2001")) & 
+                   (!is.na(Sexed)) & (Sexed != 0)))
+
+PeL1997 <- tsd(df=Podocnemis_expansa_Valenzuela_1997)
+
 }
 }
 \references{
@@ -189,11 +288,16 @@ Godfrey, M.H., Delmas, V., Girondot, M., 2003. Assessment of patterns of tempera
 Hulin, V., Delmas, V., Girondot, M., Godfrey, M.H., Guillon, J.-M., 2009. Temperature-dependent sex determination and global change: are some species at greater risk? Oecologia 160, 493-506.
 }
 \seealso{
-Other Functions for temperature-dependent sex determination: \code{\link{DatabaseTSD}},
-  \code{\link{P_TRT}}, \code{\link{TSP.list}},
-  \code{\link{plot.tsd}}, \code{\link{predict.tsd}},
-  \code{\link{stages}}, \code{\link{tsd_MHmcmc_p}},
-  \code{\link{tsd_MHmcmc}}
+Other Functions for temperature-dependent sex determination: 
+\code{\link{DatabaseTSD.version}()},
+\code{\link{DatabaseTSD}},
+\code{\link{P_TRT}()},
+\code{\link{TSP.list}},
+\code{\link{plot.tsd}()},
+\code{\link{predict.tsd}()},
+\code{\link{stages}},
+\code{\link{tsd_MHmcmc_p}()},
+\code{\link{tsd_MHmcmc}()}
 }
 \author{
 Marc Girondot

@@ -38,9 +38,9 @@
 #' \itemize{
 #'   \item \code{TimeWeighted.temperature.mean}
 #'   \item \code{TSP.TimeWeighted.temperature.mean}
-#'   \item \code{TSP.MassWeighted.temperature.mean}
+#'   \item \code{TSP.GrowthWeighted.temperature.mean}
 #'   \item \code{TSP.STRNWeighted.temperature.mean}
-#'   \item \code{TSP.MassWeighted.STRNWeighted.temperature.mean}
+#'   \item \code{TSP.GrowthWeighted.STRNWeighted.temperature.mean}
 #'   \item \code{MiddleThird.TimeWeighted.temperature.mean}
 #' }
 #' They are explained in the \code{\link{info.nests}} function.\cr
@@ -67,7 +67,7 @@
 #' fitSTRN <- STRN(Initial_STRN, EmbryoGrowthTRN=resultNest_4p_SSM4p, tsd=Med_Cc, 
 #'                 Sexed=sexed, Males=males, 
 #'                 fixed.parameters=fp,  
-#'                 Temperatures="TSP.MassWeighted.STRNWeighted.temperature.mean")
+#'                 Temperatures="TSP.GrowthWeighted.STRNWeighted.temperature.mean")
 #' pMCMC <- TRN_MHmcmc_p(fitSTRN, accept=TRUE)
 #' pMCMC[, "Density"] <- "dunif"
 #' pMCMC[, "Prior2"] <- pMCMC[, "Max"]<- 10000

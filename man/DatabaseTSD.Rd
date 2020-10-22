@@ -5,7 +5,9 @@
 \name{DatabaseTSD}
 \alias{DatabaseTSD}
 \title{Database of TSD information for reptiles}
-\format{A dataframe with raw data.}
+\format{
+A dataframe with raw data.
+}
 \usage{
 DatabaseTSD
 }
@@ -46,7 +48,7 @@ Database of TSD information for marine turtles
 \dontrun{
 library(embryogrowth)
 data(DatabaseTSD)
-DatabaseTSD$Version[1]
+DatabaseTSD.version()
 totalIncubation_Lo <- subset(DatabaseTSD, 
          Species=="Lepidochelys olivacea" & (!is.na(Sexed) & Sexed!=0), 
          select=c("Males", "Females", "Incubation.temperature"))
@@ -58,6 +60,8 @@ tot_Lo <- with(totalIncubation_Lo, tsd(males=Males, females=Females,
 \references{
 Binckley C.A., Spotila J.R., Wilson K.S. and Paladino F.V. (1998) Sex determination and sex ratios of Pacific Leatherback Turtles, Dermochelys coriacea. Copeia, 1998(2), 291-300.
 
+Booth DT (1998) Incubation of turtle eggs at different temperatures: do embryos compensate for temperature during development? Physiological Zoology 71: 23-26
+
 Castheloge, V.D., de D. dos Santos, M.R., de Castilhos, J.C., de J. Filho, P.R., de C. Gomes, L., Clemente-Carvalho, R.B.G., Ferreira, P.D., 2018. Pivotal temperature and hatcHling sex ratio of olive ridley sea turtles Lepidochelys olivacea from the South Atlantic coast of Brazil. Herpetological Conservation and Biology 13, 488-496.
 
 Crastz F. (1982) Embryological stages of the marine turtle Lepidochelys olivacea (Eschscholtz). Rev. Biol. Trop., 30, 113-120.
@@ -65,6 +69,8 @@ Crastz F. (1982) Embryological stages of the marine turtle Lepidochelys olivacea
 De Souza, R.R., Vogt, R.C., 1994. Incubation temperature influences sex and hatchling size in the neotropical turtle Podocnemis unifilis. Journal of Herpetology 28, 453-464.
 
 Dimond, M.T., 1985. Some effects of temperature on turtle egg incubation, in: Goel, S.C., Srivastava, C.B.L. (Eds.), Recent Advances in Developmental Biology of Animals. Indian Society of Developmental Biologists, Poona, India, pp. 35-39.
+
+Dobbs KA, Miller JD, Limpus C, Landry AM, Jr (2010) Hawksbill turtle hatchling sex ratios and incubation and pivotal temperatures from Milman Island, Great Barrier Reef, Australia. Marine Turtle Newsletter 128: 12-16
 
 Emer, S.A., 2007. Temperature-dependent sex determination in Manouria emys emys, the asian forest tortoise, College of Arts and Sciences. Georgia State University, Atlanta, GE, p. 60.
 
@@ -116,6 +122,8 @@ Mrosovsky N., Dutton P.H. and Whitmore C.P. (1984) Sex ratios of two species of 
 
 Mrosovsky N., Bass A., Corliss L.A., Richardson J.I. and Richardson T.H. (1992) Pivotal and beach temperature for hawksbill turtles nesting in Antigua. Can. J. Zool., 70, 1920-1925.
 
+NNavarro Sánchez, E.J., 2015. Efecto de la temperatura de incubación y la diferenciación sexual sobre la morfología de crías de tortuga marina Lepidochelys olivacea, Ciencias del mar y limnología. Universidad Nacional Autónoma de México, México, D.F., p. 89.
+
 Rimblot F., Fretey J., Mrosovsky N., Lescure J. and Pieau C. (1985) Sexual differentiation as a function of the incubation temperature of eggs in the sea-turtle Dermochelys coriacea (Vandelli, 1761). Amphibia-Reptilia, 85(6), 83-92.
 
 Rimblot-Baly F., Lescure J., Fretey J. and Pieau C. (1986-1987) Sensibilité à la température de la differenciation sexuelle chez la tortue Luth, Dermochelys coriacea (Vandelli, 1761); application des données de l'incubation artificielle à l'étude de la sex-ratio dans la nature. Annales des Sciences Naturelles, Zoologie, 8, 277-290.
@@ -141,11 +149,16 @@ Yntema C.L. and Mrosovsky N. (1980) Sexual differentiation in hatchling loggerhe
 Yntema C.L. and Mrosovsky N. (1982) Critical periods and pivotal temperatures for sexual differentiation in loggerhead sea turtles. Canadian Journal of Zoology-Revue Canadienne De Zoologie, 60(5), 1012-1016.
 }
 \seealso{
-Other Functions for temperature-dependent sex determination: \code{\link{P_TRT}},
-  \code{\link{TSP.list}}, \code{\link{plot.tsd}},
-  \code{\link{predict.tsd}}, \code{\link{stages}},
-  \code{\link{tsd_MHmcmc_p}}, \code{\link{tsd_MHmcmc}},
-  \code{\link{tsd}}
+Other Functions for temperature-dependent sex determination: 
+\code{\link{DatabaseTSD.version}()},
+\code{\link{P_TRT}()},
+\code{\link{TSP.list}},
+\code{\link{plot.tsd}()},
+\code{\link{predict.tsd}()},
+\code{\link{stages}},
+\code{\link{tsd_MHmcmc_p}()},
+\code{\link{tsd_MHmcmc}()},
+\code{\link{tsd}()}
 }
 \author{
 Marc Girondot \email{marc.girondot@u-psud.fr}

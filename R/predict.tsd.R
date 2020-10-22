@@ -16,7 +16,7 @@
 #' The data.frame has the temperatures or durations in columns and the quantiles in rows.\cr
 #' Note that incubation duration is a very bad proxy for sex ratio. See Georges, 
 #' A., Limpus, C. J. & Stoutjesdijk, R. 1994. Hatchling sex in the marine turtle 
-#' Caretta caretta is determined by proportion of development at a temperature, 
+#' _Caretta caretta_ is determined by proportion of development at a temperature, 
 #' not daily duration of exposure. J. Exp. Zool., 270, 432-444.\cr
 #' If replicate.CI is 0 or NULL, point estimate for maximum likelihood is returned.
 #' @family Functions for temperature-dependent sex determination

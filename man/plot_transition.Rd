@@ -4,8 +4,7 @@
 \alias{plot_transition}
 \title{Show fonction used for transition}
 \usage{
-plot_transition(result = NULL, parameters = NULL, sizes = c(0, 40),
-  ...)
+plot_transition(result = NULL, parameters = NULL, sizes = c(0, 40), ...)
 }
 \arguments{
 \item{result}{A result object}

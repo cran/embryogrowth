@@ -7,10 +7,12 @@
 #' @param replicates Number of replicates to estimate the confidence interval.
 #' @param object The return of a fit done with HatchingSuccesss.fit().
 #' @param resultmcmc Results obtained using HatchingSuccesss.MHmcmc()
-
+#' @param chain Chain to use in resultmcmc
 #' @param ... Not used
 #' @description Set of functions to study the hatching success.\cr
-#' If replicates is NULL or 0, it returns the fitted model.\cr
+#' If replicates is 0, it returns only the fitted model.\cr
+#' If replicates is null and resultmcmc is not null, it will use all the mcmc data.\cr
+#' if replicates is lower than the number of iterations in resultmcmc, it will use sequence of data regularly thined.
 #' @family Hatching success
 #' @examples
 #' \dontrun{
@@ -21,7 +23,7 @@
 #'                                !is.na(Total) & Total != 0)
 #' 
 #' par <- c(S.low=0.5, S.high=0.3, 
-#'          P.low=25, deltaP=10, MaxHS=logit(0.8))
+#'          P.low=25, deltaP=10, MaxHS=0.8)
 #'          
 #' HatchingSuccess.lnL(x=par, data=totalIncubation_Cc)
 #' 
@@ -40,7 +42,7 @@
 predict.HatchingSuccess <- function(object, ..., 
                                     temperature=NULL, 
                                     probs=c(0.025, 0.5, 0.975), 
-                                    replicates=NULL, resultmcmc=NULL) {
+                                    replicates=NULL, resultmcmc=NULL, chain=1) {
   
   par <- c(object$par, object$fixed.parameters)
   
@@ -53,10 +55,11 @@ predict.HatchingSuccess <- function(object, ...,
   
   if (!is.null(resultmcmc)) {
     
-    par <- resultmcmc$resultMCMC[[1]]
+    par <- resultmcmc$resultMCMC[[chain]]
     if (!is.null(replicates)) {
       if (replicates<nrow(par)) {
-        par <- par[sample(x=1:nrow(par), size = replicates)]
+        par <- par[round(seq(from=1, to=nrow(par), length.out =  replicates)), ]
+        
       }
     }
     replicates <- nrow(par)
@@ -84,7 +87,9 @@ predict.HatchingSuccess <- function(object, ...,
         }
         
         for (c in 1:replicates) {
-          CI[, c] <- HatchingSuccess.model(par=par[c, ], temperature)
+          parec <- par[c, ]
+          names(parec) <- colnames(object$hessian)
+          CI[, c] <- HatchingSuccess.model(par=parec, temperature)
         }
       } else {
         warning("The package lmf should be present to better estimate confidence interval taking into account covariances.")
@@ -102,7 +107,7 @@ predict.HatchingSuccess <- function(object, ...,
   }
   
   CIq <- apply(CI, MARGIN = 1, FUN = function(x) {quantile(x, probs = probs)})
-  if (class(CIq)=="numeric") CIq <- matrix(data=CIq, ncol=length(temperature))
+  if (any(class(CIq)=="numeric")) CIq <- matrix(data=CIq, ncol=length(temperature))
   colnames(CIq) <- as.character(temperature)
   
   return(CIq)

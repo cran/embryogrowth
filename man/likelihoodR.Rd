@@ -4,10 +4,19 @@
 \alias{likelihoodR}
 \title{Estimate the likelihood of a set of parameters for nest incubation data}
 \usage{
-likelihoodR(result = NULL, parameters = NULL,
-  fixed.parameters = NULL, temperatures = NULL, derivate = NULL,
-  test = NULL, M0 = NULL, hessian = FALSE, weight = NULL,
-  parallel = TRUE, echo = TRUE)
+likelihoodR(
+  result = NULL,
+  parameters = NULL,
+  fixed.parameters = NULL,
+  temperatures = NULL,
+  derivate = NULL,
+  test = NULL,
+  M0 = NULL,
+  hessian = FALSE,
+  weight = NULL,
+  parallel = TRUE,
+  echo = TRUE
+)
 }
 \arguments{
 \item{result}{A object obtained after searchR or likelihoodR}

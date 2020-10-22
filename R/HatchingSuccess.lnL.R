@@ -19,7 +19,7 @@
 #'                                !is.na(Total) & Total != 0)
 #' 
 #' par <- c(S.low=0.5, S.high=0.3, 
-#'          P.low=25, deltaP=10, MaxHS=logit(0.8))
+#'          P.low=25, deltaP=10, MaxHS=0.8)
 #'          
 #' HatchingSuccess.lnL(par=par, data=totalIncubation_Cc)
 #' 
@@ -45,7 +45,13 @@ HatchingSuccess.lnL <- function(par, data, fixed.parameters=NULL,
   # S.high, deltaP logistic haute
   # MaxHS
   model <- HatchingSuccess.model(par=c(par, fixed.parameters), temperature=data[, column.Incubation.temperature])
+  model <- ifelse(model == 0, 1E-9, model)
+  model <- ifelse(model == 1, 1 - 1E-9, model)
   lnL <- -sum(dbinom(x = data[, column.Hatched], size=data[, column.Hatched]+data[, column.NotHatched], prob=model, log=TRUE))
+  if (is.infinite(lnL)) {
+    # print(par)
+    lnL <- 1E9
+  }
   return(lnL)
 }
 

@@ -15,19 +15,23 @@
 #' @param pch.observations Character used for observation (no observations if NULL)
 #' @param cex.observations Size of characters for observations
 #' @param show.CI.observations Should the confidence interval of the observations be shown ?
-#' @param col.mean Color of the mean model
-#' @param lty.mean Line type of the mean model (no line if NULL)
-#' @param lwd.mean Line width of the mean model
+#' @param col.ML Color of the maximum likelihood model
+#' @param lty.ML Line type of the maximum likelihood model (no line if NULL)
+#' @param lwd.ML Line width of the maximum likelihood model
 #' @param col.median Color of the median model
 #' @param lty.median Line type of the median model (no line if NULL)
 #' @param lwd.median Line width of the mean model
 #' @param col.CI Color of the 95\% confidence interval lines
 #' @param lty.CI Line type of the 95\% confidence interval lines (no line if NULL)
 #' @param lwd.CI Line width of the 95\% confidence interval lines
+#' @param polygon If TRUE, confidence interval is shown as a polygon
+#' @param color.polygon The color used for polygon
+#' @param what Indicate what to plot: "observations", "ML", "CI"
 #' @param ... Parameters for plot()
 #' @description Plot the estimates that best describe hatching success.\cr
-#' If resultmcmc is given and replicates is null, it will use all information to 
-#' estimate confidence interval.
+#' If replicates is 0, it returns only the fitted model.\cr
+#' If replicates is null and resultmcmc is not null, it will use all the mcmc data.\cr
+#' if replicates is lower than the number of iterations in resultmcmc, it will use sequence of data regularly thined.
 #' @examples
 #' \dontrun{
 #' library(embryogrowth)
@@ -65,29 +69,49 @@ plot.HatchingSuccess <- function(x, xlim=c(20, 40), ylim=c(0, 1),
                                  ylab="Hatching success", bty="n", las=1, 
                                  col.observations="red", pch.observations=19, cex.observations=1,
                                  show.CI.observations=TRUE, 
-                                 col.mean="black", lty.mean=1, lwd.mean=1,
+                                 col.ML="black", lty.ML=1, lwd.ML=1,
                                  col.median="black", lty.median=2, lwd.median=1,
                                  col.CI="black", lty.CI=3, lwd.CI=1,
-                                 replicates=NULL, resultmcmc=NULL, ...) {
+                                 replicates=NULL, resultmcmc=NULL, 
+                                 polygon=TRUE, color.polygon=rgb(red = 0.8, green = 0, blue=0, alpha = 0.1), 
+                                 what=c("observations", "ML", "CI"), ...) {
+  
+  # xlim=c(20, 40); ylim=c(0, 1)
+  # xlab="Constant incubation temperatures"
+  # ylab="Hatching success"; bty="n"; las=1 
+  # col.observations="red"; pch.observations=19; cex.observations=1
+  # show.CI.observations=TRUE
+  # col.ML="black"; lty.ML=1; lwd.ML=1
+  # col.median="black"; lty.median=2; lwd.median=1
+  # col.CI="black"; lty.CI=3; lwd.CI=1
+  # replicates=NULL; resultmcmc=NULL
+  # polygon=TRUE; color.polygon=rgb(red = 0.8, green = 0, blue=0, alpha = 0.1) 
+  # what=c("observations", "ML", "CI")
+  # p3p <- list()
   
   p3p <- list(...)
+  
+  what <- tolower(what)
+  what <- match.arg(what, choices = c("observations", "ml", "ci"), several.ok = TRUE)
   
   temperatures <- seq(from=xlim[1], to=xlim[2], length.out = 100)
   CIq <- predict(x, temperature=temperatures, replicates=0)
   
-  if (!is.null(lty.mean)) {
-    type.mean <- "l"
+  if ((!is.null(lty.ML)) & any(what %in% "ml")) {
+    type.ML <- "l"
   } else {
-    type.mean <- "n"
+    type.ML <- "n"
   }
+  
+  
   p3p <- modifyList(p3p, list(x=temperatures, 
                               y=HatchingSuccess.model(par=x$par, temperature = temperatures), 
-                              xlim=xlim, type=type.mean, xlab=xlab, ylab=ylab, bty=bty, las=las, 
-                              ylim=ylim, col=col.mean, lty=lty.mean, lwd=lwd.mean))
+                              xlim=xlim, type=type.ML, xlab=xlab, ylab=ylab, bty=bty, las=las, 
+                              ylim=ylim, col=col.ML, lty=lty.ML, lwd=lwd.ML))
   
   do.call(plot, args=p3p)
   
-  if (!is.null(pch.observations)) {
+  if (!is.null(pch.observations) & any(what %in% "observations")) {
     
     points(x = x$data[, x$column.Incubation.temperature], 
            y = x$data[, x$column.Hatched]/(x$data[, x$column.Hatched]+x$data[, x$column.NotHatched]), 
@@ -96,49 +120,51 @@ plot.HatchingSuccess <- function(x, xlim=c(20, 40), ylim=c(0, 1),
       ciO <- getFromNamespace(x=".BinomialConfidence", ns="HelpersMG")(x=x$data[, x$column.Hatched], 
                                                                        n=x$data[, x$column.Hatched]+x$data[, x$column.NotHatched])
       for (i in 1:length(x$data[, x$column.Incubation.temperature])) {
+        col.observations <- rep(col.observations, length(x$data[, x$column.Incubation.temperature]))[1:length(x$data[, x$column.Incubation.temperature])]
         segments(x0=x$data[i, x$column.Incubation.temperature], 
                  x1=x$data[i, x$column.Incubation.temperature], 
-                 y0=ciO[i, 1], y1=ciO[i, 2], col=col.observations)
+                 y0=ciO[i, 2], y1=ciO[i, 3], col=col.observations[i])
         tick <- ScalePreviousPlot()$xlim["range"]/60
         segments(x0=x$data[i, x$column.Incubation.temperature]-tick, 
                  x1=x$data[i, x$column.Incubation.temperature]+tick, 
-                 y0=ciO[i, 1], y1=ciO[i, 1], col=col.observations)
+                 y0=ciO[i, 2], y1=ciO[i, 2], col=col.observations[i])
         segments(x0=x$data[i, x$column.Incubation.temperature]-tick, 
                  x1=x$data[i, x$column.Incubation.temperature]+tick, 
-                 y0=ciO[i, 2], y1=ciO[i, 2], col=col.observations)
+                 y0=ciO[i, 3], y1=ciO[i, 3], col=col.observations[i])
       }
     }
   }
   
   
   show.CI <- TRUE
-  if (is.null(resultmcmc)) {
-    if (is.null(replicates)) {
-      show.CI <- FALSE
-    } else {
-      if (replicates == 0) {
+  if (any(what %in% "ci")) {
+    if (is.null(resultmcmc)) {
+      if (is.null(replicates)) {
         show.CI <- FALSE
+      } else {
+        if (replicates == 0) show.CI <- FALSE
       }
     }
+  } else {
+    show.CI <- FALSE
   }
-    
-    if (show.CI) {
+  
+  if (show.CI) {
     CIq <- predict(x, temperature=temperatures, replicates=replicates, resultmcmc=resultmcmc)
     
+    if ((polygon) & (!is.null(lty.CI))) {
+      polygon(x=c(temperatures, rev(temperatures)), y=c(CIq["2.5%", ], rev(CIq["97.5%", ])), 
+              lty=lty.CI, lwd=lwd.CI, col=color.polygon)
+    } else {
+      if (!is.null(lty.CI)) {
+        lines(x = temperatures, y=CIq["2.5%", ], lty=lty.CI, lwd=lwd.CI)
+        lines(x = temperatures, y=CIq["97.5%", ], lty=lty.CI, lwd=lwd.CI)
+      }
+    }
     if (!is.null(lty.median)) {
-      lines(x = temperatures, y=CIq["2.5%", ], lty=lty.median, lwd=lwd.median)
-      lines(x = temperatures, y=CIq["97.5%", ], lty=lty.median, lwd=lwd.median)
+      lines(x = temperatures, y=CIq["50%", ], lty=lty.median, lwd=lwd.median)
     }
-    if (!is.null(lty.CI)) {
-      lines(x = temperatures, y=CIq["50%", ], lty=lty.CI, lwd=lwd.CI)
-    }
-    }
-
-  return()
+  }
+  
+  # return(invisible())
 }
-
-
-
-
-
-

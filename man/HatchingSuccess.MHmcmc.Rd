@@ -4,14 +4,23 @@
 \alias{HatchingSuccess.MHmcmc}
 \title{Metropolis-Hastings algorithm for hatching success}
 \usage{
-
-  HatchingSuccess.MHmcmc(result = stop("Give a result of HatchingSuccesss.fit()"),
-  n.iter = 10000, parametersMCMC = NULL, n.chains = 1, n.adapt = 0,
-  thin = 1, trace = FALSE, traceML = FALSE,
-  batchSize = sqrt(n.iter), adaptive = FALSE, adaptive.lag = 500,
+HatchingSuccess.MHmcmc(
+  result = stop("Give a result of HatchingSuccesss.fit()"),
+  n.iter = 10000,
+  parametersMCMC = NULL,
+  n.chains = 1,
+  n.adapt = 0,
+  thin = 1,
+  trace = FALSE,
+  traceML = FALSE,
+  batchSize = sqrt(n.iter),
+  adaptive = FALSE,
+  adaptive.lag = 500,
   adaptive.fun = function(x) {     ifelse(x > 0.234, 1.3, 0.7) },
-  intermediate = NULL, filename = "intermediate.Rdata",
-  previous = NULL)
+  intermediate = NULL,
+  filename = "intermediate.Rdata",
+  previous = NULL
+)
 }
 \arguments{
 \item{result}{An object obtained after a SearchR fit}
@@ -83,14 +92,15 @@ mcmc <- HatchingSuccess.MHmcmc(result=g, parameters = pMCMC,
 }
 }
 \seealso{
-Other Hatching success: \code{\link{HatchingSuccess.MHmcmc_p}},
-  \code{\link{HatchingSuccess.fit}},
-  \code{\link{HatchingSuccess.lnL}},
-  \code{\link{HatchingSuccess.model}},
-  \code{\link{logLik.HatchingSuccess}},
-  \code{\link{nobs.HatchingSuccess}},
-  \code{\link{plot.HatchingSuccess}},
-  \code{\link{predict.HatchingSuccess}}
+Other Hatching success: 
+\code{\link{HatchingSuccess.MHmcmc_p}()},
+\code{\link{HatchingSuccess.fit}()},
+\code{\link{HatchingSuccess.lnL}()},
+\code{\link{HatchingSuccess.model}()},
+\code{\link{logLik.HatchingSuccess}()},
+\code{\link{nobs.HatchingSuccess}()},
+\code{\link{plot.HatchingSuccess}()},
+\code{\link{predict.HatchingSuccess}()}
 }
 \author{
 Marc Girondot

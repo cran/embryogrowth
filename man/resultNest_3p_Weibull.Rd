@@ -5,7 +5,9 @@
 \name{resultNest_3p_Weibull}
 \alias{resultNest_3p_Weibull}
 \title{Result of the fit using the nest database using Weibull function}
-\format{A list with fitted information about data(nest)}
+\format{
+A list with fitted information about data(nest)
+}
 \usage{
 resultNest_3p_Weibull
 }

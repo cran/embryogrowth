@@ -4,15 +4,27 @@
 \alias{STRN}
 \title{Estimate the parameters that best describe the sexualisation thermal reaction norm within the TSP}
 \usage{
-STRN(Initial_STRN = NULL, fixed.parameters = NULL,
+STRN(
+  Initial_STRN = NULL,
+  fixed.parameters = NULL,
   EmbryoGrowthTRN = stop("Embryo Growth Thermal Reaction Norm must be provided"),
-  TSP.borders = NULL, embryo.stages = "Generic.ProportionDevelopment",
-  tsd = NULL, equation = "logistic", Sexed = NULL, Males = NULL,
+  TSP.borders = NULL,
+  embryo.stages = "Generic.ProportionDevelopment",
+  TSP.begin = 0,
+  TSP.end = 0.5,
+  tsd = NULL,
+  equation = "logistic",
+  Sexed = NULL,
+  Males = NULL,
   Females = NULL,
-  Temperatures = "TSP.MassWeighted.STRNWeighted.temperature.mean",
-  SE = TRUE, parallel = TRUE, itnmax = 1000,
-  method = c("Nelder-Mead", "BFGS"), control = list(trace = 1, REPORT =
-  10), zero = 1e-09)
+  Temperatures = "TSP.GrowthWeighted.STRNWeighted.temperature.mean",
+  SE = TRUE,
+  parallel = TRUE,
+  itnmax = 1000,
+  method = c("Nelder-Mead", "BFGS"),
+  control = list(trace = 1, REPORT = 10),
+  zero = 1e-09
+)
 }
 \arguments{
 \item{Initial_STRN}{Values for initial model of Sexualisation Thermal Reaction Norm}
@@ -24,6 +36,10 @@ STRN(Initial_STRN = NULL, fixed.parameters = NULL,
 \item{TSP.borders}{The limits of TSP in stages. See embryo.stages parameter.}
 
 \item{embryo.stages}{The embryo stages. At least TSP.borders stages must be provided to estimate TSP borders. See note.}
+
+\item{TSP.begin}{Where TSP begin during the stage of beginning? In relative proportion of the stage.}
+
+\item{TSP.end}{Where TSP begin during the stage of ending? In relative proportion of the stage.}
 
 \item{tsd}{The model used to predict sex ratio, obtained from tsd()}
 
@@ -57,11 +73,17 @@ Estimate the parameters that best describe the sexualisation thermal reaction no
 The Temperatures parameter is a character string which can be:\cr
 \itemize{
   \item \code{TimeWeighted.temperature.mean}
+  \item \code{GrowthWeighted.temperature.mean}
+  \item \code{GrowthRateWeighted.temperature.mean}
   \item \code{TSP.TimeWeighted.temperature.mean}
-  \item \code{TSP.MassWeighted.temperature.mean}
+  \item \code{TSP.GrowthWeighted.temperature.mean}
+  \item \code{TSP.GrowthRateWeighted.temperature.mean}
   \item \code{TSP.STRNWeighted.temperature.mean}
-  \item \code{TSP.MassWeighted.STRNWeighted.temperature.mean}
+  \item \code{TSP.GrowthWeighted.STRNWeighted.temperature.mean}
+  \item \code{TSP.GrowthRateWeighted.STRNWeighted.temperature.mean}
   \item \code{MiddleThird.TimeWeighted.temperature.mean}
+  \item \code{MiddleThird.GrowthWeighted.temperature.mean}
+  \item \code{MiddleThird.GrowthRateWeighted.temperature.mean}
   }
 If information for sex is not known for some timeseries, set NA for Sexed.\cr
 Sexed, Males and Females must be vectors with names. The names must be the same as 
@@ -102,7 +124,7 @@ fitSTRN <- STRN(Initial_STRN=Initial_STRN,
                 Sexed=sexed, Males=males, 
                 fixed.parameters=fp, 
                 SE=TRUE, 
-                Temperatures="TSP.MassWeighted.STRNWeighted.temperature.mean")
+                Temperatures="TSP.GrowthWeighted.STRNWeighted.temperature.mean")
 plotR(fitSTRN, curves ="ML quantiles", ylim=c(0,2))
 CTE <- info.nests(NestsResult=resultNest_4p_SSM4p, 
                   SexualisationTRN=fitSTRN,
@@ -115,13 +137,13 @@ CTE <- info.nests(NestsResult=resultNest_4p_SSM4p,
                   out="summary")$summary
 # CTE with growth-weighted temperature average
 plot(Med_Cc, xlim=c(25, 35))
-points(x=CTE$TSP.MassWeighted.temperature.mean, y=males/sexed, 
+points(x=CTE$TSP.GrowthWeighted.temperature.mean, y=males/sexed, 
          col="red", pch=19)
 legend("topright", legend=c("CTE with growth-weighted TRN"), 
          pch=19, col=c("red"))
 # CTE with sexualisation TRN and growth-weighted temperature average
 plot(Med_Cc, xlim=c(25, 35))
-points(x=CTE$TSP.MassWeighted.STRNWeighted.temperature.mean, y=males/sexed, 
+points(x=CTE$TSP.GrowthWeighted.STRNWeighted.temperature.mean, y=males/sexed, 
          col="red", pch=19)
 legend("topright", legend=c("CTE with growth-weighted TRN and Sex. TRN"), 
        pch=19, col=c("red"))

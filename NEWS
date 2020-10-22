@@ -1,5 +1,34 @@
 THIS IS THE CHANGELOG OF THE "embryogrowth" PACKAGE
 
+            CHANGES IN VERSION 8.0 (2020-10-22)
+
+* TSP.begin and TSP.end are used in STRN - 7.7.1 (2020-02-22)
+* MassWeighted is replaced by GrowthWeighted in info.nests() - 7.7.2 (2020-02-23)
+* New outputs in info.nests() with GrowthRateWeighted - 7.7.2 (2020-02-23)
+* Minor changes in plot.tsd() and P_TRT() - 7.7.3 (2020-06-10)
+* Add flexit in tsd in shiny - 7.7.4 (2020-06-27)
+* when mcmc result is given with P_TRT() and the number of replicate.ci is equal to the number of iteration, no resampling is done - 7.7.5 (2020-08-12)
+* Improvement of the hatchling success model - 7.8 (2020-09-17)
+* Improvement of databaseTSD for Eretmochelys imbricata - 7.8.1 & 7.8.2 (2020-09-23 & 2020-09-24)
+* New hessian parameter in HatchingSuccess.fit - 7.8.3 (2020-10-07)
+* tsd function can now fit TSDII or FMF pattern - 7.9 (2020-10-11)
+* DatabaseTSD.version() returns the date of the most recent update of the database TSD - 7.9 (2020-10-19)
+* fixed.parameters works again in tsd - 8.0 (2020-10-20)
+
+            CHANGES IN VERSION 7.7 (2020-01-15)
+
+* Correct a strange erratic problem in P_TRT() - 7.6.1
+* Correct a problem when replicate.CI was not taken into account with resultmcmc in P_TRT() - 7.6.2
+* Parameter CI replaced by GTRN.CI in info.nests() - 7.6.3
+* Better management of replicate.CI in info.nests() - 7.6.3
+* Minor changes in info.nests() and moving.incubation() - 7.6.4
+* Major changes in hatching success model - 7.6.5
+* Correct a bug in predict.HatchingSuccess() with MCMC - 7.6.6
+* New version of TSD database - 7.6.7
+* New function movement() - 7.7
+* replicate.NullDeviance was not taken into account in tsd() - 7.7
+* New CRAN version - 7.7 (2020-01-15)
+
             CHANGES IN VERSION 7.6 (2019-08-30)
           
 * New function to study data logger precision: uncertainty.datalogger - 7.3

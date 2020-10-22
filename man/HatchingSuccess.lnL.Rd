@@ -4,9 +4,14 @@
 \alias{HatchingSuccess.lnL}
 \title{Return -log likelihood of the data and the parameters}
 \usage{
-HatchingSuccess.lnL(par, data, fixed.parameters = NULL,
+HatchingSuccess.lnL(
+  par,
+  data,
+  fixed.parameters = NULL,
   column.Incubation.temperature = "Incubation.temperature",
-  column.Hatched = "Hatched", column.NotHatched = "NotHatched")
+  column.Hatched = "Hatched",
+  column.NotHatched = "NotHatched"
+)
 }
 \arguments{
 \item{par}{A set of parameters.}
@@ -39,7 +44,7 @@ totalIncubation_Cc <- subset(DatabaseTSD,
                                !is.na(Total) & Total != 0)
 
 par <- c(S.low=0.5, S.high=0.3, 
-         P.low=25, deltaP=10, MaxHS=logit(0.8))
+         P.low=25, deltaP=10, MaxHS=0.8)
          
 HatchingSuccess.lnL(par=par, data=totalIncubation_Cc)
 
@@ -55,14 +60,15 @@ plot(g)
 }
 }
 \seealso{
-Other Hatching success: \code{\link{HatchingSuccess.MHmcmc_p}},
-  \code{\link{HatchingSuccess.MHmcmc}},
-  \code{\link{HatchingSuccess.fit}},
-  \code{\link{HatchingSuccess.model}},
-  \code{\link{logLik.HatchingSuccess}},
-  \code{\link{nobs.HatchingSuccess}},
-  \code{\link{plot.HatchingSuccess}},
-  \code{\link{predict.HatchingSuccess}}
+Other Hatching success: 
+\code{\link{HatchingSuccess.MHmcmc_p}()},
+\code{\link{HatchingSuccess.MHmcmc}()},
+\code{\link{HatchingSuccess.fit}()},
+\code{\link{HatchingSuccess.model}()},
+\code{\link{logLik.HatchingSuccess}()},
+\code{\link{nobs.HatchingSuccess}()},
+\code{\link{plot.HatchingSuccess}()},
+\code{\link{predict.HatchingSuccess}()}
 }
 \author{
 Marc Girondot

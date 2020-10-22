@@ -4,8 +4,15 @@
 \alias{predict.HatchingSuccess}
 \title{Return prediction based on a model fitted with HatchingSuccess.fit()}
 \usage{
-\method{predict}{HatchingSuccess}(object, ..., temperature = NULL,
-  probs = c(0.025, 0.5, 0.975), replicates = NULL, resultmcmc = NULL)
+\method{predict}{HatchingSuccess}(
+  object,
+  ...,
+  temperature = NULL,
+  probs = c(0.025, 0.5, 0.975),
+  replicates = NULL,
+  resultmcmc = NULL,
+  chain = 1
+)
 }
 \arguments{
 \item{object}{The return of a fit done with HatchingSuccesss.fit().}
@@ -19,13 +26,17 @@
 \item{replicates}{Number of replicates to estimate the confidence interval.}
 
 \item{resultmcmc}{Results obtained using HatchingSuccesss.MHmcmc()}
+
+\item{chain}{Chain to use in resultmcmc}
 }
 \value{
 Return a matrix with prediction based on a model fitted with HatchingSuccess.fit()
 }
 \description{
 Set of functions to study the hatching success.\cr
-If replicates is NULL or 0, it returns the fitted model.\cr
+If replicates is 0, it returns only the fitted model.\cr
+If replicates is null and resultmcmc is not null, it will use all the mcmc data.\cr
+if replicates is lower than the number of iterations in resultmcmc, it will use sequence of data regularly thined.
 }
 \details{
 predict.HatchingSuccess returns prediction based on a model fitted with HatchingSuccessfit()
@@ -39,7 +50,7 @@ totalIncubation_Cc <- subset(DatabaseTSD,
                                !is.na(Total) & Total != 0)
 
 par <- c(S.low=0.5, S.high=0.3, 
-         P.low=25, deltaP=10, MaxHS=logit(0.8))
+         P.low=25, deltaP=10, MaxHS=0.8)
          
 HatchingSuccess.lnL(x=par, data=totalIncubation_Cc)
 
@@ -51,14 +62,15 @@ plot(g)
 }
 }
 \seealso{
-Other Hatching success: \code{\link{HatchingSuccess.MHmcmc_p}},
-  \code{\link{HatchingSuccess.MHmcmc}},
-  \code{\link{HatchingSuccess.fit}},
-  \code{\link{HatchingSuccess.lnL}},
-  \code{\link{HatchingSuccess.model}},
-  \code{\link{logLik.HatchingSuccess}},
-  \code{\link{nobs.HatchingSuccess}},
-  \code{\link{plot.HatchingSuccess}}
+Other Hatching success: 
+\code{\link{HatchingSuccess.MHmcmc_p}()},
+\code{\link{HatchingSuccess.MHmcmc}()},
+\code{\link{HatchingSuccess.fit}()},
+\code{\link{HatchingSuccess.lnL}()},
+\code{\link{HatchingSuccess.model}()},
+\code{\link{logLik.HatchingSuccess}()},
+\code{\link{nobs.HatchingSuccess}()},
+\code{\link{plot.HatchingSuccess}()}
 }
 \author{
 Marc Girondot

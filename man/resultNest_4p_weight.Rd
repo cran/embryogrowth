@@ -5,7 +5,9 @@
 \name{resultNest_4p_weight}
 \alias{resultNest_4p_weight}
 \title{Fit using the nest database with weight}
-\format{A list with fitted information about data(nest)}
+\format{
+A list with fitted information about data(nest)
+}
 \usage{
 resultNest_4p_weight
 }

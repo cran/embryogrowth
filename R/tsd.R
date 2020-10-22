@@ -147,7 +147,95 @@
 #' tsd(subset(cm, subset=RMU=="Pacific, SW"))
 #' tsd(subset(cm, subset=RMU=="Pacific, Northwest"))
 #' tsd(subset(cm, subset=RMU=="Atlantic, S Caribbean"))
-#'                                        
+#' 
+#' ### Eretmochelys imbricata
+#' Ei_PacificSW <- subset(DatabaseTSD, RMU=="Pacific, SW" & 
+#'                        Species=="Eretmochelys imbricata")
+#' Ei_AtlanticW <- subset(DatabaseTSD, RMU=="Atlantic, W (Caribbean and E USA)" & 
+#'                        Species=="Eretmochelys imbricata")
+#' Ei_AtlanticSW <- subset(DatabaseTSD, RMU=="Atlantic, SW" & 
+#'                        Species=="Eretmochelys imbricata")
+#' Ei_PacSW <- tsd(Ei_PacificSW)
+#' Ei_AtlW <- tsd(Ei_AtlanticW)
+#' Ei_AtlSW <- tsd(Ei_AtlanticSW)
+#' 
+#' plot(Ei_PacSW, xlim=c(27, 33), show.PTRT = FALSE, main=expression(italic("Eretmochelys imbricata")))
+#' par(new=TRUE)
+#' plot(Ei_AtlW, xlim=c(27, 33), col="red", xlab="", ylab="", 
+#'      axes=FALSE, xaxt="n", show.PTRT = FALSE, errbar.col="red")
+#' par(new=TRUE)
+#' plot(Ei_AtlSW, xlim=c(27, 33), col="blue", xlab="", ylab="", axes=FALSE, 
+#'      xaxt="n", show.PTRT = FALSE, errbar.col="blue")
+#' legend("topright", legend=c("Pacific, SW", "Atlantic, W", "Atlantic, SW"), lty=1, 
+#' col=c("black", "red", "blue"))
+#' 
+#' ### Chelonia mydas
+#' Cm_PacificSW <- subset(DatabaseTSD, RMU=="Pacific, SW" & !is.na(Sexed) & 
+#'                        Species=="Chelonia mydas")
+#' Cm_PacificNW <- subset(DatabaseTSD, RMU=="Pacific, NW" &  !is.na(Sexed) & 
+#'                        Species=="Chelonia mydas")
+#' Cm_AtlanticSC <- subset(DatabaseTSD, RMU=="Atlantic, S Caribbean" &  !is.na(Sexed) & 
+#'                        Species=="Chelonia mydas")
+#' Cm_IndianSE <- subset(DatabaseTSD, RMU=="Indian, SE" &  !is.na(Sexed) & 
+#'                        Species=="Chelonia mydas")
+#' Cm_PacSW <- tsd(Cm_PacificSW)
+#' Cm_PacNW <- tsd(Cm_PacificNW)
+#' Cm_IndSE <- tsd(Cm_IndianSE)
+#' Cm_AtlSC <- tsd(Cm_AtlanticSC)
+#' 
+#' plot(Cm_PacSW, xlim=c(24, 34), show.PTRT = FALSE, main=expression(italic("Chelonia mydas")))
+#' par(new=TRUE)
+#' plot(Cm_PacNW, xlim=c(24, 34), col="red", xlab="", ylab="", 
+#'      axes=FALSE, xaxt="n", show.PTRT = FALSE, errbar.col="red")
+#' par(new=TRUE)
+#' plot(Cm_IndSE, xlim=c(24, 34), col="blue", xlab="", ylab="", 
+#'      axes=FALSE, xaxt="n", show.PTRT = FALSE, errbar.col="blue")
+#' par(new=TRUE)
+#' plot(Cm_AtlSC, xlim=c(24, 34), col="green", xlab="", ylab="", 
+#'      axes=FALSE, xaxt="n", show.PTRT = FALSE, errbar.col="green")
+#' 
+#' # To fit a TSDII or FMF TSD pattern, you must indicate P_low, S_low, P_high, and S_high
+#' # for logistic model and P_low, S_low, K1_low, K2_low, P_high, S_high, K1_high, and K2_high for 
+#' # flexit model
+#' # The model must be 0-1 for low and 1-0 for high with P_low < P_high
+#' 
+#' Chelydra_serpentina <- subset(DatabaseTSD, !is.na(Sexed) & (Sexed != 0) & 
+#'                        Species=="Chelydra serpentina")
+#'                        
+#' model_TSDII <- tsd(Chelydra_serpentina, males.freq=FALSE, 
+#'                    parameters.initial=c(P_low=21, S_low=0.3, P_high=28, S_high=-0.4), 
+#'                    equation="logistic")
+#' plot(model_TSDII, lab.TRT = "TRT l = 5 %")
+#' priors <- tsd_MHmcmc_p(result=model_TSDII, accept=TRUE)
+#' out_mcmc <- tsd_MHmcmc(result=model_TSDII, n.iter=10000, parametersMCMC=priors)
+#' plot(model_TSDII, resultmcmc=out_mcmc, lab.TRT = "TRT l = 5 %")
+#' predict(model_TSDII, temperatures=25:35)
+#' 
+#' # Podocnemis expansa
+#' Podocnemis_expansa <- subset(DatabaseTSD, !is.na(Sexed) & (Sexed != 0) & 
+#'                        Species=="Podocnemis expansa")
+#' Podocnemis_expansa_Valenzuela_2001 <- subset(Podocnemis_expansa, 
+#'                    Reference=="Valenzuela, 2001")
+#' PeL2001 <- tsd(df=Podocnemis_expansa_Valenzuela_2001)
+#' # The pivotal temperature is 32.133 °C (CI 95% 31.495;32.766)
+#' # In Valenzuela, 2001: "Using data from the present study alone, 
+#' # the critical temperature was 32.2 °C by both methods and the 95% 
+#' # confidence limits were 31.4 °C and 32.9 °C."
+#' # Data are close but not identical to what was published.
+#' 
+#' # The pivotal temperature calculated by maximum likelihood and by inverse 
+#' # prediction from logistic regression, was 32.6°C using raw data from 
+#' # 1991 (N. Valenzuela, unpublished data) and from this study. The lower 
+#' # and upper 95% confidence limits of the pivotal temperature were 32.2°C 
+#' # and 33.2°C,
+#' 
+#' Podocnemis_expansa_Valenzuela_1997 <- subset(Podocnemis_expansa, 
+#'                    subset=(((Reference=="Lance et al., 1992; Valenzuela et al., 1997") | 
+#'                    (Reference=="Valenzuela, 2001")) & 
+#'                    (!is.na(Sexed)) & (Sexed != 0)))
+#' 
+#' PeL1997 <- tsd(df=Podocnemis_expansa_Valenzuela_1997)
+#' 
 #' }
 #' @export
 
@@ -163,10 +251,10 @@ tsd <- function(df=NULL, males=NULL, females=NULL, N=NULL,
                 control=list(maxit=1000),
                 print=TRUE) {
   
-  # df=NULL; males=NULL; females=NULL; N=NULL; temperatures=NULL; durations=NULL; l=0.05; parameters.initial=c(P=NA, S=-0.5, K=0, K1=1, K2=0); males.freq=TRUE; fixed.parameters=NULL; equation="logistic"; replicate.CI=10000; range.CI=0.95; print=TRUE; control=list(maxit=1000)
+  # df=NULL; males=NULL; females=NULL; N=NULL; temperatures=NULL; durations=NULL; l=0.05; parameters.initial=c(P=NA, S=-0.5, K=0, K1=1, K2=0); males.freq=TRUE; fixed.parameters=NULL; equation="logistic"; replicate.CI=10000; range.CI=0.95; print=TRUE; control=list(maxit=1000); replicate.NullDeviance=1000
   # CC_AtlanticSW <- subset(DatabaseTSD, RMU=="Atlantic, SW" & Species=="Caretta caretta" & Sexed!=0)
-  # males=CC_AtlanticSW$Males; females=CC_AtlanticSW$Females; temperatures=CC_AtlanticSW$Incubation.temperature-CC_AtlanticSW$Correction.factor; equation="a-logistic"
-  
+  # males=CC_AtlanticSW$Males; females=CC_AtlanticSW$Females; temperatures=CC_AtlanticSW$Incubation.temperature-CC_AtlanticSW$Correction.factor; equation="logistic"
+  # parameters.initial = c(P=29.19); fixed.parameters = c(S=-0.21)
   equation <- tolower(equation)
   
   if (!is.null(df)) {
@@ -230,7 +318,7 @@ tsd <- function(df=NULL, males=NULL, females=NULL, N=NULL,
   
   
   if (all(males * females == 0)) {
-    stop("At least one incubation temperature should produce mixed sex ratio")
+    warning("At least one incubation temperature should produce mixed sex ratio. Use MCMC rather.")
   }
   
   
@@ -246,33 +334,38 @@ tsd <- function(df=NULL, males=NULL, females=NULL, N=NULL,
     #    limit.low.TRT <- min(temperatures)
     #    limit.high.TRT <- max(temperatures)	
   } else {
-    par <- parameters.initial
-    
-    if (is.na(par["P"])) {
-      if ((equation!="probit") & (equation!="logit")) {
-        par["P"] <- temperatures[which.min(abs((males/(males+females))-0.5))]
-      } else {
-        par["P"] <- 0
+    ppi <- parameters.initial
+    par <- c(parameters.initial, fixed.parameters)
+    if (is.na(par["P_low"])) {
+      if (is.na(par["P"])) {
+        if ((equation!="probit") & (equation!="logit")) {
+          ppi["P"] <- temperatures[which.min(abs((males/(males+females))-0.5))]
+        } else {
+          ppi["P"] <- 0
+        }
       }
+      
+      if (is.na(par["S"])) {
+        if ((equation!="probit")) {
+          pente <- lm(males/(males+females) ~ temperatures)
+          ppi["S"] <- pente$coefficients["temperatures"]
+          if (equation!="flexit") ppi["S"] <- 1/(4*par["S"])
+        } else {
+          ppi["S"] <- 0
+        }
+      }
+      
     }
     
-    if (is.na(par["S"])) {
-      if ((equation!="probit")) {
-        pente <- lm(males/(males+females) ~ temperatures)
-        par["S"] <- pente$coefficients["temperatures"]
-        if (equation!="flexit") par["S"] <- 1/(4*par["S"])
-      } else {
-        par["S"] <- 0
-      }
-    }
+    if (IP) ppi["S"] <- abs(ppi["S"])
     
-    if (IP) par["S"] <- abs(par["S"])
-    
-    if (equation != "a-logistic") par <- par[which(names(par)!="K")]
+    if (equation != "a-logistic") ppi <- ppi[which(names(ppi)!="K")]
     if (equation != "hulin" & equation != "double-a-logistic" & equation != "flexit") {
-      par <- par[which(names(par)!="K1")]
-      par <- par[which(names(par)!="K2")]
+      ppi <- ppi[which(names(ppi)!="K1")]
+      ppi <- ppi[which(names(ppi)!="K2")]
     }
+    
+   par <-  ppi
     
     repeat {
       # result  <- optim(par, embryogrowth:::.tsd_fit, fixed.parameters=fixed.parameters, males=males, N=N, temperatures=temperatures, equation=equation, method="BFGS", hessian=TRUE, control = list(maxit=1000))
@@ -295,7 +388,7 @@ tsd <- function(df=NULL, males=NULL, females=NULL, N=NULL,
     result$BIC <- 2*result$value+ length(par)*log(length(males))
   }
   
-   
+  
   result$range.CI <- range.CI
   result$l <- l
   result$equation <- equation
@@ -310,7 +403,7 @@ tsd <- function(df=NULL, males=NULL, females=NULL, N=NULL,
                                                     prob = males/N, log = TRUE)))
   
   result$df <- length(result$males) - length(result$par)
-  result$pvalue <- 1-pchisq(q=result$deviance, df=result$df)
+  result$pvalue <- pchisq(q=result$deviance, df=result$df, lower.tail = FALSE)
   
   if (equation != "gsd") {
     
@@ -323,21 +416,23 @@ tsd <- function(df=NULL, males=NULL, females=NULL, N=NULL,
     result$P_TRT <- o$P_TRT_quantiles
   }
   
-  probtheor <- getFromNamespace(x=".modelTSD", ns="embryogrowth")(result$par, result$temperatures, 
+  probtheor <- getFromNamespace(x=".modelTSD", ns="embryogrowth")(c(result$par, result$fixed.parameters), 
+                                                                  result$temperatures, 
                                                                   equation=equation)
   result$predictMaleFrequency <- probtheor
   
   if (replicate.NullDeviance != 0) {
     pt <- NULL
-    
-    for (i in 1:1000) {
+    # Bug correct 2020-01-11: change 1000 to replicate.NullDeviance
+    for (i in 1:replicate.NullDeviance) {
       m <- rbinom(n=length(result$males), size=result$N, prob = probtheor)
-      result_dev  <- optim(result$par, getFromNamespace(".tsd_fit", ns="embryogrowth"), 
-                           fixed.parameters=result$fixed.parameters, males=m, N=N, 
-                           temperatures=temperatures, 
-                           equation=equation, method="BFGS", hessian=FALSE, control = control)
+      result_dev  <- optim(par=result$par, fn=getFromNamespace(".tsd_fit", ns="embryogrowth"), 
+                           fixed.parameters=result$fixed.parameters, males=m, N=result$N, 
+                           temperatures=result$temperatures, 
+                           equation=result$equation, method="BFGS", 
+                           hessian=FALSE, control = control)
       deviance_dev <- -2*(-result$value - sum(dbinom(x = m, size=N, 
-                                                        prob = m/N, log = TRUE)))
+                                                     prob = m/N, log = TRUE)))
       
       pt <- c(pt, deviance_dev)
     }
@@ -348,16 +443,38 @@ tsd <- function(df=NULL, males=NULL, females=NULL, N=NULL,
   }
   
   if (equation!="gsd" & print) {
+    if (any(colnames(o$P_TRT_quantiles)=="PT")) {
     if (!is.null(replicate.CI)) {
       print(paste0("The pivotal ", result$type, " is ", sprintf("%.3f",o$P_TRT_quantiles[2, "PT"]), " CI", as.character(range.CI*100), "% ", sprintf("%.3f", min(o$P_TRT_quantiles[1, "PT"], o$P_TRT_quantiles[3, "PT"])), ";", sprintf("%.3f",max(o$P_TRT_quantiles[1, "PT"], o$P_TRT_quantiles[3, "PT"]))))
       print(paste0("The transitional range of ", result$type, "s is ", sprintf("%.3f",o$P_TRT_quantiles[2, "TRT"]), " CI", as.character(range.CI*100), "% ", sprintf("%.3f",min(o$P_TRT_quantiles[1, "TRT"], o$P_TRT_quantiles[3, "TRT"])), ";", sprintf("%.3f",max(o$P_TRT_quantiles[1, "TRT"], o$P_TRT_quantiles[3, "TRT"]))))
       print(paste0("The lower limit of transitional range of ", result$type, "s is ", sprintf("%.3f",o$P_TRT_quantiles[2, "lower.limit.TRT"]), " CI", as.character(range.CI*100), "% ", sprintf("%.3f",min(o$P_TRT_quantiles[1, "lower.limit.TRT"], o$P_TRT_quantiles[3, "lower.limit.TRT"])), ";", sprintf("%.3f", max(o$P_TRT_quantiles[1, "lower.limit.TRT"], o$P_TRT_quantiles[3, "lower.limit.TRT"]))))
-      print(paste0("The higher limit of transitional range of ", result$type, "s is ", sprintf("%.3f",o$P_TRT_quantiles[2, "higher.limit.TRT"]), " CI", as.character(range.CI*100), "% ", sprintf("%.3f",min(o$P_TRT_quantiles[1, "higher.limit.TRT"], o$P_TRT_quantiles[3, "higher.limit.TRT"])), ";", sprintf("%.3f",max(o$P_TRT_quantiles[1, "higher.limit.TRT"], o$P_TRT_quantiles[3, "higher.limit.TRT"]))))
+      print(paste0("The upper limit of transitional range of ", result$type, "s is ", sprintf("%.3f",o$P_TRT_quantiles[2, "higher.limit.TRT"]), " CI", as.character(range.CI*100), "% ", sprintf("%.3f",min(o$P_TRT_quantiles[1, "higher.limit.TRT"], o$P_TRT_quantiles[3, "higher.limit.TRT"])), ";", sprintf("%.3f",max(o$P_TRT_quantiles[1, "higher.limit.TRT"], o$P_TRT_quantiles[3, "higher.limit.TRT"]))))
     } else {
       print(paste0("The pivotal ", result$type, " is ", sprintf("%.3f",o$P_TRT_quantiles[2, "PT"])))
       print(paste0("The transitional range of ", result$type, "s is ", sprintf("%.3f",o$P_TRT_quantiles[2, "TRT"])))
       print(paste0("The lower limit of transitional range of ", result$type, "s is ", sprintf("%.3f",o$P_TRT_quantiles[2, "lower.limit.TRT"])))
-      print(paste0("The higher limit of transitional range of ", result$type, "s is ", sprintf("%.3f",o$P_TRT_quantiles[2, "higher.limit.TRT"])))
+      print(paste0("The upper limit of transitional range of ", result$type, "s is ", sprintf("%.3f",o$P_TRT_quantiles[2, "higher.limit.TRT"])))
+    }
+    } else {
+      if (!is.null(replicate.CI)) {
+        print(paste0("The lower pivotal ", result$type, " is ", sprintf("%.3f",o$P_TRT_quantiles[2, "PT_low"]), " CI", as.character(range.CI*100), "% ", sprintf("%.3f", min(o$P_TRT_quantiles[1, "PT_low"], o$P_TRT_quantiles[3, "PT_low"])), ";", sprintf("%.3f",max(o$P_TRT_quantiles[1, "PT_low"], o$P_TRT_quantiles[3, "PT_low"]))))
+        print(paste0("The lower transitional range of ", result$type, "s is ", sprintf("%.3f",o$P_TRT_quantiles[2, "TRT_low"]), " CI", as.character(range.CI*100), "% ", sprintf("%.3f",min(o$P_TRT_quantiles[1, "TRT_low"], o$P_TRT_quantiles[3, "TRT_low"])), ";", sprintf("%.3f",max(o$P_TRT_quantiles[1, "TRT_low"], o$P_TRT_quantiles[3, "TRT_low"]))))
+        print(paste0("The lower limit of lower transitional range of ", result$type, "s is ", sprintf("%.3f",o$P_TRT_quantiles[2, "lower.limit.TRT_low"]), " CI", as.character(range.CI*100), "% ", sprintf("%.3f",min(o$P_TRT_quantiles[1, "lower.limit.TRT_low"], o$P_TRT_quantiles[3, "lower.limit.TRT_low"])), ";", sprintf("%.3f", max(o$P_TRT_quantiles[1, "lower.limit.TRT_low"], o$P_TRT_quantiles[3, "lower.limit.TRT_low"]))))
+        print(paste0("The upper limit of lower transitional range of ", result$type, "s is ", sprintf("%.3f",o$P_TRT_quantiles[2, "higher.limit.TRT_low"]), " CI", as.character(range.CI*100), "% ", sprintf("%.3f",min(o$P_TRT_quantiles[1, "higher.limit.TRT_low"], o$P_TRT_quantiles[3, "higher.limit.TRT_low"])), ";", sprintf("%.3f",max(o$P_TRT_quantiles[1, "higher.limit.TRT_low"], o$P_TRT_quantiles[3, "higher.limit.TRT_low"]))))
+        print(paste0("The upper pivotal ", result$type, " is ", sprintf("%.3f",o$P_TRT_quantiles[2, "PT_high"]), " CI", as.character(range.CI*100), "% ", sprintf("%.3f", min(o$P_TRT_quantiles[1, "PT_high"], o$P_TRT_quantiles[3, "PT_high"])), ";", sprintf("%.3f",max(o$P_TRT_quantiles[1, "PT_high"], o$P_TRT_quantiles[3, "PT_high"]))))
+        print(paste0("The upper transitional range of ", result$type, "s is ", sprintf("%.3f",o$P_TRT_quantiles[2, "TRT_high"]), " CI", as.character(range.CI*100), "% ", sprintf("%.3f",min(o$P_TRT_quantiles[1, "TRT_high"], o$P_TRT_quantiles[3, "TRT_high"])), ";", sprintf("%.3f",max(o$P_TRT_quantiles[1, "TRT_high"], o$P_TRT_quantiles[3, "TRT_high"]))))
+        print(paste0("The lower limit of upper transitional range of ", result$type, "s is ", sprintf("%.3f",o$P_TRT_quantiles[2, "lower.limit.TRT_high"]), " CI", as.character(range.CI*100), "% ", sprintf("%.3f",min(o$P_TRT_quantiles[1, "lower.limit.TRT_high"], o$P_TRT_quantiles[3, "lower.limit.TRT_high"])), ";", sprintf("%.3f", max(o$P_TRT_quantiles[1, "lower.limit.TRT_high"], o$P_TRT_quantiles[3, "lower.limit.TRT_high"]))))
+        print(paste0("The upper limit of upper transitional range of ", result$type, "s is ", sprintf("%.3f",o$P_TRT_quantiles[2, "higher.limit.TRT_high"]), " CI", as.character(range.CI*100), "% ", sprintf("%.3f",min(o$P_TRT_quantiles[1, "higher.limit.TRT_high"], o$P_TRT_quantiles[3, "higher.limit.TRT_high"])), ";", sprintf("%.3f",max(o$P_TRT_quantiles[1, "higher.limit.TRT_high"], o$P_TRT_quantiles[3, "higher.limit.TRT_high"]))))
+      } else {
+        print(paste0("The lower pivotal ", result$type, " is ", sprintf("%.3f",o$P_TRT_quantiles[2, "PT_low"])))
+        print(paste0("The lower transitional range of ", result$type, "s is ", sprintf("%.3f",o$P_TRT_quantiles[2, "TRT_low"])))
+        print(paste0("The lower limit of lower transitional range of ", result$type, "s is ", sprintf("%.3f",o$P_TRT_quantiles[2, "lower.limit.TRT_low"])))
+        print(paste0("The upper limit of lower transitional range of ", result$type, "s is ", sprintf("%.3f",o$P_TRT_quantiles[2, "higher.limit.TRT_low"])))
+        print(paste0("The upper pivotal ", result$type, " is ", sprintf("%.3f",o$P_TRT_quantiles[2, "PT_high"])))
+        print(paste0("The upper transitional range of ", result$type, "s is ", sprintf("%.3f",o$P_TRT_quantiles[2, "TRT_high"])))
+        print(paste0("The lower limit of upper transitional range of ", result$type, "s is ", sprintf("%.3f",o$P_TRT_quantiles[2, "lower.limit.TRT_high"])))
+        print(paste0("The upper limit of upper transitional range of ", result$type, "s is ", sprintf("%.3f",o$P_TRT_quantiles[2, "higher.limit.TRT_high"])))
+      }
     }
   }
   

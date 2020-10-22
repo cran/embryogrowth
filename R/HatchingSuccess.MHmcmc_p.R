@@ -17,7 +17,7 @@
 #'                                !is.na(Total) & Total != 0)
 #' 
 #' par <- c(S.low=0.5, S.high=0.3, 
-#'          P.low=25, deltaP=10, MaxHS=logit(0.8))
+#'          P.low=25, deltaP=10, MaxHS=0.8)
 #'          
 #' g <- HatchingSuccess.fit(par=par, data=totalIncubation_Cc)
 #' pMCMC <- HatchingSuccess.MHmcmc_p(g, accept=TRUE)
@@ -50,23 +50,49 @@ HatchingSuccess.MHmcmc_p<-function(result=NULL, parameters=NULL, fixed.parameter
 # 7/2/2014, ajout de la nouvelle version des parametres
 # #' par <- c(S.low=0.5, S.high=0.3,  P.low=25, deltaP=10, MaxHS=logit(0.8)) 
   
+  P.low <- abs(allpar["P.low"])
+  deltaP <- abs(allpar["deltaP"])
+  P.high <- abs(allpar["P.high"])
+  
+  S.low <- allpar["S.low"]
+  S.high <- allpar["S.high"]
+  
+  K1.low <- allpar["K1.low"]
+  K1.high <- allpar["K1.high"]
+  K2.low <- allpar["K2.low"]
+  K2.high <- allpar["K2.high"]  
+  
+  if (is.na(P.low)) P.low <- P.high - deltaP
+  if (is.na(P.high)) P.high <- P.low + deltaP
+  if (is.na(deltaP)) deltaP <- P.high - P.low
+  
+  
   # S.low
-  S.low <- c("dunif", 0, par["S.low"]*2, 2, 0, par["S.low"]*2, par["S.low"])
+  S.low <- c("dunif", 0, max(allpar["S.low"]*2, 10), 2, 0, max(allpar["S.low"]*2, 10), par["S.low"])
   
   # S.high
-  S.high <- c("dunif", 0, par["S.high"]*2, 2, 0, par["S.high"]*2, par["S.high"])
+  S.high <- c("dunif", 0, max(allpar["S.high"]*2, 10), 2, 0, max(par["S.high"]*2, 10), par["S.high"])
   
   # P.low
-  P.low <- c("dunif", 0, par["P.low"]*2, 2, 0, par["P.low"]*2, par["P.low"])
+  P.low <- c("dunif", 0, max(P.low * 2, 30), 2, 0, max(P.low * 2, 30), P.low)
+
+  # P.high
+  P.high <- c("dunif", 0, max(P.high * 2, 40), 2, 0, max(P.high * 2, 40), P.high)
   
   # deltaP
-  deltaP <- c("dunif", 0, par["deltaP"]*2, 2, 0, par["deltaP"]*2, par["deltaP"])
+  deltaP <- c("dunif", 0, max(deltaP * 2, 10), 2, 0, max(deltaP * 2, 10), deltaP)
   
   # MaxHS
-  MaxHS <- c("dunif", min(-5, par["MaxHS"]*2), max(5, par["MaxHS"]*2), 2, min(-5, par["MaxHS"]*2), max(5, par["MaxHS"]*2), par["MaxHS"])
+  MaxHS <- c("dunif", 0, 1, 2, 0, 1, par["MaxHS"])
+  
+  K1.low <- c("dunif", min(K1.low * 2, -10), max(K1.low * 2, 10), 2, min(K1.low * 2, -10), max(K1.low * 2, 10), K1.low)
+  K1.high <- c("dunif", min(K1.high * 2, -10), max(K1.high * 2, 10), 2, min(K1.high * 2, -10), max(K1.high * 2, 10), K1.high)
+  K2.low <- c("dunif", min(K2.low * 2, -10), max(K2.low * 2, 10), 2, min(K2.low * 2, -10), max(K2.low * 2, 10), K2.low)
+  K2.high <- c("dunif", min(K2.high * 2, -10), max(K2.high * 2, 10), 2, min(K2.high * 2, -10), max(K2.high * 2, 10), K2.high)
   
   
-priors <- list(S.low=S.low, S.high=S.high, P.low=P.low, deltaP=deltaP, MaxHS=MaxHS)
+priors <- list(S.low=S.low, S.high=S.high, P.low=P.low, P.high=P.high, deltaP=deltaP, MaxHS=MaxHS, 
+               K1.low=K1.low, K1.high=K1.high, K2.low=K2.low, K2.high=K2.high)
 
 prencours <- NULL
 

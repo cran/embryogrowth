@@ -4,7 +4,9 @@
 \name{TSP.list}
 \alias{TSP.list}
 \title{Database of thermosensitive period of development for sex determination}
-\format{A list with dataframes including attributes}
+\format{
+A list with dataframes including attributes
+}
 \usage{
 TSP.list
 }
@@ -45,11 +47,16 @@ temperatures and thermosensitive stages for sex determination in reptiles.
 Amphibia-Reptilia 12, 169-179.
 }
 \seealso{
-Other Functions for temperature-dependent sex determination: \code{\link{DatabaseTSD}},
-  \code{\link{P_TRT}}, \code{\link{plot.tsd}},
-  \code{\link{predict.tsd}}, \code{\link{stages}},
-  \code{\link{tsd_MHmcmc_p}}, \code{\link{tsd_MHmcmc}},
-  \code{\link{tsd}}
+Other Functions for temperature-dependent sex determination: 
+\code{\link{DatabaseTSD.version}()},
+\code{\link{DatabaseTSD}},
+\code{\link{P_TRT}()},
+\code{\link{plot.tsd}()},
+\code{\link{predict.tsd}()},
+\code{\link{stages}},
+\code{\link{tsd_MHmcmc_p}()},
+\code{\link{tsd_MHmcmc}()},
+\code{\link{tsd}()}
 }
 \author{
 Marc Girondot \email{marc.girondot@u-psud.fr}

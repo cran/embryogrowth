@@ -15,7 +15,7 @@
 #'                                !is.na(Total) & Total != 0)
 #' 
 #' par <- c(S.low=0.5, S.high=0.3, 
-#'          P.low=25, deltaP=10, MaxHS=logit(0.8))
+#'          P.low=25, deltaP=10, MaxHS=0.8)
 #'          
 #' HatchingSuccess.lnL(par=par, data=totalIncubation_Cc)
 #' 
@@ -30,8 +30,28 @@
 
 
 HatchingSuccess.model <- function(par, temperature) {
-  P.high <- par["P.low"]+abs(par["deltaP"])
-  model <- (1/(1+exp((1/abs(par["S.low"]))*(par["P.low"]-temperature))))*(1/(1+exp((1/-abs(par["S.high"]))*(P.high-temperature))))*invlogit(par["MaxHS"])
+  P.low <- par["P.low"]
+  deltaP <- abs(par["deltaP"])
+  P.high <- abs(par["P.high"])
+  
+  if (is.na(P.low)) P.low <- P.high - deltaP
+  if (is.na(P.high)) P.high <- P.low + deltaP
+  if (is.na(deltaP)) deltaP <- P.high - P.low
+  
+  if (is.na(par["K1.low"])) par <- c(par, K1.low=0)
+  if (is.na(par["K2.low"])) par <- c(par, K2.low=0)
+  if (is.na(par["K1.high"])) par <- c(par, K1.high=0)
+  if (is.na(par["K2.high"])) par <- c(par, K2.high=0)
+  
+  m.low <- flexit(x=temperature, 
+               P=P.low, S=par["S.low"], 
+               K1=par["K1.low"], K2=par["K2.low"])
+  m.high <- flexit(x=temperature, 
+               P=P.high, S=-par["S.high"], 
+               K1=par["K1.high"], K2=par["K2.high"])
+  
+  
+  model <- m.low*m.high*par["MaxHS"]
   return(model)
 }
 

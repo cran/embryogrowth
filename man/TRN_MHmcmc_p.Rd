@@ -4,8 +4,12 @@
 \alias{TRN_MHmcmc_p}
 \title{Generates set of parameters to be used with GRTRN_MHmcmc() or STRN_MHmcmc()}
 \usage{
-TRN_MHmcmc_p(result = NULL, parameters = NULL,
-  fixed.parameters = NULL, accept = FALSE)
+TRN_MHmcmc_p(
+  result = NULL,
+  parameters = NULL,
+  fixed.parameters = NULL,
+  accept = FALSE
+)
 }
 \arguments{
 \item{result}{An object obtained after a SearchR fit}

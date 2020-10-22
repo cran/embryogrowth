@@ -88,7 +88,7 @@ shinyUI(fluidPage(
                    , radioButtons("Male", "Should the data presented as male or female relative frequency?", list(Male=1, Female=2), selected=1, inline = TRUE)
                    , radioButtons("Temperature", "Analyze sex ratio against temperature or incubation duration ?", list(Temperature=1, Duration=2), selected=1, inline = TRUE)
                    , selectInput("Equation", "What equation should be used?"
-                                 , choices=list("GSD", "Logistic", "Hill", "Richards", "Double-Richards", "Hulin")
+                                 , choices=list("GSD", "Logistic", "Hill", "Richards", "Double-Richards", "Hulin", "flexit")
                                  , selected = "Logistic", multiple = FALSE,
                                  selectize = TRUE, width = NULL, size = NULL)
                    , radioButtons("Intersexes", "How to count intersexes?", list(Discard=1, Males=2), selected=1, inline = TRUE)

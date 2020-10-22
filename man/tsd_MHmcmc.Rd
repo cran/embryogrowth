@@ -4,13 +4,23 @@
 \alias{tsd_MHmcmc}
 \title{Metropolis-Hastings algorithm for Sex ratio}
 \usage{
-tsd_MHmcmc(result = stop("A result of tsd() fit must be provided"),
-  n.iter = 10000, parametersMCMC = NULL, n.chains = 1, n.adapt = 0,
-  thin = 1, trace = FALSE, traceML = FALSE,
-  batchSize = sqrt(n.iter), adaptive = FALSE, adaptive.lag = 500,
+tsd_MHmcmc(
+  result = stop("A result of tsd() fit must be provided"),
+  n.iter = 10000,
+  parametersMCMC = NULL,
+  n.chains = 1,
+  n.adapt = 0,
+  thin = 1,
+  trace = FALSE,
+  traceML = FALSE,
+  batchSize = sqrt(n.iter),
+  adaptive = FALSE,
+  adaptive.lag = 500,
   adaptive.fun = function(x) {     ifelse(x > 0.234, 1.3, 0.7) },
-  intermediate = NULL, filename = "intermediate.Rdata",
-  previous = NULL)
+  intermediate = NULL,
+  filename = "intermediate.Rdata",
+  previous = NULL
+)
 }
 \arguments{
 \item{result}{An object obtained after a SearchR fit}
@@ -116,11 +126,16 @@ lines(x=seq(from=25, to=35, by=0.1), y=q[2, ])
 }
 }
 \seealso{
-Other Functions for temperature-dependent sex determination: \code{\link{DatabaseTSD}},
-  \code{\link{P_TRT}}, \code{\link{TSP.list}},
-  \code{\link{plot.tsd}}, \code{\link{predict.tsd}},
-  \code{\link{stages}}, \code{\link{tsd_MHmcmc_p}},
-  \code{\link{tsd}}
+Other Functions for temperature-dependent sex determination: 
+\code{\link{DatabaseTSD.version}()},
+\code{\link{DatabaseTSD}},
+\code{\link{P_TRT}()},
+\code{\link{TSP.list}},
+\code{\link{plot.tsd}()},
+\code{\link{predict.tsd}()},
+\code{\link{stages}},
+\code{\link{tsd_MHmcmc_p}()},
+\code{\link{tsd}()}
 }
 \author{
 Marc Girondot

@@ -4,9 +4,14 @@
 \alias{uncertainty.datalogger}
 \title{Uncertainty of average temperatures obtained using temperature data logger}
 \usage{
-uncertainty.datalogger(max.time = 0, sample.rate = 0, accuracy = 0.5,
-  resolution = 1, replicates = 10000, method = function(x) {     2 *
-  qnorm(0.975) * sd(x) })
+uncertainty.datalogger(
+  max.time = 0,
+  sample.rate = 0,
+  accuracy = 0.5,
+  resolution = 1,
+  replicates = 10000,
+  method = function(x) {     2 * qnorm(0.975) * sd(x) }
+)
 }
 \arguments{
 \item{max.time}{being the maximum time to record in minutes}
@@ -69,7 +74,9 @@ legend("topleft", legend=c("Accuracy=0.5, resolution=0.5",
 }
 }
 \seealso{
-Other Data loggers utilities: \code{\link{calibrate.datalogger}}
+Other Data loggers utilities: 
+\code{\link{calibrate.datalogger}()},
+\code{\link{movement}()}
 }
 \author{
 Marc Girondot

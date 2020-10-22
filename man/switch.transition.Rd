@@ -4,8 +4,7 @@
 \alias{switch.transition}
 \title{Add a transition parameter on a set of parameters or remove it}
 \usage{
-
-  switch.transition(parameters = stop("A set of parameters must be supplied"))
+switch.transition(parameters = stop("A set of parameters must be supplied"))
 }
 \arguments{
 \item{parameters}{A vector with parameters}

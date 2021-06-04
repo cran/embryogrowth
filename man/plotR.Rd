@@ -7,10 +7,11 @@
 plotR(
   result = NULL,
   resultmcmc = NULL,
+  chain = 1,
   parameters = NULL,
   fixed.parameters = NULL,
   temperatures = NULL,
-  curves = "ML quantiles",
+  curve = "ML quantiles",
   set.par = 1,
   ylim = c(0, 5),
   xlim = c(20, 35),
@@ -52,13 +53,15 @@ plotR(
 
 \item{resultmcmc}{A result object from GRTN_MHmcmc() function}
 
+\item{chain}{The chain to use in resultmcmc}
+
 \item{parameters}{A set of parameters - Has the priority over result}
 
 \item{fixed.parameters}{A set of fixed parameters}
 
 \item{temperatures}{A set of temperatures - Has the priority over result}
 
-\item{curves}{What curves to show: "MCMC quantiles" or "MCMC mean-SD" based on mcmc or "ML" or "ML quantiles" for maximum-likelihood}
+\item{curve}{What curve to show: "MCMC quantiles" or "MCMC mean-SD" based on mcmc or "ML" or "ML quantiles" or "ML mean-SE" for maximum-likelihood. Or "none"}
 
 \item{set.par}{1 or 2 to designate with set of parameters to show}
 
@@ -137,7 +140,7 @@ The curve "ML quantiles" is based on delta method.\cr
 The curve "ML" just shows the fitted model.\cr
 The curve "MCMC quantiles" uses the mcmc replicates to build the quantiles.\cr
 The curve "MCMC mean-SD" uses the mcmc replicates to build a symetric credibility interval.\cr
-The parameter curves is case insensitive. If only parameters is given, curves must be ML.
+The parameter curve is case insensitive. If only parameters is given, curve must be ML.
 }
 \details{
 plotR shows the fitted growth rate dependent on temperature and the density of the mcmc
@@ -145,50 +148,48 @@ plotR shows the fitted growth rate dependent on temperature and the density of t
 \examples{
 \dontrun{
 library(embryogrowth)
-plotR(result = resultNest_4p_SSM4p, 
-             resultmcmc=resultNest_mcmc_4p_SSM4p, 
-             curves = "MCMC quantiles")
+# Note that the confidence interval is not the same for mcmc and ml quantiles
+plotR(result = resultNest_4p_SSM, 
+             resultmcmc=resultNest_mcmc_4p_SSM, 
+             curve = "MCMC quantiles", ylim=c(0, 8))
+plotR(resultNest_4p_SSM, curve="ML quantiles", ylim=c(0, 6))
 #################
-plotR(resultmcmc=resultNest_mcmc_4p_SSM4p, 
-             curves = "MCMC quantiles", show.density=TRUE)
+plotR(resultmcmc=resultNest_mcmc_4p_SSM, ylim=c(0, 10), 
+             curve = "MCMC quantiles", show.density=TRUE)
 #################
-plotR(resultmcmc=resultNest_mcmc_4p_SSM4p, 
-             curves = "MCMC quantiles", polygon=TRUE)
+plotR(resultmcmc=resultNest_mcmc_4p_SSM, 
+             curve = "MCMC quantiles", polygon=TRUE)
 #################
-plotR(resultmcmc=resultNest_mcmc_6p_SSM6p, ylim=c(0,4), 
-      curves = "MCMC quantiles", polygon=TRUE, col.polygon = rgb(0, 1, 0, 1))
-plotR(resultmcmc=resultNest_mcmc_4p_SSM4p,
-       curves = "MCMC quantiles", polygon=TRUE, col.polygon = rgb(1, 0, 0, 0.5), new=FALSE)
+plotR(resultmcmc=resultNest_mcmc_6p_SSM, ylim=c(0,8), 
+      curve = "MCMC quantiles", polygon=TRUE, col.polygon = rgb(0, 1, 0, 1))
+plotR(resultmcmc=resultNest_mcmc_4p_SSM, ylim=c(0,8), 
+       curve = "MCMC quantiles", polygon=TRUE, col.polygon = rgb(1, 0, 0, 0.5), 
+       new=FALSE)
 legend("topleft", legend=c("SSM 4 parameters", "SSM 6 parameters"), 
         pch=c(15, 15), col=c(rgb(1, 0, 0, 0.5), rgb(0, 1, 0, 1)))
 #################
-sy <- plotR(resultmcmc=resultNest_mcmc_4p_SSM4p, 
-             curves = "MCMC quantiles", show.density=FALSE)
-plotR(resultmcmc=resultNest_mcmc_6p_SSM6p, col="red",
-             curves = "MCMC quantiles", show.density=FALSE, 
+sy <- plotR(resultmcmc=resultNest_mcmc_4p_SSM, ylim=c(0, 8), 
+             curve = "MCMC quantiles", show.density=FALSE)
+plotR(resultmcmc=resultNest_mcmc_6p_SSM, col="red", ylim=c(0, 8), 
+             curve = "MCMC quantiles", show.density=FALSE, 
              new=FALSE, scaleY=sy)
 #################
-sy <- plotR(result=resultNest_6p_SSM6p, curves="ML", 
-             show.hist = TRUE, new = TRUE)
-plotR(result=resultNest_4p_SSM4p, curves="ML", scaleY=sy, 
-             show.hist = FALSE, new = FALSE, col="red")
+sy <- plotR(result=resultNest_6p_SSM, curve="none", 
+             scaleY=1E5, 
+             ylim=c(0, 8), 
+             show.hist = TRUE, new = TRUE, mar=c(4, 4, 1, 4))
 #################
-plotR(result=resultNest_6p_SSM6p, curves="ML", 
+plotR(result=resultNest_6p_SSM, curve="ML", 
+             ylim=c(0, 8), 
              show.hist = TRUE, ylimH=c(0,1), atH=c(0, 0.1, 0.2))
 ################
-plotR(result = resultNest_4p_SSM4p, 
-             resultmcmc=resultNest_mcmc_4p_SSM4p, 
+plotR(result = resultNest_4p_SSM, ylim=c(0, 8), 
+             resultmcmc=resultNest_mcmc_4p_SSM, 
              show.density = TRUE, 
-             curves = "MCMC quantiles")
+             curve = "MCMC quantiles")
 #################
-plotR(result=resultNest_4p_SSM4p, 
-             ylim=c(0, 4), curves="ML quantiles", scaleY=1E5)
-#################             
-plotR(result=resultNest_4p_SSM4p, show.hist = TRUE,
-             ylim=c(0, 4), curves="ML quantiles", scaleY=1E5)
-#################
-plotR(resultmcmc=resultNest_mcmc_4p_SSM4p, 
-             ylim=c(0, 4), curves = "MCMC quantiles", show.density=TRUE, scaleY=1E5)
+plotR(resultmcmc=resultNest_mcmc_4p_SSM, ylim=c(0, 8), 
+             curve = "MCMC quantiles", show.density=TRUE, scaleY=1E5)
 }
 }
 \author{

@@ -5,7 +5,7 @@
 \title{Metropolis-Hastings algorithm for hatching success}
 \usage{
 HatchingSuccess.MHmcmc(
-  result = stop("Give a result of HatchingSuccesss.fit()"),
+  result = stop("Give a result of HatchingSuccess.fit()"),
   n.iter = 10000,
   parametersMCMC = NULL,
   n.chains = 1,
@@ -61,7 +61,7 @@ Run the Metropolis-Hastings algorithm for hatching success.\cr
 The number of iterations is n.iter+n.adapt+1 because the initial likelihood is also displayed.\cr
 I recommend that thin=1 because the method to estimate SE uses resampling.\cr
 If initial point is maximum likelihood, n.adapt = 0 is a good solution.\cr
-To get the SE from result_mcmc <- HatchingSuccesss.MHmcmc(result=try), use:\cr
+To get the SE from result_mcmc <- HatchingSuccess.MHmcmc(result=try), use:\cr
 result_mcmc$BatchSE or result_mcmc$TimeSeriesSE\cr
 The batch standard error procedure is usually thought to be not as accurate as the time series methods.\cr
 Based on Jones, Haran, Caffo and Neath (2005), the batch size should be equal to sqrt(n.iter).\cr
@@ -83,7 +83,7 @@ totalIncubation_Cc <- subset(DatabaseTSD,
                                !is.na(Total) & Total != 0)
 
 par <- c(S.low=0.5, S.high=0.3, 
-         P.low=25, deltaP=10, MaxHS=logit(0.8))
+         P.low=25, deltaP=10, MaxHS=0.8)
          
 g <- HatchingSuccess.fit(par=par, data=totalIncubation_Cc)
 pMCMC <- HatchingSuccess.MHmcmc_p(g, accept=TRUE)

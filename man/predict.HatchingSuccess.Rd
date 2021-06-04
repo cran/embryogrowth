@@ -15,7 +15,7 @@
 )
 }
 \arguments{
-\item{object}{The return of a fit done with HatchingSuccesss.fit().}
+\item{object}{The return of a fit done with HatchingSuccess.fit().}
 
 \item{...}{Not used}
 
@@ -25,7 +25,7 @@
 
 \item{replicates}{Number of replicates to estimate the confidence interval.}
 
-\item{resultmcmc}{Results obtained using HatchingSuccesss.MHmcmc()}
+\item{resultmcmc}{Results obtained using HatchingSuccess.MHmcmc()}
 
 \item{chain}{Chain to use in resultmcmc}
 }

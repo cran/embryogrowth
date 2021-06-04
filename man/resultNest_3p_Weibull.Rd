@@ -27,18 +27,18 @@ data(nest)
 formated <- FormatNests(nest)
 # Weibull model
  x <- ChangeSSM(temperatures = (200:350)/10,
-                parameters = resultNest_4p_SSM4p$par,
+                parameters = resultNest_4p_SSM$par,
                 initial.parameters = structure(c(73.4009010417375, 304.142079511996, 
                                                 27.4671689276281), 
                                         .Names = c("k", "lambda", "scale")), 
                 control=list(maxit=1000))
 pfixed <- c(rK=2.093313)
 resultNest_3p_Weibull <- searchR(parameters=x$par, fixed.parameters=pfixed, 
-                         temperatures=formated, derivate=dydt.Gompertz, M0=1.7, 
-                         test=c(Mean=39.33, SD=1.92))
+                         temperatures=formated, integral=integral.Gompertz, M0=1.7, 
+                         hatchling.metric=c(Mean=39.33, SD=1.92))
 plotR(resultNest_3p_Weibull, ylim=c(0, 3))
 plotR(resultNest_3p_Weibull, ylim=c(0, 3), ylimH = c(0, 0.9), show.hist=TRUE)
-compare_AIC(SSM=resultNest_4p_SSM4p, Weibull=resultNest_3p_Weibull)
+compare_AIC(SSM=resultNest_4p_SSM, Weibull=resultNest_3p_Weibull)
 }
 }
 \references{
@@ -48,6 +48,6 @@ Girondot, M., & Kaska, Y. (2014). A model to predict
             doi: 10.1016/j.jtherbio.2014.08.005
 }
 \author{
-Marc Girondot \email{marc.girondot@u-psud.fr}
+Marc Girondot \email{marc.girondot@universite-paris-saclay.fr}
 }
 \keyword{datasets}

@@ -6,8 +6,9 @@
 #' @param parameters A set of parameters
 #' @param fixed.parameters A set of parameters that will not be changed
 #' @param temperatures Timeseries of temperatures
-#' @param derivate Function used to fit embryo growth: dydt.Gompertz, dydt.exponential or dydt.linear
-#' @param test Mean and SD of size of hatchlings
+#' @param integral Function used to fit embryo growth: integral.Gompertz, integral.exponential or integral.linear
+#' @param derivate Function used to fit embryo growth: dydt.Gompertz, dydt.exponential or dydt.linear. It will replace the one in NestsResult.
+#' @param hatchling.metric Mean and SD of size of hatchlings
 #' @param M0 Measure of hatchling size or mass proxi at laying date
 #' @param weight A named vector of the weight for each nest for likelihood estimation
 #' @param hessian If TRUE, the hessian matrix is estimated and the SE of parameters estimated.
@@ -29,41 +30,42 @@
 #' 116.055824800264), .Names = c("DHA", "DHH", "T12H", "Rho25"))
 #' # pfixed <- c(K=82.33) or rK=82.33/39.33
 #' pfixed <- c(rK=2.093313)
-#' # K or rK are not used for dydt.linear or dydt.exponential
+#' # K or rK are not used for integral.linear or integral.exponential
 #' LresultNest_4p <- likelihoodR(parameters=x, fixed.parameters=pfixed,  
-#' 	temperatures=formated, derivate=dydt.Gompertz, M0=1.7,  
-#' 	test=c(Mean=39.33, SD=1.92))
-#' data(resultNest_4p_SSM4p)
-#' LresultNest_4p <- likelihoodR(result=resultNest_4p_SSM4p)
+#' 	temperatures=formated, integral=integral.Gompertz, M0=1.7,  
+#' 	hatchling.metric=c(Mean=39.33, SD=1.92))
+#' data(resultNest_4p_SSM)
+#' LresultNest_4p <- likelihoodR(result=resultNest_4p_SSM)
 #' }
 #' @export
 
 
 likelihoodR <-
 function(result=NULL, parameters=NULL, fixed.parameters=NULL, temperatures=NULL, 
-	derivate=NULL, test=NULL, M0=NULL, hessian=FALSE, weight= NULL, parallel=TRUE,
+         integral=NULL, derivate=NULL, hatchling.metric=NULL, M0=NULL, hessian=FALSE, weight= NULL, parallel=TRUE,
 	echo=TRUE) {
 
-  # result=NULL; parameters=NULLfixed.parameters=NULL; temperatures=NULL; echo=TRUE;derivate=NULL; test=NULL; M0=NULL; hessian=FALSE; weight= NULL; parallel=TRUE
+  # result=NULL; parameters=NULLfixed.parameters=NULL; temperatures=NULL; echo=TRUE;integral=NULL; derivate=NULL; hatchling.metric=NULL; M0=NULL; hessian=FALSE; weight= NULL; parallel=TRUE
   # result=resultNest_4p
   # parameters=structure(c(0.840429263837085, 1.15929190273597, 1.57697305167496, 2.06657337881587, 2.43555105967532, 2.24337041114994, 1.44633577322632), .Names = c("296", "298", "300", "302", "304", "306", "308"))
 
 if (!is.null(result)) {
 	if (is.null(temperatures)) temperatures <- result[["data"]]
+	if (is.null(integral)) integral <- result[["integral"]]
 	if (is.null(derivate)) derivate <- result[["derivate"]]
-	if (is.null(test)) test <- result[["test"]]
+	if (is.null(hatchling.metric)) hatchling.metric <- result[["hatchling.metric"]]
 	if (is.null(M0)) M0 <- result[["M0"]]
 	if (is.null(fixed.parameters)) fixed.parameters <- result[["fixed.parameters"]]
 	if (is.null(parameters)) parameters <- result[["par"]]
 	# correction le 29/1/2014
 	if (is.null(weight)) weight <- result[["weight"]]
-	testuse <- test
+	hatchling.metricuse <- hatchling.metric
 } else {
 
-	if (is.numeric(test)) {
-		testuse<-data.frame(Mean=rep(test["Mean"], temperatures[["IndiceT"]][3]), SD=rep(test["SD"], temperatures[["IndiceT"]][3]), row.names=names(temperatures[1:temperatures$IndiceT["NbTS"]]))
+	if (is.numeric(hatchling.metric)) {
+		hatchling.metricuse<-data.frame(Mean=rep(hatchling.metric["Mean"], temperatures[["IndiceT"]][3]), SD=rep(hatchling.metric["SD"], temperatures[["IndiceT"]][3]), row.names=names(temperatures[1:temperatures$IndiceT["NbTS"]]))
 	} else {
-		testuse<-test
+		hatchling.metricuse<-hatchling.metric
 	}
 
 }
@@ -93,7 +95,7 @@ if (is.null(weight)) {
 
 weight <- par
 
-# test si tous sont l
+# te_st si tous sont l
 if (length(setdiff(names(temperatures)[1:temperatures$IndiceT[3]], names(weight)))!=0) {
 	warning("The weight parameter must define weight for each nest.")
 	warning(paste("check", setdiff(names(temperatures)[1:temperatures$IndiceT[3]], names(weight)), "nests"))
@@ -102,7 +104,6 @@ if (length(setdiff(names(temperatures)[1:temperatures$IndiceT[3]], names(weight)
 
 
 # Un paramtre ne peut pas tre indique en fixe et en fite - 22/7/2012	
-# test faux, corrige le 19/2/2013
 
 	if (length(intersect(names(parameters), names(fixed.parameters)))!=0) {
 		warning("A parameter cannot be fixed and fitted at the same time !")
@@ -114,8 +115,8 @@ for (j in 1:NbTS) temperatures[[j]][1, "Mass"] <- M0
 
 resultnest <- list(par=parameters)
 
-resultnest$value <- info.nests(parameters=parameters, temperatures=temperatures, derivate=derivate, 
-                                 test=testuse, M0=M0, fixed.parameters=fixed.parameters, weight=weight)
+resultnest$value <- info.nests(parameters=parameters, temperatures=temperatures, integral=integral, derivate=derivate, 
+                                 hatchling.metric=hatchling.metricuse, M0=M0, fixed.parameters=fixed.parameters, weight=weight)
 
 if(echo) {
 
@@ -127,8 +128,8 @@ if (hessian) {
 
 	print("Estimate the SE for parameters at that point")
 
-	mathessian <- try(hessian(info.nests, parameters=result$par, method="Richardson", temperatures=temperatures, derivate=derivate, 
-	                          test=testuse, M0=M0, fixed.parameters=fixed.parameters, weight=weight), silent=TRUE)
+	mathessian <- try(hessian(info.nests, parameters=result$par, method="Richardson", temperatures=temperatures, integral=integral, derivate=derivate, 
+	                          hatchling.metric=hatchling.metricuse, M0=M0, fixed.parameters=fixed.parameters, weight=weight), silent=TRUE)
 
 	if (inherits(mathessian, "try-error")) {
 			res<-rep(NA, length(parameters))
@@ -165,7 +166,7 @@ if (hessian) {
 			print("Try using MHmcmc() function to get the SE of parameters.")
 		}
 	}
-# fin du test sur la premire erreur
+# fin du te_st sur la premire erreur
 }
 
 } else {
@@ -183,8 +184,9 @@ resultnest$data <- temperatures
 # Avant *5. Correction du 17/7/2012
 resultnest$AIC <- 2*result$value+2*length(parameters)
 
-resultnest$test <- testuse
+resultnest$hatchling.metric <- hatchling.metricuse
 
+resultnest$integral <- integral
 resultnest$derivate <- derivate
 
 resultnest$M0 <- M0

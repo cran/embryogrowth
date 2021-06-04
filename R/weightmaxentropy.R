@@ -28,7 +28,7 @@
 #' # K or rK are not used for dydt.linear or dydt.exponential
 #' resultNest_4p_weight <- searchR(parameters=x,  
 #' 	fixed.parameters=pfixed, temperatures=formated,  
-#' 	derivate=dydt.Gompertz, M0=1.7, test=c(Mean=39.33, SD=1.92),  
+#' 	integral=integral.Gompertz, M0=1.7, hatchling.metric=c(Mean=39.33, SD=1.92),  
 #' 	method = "BFGS", weight=w)
 #' data(resultNest_4p_weight)
 #' plotR(resultNest_4p_weight, ylim=c(0,0.50), xlim=c(15, 35))

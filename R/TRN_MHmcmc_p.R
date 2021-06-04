@@ -16,22 +16,29 @@
 #' # "T12H", "DHA",  "DHH", "Rho25"
 #' # Or
 #' # "T12L", "T12H", "DHA",  "DHH", "DHL", "Rho25"
-#' x <- structure(c(118.768297442004, 475.750095909406, 306.243694918151, 
-#' 116.055824800264), .Names = c("DHA", "DHH", "T12H", "Rho25"))
-#' # pfixed <- c(K=82.33) or rK=82.33/39.33
-#' pfixed <- c(rK=2.093313)
-#' resultNest_4p_SSM4p <- searchR(parameters=x, fixed.parameters=pfixed,  
-#' 	temperatures=formated, derivate=dydt.Gompertz, M0=1.7,  
-#' 	test=c(Mean=39.33, SD=1.92))
-#' data(resultNest_4p_SSM4p)
-#' pMCMC <- TRN_MHmcmc_p(resultNest_4p_SSM4p, accept=TRUE)
+#' ############################################################################
+#' pfixed <- c(rK=1.208968)
+#' M0 = 0.3470893 
+#' ############################################################################
+#' # 4 parameters
+#' ############################################################################
+#' x <- structure(c(105.966881676793, 613.944134764125, 306.449533440186, 
+#'                 118.193882815108), .Names = c("DHA", "DHH", "T12H", "Rho25"))
+#' resultNest_4p_SSM <- searchR(parameters=x, fixed.parameters=pfixed, 
+#' 	temperatures=formated, integral=integral.Gompertz, M0=M0, 
+#' 	hatchling.metric=c(Mean=39.33, SD=1.92))
+#' data(resultNest_4p_SSM)
+#' plot(resultNest_4p_SSM, xlim=c(0,70), ylimT=c(22, 32), ylimS=c(0,45), series=1, 
+#' embryo.stages="Caretta caretta.SCL")
+#' ############################################################################
+#' pMCMC <- TRN_MHmcmc_p(resultNest_4p_SSM, accept=TRUE)
 #' }
 #' @export
 
 # Algo Metropolis-Hastings
 # ------------------------
 
-TRN_MHmcmc_p<-function(result=NULL, parameters=NULL, fixed.parameters=NULL, 
+TRN_MHmcmc_p <- function(result=NULL, parameters=NULL, fixed.parameters=NULL, 
                                 accept=FALSE) {
 
   # result=NULL; parameters=NULL; fixed.parameters=NULL; accept=TRUE
@@ -140,15 +147,15 @@ if (as.numeric(DHH[7])>400) {
 
 # "T12L"
 
-T12L <- c("dnorm", 30+273.15, 7, 1, 20+273.15, 40+273.15, ifelse(is.na(par["T12L"]), 30+273.15, par["T12L"]))
+T12L <- c("dunif", 0, par["T12L"]+200, 1, 0, par["T12L"]+200, ifelse(is.na(par["T12L"]), 30+273.15, par["T12L"]))
 
 # "T12H"
 
-T12H <- c("dnorm", 30+273.15, 7, 1, 20+273.15, 40+273.15, ifelse(is.na(par["T12H"]), 30+273.15, par["T12H"]))
+T12H <- c("dunif", 0, par["T12H"]+200, 1, 0, par["T12H"]+200, ifelse(is.na(par["T12H"]), 30+273.15, par["T12H"]))
 
 # "DT"
 
-DT <- c("dnorm", 15, 10, 1, 0, 100, ifelse(is.na(par["DT"]), 10, par["DT"]))
+DT <- c("dunif", 0, par["DT"]+20, 1, 0, par["DT"]+20, ifelse(is.na(par["DT"]), 5, par["DT"]))
 
 # "Rho25"
 

@@ -25,8 +25,8 @@ formated <- FormatNests(nest)
 newp <- GenerateAnchor(nests=formated, number.anchors=7)
 pfixed <- c(rK=2.093313)
 resultNest_newp <- searchR(parameters=newp, fixed.parameters=pfixed, 
-  temperatures=formated, derivate=dydt.Gompertz, M0=1.7, 
-	test=c(Mean=39.33, SD=1.92))
+  temperatures=formated, integral=integral.Gompertz, M0=1.7, 
+	hatchling.metric=c(Mean=39.33, SD=1.92))
 data(resultNest_newp)
 plotR(resultNest_newp)
 }
@@ -38,6 +38,6 @@ Girondot, M., & Kaska, Y. (2014). A model to predict
             doi: 10.1016/j.jtherbio.2014.08.005
 }
 \author{
-Marc Girondot \email{marc.girondot@u-psud.fr}
+Marc Girondot \email{marc.girondot@universite-paris-saclay.fr}
 }
 \keyword{datasets}

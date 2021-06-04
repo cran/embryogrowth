@@ -37,7 +37,7 @@ x <- structure(c(306.174998729436, 333.708348843241, 299.856306141849,
 # K or rK are not used for dydt.linear or dydt.exponential
 resultNest_4p_linear <- searchR(parameters=x, fixed.parameters=NULL,  
 	temperatures=formated, derivate=dydt.linear, M0=1.7,  
-	test=c(Mean=39.33, SD=1.92))
+	hatchling.metric=c(Mean=39.33, SD=1.92))
 }
 }
 \author{

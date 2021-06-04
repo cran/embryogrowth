@@ -7,6 +7,7 @@
 FormatNests(
   data = stop("A dataset must be provided !"),
   previous = NULL,
+  usemiddletime = FALSE,
   simplify = TRUE,
   weight = NULL
 )
@@ -15,6 +16,8 @@ FormatNests(
 \item{data}{Data to be newly formated}
 
 \item{previous}{Data already formated}
+
+\item{usemiddletime}{If TRUE, suppose that recorded temperatures are those at middle segment}
 
 \item{simplify}{If TRUE, simply the time series by removing identical time series of temperatures}
 

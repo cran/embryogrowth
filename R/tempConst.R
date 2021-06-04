@@ -1,6 +1,6 @@
 #' Timeseries of constant temperatures for nests
 #' @title Timeseries of constant temperatures for nests
-#' @author Marc Girondot \email{marc.girondot@@u-psud.fr}
+#' @author Marc Girondot \email{marc.girondot@@universite-paris-saclay.fr}
 #' @docType data
 #' @name tempConst
 #' @description Timeseries of temperatures for nests
@@ -27,23 +27,23 @@
 #'  
 #' pfixed <- c(rK=1.208968)
 #' resultNest_4p_SSM <- searchR(parameters=x, fixed.parameters=pfixed, 
-#' 	temperatures=formated, derivate=dydt.Gompertz, M0=0.3470893, 
-#' 	test=c(Mean=39.33, SD=1.92))
+#' 	temperatures=formated, integral=integral.Gompertz, M0=0.3470893, 
+#' 	hatchling.metric=c(Mean=39.33, SD=1.92))
 #' 	
 #' plotR(result=resultNest_4p_SSM, show.hist = TRUE,
-#'              ylim=c(0, 8), curves="ML quantiles")
+#'              ylim=c(0, 8), curve="ML quantiles")
 #' 
 #' # Now use the fited parameters from resultNest_4p_SSM with  
 #' # the constant incubation temperatures:
 #' 
 #' plot(resultNest_4p_SSM, temperatures=tempConst_f,  
-#' 	stopattest=TRUE, series="T30", xlim=c(0,50),  
-#' 	ylimT=c(22, 32), test=c(Mean=39.33, SD=1.92), 
+#' 	stop.at.hatchling.metric=TRUE, series="T30", xlim=c(0,50),  
+#' 	ylimT=c(22, 32), hatchling.metric=c(Mean=39.33, SD=1.92), 
 #' 	embryo.stages="Caretta caretta.SCL")
 #' 	
 #' plot(resultNest_4p_SSM, temperatures=tempConst_f,  
-#' 	stopattest=TRUE, series="T25", xlim=c(0,120),  
-#' 	ylimT=c(22, 32), test=c(Mean=39.33, SD=1.92), 
+#' 	stop.at.hatchling.metric=TRUE, series="T25", xlim=c(0,120),  
+#' 	ylimT=c(22, 32), hatchling.metric=c(Mean=39.33, SD=1.92), 
 #' 	embryo.stages="Caretta caretta.SCL")
 #' 	
 #' }

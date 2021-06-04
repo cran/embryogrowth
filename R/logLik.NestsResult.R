@@ -8,9 +8,9 @@
 #' @examples
 #' \dontrun{
 #' library(embryogrowth)
-#' data(resultNest_4p_SSM4p)
-#' logLik(resultNest_4p_SSM4p)
-#' AIC(resultNest_4p_SSM4p)
+#' data(resultNest_4p_SSM)
+#' logLik(resultNest_4p_SSM)
+#' AIC(resultNest_4p_SSM)
 #' }
 #' @method logLik NestsResult
 #' @export
@@ -18,6 +18,8 @@
 
 logLik.NestsResult <- function(object, ...) {
   l <- -object$value
-  attributes(l) <- list(nall=object$data$IndiceT["NbTS"] , nobs=object$data$IndiceT["NbTS"] , df=length(object$par) , class="logLik")
+  attributes(l) <- list(nall=object$data$IndiceT["NbTS"] , 
+                        nobs=object$data$IndiceT["NbTS"] , 
+                        df=length(object$par) , class="logLik")
   return(l)
 }

@@ -76,7 +76,7 @@
 
 \item{replicates}{Number of replicates to estimate confidence interval}
 
-\item{resultmcmc}{Results obtained using HatchingSuccesss.MHmcmc()}
+\item{resultmcmc}{Results obtained using HatchingSuccess.MHmcmc()}
 
 \item{polygon}{If TRUE, confidence interval is shown as a polygon}
 
@@ -96,7 +96,7 @@ If replicates is null and resultmcmc is not null, it will use all the mcmc data.
 if replicates is lower than the number of iterations in resultmcmc, it will use sequence of data regularly thined.
 }
 \details{
-plot.HatchingSuccess plot result of HatchingSuccess.fit() or HatchingSuccesss.MHmcmc() that best describe hatching success
+plot.HatchingSuccess plot result of HatchingSuccess.fit() or HatchingSuccess.MHmcmc() that best describe hatching success
 }
 \examples{
 \dontrun{
@@ -107,7 +107,7 @@ totalIncubation_Cc <- subset(DatabaseTSD,
                                !is.na(Total) & Total != 0)
 
 par <- c(S.low=0.5, S.high=0.3, 
-         P.low=25, deltaP=10, MaxHS=logit(0.8))
+         P.low=25, deltaP=10, MaxHS=0.8)
          
 HatchingSuccess.lnL(par=par, data=totalIncubation_Cc)
 

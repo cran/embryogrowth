@@ -1,6 +1,6 @@
 #' Database of RMU for marine turtles
 #' @title Database of RMU for marine turtles
-#' @author Marc Girondot \email{marc.girondot@@u-psud.fr}
+#' @author Marc Girondot \email{marc.girondot@@universite-paris-saclay.fr}
 #' @author Maria Sousa Martins \email{maria.esmartins@@gmail.com}
 #' @docType data
 #' @name DatabaseNestingArea

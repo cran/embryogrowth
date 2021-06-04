@@ -32,6 +32,6 @@ Girondot, M., & Kaska, Y. (2014). A model to predict
             doi: 10.1016/j.jtherbio.2014.08.005
 }
 \author{
-Marc Girondot \email{marc.girondot@u-psud.fr}
+Marc Girondot \email{marc.girondot@universite-paris-saclay.fr}
 }
 \keyword{datasets}

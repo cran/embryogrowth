@@ -1,14 +1,11 @@
 #' Result of the fit using the nest database
 #' @title Fit using the nest database
-#' @author Marc Girondot \email{marc.girondot@@u-psud.fr}
+#' @author Marc Girondot \email{marc.girondot@@universite-paris-saclay.fr}
 #' @docType data
 #' @name resultNest_5p_Dallwitz
 #' @encoding UTF-8
 #' @description Fit using the nest database
-#' @references Girondot, M., Monsinjon, J., Guillon, J.-M., Submitted. 
-#'             Delimitation of the embryonic thermosensitive period for 
-#'             sex determination using an embryo growth model reveals a 
-#'             potential bias for sex ratio prediction in turtles.
+#' @references Girondot M, Monsinjon J, Guillon J-M (2018) Delimitation of the embryonic thermosensitive period for sex determination using an embryo growth model reveals a potential bias for sex ratio prediction in turtles. Journal of Thermal Biology 73: 32-40 
 #' @keywords datasets
 #' @usage resultNest_5p_Dallwitz
 #' @examples
@@ -21,8 +18,8 @@
 #'  "Dallwitz_b2", "Dallwitz_b3", "Dallwitz_b4", "Dallwitz_b5"))
 #' pfixed <- c(rK=1.208968)
 #' resultNest_5p_Dallwitz <- searchR(parameters=x, fixed.parameters=pfixed, 
-#' 	temperatures=formated, derivate=dydt.Gompertz, M0=0.3470893, 
-#' 	test=c(Mean=39.33, SD=1.92))
+#' 	temperatures=formated, integral=integral.Gompertz, M0=0.3470893, 
+#' 	hatchling.metric=c(Mean=39.33, SD=1.92))
 #' plotR(result=resultNest_5p_Dallwitz, show.hist = TRUE,
 #'              ylim=c(0, 8), curves="ML quantiles")
 #' }

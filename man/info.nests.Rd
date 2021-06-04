@@ -14,31 +14,34 @@ info.nests(
   fixed.parameters = NULL,
   SE = NULL,
   temperatures = NULL,
+  integral = NULL,
   derivate = NULL,
-  test = NULL,
-  stopattest = FALSE,
+  hatchling.metric = NULL,
+  stop.at.hatchling.metric = FALSE,
   M0 = NULL,
   series = "all",
   TSP.borders = NULL,
-  embryo.stages = "Generic.ProportionDevelopment",
+  embryo.stages = NULL,
   TSP.begin = 0,
   TSP.end = 0.5,
-  replicate.CI = 100,
+  replicate.CI = 0,
   weight = NULL,
   out = "likelihood",
   fill = NULL,
+  probs = c(0.025, 0.5, 0.975),
   SexualisationTRN = NULL,
   SexualisationTRN.mcmc = NULL,
   SexualisationTRN.CI = NULL,
-  metric.end.incubation = NA,
+  metric.end.incubation = "observed",
   metabolic.heating = 0,
   temperature.heterogeneity = 0,
-  progress = FALSE,
+  progressbar = FALSE,
   warnings = TRUE,
   parallel = TRUE,
   tsd = NULL,
   tsd.CI = NULL,
-  tsd.mcmc = NULL
+  tsd.mcmc = NULL,
+  zero = 1e-09
 )
 }
 \arguments{
@@ -60,11 +63,13 @@ info.nests(
 
 \item{temperatures}{Timeseries of temperatures formatted using formatNests(). It will replace the one in NestsResult.}
 
+\item{integral}{Function used to fit embryo growth: integral.Gompertz, integral.exponential or integral.linear. It will replace the one in NestsResult.}
+
 \item{derivate}{Function used to fit embryo growth: dydt.Gompertz, dydt.exponential or dydt.linear. It will replace the one in NestsResult.}
 
-\item{test}{Mean and SD of size of hatchlings. It will replace the one in NestsResult.}
+\item{hatchling.metric}{Mean and SD of size of hatchlings. It will replace the one in NestsResult.}
 
-\item{stopattest}{TRUE or FALSE. If TRUE, the model stops when proxy of size reached the mean test size.}
+\item{stop.at.hatchling.metric}{TRUE or FALSE. If TRUE, the model stops when proxy of size reached the mean hatchling.metric size.}
 
 \item{M0}{Measure of hatchling size proxi at laying date. It will replace the one in NestsResult.}
 
@@ -82,9 +87,11 @@ info.nests(
 
 \item{weight}{Weights of the different nests to estimate likelihood. It will replace the ones in NestsResult.}
 
-\item{out}{Can take the values of "likelihood" or "metric" or "summary". "metric" and "summary" can be combined: c("metric", "summary")}
+\item{out}{Can take the values of "likelihood", "summary", "metric" or "dynamic".}
 
 \item{fill}{Number of minutes between two records. Create new one if they do not exist. NULL does not change the time of temperature recordings.}
+
+\item{probs}{Probabilities for metric quantiles.}
 
 \item{SexualisationTRN}{A set of parameters used to model sexualisation thermal reaction norm during TSP or a result of STRN()}
 
@@ -92,13 +99,13 @@ info.nests(
 
 \item{SexualisationTRN.CI}{How to estimate CI of sexualisation thermal reaction norm. Can be NULL, "SE", "MCMC", or "Hessian".}
 
-\item{metric.end.incubation}{The expected metric at the end of incubation. Used to calibrate TSP size. If NULL, take the maximum Mean of the test parameter. If NA, use the actual final size. Can be a vector and is recycled if necessary.}
+\item{metric.end.incubation}{The metric at the end of incubation used to calibrate TSP size. Can be "hatchling.metric", or "observed".}
 
 \item{metabolic.heating}{Degrees Celsius to be added at the end of incubation due to metabolic heating.}
 
 \item{temperature.heterogeneity}{SD of heterogeneity of temperatures. Can be 2 values, sd_low and sd_high and then HelpersMG::r2norm() is used.}
 
-\item{progress}{If FALSE, the progress bar is not shown (useful for using with sweave or knitr)}
+\item{progressbar}{If FALSE, the progress bar is not shown (useful for using with sweave or knitr)}
 
 \item{warnings}{If FALSE, does not show warnings}
 
@@ -108,7 +115,9 @@ info.nests(
 
 \item{tsd.CI}{How to estimate CI for sex ratio thermal reaction norm; Can be NULL, "SE", "MCMC", or "Hessian".}
 
-\item{tsd.mcmc}{A object from tsd_MHmcmc()}
+\item{tsd.mcmc}{A object from tsd_MHmcmc() .}
+
+\item{zero}{Value to replace 0 or 1.}
 }
 \value{
 Return or the total likelihood or a list with $metric and $summary depending on out parameter
@@ -119,71 +128,78 @@ The embryo.stages is a named vector with relative size as compared to final size
 For example for SCL in Caretta caretta:\cr
 embryo.stages=structure(c(8.4, 9.4, 13.6, 13.8, 18.9, 23.5, 32.2, 35.2, 35.5, 38.5)/39.33), \cr
 .Names = c("21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31"))\cr
- indicates that the stages 21 begins at the relative size of 8.4/39.33.\cr
-Series can be indicated as the name of the series, their numbers or series or sucession of TRUE or FALSE. "all" indicates that all series must be analyzed.\cr
+indicates that the stages 21 begins at the relative size of 8.4/39.33 as compared to the final size.\cr
+Series can be indicated as the name of the series, their numbers or series or succession of TRUE or FALSE. "all" indicates that all series must be analyzed.\cr
 The likelihood object is just the total likelihood of the data in the model.\cr
 If one parameter is named "pipping_emergence" it is used as the number of days between pipping and emergence to calculate the 1/3 and 2/3 of incubation.\cr
-The summary object is a data.frame composed of these elements:
+The summary object is a data.frame composed of these elements with the suffix .mean, .se or .quantile_x with x from the parameter probs.
 \itemize{
   \item \code{Temperature.max} Maximum temperature recorded during incubation
-  \item \code{TimeWeighted.temperature.mean} Average temperature weigthed by the time at each temperature for all incubation
-  \item \code{TimeWeighted.temperature.se} Standard error for the average temperature weigthed by the time at each temperature for all incubation
-  \item \code{GrowthWeighted.temperature.mean} Average temperature weigthed by the growth of embryo for all incubation
-  \item \code{GrowthWeighted.temperature.se} Standard error for the average temperature weigthed by the growth of embryo for all incubation
-  \item \code{GrowthRateWeighted.temperature.mean} Average temperature weigthed by the growth rate of embryo for all incubation
-  \item \code{GrowthRateWeighted.temperature.se} Standard error for the average temperature weigthed by the growth rate of embryo for all incubation
-  \item \code{TSP.TimeWeighted.temperature.mean} Average temperature during the TSP weigthed by the time at each temperature
-  \item \code{TSP.TimeWeighted.temperature.se} Standard error for the average temperature during the TSP weigthed by the time at each temperature
-  \item \code{TSP.GrowthWeighted.temperature.mean} Average temperature during the TSP weigthed by the growth of embryo at each temperature
-  \item \code{TSP.GrowthWeighted.temperature.se} Standard error for the average temperature during the TSP weigthed by the growth of embryo at each temperature
-  \item \code{TSP.GrowthRateWeighted.temperature.mean} Average temperature during the TSP weigthed by the growth rate of embryo at each temperature
-  \item \code{TSP.GrowthRateWeighted.temperature.se} Standard error for the average temperature during the TSP weigthed by the growth rate of embryo at each temperature
-  \item \code{TSP.STRNWeighted.temperature.mean} Averaged temperature during the TSP weighted by sexualisation thermal reaction norm
-  \item \code{TSP.STRNWeighted.temperature.se} Standard error for temperature during the TSP weighted by sexualisation thermal reaction norm
-  \item \code{TSP.GrowthWeighted.STRNWeighted.temperature.mean} Averaged temperature during the TSP weighted by sexualisation thermal reaction norm and embryo growth
-  \item \code{TSP.GrowthWeighted.STRNWeighted.temperature.se} Standard error for temperature during the TSP weighted by sexualisation thermal reaction norm and embryo growth
-  \item \code{TSP.GrowthRateWeighted.STRNWeighted.temperature.mean} Averaged temperature during the TSP weighted by sexualisation thermal reaction norm and embryo growth rate
-  \item \code{TSP.GrowthRateWeighted.STRNWeighted.temperature.se} Standard error for temperature during the TSP weighted by sexualisation thermal reaction norm and embryo growth rate
-  \item \code{TSP.length.mean} Average length of the TSP
-  \item \code{TSP.length.se} Standard error for length of the TSP
-  \item \code{TSP.begin.mean} Average time of the beginning of the TSP
-  \item \code{TSP.begin.se} Standard error for the beginning of the TSP
-  \item \code{TSP.end.mean} Average time of the endd of the TSP
-  \item \code{TSP.end.se} Standard error for the end of the TSP
-  \item \code{PM.GrowthWeighted.mean} Proportion of males based on Massey et al. 2019, weighted by growth of embryo
-  \item \code{PM.GrowthWeighted.se} Standard error for the proportion of males based on Massey et al. 2019, weighted by growth of embryo
-  \item \code{PM.GrowthRateWeighted.mean} Proportion of males based on Massey et al. 2019, weighted by growth rate of embryo
-  \item \code{PM.GrowthRateWeighted.se} Standard error for the proportion of males based on Massey et al. 2019, weighted by growth rate of embryo
-  \item \code{PM.TimeWeighted.mean} Proportion of males with time effect
-  \item \code{PM.TimeWeighted.se} Standard error for the proportion of males with time effect
-  \item \code{Incubation.length.mean} Average number of days for the incubation length
-  \item \code{Incubation.length.se} Standard error for number of days for the incubation length
-  \item \code{Middlethird.begin.mean} Average day at which the middle third incubation begins
-  \item \code{Middlethird.begin.se} Standard error for day at which the middle third incubation begins
-  \item \code{Middlethird.end.mean} Average day at which the middle third incubation ends
-  \item \code{Middlethird.end.se} Standard error at which the middle third incubation ends
-  \item \code{Middlethird.length.mean} Average days for second third of incubation
-  \item \code{Middlethird.length.se} Standard error for second third of incubation
-  \item \code{MiddleThird.TimeWeighted.temperature.mean} Average temperature during the middle third of incubation
-  \item \code{MiddleThird.TimeWeighted.temperature.se} Standard error for the temperature during the middle third of incubation
-  \item \code{MiddleThird.GrowthWeighted.temperature.mean} Average temperature during the middle third of incubation weighted by embryo growth
-  \item \code{MiddleThird.GrowthWeighted.temperature.se} Standard error for temperature during the middle third of incubation weighted by embryo growth
-  \item \code{MiddleThird.GrowthRateWeighted.temperature.mean} Average temperature during the middle third of incubation weighted by embryo growth rate
-  \item \code{MiddleThird.GrowthRateWeighted.temperature.se} Standard error for temperature during the middle third of incubation weighted by embryo growth rate
+  \item \code{TimeWeighted.temperature} Average temperature during all incubation
+  \item \code{GrowthWeighted.temperature} Average temperature weighted by the actual growth during all incubation
+  \item \code{TimeWeighted.GrowthRateWeighted.temperature} Average temperature weighted by the growth rate during all incubation
+  \item \code{TSP.TimeWeighted.temperature} Average temperature during the TSP
+  \item \code{TSP.GrowthWeighted.temperature} Average temperature weighted by the actual growth during the TSP
+  \item \code{TSP.TimeWeighted.GrowthRateWeighted.temperature} Average temperature weighted by the growth rate during the TSP
+  \item \code{TSP.TimeWeighted.STRNWeighted.temperature} Average temperature weighted by the thermal reaction norm of sexualization during the TSP
+  \item \code{TSP.GrowthWeighted.STRNWeighted.temperature} Average temperature weighted by actual growth and the thermal reaction norm of sexualization during the TSP
+  \item \code{TSP.TimeWeighted.GrowthRateWeighted.STRNWeighted.temperature} Average temperature weighted by growth rate and the thermal reaction norm of sexualization during the TSP
+  \item \code{TSP.length} TSP duration
+  \item \code{TSP.begin} Beginning of the TSP
+  \item \code{TSP.end} End of the TSP
+  \item \code{TSP.PM.GrowthWeighted} Average of male probability for each temperature weighted by actual growth during the TSP
+  \item \code{TSP.PM.TimeWeighted.GrowthRateWeighted} Average of male probability for each temperature weighted by growth rate during the TSP
+  \item \code{TSP.PM.TimeWeighted} Average of male probability for each temperature during the TSP
+  \item \code{Incubation.length} Incubation length duration
+  \item \code{MiddleThird.length} Middle third incubation duration
+  \item \code{MiddleThird.begin} Beginning of the middle third incubation duration
+  \item \code{MiddleThird.end} End of the middle third incubation duration
+  \item \code{MiddleThird.TimeWeighted.temperature} Average temperature during the middle third incubation
+  \item \code{MiddleThird.GrowthWeighted.temperature} Average temperature weighted by the actual growth during the middle third incubation
+  \item \code{MiddleThird.TimeWeighted.GrowthRateWeighted.temperature} Average temperature weighted by the growth rate during the middle third incubation
+  \item \code{TSP.TimeWeighted.sexratio} Sex ratio based on average temperature during the TSP
+  \item \code{TSP.GrowthWeighted.sexratio} Sex ratio based on average temperature weighted by the actual growth during the TSP
+  \item \code{TSP.TimeWeighted.GrowthRateWeighted.sexratio} Sex ratio based on average temperature weighted by the growth rate during the TSP
+  \item \code{TSP.TimeWeighted.STRNWeighted.sexratio} Sex ratio based on average temperature weighted by the thermal reaction norm of sexualization during the TSP
+  \item \code{TSP.GrowthWeighted.STRNWeighted.sexratio} Sex ratio based on average temperature weighted by the actual growth and thermal reaction norm of sexualization during the TSP
+  \item \code{TSP.TimeWeighted.GrowthRateWeighted.STRNWeighted.sexratio} Sex ratio based on average temperature weighted by the growth rate and the thermal reaction norm of sexualization during the TSP
+  \item \code{MiddleThird.TimeWeighted.sexratio} Sex ratio based on average temperature during the middle third incubation
+  \item \code{MiddleThird.GrowthWeighted.sexratio} Sex ratio based on average temperature weighted by actual growth during the middle third incubation
+  \item \code{MiddleThird.TimeWeighted.GrowthRateWeighted.sexratio} Sex ratio based on average temperature weighted by growth rate during the middle third incubation
+  \item \code{TimeWeighted.sexratio} Sex ratio based on average temperature during all incubation
+  \item \code{GrowthWeighted.sexratio} Sex ratio based on average temperature weighted by actual growth during all incubation
+  \item \code{TimeWeighted.GrowthRateWeighted.sexratio} Sex ratio based on average temperature weighted by growth rate during all incubation
 }
-The metric object is a list composed of data.frames which have the following attributes for each element of the list:
+If \code{out} is equal to \code{summary}, the return is a list with:
 \itemize{
-  \item \code{time.begin.tsp} Average time at the beginning of TSP
-  \item \code{time.end.tsp} Average time at the end of TSP
-  \item \code{time.begin.middlethird} Average time at the beginning of the middle third of incubation
-  \item \code{time.begin.middlethird} Average time at the end of the middle third of incubation
-  \item \code{time.begin.tsp.se} Standard error for the time at the beginning of TSP
-  \item \code{time.end.tsp.se} Standard error for the time at the end of TSP
-  \item \code{time.begin.middlethird.se} Standard error for the time at the beginning of the middle third of incubation
-  \item \code{time.end.middlethird.se} Standard error for the time at the end of the middle third of incubation
-  \item \code{stopattest} NA if stopattest was false, TRUE if at least one incubation series was longer than hatchling size and FALSE at contrary
+  \item \code{summary} is a data.frame with statistics for each nest.
+  \item \code{dynamic.metric} object is a list composed of data.frames with the dynamics of growth for each nest. It showed only temperatures from original dataset.
+  \item \code{summary.dynamic.metric} is a data.frame with the following columns with the suffix .mean, .se or .quantile_x with x from the parameter probs.
 }
-If you indicate new set of temperatures, you must probably also indicate new test values.\cr
+If \code{out} is equal to \code{metric}, the return is a list with:
+\itemize{
+  \item \code{dynamic.metric} object is a list composed of data.frames with the dynamics of growth for each nest
+  \item \code{indices.dynamic.metric} is a data.frame with the following columns.
+}
+The object \code{summary.dynamic.metric} or \code{indices.dynamic.metric} is a data.frame with the following columns:
+\itemize{
+  \item \code{series} Name of the series
+  \item \code{metric.begin.tsp} Metric at the beginning of TSP
+  \item \code{metric.end.tsp} Metric at the end of TSP
+  \item \code{hatchling.metric.mean} Average expected size of hatchlings
+  \item \code{hatchling.metric.sd} standard deviation of expected size of hatchlings
+  \item \code{time.begin.tsp} Time at the beginning of TSP
+  \item \code{time.end.tsp} Time at the end of TSP
+  \item \code{time.begin.middlethird} Time at the beginning of the middle third incubation
+  \item \code{time.end.middlethird} Time at the end of the middle third incubation
+  \item \code{stop.at.hatchling.metric} Take the value of NA if stop.at.hatchling.metric was FALSE. TRUE if at least one incubation series was longer than hatchling size and FALSE at contrary
+  \item \code{stop.at.hatchling.metric} Take the value of NA if stop.at.hatchling.metric was FALSE. TRUE if at least one incubation series was longer than hatchling size and FALSE at contrary
+  \item \code{stop.at.hatchling.metric} Take the value of NA if stop.at.hatchling.metric was FALSE. TRUE if at least one incubation series was longer than hatchling size and FALSE at contrary
+  \item \code{stop.at.hatchling.metric} Take the value of NA if stop.at.hatchling.metric was FALSE. TRUE if at least one incubation series was longer than hatchling size and FALSE at contrary
+  \item \code{stop.at.hatchling.metric} Take the value of NA if stop.at.hatchling.metric was FALSE. TRUE if at least one incubation series was longer than hatchling size and FALSE at contrary
+  \item \code{stop.at.hatchling.metric} Take the value of NA if stop.at.hatchling.metric was FALSE. TRUE if at least one incubation series was longer than hatchling size and FALSE at contrary
+}
+If you indicate new set of temperatures, you must probably also indicate new hatchling.metric values.\cr
 Note: four species have predefined embryo stages. embryo.stages parameter can take the values:\cr
 \itemize{
   \item \code{Caretta caretta.SCL}
@@ -193,8 +209,8 @@ Note: four species have predefined embryo stages. embryo.stages parameter can ta
   \item \code{Podocnemis expansa.SCL}
   \item \code{Generic.ProportionDevelopment}
   }
-But remember that mass is not the best proxy to describe the growth of an embryo because it can decrease if the subtrate becomes dry.\cr
-The progress bar is based on both replicates and timeseries progress.\cr
+But remember that mass is not the best proxy to describe the growth of an embryo because it can decrease if the substrate becomes dry.\cr
+The progress bar is based on both replicates and timeseries progress. It necessitates the pbapply package.\cr
 If replicate.CI is null or 0, only maximum likelihood is used and no confidence interval is calculated.\cr
 If replicate.CI is 1, one random value for the parameters is used but no confidence interval is calculated.\cr
 In other cases, replicate.CI random samples are used to estimate confidence interval.
@@ -205,46 +221,48 @@ Calculate statistics about nests
 \examples{
 \dontrun{
 library(embryogrowth)
-data(resultNest_4p_SSM4p)
-summary.nests <- info.nests(resultNest_4p_SSM4p, out="summary", 
+data(resultNest_4p_SSM)
+# Some basic calculations to show the advantage of parallel computing
+system.time(summary.nests <- info.nests(x=resultNest_4p_SSM, out="summary", 
+  embryo.stages="Caretta caretta.SCL", replicate.CI=0, parallel=FALSE))
+system.time(summary.nests <- info.nests(x=resultNest_4p_SSM, out="summary", 
+  embryo.stages="Caretta caretta.SCL", replicate.CI=0, parallel=TRUE))
+system.time(summary.nests <- info.nests(x=resultNest_4p_SSM, out="summary", 
+  embryo.stages="Caretta caretta.SCL", replicate.CI=0, parallel=TRUE, progressbar=TRUE))
+system.time(summary.nests <- info.nests(x=resultNest_4p_SSM, out="likelihood", 
+  embryo.stages="Caretta caretta.SCL", replicate.CI=0, parallel=TRUE, progressbar=FALSE))
+  
+# By default parallel computing is TRUE but progressbar is FALSE
+# When out is "likelihood", it returns only the likelihood
+# otherwise, it returns a list with 3 objects "summary", 
+#        "dynamic.metric", and "summary.dynamic.metric".
+
+summary.nests <- info.nests(resultNest_4p_SSM, out="summary", 
   embryo.stages="Caretta caretta.SCL", 
   replicate.CI=100, 
-  resultmcmc=resultNest_mcmc_4p_SSM4p, 
+  resultmcmc=resultNest_mcmc_4p_SSM, 
   GTRN.CI="MCMC", 
-  progress=TRUE)
-  # Result is in summary.nests$summary
-infoall <- info.nests(resultNest_4p_SSM4p)
-  # Result is a value
-infoall.df <- info.nests(resultNest_4p_SSM4p, out="metric", 
+  progressbar=TRUE)
+  
+summary.nests <- info.nests(resultNest_4p_SSM, 
   embryo.stages="Caretta caretta.SCL", 
-  replicate.CI=100, 
-  resultmcmc=resultNest_mcmc_4p_SSM4p, 
-  GTRN.CI="MCMC", 
-  progress=TRUE)
-# Result is in infoall.df$metric
-infoall.both <- info.nests(resultNest_4p_SSM4p, 
-  embryo.stages="Caretta caretta.SCL", 
-  out=c("metric", "summary"), replicate.CI=100, 
-  resultmcmc=resultNest_mcmc_4p_SSM4p, 
-  GTRN.CI="MCMC", 
-  progress=TRUE)
-# Results are in infoall.both$summary and in infoall.both$metric
-infoall.both <- info.nests(resultNest_4p_SSM4p, 
-  embryo.stages="Caretta caretta.SCL", 
-  out=c("metric", "summary"), replicate.CI=100, 
+  out="summary", replicate.CI=100, 
   GTRN.CI="Hessian", 
-  progress=TRUE)
-infoall.both <- info.nests(resultNest_4p_SSM4p, 
+  progressbar=TRUE)
+  
+summary.nests <- info.nests(resultNest_4p_SSM, 
+  series = 1, 
   embryo.stages="Caretta caretta.SCL", 
-  out=c("metric", "summary"), replicate.CI=100, 
+  out="summary", replicate.CI=100, 
   GTRN.CI="SE", 
-  progress=TRUE)
+  progressbar=TRUE)
+  
 # Example of use of embryo.stages and TSP.borders:
-  summary.nests <- info.nests(resultNest_4p_SSM4p, out="summary", 
+  summary.nests <- info.nests(resultNest_4p_SSM, out="summary", 
                             embryo.stages=c("10"=0.33, "11"=0.33, "12"=0.66, "13"=0.66), 
                             TSP.borders = c(10, 12), 
                             replicate.CI=100,
-                            progress=TRUE)
+                            progressbar=TRUE)
                             
 #########################################
 # Sex ratio using Massey et al. method PM
@@ -260,66 +278,37 @@ tsdL <- with (CC_Mediterranean, tsd(males=Males, females=Females,
                                     temperatures=Incubation.temperature, 
                                     equation="logistic", replicate.CI=NULL))
                                     
-PM <- info.nests(resultNest_4p_SSM4p, 
+PM <- info.nests(x=resultNest_4p_SSM, 
+  GTRN.CI="Hessian", tsd.CI="Hessian", 
   embryo.stages="Caretta caretta.SCL", replicate.CI=100, 
-  GTRN.CI="Hessian", 
-  out="summary", progress=TRUE, tsd=tsdL)
+  out="summary", progressbar=TRUE, tsd=tsdL)
   
-sr_TSP_SCLW <- predict(tsdL, temperatures=PM$summary[, "TSP.GrowthWeighted.temperature.mean"], 
-              temperature.se=PM$summary[, "TSP.GrowthWeighted.temperature.se"])
 
-plot_errbar(x=sr_TSP_SCLW["50\%", ], y=PM$summary[, "PM.GrowthWeighted.mean"], 
-            x.minus=sr_TSP_SCLW["2.5\%", ], 
-            x.plus=sr_TSP_SCLW["97.5\%", ], 
-            errbar.y=2*PM$summary[, "PM.GrowthWeighted.se"], xlab="CTE SCL growth", 
-            ylab="PM Massey et al. 2016", xlim=c(0, 1), ylim=c(0, 1), las=1)
-segments(x0=0, y0=0, x1=1, y1=1, lty=2, col="red")
-
-sr_TSP_TW <- predict(tsdL, temperatures=PM$summary[, "TSP.TimeWeighted.temperature.mean"], 
-              temperature.se=PM$summary[, "TSP.TimeWeighted.temperature.se"])
-              
-plot_errbar(x=sr_TSP_TW["50\%", ], y=PM$summary[, "PM.GrowthWeighted.mean"], 
-            x.minus=sr_TSP_TW["2.5\%", ], 
-            x.plus=sr_TSP_TW["97.5\%", ], 
-            errbar.y=2*PM$summary[, "PM.GrowthWeighted.se"], xlab="CTE Time", 
-            ylab="PM Massey et al. 2016", xlim=c(0, 1), ylim=c(0, 1), las=1)
-segments(x0=0, y0=0, x1=1, y1=1, lty=2, col="red")
-
-plot_errbar(x=sr_TSP_TW["50\%", ], y=sr_TSP_SCLW["50\%", ], 
-            x.minus=sr_TSP_TW["2.5\%", ], 
-            x.plus=sr_TSP_TW["97.5\%", ], 
-            y.minus=sr_TSP_SCLW["2.5\%", ], 
-            y.plus=sr_TSP_SCLW["97.5\%", ], xlab="CTE Time", 
-            ylab="CTE SCL", xlim=c(0, 1), ylim=c(0, 1), las=1)
-segments(x0=0, y0=0, x1=1, y1=1, lty=2, col="red")
+plot_errbar(x=PM$summary$TimeWeighted.temperature.mean, 
+            y=PM$summary$TSP.PM.GrowthWeighted.mean, 
+            y.minus=PM$summary$TSP.PM.GrowthWeighted.quantile_0.025, 
+            y.plus=PM$summary$TSP.PM.GrowthWeighted.quantile_0.975, 
+            xlab="CTE SCL growth", 
+            ylab="PM Massey et al. 2016", xlim=c(26, 32), ylim=c(0, 1), las=1)
 
 # Relationship between growth and growth rate
 
-infoall.df <- info.nests(resultNest_4p_SSM4p, out="metric", 
+infoall.df <- info.nests(x=resultNest_4p_SSM, out="summary", 
   embryo.stages="Caretta caretta.SCL", 
   replicate.CI=100, 
-  resultmcmc=resultNest_mcmc_4p_SSM4p, 
+  resultmcmc=resultNest_mcmc_4p_SSM, 
   GTRN.CI="MCMC", 
-  progress=TRUE)
+  progressbar=TRUE)
+  
   layout(1)
-plot(x=infoall.df$metric[[1]][, "Time"][-nrow(infoall.df$metric[[1]])], 
-     y=infoall.df$metric[[1]][, "R"][-nrow(infoall.df$metric[[1]])], 
+plot(x=infoall.df$dynamic.metric[[1]][, "Time"], 
+     y=infoall.df$dynamic.metric[[1]][, "Metric_50\%"], 
      type="l", las=1, bty="n", 
-     xlab="Time in minute", ylab="Growth Rate", ylim=c(0, 3E-5), xlim=c(0, 100000))
-plot(x=infoall.df$metric[[1]][, "Time"][-nrow(infoall.df$metric[[1]])], 
-     y=diff(infoall.df$metric[[1]][, "SCL"]), 
-     type="l", las=1, bty="n", 
-     xlab="Time in minute", ylab="Growth", ylim=c(0, 5), xlim=c(0, 100000))
-plot(x=infoall.df$metric[[1]][, "Time"][-nrow(infoall.df$metric[[1]])], 
-     y=diff(infoall.df$metric[[1]][, "SCL"])/diff(infoall.df$metric[[1]][, "Time"]), 
-     type="l", las=1, bty="n", 
-     xlab="Time in minute", ylab="Growth per minute", ylim=c(0, 0.0008), xlim=c(0, 100000))
-plot(x=infoall.df$metric[[1]][, "Time"][-nrow(infoall.df$metric[[1]])], 
-     y=(diff(infoall.df$metric[[1]][, "SCL"])/diff(infoall.df$metric[[1]][, "Time"])) / 
-       (infoall.df$metric[[1]][, "R"][-nrow(infoall.df$metric[[1]])]), 
-     type="l", las=1, bty="n", 
-     xlab="Time in minute", ylab="Ratio Actual Growth / Growth rate", 
-     ylim=c(0, 40), xlim=c(0, 100000))
+     xlab="Time in minute", ylab="Growth", ylim=c(0, 39), xlim=c(0, 100000))
+lines(x=infoall.df$dynamic.metric[[1]][, "Time"], 
+     y=infoall.df$dynamic.metric[[1]][, "Metric_2.5\%"], lty=2)
+lines(x=infoall.df$dynamic.metric[[1]][, "Time"], 
+     y=infoall.df$dynamic.metric[[1]][, "Metric_97.5\%"], lty=2)
 }
 }
 \author{

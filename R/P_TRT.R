@@ -168,17 +168,15 @@ P_TRT <- function(x=NULL, resultmcmc=NULL, fixed.parameters=NULL,
             errorsigncpt <- errorsigncpt + replicate.CI-nrow(partot)
             
             if (!is.na(x$par["S"])) {
-            # Je retire quand S change de signe
-            # Là je ne le retire pas mais je l'inverse !
-            if (any(sign(par[, "S"]) != sign(x$par["S"]))) {
-              errorsignS <- errorsignS + sum(sign(par[, "S"]) != sign(x$par["S"]))
-              par <- par[sign(par[, "S"]) == sign(x$par["S"]), , drop = FALSE]
-            }
+              # Je retire quand S change de signe
+              if (any(sign(par[, "S"]) != sign(x$par["S"]))) {
+                errorsignS <- errorsignS + sum(sign(par[, "S"]) != sign(x$par["S"]))
+                par <- par[sign(par[, "S"]) == sign(x$par["S"]), , drop = FALSE]
+              }
             }
             
             if (!is.na(x$par["S_low"])) {
               # Je retire quand S change de signe
-              # Là je ne le retire pas mais je l'inverse !
               if (any(sign(par[, "S_low"]) != sign(x$par["S_low"]))) {
                 errorsignS_low <- errorsignS_low + sum(sign(par[, "S_low"]) != sign(x$par["S_low"]))
                 par <- par[sign(par[, "S_low"]) == sign(x$par["S_low"]), , drop = FALSE]
@@ -187,7 +185,6 @@ P_TRT <- function(x=NULL, resultmcmc=NULL, fixed.parameters=NULL,
             
             if (!is.na(x$par["S_high"])) {
               # Je retire quand S change de signe
-              # Là je ne le retire pas mais je l'inverse !
               if (any(sign(par[, "S_high"]) != sign(x$par["S_high"]))) {
                 errorsignS_high <- errorsignS_high + sum(sign(par[, "S_high"]) != sign(x$par["S_high"]))
                 par <- par[sign(par[, "S_high"]) == sign(x$par["S_high"]), , drop = FALSE]
@@ -351,11 +348,17 @@ P_TRT <- function(x=NULL, resultmcmc=NULL, fixed.parameters=NULL,
   equation <- tolower(equation)
   
   if (!is.null(temperatures)) {
+    
     srT <- apply(X = par, MARGIN=1, function(xpar) {
-      p <- modelTSD(xpar, rnorm(length(temperatures), temperatures, SD), equation)
-      if (any(is.na(p))) {
-        warning("Error for this set of parameters")
-        print(d(xpar))
+      
+      if (all(is.finite(c(temperatures, SD)))) {
+        p <- modelTSD(xpar, rnorm(length(temperatures), temperatures, SD), equation)
+        if (any(is.na(p))) {
+          warning(paste0("Error for this set of parameters: ", paste0(as.character(xpar), collapse="; "), "; temperatures=", paste0(as.character(temperatures), collapse="; ")))
+        }
+        
+      } else {
+        p <- rep(NA, length(temperatures))
       }
       return(p)
     })
@@ -391,12 +394,12 @@ P_TRT <- function(x=NULL, resultmcmc=NULL, fixed.parameters=NULL,
         # log((1/l)-1) <- (1/S)(P-T)
         # log((1/l)-1)*S <- P-T
         if (is.na(xpar["P_low"])) {
-        limit.low.TRT <- unname(xpar["P"]-log((1/l)-1)*xpar["S"])
-        limit.high.TRT <- unname(xpar["P"]-log((1/(1-l))-1)*xpar["S"])
-        outr <- c(lower.limit.TRT=unname(min(c(limit.low.TRT, limit.high.TRT))), 
-                  higher.limit.TRT=unname(max(c(limit.low.TRT, limit.high.TRT))), 
-                  TRT=unname(abs(limit.high.TRT-limit.low.TRT)), 
-                  PT=unname(xpar["P"]))
+          limit.low.TRT <- unname(xpar["P"]-log((1/l)-1)*xpar["S"])
+          limit.high.TRT <- unname(xpar["P"]-log((1/(1-l))-1)*xpar["S"])
+          outr <- c(lower.limit.TRT=unname(min(c(limit.low.TRT, limit.high.TRT))), 
+                    higher.limit.TRT=unname(max(c(limit.low.TRT, limit.high.TRT))), 
+                    TRT=unname(abs(limit.high.TRT-limit.low.TRT)), 
+                    PT=unname(xpar["P"]))
         } else {
           limit.low.TRT_low <- unname(xpar["P_low"]-log((1/l)-1)*xpar["S_low"])
           limit.high.TRT_low <- unname(xpar["P_low"]-log((1/(1-l))-1)*xpar["S_low"])
@@ -415,60 +418,66 @@ P_TRT <- function(x=NULL, resultmcmc=NULL, fixed.parameters=NULL,
       }
       if (equation=="flexit") {
         if (!is.na(xpar["P"])) {
-        P <- xpar["P"]
-        S <- xpar["S"]
-        K1 <- xpar["K1"]
-        K2 <- xpar["K2"]
-        
-        if (K1 == 0) {
-          K1 <- 1e-9
-        }
-        if (K2 == 0) {
-          K2 <- 1e-9
-        }
-        
-        if (is.infinite(2^(K1))) {
-          S1 <- K1*S
-          K1 <- sign(K1)*500
-        } else {
-          S1 <- (2^(K1 - 1)*K1*S)/(2^(K1) - 1)
-        }
-        
-        
-        if (is.infinite(2^(K2))) {
-          S2 <- K2*S
-          K2 <- sign(K2)*500
-        } else {
-          S2 <- (2^(K2 - 1)*K2*S)/(2^(K2) - 1)
-        }
-        
-        # (1 + (2^K1 - 1) *  exp(4 * S1 * (P - x)))^(-1/K1)) = (1-l)
-        # (1 + (2^K1 - 1) *  exp(4 * S1 * (P - x)))^(1/K1)) = 1/(1-l)
-        # (1 + (2^K1 - 1) *  exp(4 * S1 * (P - x))) = (1/(1-l)) ^ K1
-        # (2^K1 - 1) *  exp(4 * S1 * (P - x)) = (1/(1-l)) ^ K1 - 1
-        # exp(4 * S1 * (P - x)) = ((1/(1-l)) ^ K1 - 1)/(2^K1 - 1)
-        # 4 * S1 * (P - x) = log(((1/(1-l)) ^ K1 - 1)/(2^K1 - 1))
-        # P - x = log(((1/(1-l)) ^ K1 - 1)/(2^K1 - 1))/(4 * S1)
-        # x= P -  log(((1/(1-l)) ^ K1 - 1)/(2^K1 - 1))/(4 * S1)
-        
-        limit.low.TRT <- P -  log(((1/(1-l)) ^ K1 - 1)/(2^K1 - 1))/(4 * S1)
-        
-        # 1-(1 + (2^K2 - 1) * exp(4 * S2 * (x - P)))^(-1/K2) = l
-        # (1 + (2^K2 - 1) * exp(4 * S2 * (x - P)))^(-1/K2) = (1-l)
-        # (1 + (2^K2 - 1) * exp(4 * S2 * (x - P)))^(1/K2) = 1/(1-l)
-        # 1 + (2^K2 - 1) * exp(4 * S2 * (x - P)) = (1/(1-l))^K2
-        # (2^K2 - 1) * exp(4 * S2 * (x - P)) = (1/(1-l))^K2 - 1
-        # exp(4 * S2 * (x - P)) = ((1/(1-l))^K2 - 1)/(2^K2 - 1)
-        # 4 * S2 * (x - P)) = log(((1/(1-l))^K2 - 1)/(2^K2 - 1))
-        # x - P = 1/(4 * S2) * log(((1/(1-l))^K2 - 1)/(2^K2 - 1))
-        # x = 1/(4 * S2) * log(((1/(1-l))^K2 - 1)/(2^K2 - 1)) + P
-        
-        limit.high.TRT <- 1/(4 * S2) * log(((1/(1-l))^K2 - 1)/(2^K2 - 1)) + P
-        
-        outr <- c(lower.limit.TRT=unname(limit.low.TRT), 
-                  higher.limit.TRT=unname(limit.high.TRT), 
-                  TRT=unname(limit.high.TRT-limit.low.TRT), 
-                  PT=unname(P))
+          P <- xpar["P"]
+          S <- xpar["S"]
+          K1 <- xpar["K1"]
+          K2 <- xpar["K2"]
+          
+          if (K1 == 0) {
+            K1 <- 1e-9
+          }
+          if (K2 == 0) {
+            K2 <- 1e-9
+          }
+          
+          if (is.infinite(2^(K1))) {
+            S1 <- K1*S
+            K1 <- sign(K1)*500
+          } else {
+            S1 <- (2^(K1 - 1)*K1*S)/(2^(K1) - 1)
+          }
+          
+          
+          if (is.infinite(2^(K2))) {
+            S2 <- K2*S
+            K2 <- sign(K2)*500
+          } else {
+            S2 <- (2^(K2 - 1)*K2*S)/(2^(K2) - 1)
+          }
+          
+          # (1 + (2^K1 - 1) *  exp(4 * S1 * (P - x)))^(-1/K1)) = (1-l)
+          # (1 + (2^K1 - 1) *  exp(4 * S1 * (P - x)))^(1/K1)) = 1/(1-l)
+          # (1 + (2^K1 - 1) *  exp(4 * S1 * (P - x))) = (1/(1-l)) ^ K1
+          # (2^K1 - 1) *  exp(4 * S1 * (P - x)) = (1/(1-l)) ^ K1 - 1
+          # exp(4 * S1 * (P - x)) = ((1/(1-l)) ^ K1 - 1)/(2^K1 - 1)
+          # 4 * S1 * (P - x) = log(((1/(1-l)) ^ K1 - 1)/(2^K1 - 1))
+          # P - x = log(((1/(1-l)) ^ K1 - 1)/(2^K1 - 1))/(4 * S1)
+          # x= P -  log(((1/(1-l)) ^ K1 - 1)/(2^K1 - 1))/(4 * S1)
+          
+          limit.low.TRT <- P -  log(((1/(1-l)) ^ K1 - 1)/(2^K1 - 1))/(4 * S1)
+          
+          # 1-(1 + (2^K2 - 1) * exp(4 * S2 * (x - P)))^(-1/K2) = l
+          # (1 + (2^K2 - 1) * exp(4 * S2 * (x - P)))^(-1/K2) = (1-l)
+          # (1 + (2^K2 - 1) * exp(4 * S2 * (x - P)))^(1/K2) = 1/(1-l)
+          # 1 + (2^K2 - 1) * exp(4 * S2 * (x - P)) = (1/(1-l))^K2
+          # (2^K2 - 1) * exp(4 * S2 * (x - P)) = (1/(1-l))^K2 - 1
+          # exp(4 * S2 * (x - P)) = ((1/(1-l))^K2 - 1)/(2^K2 - 1)
+          # 4 * S2 * (x - P)) = log(((1/(1-l))^K2 - 1)/(2^K2 - 1))
+          # x - P = 1/(4 * S2) * log(((1/(1-l))^K2 - 1)/(2^K2 - 1))
+          # x = 1/(4 * S2) * log(((1/(1-l))^K2 - 1)/(2^K2 - 1)) + P
+          
+          limit.high.TRT <- 1/(4 * S2) * log(((1/(1-l))^K2 - 1)/(2^K2 - 1)) + P
+          
+          if (S > 0) {
+            lTRT <- limit.low.TRT
+            limit.low.TRT <- limit.high.TRT
+            limit.high.TRT <- lTRT
+          }
+          
+          outr <- c(lower.limit.TRT=unname(limit.low.TRT), 
+                    higher.limit.TRT=unname(limit.high.TRT), 
+                    TRT=unname(limit.high.TRT-limit.low.TRT), 
+                    PT=unname(P))
         } else {
           # Modèle TSD II ou FMF
           P <- xpar["P_low"]
@@ -521,6 +530,12 @@ P_TRT <- function(x=NULL, resultmcmc=NULL, fixed.parameters=NULL,
           
           limit.high.TRT_low <- 1/(4 * S2) * log(((1/(1-l))^K2 - 1)/(2^K2 - 1)) + P
           
+          if (S > 0) {
+            lTRT <- limit.low.TRT_low
+            limit.low.TRT_low <- limit.high.TRT_low
+            limit.high.TRT_low <- lTRT
+          }
+          
           P <- xpar["P_high"]
           S <- xpar["S_high"]
           K1 <- xpar["K1_high"]
@@ -570,6 +585,13 @@ P_TRT <- function(x=NULL, resultmcmc=NULL, fixed.parameters=NULL,
           # x = 1/(4 * S2) * log(((1/(1-l))^K2 - 1)/(2^K2 - 1)) + P
           
           limit.high.TRT_high <- 1/(4 * S2) * log(((1/(1-l))^K2 - 1)/(2^K2 - 1)) + P
+          
+          
+          if (S > 0) {
+            lTRT <- limit.low.TRT_high
+            limit.low.TRT_high <- limit.high.TRT_high
+            limit.high.TRT_high <- lTRT
+          }
           
           outr <- c(lower.limit.TRT_low=unname(min(c(limit.low.TRT_low, limit.high.TRT_low))), 
                     higher.limit.TRT_low=unname(max(c(limit.low.TRT_low, limit.high.TRT_low))), 

@@ -1,6 +1,6 @@
 #' Result of the fit using the nest database using transition
 #' @title Result of the fit using the nest database using transition
-#' @author Marc Girondot \email{marc.girondot@@u-psud.fr}
+#' @author Marc Girondot \email{marc.girondot@@universite-paris-saclay.fr}
 #' @docType data
 #' @name resultNest_4p_transition
 #' @encoding UTF-8

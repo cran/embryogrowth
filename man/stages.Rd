@@ -231,7 +231,7 @@ Other Functions for temperature-dependent sex determination:
 \code{\link{tsd}()}
 }
 \author{
-Marc Girondot \email{marc.girondot@u-psud.fr}
+Marc Girondot \email{marc.girondot@universite-paris-saclay.fr}
 }
 \concept{Functions for temperature-dependent sex determination}
 \keyword{datasets}

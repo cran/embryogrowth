@@ -6,9 +6,11 @@
 \title{The package embryogrowth}
 \description{
 Tools to analyze the embryo growth and the sexualisation thermal reaction norms.\cr
-The lastest version of this package can always been installed using:\cr
-install.packages("http:///max2.ese.u-psud.fr/epc/conservation/CRAN/HelpersMG.tar.gz", repos=NULL, type="source")\cr
-install.packages("http:///max2.ese.u-psud.fr/epc/conservation/CRAN/embryogrowth.tar.gz", repos=NULL, type="source")
+The latest version of this package can always been installed using:\cr
+install.packages("http://max2.ese.u-psud.fr/epc/conservation/CRAN/HelpersMG.tar.gz", repos=NULL, type="source")\cr
+install.packages("http://max2.ese.u-psud.fr/epc/conservation/CRAN/embryogrowth.tar.gz", repos=NULL, type="source")
+\if{html}{\figure{E.png}{options: alt="embryogrowth logo", width="200pt", align="right"}}
+\if{latex}{\figure{E.png}{options: width="200pt"}}
 }
 \details{
 Fit a parametric function that describes dependency of embryo growth to temperature
@@ -16,8 +18,8 @@ Fit a parametric function that describes dependency of embryo growth to temperat
 \tabular{ll}{
  Package: \tab embryogrowth\cr
  Type: \tab Package\cr
- Version: \tab 8.0 build 1133\cr
- Date: \tab 2020-10-22\cr
+ Version: \tab 8.1 build 1462\cr
+ Date: \tab 2021-06-04\cr
  License: \tab GPL (>= 2)\cr
  LazyLoad: \tab yes\cr
  }
@@ -49,60 +51,61 @@ pfixed <- c(rK=2.093313)
 # Thermal Biology. 45, 96-102.
 #
 # Based on recent analysis on table of development for both Emys orbicularis and 
-# Caretta caretta, best value for pfixed should be 1.209 and M0 should be 0.34.
-# Girondot, M., Monsinjon, J., Guillon, J.-M., Submitted. Delimitation of the 
-# embryonic thermosensitive period for sex determination using an embryo growth 
-# model reveals a potential bias for sex ratio prediction in turtles.
+# Caretta caretta, best value for rK should be 1.209 and M0 should be 0.34.
+# Girondot M, Monsinjon J, Guillon J-M (2018) Delimitation of the embryonic 
+# thermosensitive period for sex determination using an embryo growth model 
+# reveals a potential bias for sex ratio prediction in turtles. Journal of 
+# Thermal Biology 73: 32-40 
 #
 # See the example in the stages datasets
 # 
 ################################################################################
 
-resultNest_4p_SSM4p <- searchR(parameters=x, fixed.parameters=pfixed, 
-	temperatures=formated, derivate=dydt.Gompertz, M0=1.7, 
-	test=c(Mean=39.33, SD=1.92))
-data(resultNest_4p_SSM4p)
+resultNest_4p_SSM <- searchR(parameters=x, fixed.parameters=pfixed, 
+	temperatures=formated, integral=integral.Gompertz, M0=1.7, 
+	hatchling.metric=c(Mean=39.33, SD=1.92))
+data(resultNest_4p_SSM)
 par(mar=c(4, 4, 1, 1))
-plot(resultNest_4p_SSM4p$data[[1]][, 1]/60/24,resultNest_4p_SSM4p$data[[1]][, 2], bty="n", las=1, 
+plot(resultNest_4p_SSM$data[[1]][, 1]/60/24,resultNest_4p_SSM$data[[1]][, 2], bty="n", las=1, 
      xlab="Days of incubation", ylab="Temperatures in °C", 
      type="l", xlim=c(0,70),ylim=c(20, 35))
-for (i in 2:resultNest_4p_SSM4p$data$IndiceT[3]) {
+for (i in 2:resultNest_4p_SSM$data$IndiceT[["NbTS"]]) {
   par(new=TRUE)
-  plot(resultNest_4p_SSM4p$data[[i]][, 1]/60/24,resultNest_4p_SSM4p$data[[i]][, 2], 
+  plot(resultNest_4p_SSM$data[[i]][, 1]/60/24,resultNest_4p_SSM$data[[i]][, 2], 
   bty="n", las=1, xlab="", ylab="", type="l", xlim=c(0,70),ylim=c(20, 35), axes = FALSE)
 }
 par(mar=c(4, 4, 1, 1))
-pMCMC <- TRN_MHmcmc_p(resultNest_4p_SSM4p, accept=TRUE)
+pMCMC <- TRN_MHmcmc_p(resultNest_4p_SSM, accept=TRUE)
 # Take care, it can be very long, sometimes several days
-resultNest_mcmc_4p_SSM4p <- GRTRN_MHmcmc(result=resultNest_4p_SSM4p,  
+resultNest_mcmc_4p_SSM <- GRTRN_MHmcmc(result=resultNest_4p_SSM,  
 	parametersMCMC=pMCMC, n.iter=10000, n.chains = 1, n.adapt = 0,  
 	thin=1, trace=TRUE)
-data(resultNest_mcmc_4p_SSM4p)
-out <- as.mcmc(resultNest_mcmc_4p_SSM4p)
+data(resultNest_mcmc_4p_SSM)
+out <- as.mcmc(resultNest_mcmc_4p_SSM)
 # This out obtained after as.mcmc can be used with coda package
 # plot() can use the direct output of GRTRN_MHmcmc() function.
-plot(resultNest_mcmc_4p_SSM4p, parameters=1, xlim=c(0,550))
-plot(resultNest_mcmc_4p_SSM4p, parameters=3, xlim=c(290,320))
+plot(resultNest_mcmc_4p_SSM, parameters=1, xlim=c(0,550))
+plot(resultNest_mcmc_4p_SSM, parameters=3, xlim=c(290,320))
 # But rather than to use the SD for each parameter independantly, it is
 # more logical to estimate the distribution of the curves
-new_result <- ChangeSSM(resultmcmc = resultNest_mcmc_4p_SSM4p, result = resultNest_4p_SSM4p,
+new_result <- ChangeSSM(resultmcmc = resultNest_mcmc_4p_SSM, result = resultNest_4p_SSM,
                         temperatures = seq(from = 20, to = 35, by = 0.1), 
                         initial.parameters = NULL)
 par(mar=c(4, 4, 1, 5)+0.4)
 
-plotR(result = resultNest_4p_SSM4p, parameters = new_result$par, 
+plotR(result = resultNest_4p_SSM, parameters = new_result$par, 
            ylabH = "Temperatures\ndensity", ylimH=c(0, 0.3), atH=c(0, 0.1, 0.2), 
            ylim=c(0, 3), show.hist=TRUE)
       
 # Beautiful density plots
 
-plotR(result = resultNest_4p_SSM4p, 
-             resultmcmc=resultNest_mcmc_4p_SSM4p, 
-             curves = "MCMC quantiles", show.density=TRUE)
+plotR(result = resultNest_4p_SSM, 
+             resultmcmc=resultNest_mcmc_4p_SSM, 
+             curve = "MCMC quantiles", show.density=TRUE)
 
-plotR(resultNest_6p_SSM6p, resultmcmc=resultNest_mcmc_6p_SSM6p, 
+plotR(resultNest_6p_SSM, resultmcmc=resultNest_mcmc_6p_SSM, 
             ylim=c(0, 4), show.density=TRUE, show.hist=TRUE, 
-            curves = "MCMC quantiles", 
+            curve = "MCMC quantiles", 
             ylimH=c(0,0.5), atH=c(0, 0.1, 0.2))
 }
 }
@@ -147,7 +150,7 @@ Girondot, M., & Kaska, Y. (2014). Nest temperatures in a loggerhead-
          than air temperature. Journal of Thermal Biology, 47, 13-18.
 }
 \author{
-Marc Girondot \email{marc.girondot@universite-paris-saclay.fr}
+Marc Girondot \email{marc.girondot@gmail.com}
 }
 \keyword{Ecology}
 \keyword{Embryo}

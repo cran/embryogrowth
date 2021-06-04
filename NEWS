@@ -1,19 +1,50 @@
 THIS IS THE CHANGELOG OF THE "embryogrowth" PACKAGE
 
-            CHANGES IN VERSION 8.0 (2020-10-22)
+            CHANGES IN VERSION 8.1 (2021-06-04)
 
-* TSP.begin and TSP.end are used in STRN - 7.7.1 (2020-02-22)
-* MassWeighted is replaced by GrowthWeighted in info.nests() - 7.7.2 (2020-02-23)
-* New outputs in info.nests() with GrowthRateWeighted - 7.7.2 (2020-02-23)
-* Minor changes in plot.tsd() and P_TRT() - 7.7.3 (2020-06-10)
-* Add flexit in tsd in shiny - 7.7.4 (2020-06-27)
-* when mcmc result is given with P_TRT() and the number of replicate.ci is equal to the number of iteration, no resampling is done - 7.7.5 (2020-08-12)
-* Improvement of the hatchling success model - 7.8 (2020-09-17)
-* Improvement of databaseTSD for Eretmochelys imbricata - 7.8.1 & 7.8.2 (2020-09-23 & 2020-09-24)
-* New hessian parameter in HatchingSuccess.fit - 7.8.3 (2020-10-07)
-* tsd function can now fit TSDII or FMF pattern - 7.9 (2020-10-11)
-* DatabaseTSD.version() returns the date of the most recent update of the database TSD - 7.9 (2020-10-19)
-* fixed.parameters works again in tsd - 8.0 (2020-10-20)
+* New CRAN version - 8.1 (2020-10-20)
+
+            CHANGES IN VERSION 8.0-42 (2021-06-03)
+
+* fixed.parameters works again in tsd - 8.0-0 (2020-10-20)
+* Fix a bug for AICc and BIC estimation in tsd function - 8.0-1 (2020-10-31)
+* Calculate AICc and BIC in HatchingSuccess.fit - 8.0-2 (2020-11-23)
+* HatchingSuccess.fit is compatible with IP.mean - 8.0-2 (2020-11-23)
+* Polishing STRN - 8.0-3 (2020-12-10)
+* Correction for deviance test in tsd() - 8.0-4
+* nobs.HatchingSuccess() is corrected - 8.0-5
+* BIG CHANGE: test and stopattest parameters are renamed hatchling.metric and stop.at.hatchling.metric - 8.0-6
+* BIG EXPERIMENTAL CHANGE: New method to estimate growth of embryos to limit the impact of Runge-Kutta approximation - 8.0-7-8.0-9
+* New ways to estimate CTE in info.nests() to be closer from the biological interpretation - 8.0-10
+* P_TRT works when S is positive in flexit model - 8.0-11 (2021-02-01)
+* Change of description in STRN_MHmcmc() - 8.0-12 (2021-02-03)
+* durations can be used with predict.tsd - 8.0-13 (2021-02-04)
+* SE FALSE does not roduce error in tsd - 8.0-14 (2021-03-15)
+* Minor change in info.nests() - 8.0-15 (2021-04-07)
+* Results in info.nests() are ordered - 8.0-16 (2021-04-08)
+* New parameter max.time in MovingIncubation() - 8.0-17 (2021-04-13)
+* Change in info.nests to ensure that size is always increasing - 8.0-18 (2021-04-14)
+* Change in TRN_MHmcmc_p() to use only runif distribution - 8.0-19 (2021-04-15)
+* Minor change in description of DatabaseTSD(), info.nests() and GRTRN_MHmcmc() - 8.0-20 (2021-04-16)
+* Updated version of examples in searchR() - 8.0-21 (2021-04-19)
+* Minor change in info.nests() when fill is the same as existing temperatures - 8.0-21 (2021-04-19)
+* Cchange in info.nests() to estimate the TSP - 8.0-22 (2021-04-19)
+* Minor change in STRN() - 8.0-23 (2021-04-20)
+* Simplification and enhancement of STRN() - 8.0-24 (2021-04-27)
+* Prevent a case in which LengthTSP can be negative in STRN() - 8.0-25 (2021-04-29)
+* Add embryogrowth logo - 8.0-26 (2021-05-01)
+* Minor changes in info.nests() - 8.0-27 (2021-05-03)
+* Add hessian parameter in STRN() - 8.0-28 (2021-05-04)
+* Minor changes in info.nests() - 8.0-29 (2021-05-03)
+* Minor changes in info.nests() - 8.0-30 & 8.0-31 & 8.0-32 & 8.0-33 (2021-05-11)
+* Minor changes in movingincubation() - 8.0-34 & 8.0-35 (2021-05-11)
+* Minor changes in info.nests() - 8.0-36 (2021-05-12)
+* fill parameter in STRN() - 8.0-37 (2021-05-13)
+* Minor change in plotR - 8.0-38 (2021-05-14)
+* Minor changes in info.nests() - 8.0-39 (2021-05-16)
+* Minor changes in info.nests() - 8.0-40 (2021-05-17)
+* Add option dynamic in info.nests() - 8.0-41 (2021-05-18)
+* Solve too long vector in info.nests() - 8.0-42 (2021-06-03)
 
             CHANGES IN VERSION 7.7 (2020-01-15)
 
@@ -28,6 +59,17 @@ THIS IS THE CHANGELOG OF THE "embryogrowth" PACKAGE
 * New function movement() - 7.7
 * replicate.NullDeviance was not taken into account in tsd() - 7.7
 * New CRAN version - 7.7 (2020-01-15)
+* TSP.begin and TSP.end are used in STRN - 7.7.1 (2020-02-22)
+* MassWeighted is replaced by GrowthWeighted in info.nests() - 7.7.2 (2020-02-23)
+* New outputs in info.nests() with GrowthRateWeighted - 7.7.2 (2020-02-23)
+* Minor changes in plot.tsd() and P_TRT() - 7.7.3 (2020-06-10)
+* Add flexit in tsd in shiny - 7.7.4 (2020-06-27)
+* when mcmc result is given with P_TRT() and the number of replicate.ci is equal to the number of iteration, no resampling is done - 7.7.5 (2020-08-12)
+* Improvement of the hatchling success model - 7.8 (2020-09-17)
+* Improvement of databaseTSD for Eretmochelys imbricata - 7.8.1 & 7.8.2 (2020-09-23 & 2020-09-24)
+* New hessian parameter in HatchingSuccess.fit - 7.8.3 (2020-10-07)
+* tsd function can now fit TSDII or FMF pattern - 7.9 (2020-10-11)
+* DatabaseTSD.version() returns the date of the most recent update of the database TSD - 7.9 (2020-10-19)
 
             CHANGES IN VERSION 7.6 (2019-08-30)
           

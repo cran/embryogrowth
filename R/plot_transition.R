@@ -12,17 +12,17 @@
 #' library(embryogrowth)
 #' data(nest)
 #' formated <- FormatNests(nest)
-#' data(resultNest_4p_SSM4p)
+#' data(resultNest_4p_SSM)
 #' # Get a set of parameters without transition
-#' x1 <- resultNest_4p_SSM4p$par
+#' x1 <- resultNest_4p_SSM$par
 #' # Generate a set of parameters with transition
 #' x2 <- switch.transition(x1)
 #' x2 <- x2[names(x2)!="transition_P"]
 #' x2["transition_S"] <- 4
 #' pfixed <- c(rK=2.093313, transition_P=20)
 #' resultNest_4p_transition <- searchR(parameters=x2, fixed.parameters=pfixed, 
-#' temperatures=formated, derivate=dydt.Gompertz, M0=1.7, 
-#' test=c(Mean=39.33, SD=1.92))
+#' temperatures=formated, integral=integral.Gompertz, M0=1.7, 
+#' hatchling.metric=c(Mean=39.33, SD=1.92))
 #' data(resultNest_4p_transition)
 #' # show the model for smallest size
 #' plotR(resultNest_4p_transition, ylim=c(0,0.3))
@@ -32,7 +32,7 @@
 #' plotR(resultNest_4p_transition, set.par=c(1,2), ylim=c(0,0.3), 
 #'        col=c("red", "black"), legend=list("Initial", "End"))
 #' plot_transition(result=resultNest_4p_transition, las=1, sizes=c(0,40))
-#' compare_AIC(one.model=list(resultNest_4p_SSM4p), two.models=list(resultNest_4p_transition))
+#' compare_AIC(one.model=list(resultNest_4p_SSM), two.models=list(resultNest_4p_transition))
 #' # Note that the model with fitted transition_P is trivial. Embryos grow fast until  
 #' # they reach hatchling size and then growth rate becomes null!
 #' }

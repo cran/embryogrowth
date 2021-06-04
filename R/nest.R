@@ -1,6 +1,6 @@
 #' Timeseries of temperatures for nests
 #' @title Timeseries of temperatures for nests
-#' @author Marc Girondot \email{marc.girondot@@u-psud.fr}
+#' @author Marc Girondot \email{marc.girondot@@universite-paris-saclay.fr}
 #' @docType data
 #' @name nest
 #' @description Timeseries of temperatures for nests

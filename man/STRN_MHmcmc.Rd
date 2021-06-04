@@ -14,14 +14,14 @@ STRN_MHmcmc(
   trace = NULL,
   traceML = FALSE,
   batchSize = sqrt(n.iter),
-  dataSTRN = NULL,
   adaptive = FALSE,
   adaptive.lag = 500,
   adaptive.fun = function(x) {     ifelse(x > 0.234, 1.3, 0.7) },
   parallel = TRUE,
   intermediate = NULL,
   filename = "intermediate.Rdata",
-  previous = NULL
+  previous = NULL,
+  fill = NA
 )
 }
 \arguments{
@@ -43,8 +43,6 @@ STRN_MHmcmc(
 
 \item{batchSize}{Number of observations to include in each batch fo SE estimation}
 
-\item{dataSTRN}{A named list data used to estimate likelihoods (see further in description)}
-
 \item{adaptive}{Should an adaptive process for SDProp be used}
 
 \item{adaptive.lag}{Lag to analyze the SDProp value in an adaptive content}
@@ -58,6 +56,8 @@ STRN_MHmcmc(
 \item{filename}{If intermediate is not NULL, save intermediate result in this file}
 
 \item{previous}{Previous result to be continued. Can be the filename in which intermediate results are saved.}
+
+\item{fill}{Parameters to be sent to STRN().}
 }
 \value{
 A list with resultMCMC being mcmc.list object, resultLnL being likelihoods and parametersMCMC being the parameters used
@@ -70,28 +70,10 @@ If initial point is maximum likelihood, n.adapt = 0 is a good solution.\cr
 To get the SE of the point estimates from \code{result_mcmc <- STRN_MHmcmc(result=try)}, use:\cr
 \code{result_mcmc$SD}\cr
 coda package is necessary for this function.\cr
-The dataSTRN is a named list with the following objects:\cr
-\itemize{
-  \item EmbryoGrowthTRN= result of \code{\link{searchR}}
-  \item tsd= result of \code{\link{tsd}}
-  \item sexed= vector with number of sexed embryos
-  \item males= vector with number of males (could be also females=)
-  \item Temperatures= a text of the temperatures name used as CTE
-}
-The Temperatures text for CTE can be:
-\itemize{
-  \item \code{TimeWeighted.temperature.mean}
-  \item \code{TSP.TimeWeighted.temperature.mean}
-  \item \code{TSP.GrowthWeighted.temperature.mean}
-  \item \code{TSP.STRNWeighted.temperature.mean}
-  \item \code{TSP.GrowthWeighted.STRNWeighted.temperature.mean}
-  \item \code{MiddleThird.TimeWeighted.temperature.mean}
-}
-They are explained in the \code{\link{info.nests}} function.\cr
-This function is not still fully described as it has not been published still.\cr
 The parameters intermediate and filename are used to save intermediate results every 'intermediate' iterations (for example 1000). Results are saved in a file of name filename.\cr
 The parameter previous is used to indicate the list that has been save using the parameters intermediate and filename. It permits to continue a mcmc search.\cr
 These options are used to prevent the consequences of computer crash or if the run is very very long and processes at time limited.\cr
+If fill is NA, it will use the stored fill value in result.\cr
 }
 \details{
 STRN_MHmcmc runs the Metropolis-Hastings algorithm for STRN (Bayesian MCMC)
@@ -101,33 +83,33 @@ STRN_MHmcmc runs the Metropolis-Hastings algorithm for STRN (Bayesian MCMC)
 library(embryogrowth)
 MedIncubation_Cc <- subset(DatabaseTSD, Species=="Caretta caretta" & 
 RMU=="Mediterranean" & Sexed!=0)
-Med_Cc <- with(MedIncubation_Cc, tsd(males=Males, females=Females, 
- temperatures=Incubation.temperature, par=c(P=29.5, S=-0.01)))
+Med_Cc <- tsd(males=MedIncubation_Cc$Males, 
+             females=MedIncubation_Cc$Females, 
+             temperatures=MedIncubation_Cc$Incubation.temperature, 
+             par=c(P=29.5, S=-0.1))
 plot(Med_Cc, xlim=c(25, 35))
 males <- c(7, 0, 0, 0, 0, 5, 6, 3, 5, 3, 2, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0)
-names(males) <- rev(rev(names(resultNest_4p_SSM4p$data))[-(1:2)])
+names(males) <- rev(rev(names(resultNest_4p_SSM$data))[-(1:2)])
 sexed <- rep(10, length(males))
-names(sexed) <- rev(rev(names(resultNest_4p_SSM4p$data))[-(1:2)])
-Initial_STRN <- resultNest_4p_SSM4p$par[c("DHA", "DHH", "T12H")]
-Initial_STRN <- structure(c(3460.21379985491, 588.062535503578, 2347.70617453574), 
+names(sexed) <- rev(rev(names(resultNest_4p_SSM$data))[-(1:2)])
+Initial_STRN <- resultNest_4p_SSM$par[c("DHA", "DHH", "T12H")]
+Initial_STRN <- structure(c(582.567096666926, 2194.0806711639, 3475.28414940385), 
                           .Names = c("DHA", "DHH", "T12H"))
 fp <- c(Rho25=100)
-fitSTRN <- STRN(Initial_STRN, EmbryoGrowthTRN=resultNest_4p_SSM4p, tsd=Med_Cc, 
+fitSTRN <- STRN(Initial_STRN=Initial_STRN, 
+                EmbryoGrowthTRN=resultNest_4p_SSM, 
+                tsd=Med_Cc, 
+                embryo.stages="Caretta caretta.SCL", 
                 Sexed=sexed, Males=males, 
-                fixed.parameters=fp,  
-                Temperatures="TSP.GrowthWeighted.STRNWeighted.temperature.mean")
+                fixed.parameters=fp, 
+                sexratio="TSP.GrowthWeighted.STRNWeighted.sexratio")
+                
 pMCMC <- TRN_MHmcmc_p(fitSTRN, accept=TRUE)
 pMCMC[, "Density"] <- "dunif"
 pMCMC[, "Prior2"] <- pMCMC[, "Max"]<- 10000
 pMCMC[, "Prior1"] <- pMCMC[, "Min"] <- 1
-outMCMC <- STRN_MHmcmc(result = fitSTRN, n.iter = 50000, parametersMCMC = pMCMC,
+outMCMC <- STRN_MHmcmc(result = fitSTRN, n.iter = 10000, parametersMCMC = pMCMC,
                 n.chains = 1, n.adapt = 0, thin = 1, trace = TRUE,
-                dataSTRN = list(EmbryoGrowthTRN = resultNest_4p_SSM4p, 
-                   Temperatures = "TSP.STRNWeighted.temperature.mean", 
-                   fixed.parameters=fitSTRN$fixed.parameters,
-                   zero=1E-9, 
-                   tsd=Med_Cc, 
-                   Sexed=sexed, Males=males), 
                 adaptive = TRUE, adaptive.lag = 500, 
                 intermediate = 1000,
                 filename = "intermediate_mcmcSTRN.Rdata")
@@ -135,31 +117,6 @@ plot(outMCMC, parameters=1)
 plot(outMCMC, parameters=2)
 plot(outMCMC, parameters=3)
 1-rejectionRate(as.mcmc(x = outMCMC))
-# Take care,you computer will be 100\% busy as all cores will be used intensively
-outMCMC_parallel <- parallel::mclapply(1:detectCores(), function(x) {
-                STRN_MHmcmc(result = fitSTRN, n.iter = 50000/detectCores(), 
-                parametersMCMC = pMCMC,
-                n.chains = 1, n.adapt = 0, thin = 1, trace = TRUE,
-                dataSTRN = list(EmbryoGrowthTRN = resultNest_4p_SSM4p, 
-                   Temperatures = "TSP.STRNWeighted.temperature.mean", 
-                   fixed.parameters=fitSTRN$fixed.parameters,
-                   tsd=Med_Cc, zero=1E-9, 
-                   Sexed=sexed, Males=males), 
-                parallel=FALSE, 
-                adaptive = TRUE, adaptive.lag = 500, 
-                intermediate = NULL)
-})
-outMCMC_parallel_merge <- outMCMC_parallel[[1]]
-for (i in 2:length(outMCMC_parallel)) {
-  outMCMC_parallel_merge <- merge(outMCMC_parallel_merge, outMCMC_parallel[[i]])
-}
-plot(outMCMC_parallel_merge, parameters=1)
-plot(outMCMC_parallel_merge, parameters=2)
-plot(outMCMC_parallel_merge, parameters=3)
-
-plotR(parameters = fitSTRN$par, fixed.parameters=fitSTRN$fixed.parameters, 
-      curves = "MCMC quantiles", ylim=c(0, 5), resultmcmc = outMCMC_parallel_merge, 
-      ylab="Relative contribution to sexualisation", xlim=c(28, 29))
 
 }
 }

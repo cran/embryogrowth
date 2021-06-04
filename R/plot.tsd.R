@@ -130,20 +130,23 @@ plot.tsd <- function(x, ...,
   
   if ((equation!="GSD") & (show.PTRT)) {
     if (any(colnames(o$P_TRT_quantiles)=="PT")) {
-    polygon(c(o$P_TRT_quantiles[2, "lower.limit.TRT"], o$P_TRT_quantiles[2, "lower.limit.TRT"], o$P_TRT_quantiles[2, "higher.limit.TRT"], o$P_TRT_quantiles[2, "higher.limit.TRT"]), c(0,1,1,0), border=NA, col=col.TRT)  
-    # limites de la limite basse de la TRT
-    polygon(c(o$P_TRT_quantiles[1, "lower.limit.TRT"], o$P_TRT_quantiles[1, "lower.limit.TRT"], o$P_TRT_quantiles[3, "lower.limit.TRT"], o$P_TRT_quantiles[3, "lower.limit.TRT"]), c(0,1,1,0), border=NA, col=col.TRT.CI)
-    # limites de la limite haute de la TRT
-    polygon(c(o$P_TRT_quantiles[1, "higher.limit.TRT"], o$P_TRT_quantiles[1, "higher.limit.TRT"], o$P_TRT_quantiles[3, "higher.limit.TRT"], o$P_TRT_quantiles[3, "higher.limit.TRT"]), c(0,1,1,0), border=NA, col=col.TRT.CI)
-    # limites de la PT
-    polygon(c(o$P_TRT_quantiles[1, "PT"], o$P_TRT_quantiles[1, "PT"], o$P_TRT_quantiles[3, "PT"], o$P_TRT_quantiles[3, "PT"]), c(0,1,1,0), border=NA, col=col.PT.CI)  
-    par(xpd=TRUE)
-    segments(o$P_TRT_quantiles[2, "PT"], 0, o$P_TRT_quantiles[2, "PT"], 1.05, lty=4)
-    segments(o$P_TRT_quantiles[2, "lower.limit.TRT"], 0, o$P_TRT_quantiles[2, "lower.limit.TRT"], 1.15, lty=3)
-    segments(o$P_TRT_quantiles[2, "higher.limit.TRT"], 0, o$P_TRT_quantiles[2, "higher.limit.TRT"], 1.15, lty=3)
-    text(x=o$P_TRT_quantiles[2, "PT"], y=1.1, lab.PT)
-    text(x=o$P_TRT_quantiles[2, "PT"], y=1.2, lab.TRT)
+      par(xpd=FALSE)
+      polygon(c(o$P_TRT_quantiles[2, "lower.limit.TRT"], o$P_TRT_quantiles[2, "lower.limit.TRT"], o$P_TRT_quantiles[2, "higher.limit.TRT"], o$P_TRT_quantiles[2, "higher.limit.TRT"]), c(0,1,1,0), border=NA, col=col.TRT)  
+      # limites de la limite basse de la TRT
+      polygon(c(o$P_TRT_quantiles[1, "lower.limit.TRT"], o$P_TRT_quantiles[1, "lower.limit.TRT"], o$P_TRT_quantiles[3, "lower.limit.TRT"], o$P_TRT_quantiles[3, "lower.limit.TRT"]), c(0,1,1,0), border=NA, col=col.TRT.CI)
+      # limites de la limite haute de la TRT
+      polygon(c(o$P_TRT_quantiles[1, "higher.limit.TRT"], o$P_TRT_quantiles[1, "higher.limit.TRT"], o$P_TRT_quantiles[3, "higher.limit.TRT"], o$P_TRT_quantiles[3, "higher.limit.TRT"]), c(0,1,1,0), border=NA, col=col.TRT.CI)
+      # limites de la PT
+      polygon(c(o$P_TRT_quantiles[1, "PT"], o$P_TRT_quantiles[1, "PT"], o$P_TRT_quantiles[3, "PT"], o$P_TRT_quantiles[3, "PT"]), c(0,1,1,0), border=NA, col=col.PT.CI)  
+      par(xpd=TRUE)
+      segments(o$P_TRT_quantiles[2, "PT"], 0, o$P_TRT_quantiles[2, "PT"], 1.05, lty=4)
+      segments(o$P_TRT_quantiles[2, "lower.limit.TRT"], 0, o$P_TRT_quantiles[2, "lower.limit.TRT"], 1.15, lty=3)
+      segments(o$P_TRT_quantiles[2, "higher.limit.TRT"], 0, o$P_TRT_quantiles[2, "higher.limit.TRT"], 1.15, lty=3)
+      text(x=o$P_TRT_quantiles[2, "PT"], y=1.1, lab.PT)
+      text(x=o$P_TRT_quantiles[2, "PT"], y=1.2, lab.TRT)
+      par(xpd=FALSE)
     } else {
+      par(xpd=FALSE)
       polygon(c(o$P_TRT_quantiles[2, "lower.limit.TRT_low"], o$P_TRT_quantiles[2, "lower.limit.TRT_low"], o$P_TRT_quantiles[2, "higher.limit.TRT_low"], o$P_TRT_quantiles[2, "higher.limit.TRT_low"]), c(0,1,1,0), border=NA, col=col.TRT)  
       # limites de la limite basse de la TRT
       polygon(c(o$P_TRT_quantiles[1, "lower.limit.TRT_low"], o$P_TRT_quantiles[1, "lower.limit.TRT_low"], o$P_TRT_quantiles[3, "lower.limit.TRT_low"], o$P_TRT_quantiles[3, "lower.limit.TRT_low"]), c(0,1,1,0), border=NA, col=col.TRT.CI)
@@ -157,7 +160,7 @@ plot.tsd <- function(x, ...,
       segments(o$P_TRT_quantiles[2, "higher.limit.TRT_low"], 0, o$P_TRT_quantiles[2, "higher.limit.TRT_low"], 1.15, lty=3)
       text(x=o$P_TRT_quantiles[2, "PT_low"], y=1.1, lab.PT)
       text(x=o$P_TRT_quantiles[2, "PT_low"], y=1.2, lab.TRT)
-      
+      par(xpd=FALSE)
       polygon(c(o$P_TRT_quantiles[2, "lower.limit.TRT_high"], o$P_TRT_quantiles[2, "lower.limit.TRT_high"], o$P_TRT_quantiles[2, "higher.limit.TRT_high"], o$P_TRT_quantiles[2, "higher.limit.TRT_high"]), c(0,1,1,0), border=NA, col=col.TRT)  
       # limites de la limite basse de la TRT
       polygon(c(o$P_TRT_quantiles[1, "lower.limit.TRT_high"], o$P_TRT_quantiles[1, "lower.limit.TRT_high"], o$P_TRT_quantiles[3, "lower.limit.TRT_high"], o$P_TRT_quantiles[3, "lower.limit.TRT_high"]), c(0,1,1,0), border=NA, col=col.TRT.CI)
@@ -171,6 +174,7 @@ plot.tsd <- function(x, ...,
       segments(o$P_TRT_quantiles[2, "higher.limit.TRT_high"], 0, o$P_TRT_quantiles[2, "higher.limit.TRT_high"], 1.15, lty=3)
       text(x=o$P_TRT_quantiles[2, "PT_high"], y=1.1, lab.PT)
       text(x=o$P_TRT_quantiles[2, "PT_high"], y=1.2, lab.TRT)
+      par(xpd=FALSE)
     }
   }
   
@@ -209,7 +213,7 @@ plot.tsd <- function(x, ...,
                                 , "errbar.lty", "errbar.col"
                                 , "errbar.y.polygon"
                                 , "errbar.y.polygon.list"))]
-    
+    par(xpd=FALSE)
     a <- do.call(plot, L2)
     
     if (show.CI) {
@@ -229,7 +233,7 @@ plot.tsd <- function(x, ...,
                                   , "errbar.lty", "errbar.col"
                                   , "errbar.y.polygon"
                                   , "errbar.y.polygon.list"))]
-      
+      par(xpd=FALSE)
       a <- do.call(plot, L2) 
       
       par(new=TRUE)
@@ -244,7 +248,7 @@ plot.tsd <- function(x, ...,
                                   , "errbar.lty", "errbar.col"
                                   , "errbar.y.polygon"
                                   , "errbar.y.polygon.list"))]
-      
+      par(xpd=FALSE)
       a <- do.call(plot, L2) 
       
     }

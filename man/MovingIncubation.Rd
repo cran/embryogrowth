@@ -7,24 +7,31 @@
 MovingIncubation(
   NestsResult = NULL,
   resultmcmc = NULL,
-  temperatures.df = stop("A data.frame must be provided"),
-  metabolic.heating = 0,
   GTRN.CI = "Hessian",
+  tsd = NULL,
+  tsd.CI = NULL,
+  tsd.mcmc = NULL,
+  SexualisationTRN = NULL,
+  SexualisationTRN.CI = "Hessian",
+  SexualisationTRN.mcmc = NULL,
+  temperatures.df = stop("A data.frame must be provided"),
   temperature.heterogeneity = 0,
+  metabolic.heating = 0,
   average.incubation.duration = 60 * 1440,
+  max.time = 100 * 24 * 60,
   skip = 1,
   parameters = NULL,
   fixed.parameters = NULL,
   SE = NULL,
   hessian = NULL,
+  integral = NULL,
   derivate = NULL,
-  test = NULL,
+  hatchling.metric = NULL,
   M0 = NULL,
-  TSP.borders = c(21, 26),
   embryo.stages = "Caretta caretta.SCL",
-  SexualisationTRN = NULL,
-  SexualisationTRN.CI = "Hessian",
-  SexualisationTRN.mcmc = NULL,
+  TSP.borders = c(21, 26),
+  TSP.begin = 0,
+  TSP.end = 0.5,
   replicate.CI = 1,
   parallel = TRUE,
   progressbar = TRUE
@@ -35,15 +42,29 @@ MovingIncubation(
 
 \item{resultmcmc}{A mcmc result. Will be used rather than SE if provided.}
 
-\item{temperatures.df}{A data.frame with 2 or 3 columns: Times, Temperatures and Temperatures.end.incubation (facultative)}
-
-\item{metabolic.heating}{Degrees Celsius to be added at the end of incubation due to metabolic heating}
-
 \item{GTRN.CI}{How to estimate CI for embryo growth thermal reaction norm; can be NULL, "SE", "MCMC", or "Hessian".}
+
+\item{tsd}{A object from tsd() that describe the thermal react norm of sex ratio at constant temperatures}
+
+\item{tsd.CI}{How to estimate CI for sex ratio thermal reaction norm; Can be NULL, "SE", "MCMC", or "Hessian".}
+
+\item{tsd.mcmc}{A object from tsd_MHmcmc()}
+
+\item{SexualisationTRN}{A model for sexualisation thermal reaction norm during TSP obtained using STRN()}
+
+\item{SexualisationTRN.CI}{How to estimate CI of sexualisation thermal reaction norm. Can be NULL, "SE", "MCMC", or "Hessian".}
+
+\item{SexualisationTRN.mcmc}{MCMC object for STRN.}
+
+\item{temperatures.df}{A data.frame with 2 or 3 columns: Times, Temperatures and Temperatures.end.incubation (facultative)}
 
 \item{temperature.heterogeneity}{SD of heterogeneity of temperatures. Can be 2 values, sd_low and sd_high and then HelpersMG::r2norm() is used.}
 
+\item{metabolic.heating}{Degrees Celsius to be added at the end of incubation due to metabolic heating}
+
 \item{average.incubation.duration}{The average time to complete incubation (not used if metabolic heating is setup)}
+
+\item{max.time}{Maximum time of incubation}
 
 \item{skip}{Number of data to skip between two runs}
 
@@ -55,21 +76,21 @@ MovingIncubation(
 
 \item{hessian}{A hessian matrix}
 
-\item{derivate}{Function used to fit embryo growth: dydt.Gompertz, dydt.exponential or dydt.linear}
+\item{integral}{Function used to fit embryo growth: integral.Gompertz, integral.exponential or integral.linear}
 
-\item{test}{Mean and SD of size of hatchlings as a vector ie test=c(Mean=xx, SD=yy)}
+\item{derivate}{Function used to fit embryo growth: dydt.Gompertz, dydt.exponential or dydt.linear. It will replace the one in NestsResult.}
+
+\item{hatchling.metric}{Mean and SD of size of hatchlings as a vector ie hatchling.metric=c(Mean=xx, SD=yy)}
 
 \item{M0}{Measure of hatchling size proxi at laying date}
 
-\item{TSP.borders}{The limits of TSP}
-
 \item{embryo.stages}{The embryo stages. At least TSP.borders stages must be provided to estimate TSP length}
 
-\item{SexualisationTRN}{A model for sexualisation thermal reaction norm during TSP obtained using STRN()}
+\item{TSP.borders}{The limits of TSP}
 
-\item{SexualisationTRN.CI}{How to estimate CI of sexualisation thermal reaction norm. Can be NULL, "SE", "MCMC", or "Hessian".}
+\item{TSP.begin}{Where TSP begin during the stage of beginning? In relative proportion of the stage.}
 
-\item{SexualisationTRN.mcmc}{MCMC object for STRN.}
+\item{TSP.end}{Where TSP begin during the stage of ending? In relative proportion of the stage.}
 
 \item{replicate.CI}{Number of randomizations to estimate CI}
 
@@ -90,7 +111,7 @@ MovingIncubation simulate incubation of a nest with the beginning varying day by
 \examples{
 \dontrun{
 library(embryogrowth)
-data(resultNest_4p_SSM4p)
+data(resultNest_4p_SSM)
 ti <- seq(from=0, to=(60*24*100), by=60)
 temperatures <- rnorm(length(ti), 29, 5)
 temperatures <- temperatures+ti/(60*24*100)/2
@@ -99,7 +120,7 @@ parpre <- par(mar=c(4, 4, 1, 1)+0.4)
 plot(ti/(60*24), temperatures, type="l", xlab="Days", 
      ylab=expression("Nest temperature in "*degree*"C"), bty="n", las=1)
 # The sexualisation thermal reaction norm is calculated for South Pacific RMU
-out <- MovingIncubation(NestsResult=resultNest_4p_SSM4p, 
+out <- MovingIncubation(NestsResult=resultNest_4p_SSM, 
      temperatures.df=data.frame(Time=ti, Temperature=temperatures),
      metabolic.heating = 0, 
      SexualisationTRN = structure(c(71.922411148397, 613.773055147801, 

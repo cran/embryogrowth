@@ -9,7 +9,7 @@ STRN(
   fixed.parameters = NULL,
   EmbryoGrowthTRN = stop("Embryo Growth Thermal Reaction Norm must be provided"),
   TSP.borders = NULL,
-  embryo.stages = "Generic.ProportionDevelopment",
+  embryo.stages = NULL,
   TSP.begin = 0,
   TSP.end = 0.5,
   tsd = NULL,
@@ -17,19 +17,21 @@ STRN(
   Sexed = NULL,
   Males = NULL,
   Females = NULL,
-  Temperatures = "TSP.GrowthWeighted.STRNWeighted.temperature.mean",
-  SE = TRUE,
+  sexratio = "TSP.TimeWeighted.GrowthRateWeighted.STRNWeighted.sexratio.mean",
+  fill = 60,
   parallel = TRUE,
   itnmax = 1000,
   method = c("Nelder-Mead", "BFGS"),
   control = list(trace = 1, REPORT = 10),
-  zero = 1e-09
+  zero = 1e-09,
+  verbose = FALSE,
+  hessian = TRUE
 )
 }
 \arguments{
-\item{Initial_STRN}{Values for initial model of Sexualisation Thermal Reaction Norm}
+\item{Initial_STRN}{Values for initial model of Sexualisation Thermal Reaction Norm or tsd model}
 
-\item{fixed.parameters}{Value for Sexualisation Thermal Reaction Norm model that will not be changed}
+\item{fixed.parameters}{Value for Sexualisation Thermal Reaction Norm or tsd model that will not be changed}
 
 \item{EmbryoGrowthTRN}{The Embryo Growth Thermal Reaction Norm obtained with searchR()}
 
@@ -43,7 +45,7 @@ STRN(
 
 \item{tsd}{The model used to predict sex ratio, obtained from tsd()}
 
-\item{equation}{If tsd parameter is not provided, equation and parameters for tsd model must be provided.}
+\item{equation}{If tsd parameter is not provided, equation and parameters in Initial_STRN for tsd model must be provided.}
 
 \item{Sexed}{The number of sexed embryos with names identifying timeseries}
 
@@ -51,39 +53,46 @@ STRN(
 
 \item{Females}{The number of females embryos with names identifying timeseries}
 
-\item{Temperatures}{The temperature from out of info.nests to be used}
+\item{sexratio}{The sex ratio to be used}
 
-\item{SE}{Should standard error of parameters and Hessian matrix be estimated ? TRUE or FALSE}
+\item{fill}{See info.nests()}
 
 \item{parallel}{Should parallel computing for info.nests() be used}
 
-\item{itnmax}{Maximum number of iterations for each method}
+\item{itnmax}{Maximum number of iterations for each method; if 0, just return the likelihood}
 
 \item{method}{Methods to be used with optimx}
 
 \item{control}{List for control parameters for optimx}
 
 \item{zero}{The value to replace a null sex ratio}
+
+\item{verbose}{If TRUE, will show all intermediate parameters during fit}
+
+\item{hessian}{If TRUE, the Hessian approximation is estimated atthe end of the fit.}
 }
 \value{
 The list with object return by optim()
 }
 \description{
 Estimate the parameters that best describe the sexualisation thermal reaction norm within the TSP.\cr
-The Temperatures parameter is a character string which can be:\cr
+The sexratio parameter is a character string which can be:\cr
 \itemize{
-  \item \code{TimeWeighted.temperature.mean}
-  \item \code{GrowthWeighted.temperature.mean}
-  \item \code{GrowthRateWeighted.temperature.mean}
-  \item \code{TSP.TimeWeighted.temperature.mean}
-  \item \code{TSP.GrowthWeighted.temperature.mean}
-  \item \code{TSP.GrowthRateWeighted.temperature.mean}
-  \item \code{TSP.STRNWeighted.temperature.mean}
-  \item \code{TSP.GrowthWeighted.STRNWeighted.temperature.mean}
-  \item \code{TSP.GrowthRateWeighted.STRNWeighted.temperature.mean}
-  \item \code{MiddleThird.TimeWeighted.temperature.mean}
-  \item \code{MiddleThird.GrowthWeighted.temperature.mean}
-  \item \code{MiddleThird.GrowthRateWeighted.temperature.mean}
+  \item \code{TSP.TimeWeighted.sexratio.mean} Sex ratio based on average temperature during the TSP
+  \item \code{TSP.GrowthWeighted.sexratio.mean} Sex ratio based on average temperature weighted by the actual growth during the TSP
+  \item \code{TSP.TimeWeighted.GrowthRateWeighted.sexratio.mean} Sex ratio based on average temperature weighted by the growth rate during the TSP
+  \item \code{TSP.TimeWeighted.STRNWeighted.sexratio.mean} Sex ratio based on average temperature weighted by the thermal reaction norm of sexualization during the TSP
+  \item \code{TSP.GrowthWeighted.STRNWeighted.sexratio.mean} Sex ratio based on average temperature weighted by the actual growth and thermal reaction norm of sexualization during the TSP
+  \item \code{TSP.TimeWeighted.GrowthRateWeighted.STRNWeighted.sexratio.mean} Sex ratio based on average temperature weighted by the growth rate and the thermal reaction norm of sexualization during the TSP
+  \item \code{MiddleThird.TimeWeighted.sexratio.mean} Sex ratio based on average temperature during the middle third incubation
+  \item \code{MiddleThird.GrowthWeighted.sexratio.mean} Sex ratio based on average temperature weighted by actual growth during the middle third incubation
+  \item \code{MiddleThird.TimeWeighted.GrowthRateWeighted.sexratio.mean} Sex ratio based on average temperature weighted by growth rate during the middle third incubation
+  \item \code{TimeWeighted.sexratio.mean} Sex ratio based on average temperature during all incubation
+  \item \code{GrowthWeighted.sexratio.mean} Sex ratio based on average temperature weighted by actual growth during all incubation
+  \item \code{TimeWeighted.GrowthRateWeighted.sexratio.mean} Sex ratio based on average temperature weighted by growth rate during all incubation
+  \item \code{TSP.PM.TimeWeighted.mean} Average sex ratio based on temperature during the TSP
+  \item \code{TSP.PM.GrowthWeighted.mean} Average sex ratio based on temperature weighted by the actual growth during the TSP
+  \item \code{TSP.PM.TimeWeighted.GrowthRateWeighted.mean} Average sex ratio based on temperature weighted by the growth rate during the TSP
   }
 If information for sex is not known for some timeseries, set NA for Sexed.\cr
 Sexed, Males and Females must be vectors with names. The names must be the same as 
@@ -98,6 +107,14 @@ Note: four species have predefined embryo stages. embryo.stages parameter can ta
   \item \code{Podocnemis expansa.SCL}
   \item \code{Generic.ProportionDevelopment}
 }
+A fifth name \code{fitted} must be used when limits of TSP are fitted using \code{BeginTSP} and \code{EndTSP} parameters.\cr
+The parameters that can be used in STRN are:\cr
+\code{BeginTSP}, \code{EndTSP} are the logit of the proportion of development; \cr
+To ensure that \code{BeginTSP} < \code{EndTSP}, it is better to use:\cr
+\code{BeginTSP}, \code{LengthTSP} and then \code{EndTSP} is estimated using \code{BeginTSP} + \code{abs(LengthTSP)}\cr
+\code{DHA}, \code{DHH}, \code{T12H} are the SSM parameters of sexualisation thermal reaction norm; \cr
+\code{dbeta_mu}, \code{dbeta_v} are the beta mean and variance of the impact of sexualisation according to TSP progress.\cr
+Or any parameter that can be used in a TSD model.
 }
 \details{
 STRN estimates the parameters that best describe the sexualisation thermal reaction norm within the TSP
@@ -107,86 +124,148 @@ STRN estimates the parameters that best describe the sexualisation thermal react
 library(embryogrowth)
 MedIncubation_Cc <- subset(DatabaseTSD, Species=="Caretta caretta" & 
 RMU=="Mediterranean" & Sexed!=0)
-Med_Cc <- with(MedIncubation_Cc, tsd(males=Males, females=Females, 
- temperatures=Incubation.temperature, par=c(P=29.5, S=-0.01)))
+Med_Cc <- tsd(males=MedIncubation_Cc$Males, 
+             females=MedIncubation_Cc$Females, 
+             temperatures=MedIncubation_Cc$Incubation.temperature, 
+             par=c(P=29.5, S=-0.1))
 plot(Med_Cc, xlim=c(25, 35))
 males <- c(7, 0, 0, 0, 0, 5, 6, 3, 5, 3, 2, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0)
-names(males) <- rev(rev(names(resultNest_4p_SSM4p$data))[-(1:2)])
+names(males) <- rev(rev(names(resultNest_4p_SSM$data))[-(1:2)])
 sexed <- rep(10, length(males))
-names(sexed) <- rev(rev(names(resultNest_4p_SSM4p$data))[-(1:2)])
-Initial_STRN <- resultNest_4p_SSM4p$par[c("DHA_STRN", "DHH_STRN", "T12H_STRN")]
-Initial_STRN <- structure(c(582.567096666926, 2194.0806711639, 3475.28414940385), 
-                          .Names = c("DHA_STRN", "DHH_STRN", "T12H_STRN"))
-fp <- c(Rho25_STRN=100)
+names(sexed) <- rev(rev(names(resultNest_4p_SSM$data))[-(1:2)])
+
+Initial_STRN <- c('DHA' = 1174.6461503413307, 
+                  'DHH' = 2001.0619192107047, 
+                  'T12H' = 3731.353104743393)
+fp <- c(Rho25=100)
 fitSTRN <- STRN(Initial_STRN=Initial_STRN, 
-                EmbryoGrowthTRN=resultNest_4p_SSM4p, tsd=Med_Cc, 
+                EmbryoGrowthTRN=resultNest_4p_SSM, 
+                tsd=Med_Cc, 
                 embryo.stages="Caretta caretta.SCL", 
                 Sexed=sexed, Males=males, 
                 fixed.parameters=fp, 
-                SE=TRUE, 
-                Temperatures="TSP.GrowthWeighted.STRNWeighted.temperature.mean")
-plotR(fitSTRN, curves ="ML quantiles", ylim=c(0,2))
-CTE <- info.nests(NestsResult=resultNest_4p_SSM4p, 
+                sexratio="TSP.GrowthWeighted.STRNWeighted.sexratio.mean")
+plotR(fitSTRN, curve ="ML", ylim=c(0,2))
+plotR(fitSTRN)
+out <- info.nests(NestsResult=resultNest_4p_SSM, 
                   SexualisationTRN=fitSTRN,
                   SexualisationTRN.CI="Hessian",
                   embryo.stages="Caretta caretta.SCL", 
-                  CI="Hessian", 
+                  GTRN.CI="Hessian", 
+                  tsd=Med_Cc, 
+                  tsd.CI="Hessian", 
                   replicate.CI=100, 
-                  progress=TRUE, 
+                  progressbar=TRUE, 
                   warnings=TRUE, 
                   out="summary")$summary
 # CTE with growth-weighted temperature average
 plot(Med_Cc, xlim=c(25, 35))
-points(x=CTE$TSP.GrowthWeighted.temperature.mean, y=males/sexed, 
+points(x=out[, "TSP.GrowthWeighted.STRNWeighted.temperature.mean"], y=males/sexed, 
          col="red", pch=19)
-legend("topright", legend=c("CTE with growth-weighted TRN"), 
+legend("topright", legend=c("CTE with growth-weighted and Sexualization TRN"), 
          pch=19, col=c("red"))
-# CTE with sexualisation TRN and growth-weighted temperature average
-plot(Med_Cc, xlim=c(25, 35))
-points(x=CTE$TSP.GrowthWeighted.STRNWeighted.temperature.mean, y=males/sexed, 
-         col="red", pch=19)
-legend("topright", legend=c("CTE with growth-weighted TRN and Sex. TRN"), 
-       pch=19, col=c("red"))
-xx <- seq(from=20, to=35, by=0.1)
-plot(x=xx, 
-         y=log10(getFromNamespace(".SSM", ns="embryogrowth")(xx, 
-                            c(fitSTRN$par, fitSTRN$fixed.parameters))[[1]]), 
-         type="l", bty="n", xlim=c(20, 35), ylim=c(-20, 20), 
-         xlab="Temperature", ylab="Sexualisation thermal reaction norm (log10)")
-         
-# Using only the sexualisation thermal reaction norm within TSP to calculate CTE
+       
+#  Fit the beginning and end of TSP
 
-Initial_STRN <- resultNest_4p_SSM4p$par[c("DHA_STRN", "DHH_STRN", "T12H_STRN")]
-Initial_STRN <- structure(c(3678.94960547096, -301.436485427701, 912.595953854977), 
-                          .Names = c("DHA_STRN", "DHH_STRN", "T12H_STRN"))
-fp <- c(Rho25_STRN=100)
-fitSTRN_2 <- STRN(Initial_STRN=Initial_STRN, 
-                EmbryoGrowthTRN=resultNest_4p_SSM4p, tsd=Med_Cc, 
+Initial_STRN <- c('BeginTSP' = invlogit(0.33), 
+                  'EndTSP' = invlogit(0.66))
+fp <- NULL
+fitSTRN <- STRN(Initial_STRN=Initial_STRN, 
+                EmbryoGrowthTRN=resultNest_4p_SSM, 
+                tsd=Med_Cc, 
+                embryo.stages="fitted", 
+                Sexed=sexed, Males=males, 
+                fixed.parameters=fp, 
+                sexratio="TSP.TimeWeighted.GrowthRateWeighted.STRNWeighted.sexratio.mean")
+invlogit(fitSTRN$par)
+invlogit(fitSTRN$par-2*fitSTRN$SE)
+invlogit(fitSTRN$par+2*fitSTRN$SE)
+
+Initial_STRN <- c('dbeta_mu' = logit(0.5), 
+                  'dbeta_v' = 1/12)
+fp <- NULL
+fitSTRN <- STRN(Initial_STRN=Initial_STRN, 
+                EmbryoGrowthTRN=resultNest_4p_SSM, 
+                tsd=Med_Cc, 
                 embryo.stages="Caretta caretta.SCL", 
                 Sexed=sexed, Males=males, 
-                fixed.parameters=fp,  
-                Temperatures="TSP.STRNWeighted.temperature.mean")
-CTE <- info.nests(NestsResult=resultNest_4p_SSM4p, 
-                  SexualisationTRN=fitSTRN_2,
-                  SexualisationTRN.CI="Hessian",
-                  embryo.stages="Caretta caretta.SCL", 
-                  CI="Hessian", 
-                  replicate.CI=100, 
-                  progress=TRUE, 
-                  warnings=TRUE, 
-                  out="summary")$summary
-# CTE with sexualisation TRN
-plot(Med_Cc, xlim=c(25, 35))
-points(x=CTE$TSP.STRNWeighted.temperature.mean, y=males/sexed, 
-         col="red", pch=19)
-legend("topright", legend=c("CTE with Sexualisation TRN"), 
-       pch=19, col=c("red"))
-xx <- seq(from=20, to=35, by=0.1)
-plot(x=xx, 
-         y=getFromNamespace(".SSM", ns="embryogrowth")(xx, 
-                            c(fitSTRN$par, fitSTRN$fixed.parameters))[[1]], 
-         type="l", bty="n", xlim=c(20, 35), ylim=c(0, 1E-18), 
-         xlab="Temperature", ylab="Sexualisation thermal reaction norm")
+                fixed.parameters=fp, 
+                sexratio="TSP.TimeWeighted.GrowthRateWeighted.STRNWeighted.sexratio.mean")
+                mu <- invlogit(fitSTRN$par["dbeta_mu"]), 
+                v <- abs(fitSTRN$par["dbeta_v"])
+                shape1 <- mu * (((mu * (1 - mu))/v) - 1)
+                shape2 <- shape1 * (1 - mu)/mu
+plot(seq(from=0, to=1, length.out=100), 
+     dbeta(seq(from=0, to=1, length.out=100), 
+               shape1=shape1, shape2=shape2), 
+     type="l", xlab="Progress of TSP", 
+     ylab="Force of sexualisation", bty="n", ylim=c(0, 6), las=1)
+               
+ Initial_STRN <- c('dbeta_mu' = 7.2194053298953236, 
+                   'dbeta_v' = 0.00050390986089928467)
+fp <- NULL
+fitSTRN <- STRN(Initial_STRN=Initial_STRN                                                 , 
+                EmbryoGrowthTRN=resultNest_4p_SSM                                         , 
+                tsd=Med_Cc                                                                , 
+                embryo.stages="Caretta caretta.SCL"                                       , 
+                Sexed=sexed                                                               , 
+                Males=males                                                               , 
+                fixed.parameters=fp                                                       , 
+                sexratio="TSP.TimeWeighted.GrowthRateWeighted.STRNWeighted.sexratio.mean" )
+                
+                mu <- invlogit(fitSTRN$par["dbeta_mu"]), 
+                v <- abs(fitSTRN$par["dbeta_v"])
+                shape1 <- mu * (((mu * (1 - mu))/v) - 1)
+                shape2 <- shape1 * (1 - mu)/mu
+                
+plot(seq(from=0, to=1, length.out=100), 
+     dbeta(seq(from=0, to=1, length.out=100), 
+               shape1=shape1, shape2=shape2), 
+     type="l", xlab="Progress of TSP", 
+     ylab="Force of sexualisation", bty="n", ylim=c(0, 0.04), las=1)
+               
+Initial_STRN <- c('dbeta_mu' = logit(0.5), 
+                  'dbeta_v' = 1/12)
+L <- STRN(Initial_STRN=NULL                                                        , 
+          fixed.parameters=Initial_STRN                                            , 
+          EmbryoGrowthTRN=resultNest_4p_SSM                                        , 
+          tsd=Med_Cc                                                               , 
+          embryo.stages="Caretta caretta.SCL"                                                   , 
+          Sexed=sexed                                                              ,
+          Males=males                                                              , 
+          sexratio="TSP.TimeWeighted.GrowthRateWeighted.STRNWeighted.sexratio.mean")
+Initial_STRN <- c('dbeta_mu' = logit(0.6), 
+                  'dbeta_v' = 1/12)
+L <- STRN(Initial_STRN=NULL                                                        , 
+          fixed.parameters=Initial_STRN                                            , 
+          EmbryoGrowthTRN=resultNest_4p_SSM                                        , 
+          tsd=Med_Cc                                                               , 
+          embryo.stages="Caretta caretta.SCL"                                                   , 
+          Sexed=sexed                                                              ,
+          Males=males                                                              , 
+          sexratio="TSP.TimeWeighted.GrowthRateWeighted.STRNWeighted.sexratio.mean")
+ Initial_STRN <- c('dbeta_mu' = 7.2192972077000004, 
+                    'dbeta_v' = 0.00050396969999999997)
+L <- STRN(Initial_STRN=NULL                                                        , 
+          fixed.parameters=Initial_STRN                                            , 
+          EmbryoGrowthTRN=resultNest_4p_SSM                                        , 
+          tsd=Med_Cc                                                               , 
+          embryo.stages="Caretta caretta.SCL"                                      , 
+          Sexed=sexed                                                              ,
+          Males=males                                                              , 
+          sexratio="TSP.TimeWeighted.GrowthRateWeighted.STRNWeighted.sexratio.mean")
+                mu <- invlogit(fitSTRN$par["dbeta_mu"]), 
+                v <- abs(fitSTRN$par["dbeta_v"])
+                shape1 <- mu * (((mu * (1 - mu))/v) - 1)
+                shape2 <- shape1 * (1 - mu)/mu
+ 
+   tsp_progress <- seq(from=0, to=1, length.out=100)     
+  plot(tsp_progress, 
+     dbeta(tsp_progress, 
+           shape1=shape1, shape2=shape2), 
+       type="l", xlab="Progress of TSP", 
+       ylab="Force of sexualisation", bty="n", ylim=c(0, 0.04), las=1)
+ segments(x0=0, x1=1, y0=0, y1=0, lty=2)
 }
 }
 \author{

@@ -11,10 +11,11 @@
 #' @param fixed.parameters A set of fixed parameters to model the embryo growth thermal reaction norm. It will replace the fixed parameters included in NestsResult.
 #' @param SE Standard error for each parameter. It will replace the SE in NestsResult. Use SE=NA to remove SE from NestResult
 #' @param temperatures Timeseries of temperatures formatted using formatNests(). It will replace the one in NestsResult.
+#' @param integral Function used to fit embryo growth: integral.Gompertz, integral.exponential or integral.linear. It will replace the one in NestsResult.
 #' @param derivate Function used to fit embryo growth: dydt.Gompertz, dydt.exponential or dydt.linear. It will replace the one in NestsResult.
-#' @param test Mean and SD of size of hatchlings. It will replace the one in NestsResult.
+#' @param hatchling.metric Mean and SD of size of hatchlings. It will replace the one in NestsResult.
 #' @param weight Weights of the different nests to estimate likelihood. It will replace the ones in NestsResult.
-#' @param stopattest TRUE or FALSE. If TRUE, the model stops when proxy of size reached the mean test size.
+#' @param stop.at.hatchling.metric TRUE or FALSE. If TRUE, the model stops when proxy of size reached the mean hatchling.metric size.
 #' @param M0 Measure of hatchling size proxi at laying date. It will replace the one in NestsResult.
 #' @param SexualisationTRN A set of parameters used to model sexualisation thermal reaction norm during TSP or a result of STRN()
 #' @param SexualisationTRN.mcmc A mcmc object obtained from STRN_MHmcmc() to generate variability for sexualisation thermal reaction norm during TSP
@@ -28,84 +29,93 @@
 #' @param metabolic.heating Degrees Celsius to be added at the end of incubation due to metabolic heating.
 #' @param temperature.heterogeneity SD of heterogeneity of temperatures. Can be 2 values, sd_low and sd_high and then HelpersMG::r2norm() is used.
 #' @param fill Number of minutes between two records. Create new one if they do not exist. NULL does not change the time of temperature recordings.
-#' @param out Can take the values of "likelihood" or "metric" or "summary". "metric" and "summary" can be combined: c("metric", "summary")
-#' @param metric.end.incubation The expected metric at the end of incubation. Used to calibrate TSP size. If NULL, take the maximum Mean of the test parameter. If NA, use the actual final size. Can be a vector and is recycled if necessary.
-#' @param progress If FALSE, the progress bar is not shown (useful for using with sweave or knitr)
+#' @param probs Probabilities for metric quantiles.
+#' @param out Can take the values of "likelihood", "summary", "metric" or "dynamic".
+#' @param metric.end.incubation The metric at the end of incubation used to calibrate TSP size. Can be "hatchling.metric", or "observed".
+#' @param progressbar If FALSE, the progress bar is not shown (useful for using with sweave or knitr)
 #' @param warnings If FALSE, does not show warnings
 #' @param parallel If TRUE use parallel version for nests estimation
 #' @param tsd A object from tsd() that describe the thermal react norm of sex ratio at constant temperatures
-#' @param tsd.mcmc A object from tsd_MHmcmc() 
+#' @param tsd.mcmc A object from tsd_MHmcmc() .
 #' @param tsd.CI How to estimate CI for sex ratio thermal reaction norm; Can be NULL, "SE", "MCMC", or "Hessian".
+#' @param zero Value to replace 0 or 1.
 #' @description This function calculates many statistics about nests.\cr
 #' The embryo.stages is a named vector with relative size as compared to final size at the beginning of the stage. Names are the stages.\cr
 #' For example for SCL in Caretta caretta:\cr
 #' embryo.stages=structure(c(8.4, 9.4, 13.6, 13.8, 18.9, 23.5, 32.2, 35.2, 35.5, 38.5)/39.33), \cr
 #' .Names = c("21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31"))\cr
-#'  indicates that the stages 21 begins at the relative size of 8.4/39.33.\cr
-#' Series can be indicated as the name of the series, their numbers or series or sucession of TRUE or FALSE. "all" indicates that all series must be analyzed.\cr
+#' indicates that the stages 21 begins at the relative size of 8.4/39.33 as compared to the final size.\cr
+#' Series can be indicated as the name of the series, their numbers or series or succession of TRUE or FALSE. "all" indicates that all series must be analyzed.\cr
 #' The likelihood object is just the total likelihood of the data in the model.\cr
 #' If one parameter is named "pipping_emergence" it is used as the number of days between pipping and emergence to calculate the 1/3 and 2/3 of incubation.\cr
-#' The summary object is a data.frame composed of these elements:
+#' The summary object is a data.frame composed of these elements with the suffix .mean, .se or .quantile_x with x from the parameter probs.
 #' \itemize{
 #'   \item \code{Temperature.max} Maximum temperature recorded during incubation
-#'   \item \code{TimeWeighted.temperature.mean} Average temperature weigthed by the time at each temperature for all incubation
-#'   \item \code{TimeWeighted.temperature.se} Standard error for the average temperature weigthed by the time at each temperature for all incubation
-#'   \item \code{GrowthWeighted.temperature.mean} Average temperature weigthed by the growth of embryo for all incubation
-#'   \item \code{GrowthWeighted.temperature.se} Standard error for the average temperature weigthed by the growth of embryo for all incubation
-#'   \item \code{GrowthRateWeighted.temperature.mean} Average temperature weigthed by the growth rate of embryo for all incubation
-#'   \item \code{GrowthRateWeighted.temperature.se} Standard error for the average temperature weigthed by the growth rate of embryo for all incubation
-#'   \item \code{TSP.TimeWeighted.temperature.mean} Average temperature during the TSP weigthed by the time at each temperature
-#'   \item \code{TSP.TimeWeighted.temperature.se} Standard error for the average temperature during the TSP weigthed by the time at each temperature
-#'   \item \code{TSP.GrowthWeighted.temperature.mean} Average temperature during the TSP weigthed by the growth of embryo at each temperature
-#'   \item \code{TSP.GrowthWeighted.temperature.se} Standard error for the average temperature during the TSP weigthed by the growth of embryo at each temperature
-#'   \item \code{TSP.GrowthRateWeighted.temperature.mean} Average temperature during the TSP weigthed by the growth rate of embryo at each temperature
-#'   \item \code{TSP.GrowthRateWeighted.temperature.se} Standard error for the average temperature during the TSP weigthed by the growth rate of embryo at each temperature
-#'   \item \code{TSP.STRNWeighted.temperature.mean} Averaged temperature during the TSP weighted by sexualisation thermal reaction norm
-#'   \item \code{TSP.STRNWeighted.temperature.se} Standard error for temperature during the TSP weighted by sexualisation thermal reaction norm
-#'   \item \code{TSP.GrowthWeighted.STRNWeighted.temperature.mean} Averaged temperature during the TSP weighted by sexualisation thermal reaction norm and embryo growth
-#'   \item \code{TSP.GrowthWeighted.STRNWeighted.temperature.se} Standard error for temperature during the TSP weighted by sexualisation thermal reaction norm and embryo growth
-#'   \item \code{TSP.GrowthRateWeighted.STRNWeighted.temperature.mean} Averaged temperature during the TSP weighted by sexualisation thermal reaction norm and embryo growth rate
-#'   \item \code{TSP.GrowthRateWeighted.STRNWeighted.temperature.se} Standard error for temperature during the TSP weighted by sexualisation thermal reaction norm and embryo growth rate
-#'   \item \code{TSP.length.mean} Average length of the TSP
-#'   \item \code{TSP.length.se} Standard error for length of the TSP
-#'   \item \code{TSP.begin.mean} Average time of the beginning of the TSP
-#'   \item \code{TSP.begin.se} Standard error for the beginning of the TSP
-#'   \item \code{TSP.end.mean} Average time of the endd of the TSP
-#'   \item \code{TSP.end.se} Standard error for the end of the TSP
-#'   \item \code{PM.GrowthWeighted.mean} Proportion of males based on Massey et al. 2019, weighted by growth of embryo
-#'   \item \code{PM.GrowthWeighted.se} Standard error for the proportion of males based on Massey et al. 2019, weighted by growth of embryo
-#'   \item \code{PM.GrowthRateWeighted.mean} Proportion of males based on Massey et al. 2019, weighted by growth rate of embryo
-#'   \item \code{PM.GrowthRateWeighted.se} Standard error for the proportion of males based on Massey et al. 2019, weighted by growth rate of embryo
-#'   \item \code{PM.TimeWeighted.mean} Proportion of males with time effect
-#'   \item \code{PM.TimeWeighted.se} Standard error for the proportion of males with time effect
-#'   \item \code{Incubation.length.mean} Average number of days for the incubation length
-#'   \item \code{Incubation.length.se} Standard error for number of days for the incubation length
-#'   \item \code{Middlethird.begin.mean} Average day at which the middle third incubation begins
-#'   \item \code{Middlethird.begin.se} Standard error for day at which the middle third incubation begins
-#'   \item \code{Middlethird.end.mean} Average day at which the middle third incubation ends
-#'   \item \code{Middlethird.end.se} Standard error at which the middle third incubation ends
-#'   \item \code{Middlethird.length.mean} Average days for second third of incubation
-#'   \item \code{Middlethird.length.se} Standard error for second third of incubation
-#'   \item \code{MiddleThird.TimeWeighted.temperature.mean} Average temperature during the middle third of incubation
-#'   \item \code{MiddleThird.TimeWeighted.temperature.se} Standard error for the temperature during the middle third of incubation
-#'   \item \code{MiddleThird.GrowthWeighted.temperature.mean} Average temperature during the middle third of incubation weighted by embryo growth
-#'   \item \code{MiddleThird.GrowthWeighted.temperature.se} Standard error for temperature during the middle third of incubation weighted by embryo growth
-#'   \item \code{MiddleThird.GrowthRateWeighted.temperature.mean} Average temperature during the middle third of incubation weighted by embryo growth rate
-#'   \item \code{MiddleThird.GrowthRateWeighted.temperature.se} Standard error for temperature during the middle third of incubation weighted by embryo growth rate
+#'   \item \code{TimeWeighted.temperature} Average temperature during all incubation
+#'   \item \code{GrowthWeighted.temperature} Average temperature weighted by the actual growth during all incubation
+#'   \item \code{TimeWeighted.GrowthRateWeighted.temperature} Average temperature weighted by the growth rate during all incubation
+#'   \item \code{TSP.TimeWeighted.temperature} Average temperature during the TSP
+#'   \item \code{TSP.GrowthWeighted.temperature} Average temperature weighted by the actual growth during the TSP
+#'   \item \code{TSP.TimeWeighted.GrowthRateWeighted.temperature} Average temperature weighted by the growth rate during the TSP
+#'   \item \code{TSP.TimeWeighted.STRNWeighted.temperature} Average temperature weighted by the thermal reaction norm of sexualization during the TSP
+#'   \item \code{TSP.GrowthWeighted.STRNWeighted.temperature} Average temperature weighted by actual growth and the thermal reaction norm of sexualization during the TSP
+#'   \item \code{TSP.TimeWeighted.GrowthRateWeighted.STRNWeighted.temperature} Average temperature weighted by growth rate and the thermal reaction norm of sexualization during the TSP
+#'   \item \code{TSP.length} TSP duration
+#'   \item \code{TSP.begin} Beginning of the TSP
+#'   \item \code{TSP.end} End of the TSP
+#'   \item \code{TSP.PM.GrowthWeighted} Average of male probability for each temperature weighted by actual growth during the TSP
+#'   \item \code{TSP.PM.TimeWeighted.GrowthRateWeighted} Average of male probability for each temperature weighted by growth rate during the TSP
+#'   \item \code{TSP.PM.TimeWeighted} Average of male probability for each temperature during the TSP
+#'   \item \code{Incubation.length} Incubation length duration
+#'   \item \code{MiddleThird.length} Middle third incubation duration
+#'   \item \code{MiddleThird.begin} Beginning of the middle third incubation duration
+#'   \item \code{MiddleThird.end} End of the middle third incubation duration
+#'   \item \code{MiddleThird.TimeWeighted.temperature} Average temperature during the middle third incubation
+#'   \item \code{MiddleThird.GrowthWeighted.temperature} Average temperature weighted by the actual growth during the middle third incubation
+#'   \item \code{MiddleThird.TimeWeighted.GrowthRateWeighted.temperature} Average temperature weighted by the growth rate during the middle third incubation
+#'   \item \code{TSP.TimeWeighted.sexratio} Sex ratio based on average temperature during the TSP
+#'   \item \code{TSP.GrowthWeighted.sexratio} Sex ratio based on average temperature weighted by the actual growth during the TSP
+#'   \item \code{TSP.TimeWeighted.GrowthRateWeighted.sexratio} Sex ratio based on average temperature weighted by the growth rate during the TSP
+#'   \item \code{TSP.TimeWeighted.STRNWeighted.sexratio} Sex ratio based on average temperature weighted by the thermal reaction norm of sexualization during the TSP
+#'   \item \code{TSP.GrowthWeighted.STRNWeighted.sexratio} Sex ratio based on average temperature weighted by the actual growth and thermal reaction norm of sexualization during the TSP
+#'   \item \code{TSP.TimeWeighted.GrowthRateWeighted.STRNWeighted.sexratio} Sex ratio based on average temperature weighted by the growth rate and the thermal reaction norm of sexualization during the TSP
+#'   \item \code{MiddleThird.TimeWeighted.sexratio} Sex ratio based on average temperature during the middle third incubation
+#'   \item \code{MiddleThird.GrowthWeighted.sexratio} Sex ratio based on average temperature weighted by actual growth during the middle third incubation
+#'   \item \code{MiddleThird.TimeWeighted.GrowthRateWeighted.sexratio} Sex ratio based on average temperature weighted by growth rate during the middle third incubation
+#'   \item \code{TimeWeighted.sexratio} Sex ratio based on average temperature during all incubation
+#'   \item \code{GrowthWeighted.sexratio} Sex ratio based on average temperature weighted by actual growth during all incubation
+#'   \item \code{TimeWeighted.GrowthRateWeighted.sexratio} Sex ratio based on average temperature weighted by growth rate during all incubation
 #' }
-#' The metric object is a list composed of data.frames which have the following attributes for each element of the list:
+#' If \code{out} is equal to \code{summary}, the return is a list with:
 #' \itemize{
-#'   \item \code{time.begin.tsp} Average time at the beginning of TSP
-#'   \item \code{time.end.tsp} Average time at the end of TSP
-#'   \item \code{time.begin.middlethird} Average time at the beginning of the middle third of incubation
-#'   \item \code{time.begin.middlethird} Average time at the end of the middle third of incubation
-#'   \item \code{time.begin.tsp.se} Standard error for the time at the beginning of TSP
-#'   \item \code{time.end.tsp.se} Standard error for the time at the end of TSP
-#'   \item \code{time.begin.middlethird.se} Standard error for the time at the beginning of the middle third of incubation
-#'   \item \code{time.end.middlethird.se} Standard error for the time at the end of the middle third of incubation
-#'   \item \code{stopattest} NA if stopattest was false, TRUE if at least one incubation series was longer than hatchling size and FALSE at contrary
+#'   \item \code{summary} is a data.frame with statistics for each nest.
+#'   \item \code{dynamic.metric} object is a list composed of data.frames with the dynamics of growth for each nest. It showed only temperatures from original dataset.
+#'   \item \code{summary.dynamic.metric} is a data.frame with the following columns with the suffix .mean, .se or .quantile_x with x from the parameter probs.
 #' }
-#' If you indicate new set of temperatures, you must probably also indicate new test values.\cr
+#' If \code{out} is equal to \code{metric}, the return is a list with:
+#' \itemize{
+#'   \item \code{dynamic.metric} object is a list composed of data.frames with the dynamics of growth for each nest
+#'   \item \code{indices.dynamic.metric} is a data.frame with the following columns.
+#' }
+#' The object \code{summary.dynamic.metric} or \code{indices.dynamic.metric} is a data.frame with the following columns:
+#' \itemize{
+#'   \item \code{series} Name of the series
+#'   \item \code{metric.begin.tsp} Metric at the beginning of TSP
+#'   \item \code{metric.end.tsp} Metric at the end of TSP
+#'   \item \code{hatchling.metric.mean} Average expected size of hatchlings
+#'   \item \code{hatchling.metric.sd} standard deviation of expected size of hatchlings
+#'   \item \code{time.begin.tsp} Time at the beginning of TSP
+#'   \item \code{time.end.tsp} Time at the end of TSP
+#'   \item \code{time.begin.middlethird} Time at the beginning of the middle third incubation
+#'   \item \code{time.end.middlethird} Time at the end of the middle third incubation
+#'   \item \code{stop.at.hatchling.metric} Take the value of NA if stop.at.hatchling.metric was FALSE. TRUE if at least one incubation series was longer than hatchling size and FALSE at contrary
+#'   \item \code{stop.at.hatchling.metric} Take the value of NA if stop.at.hatchling.metric was FALSE. TRUE if at least one incubation series was longer than hatchling size and FALSE at contrary
+#'   \item \code{stop.at.hatchling.metric} Take the value of NA if stop.at.hatchling.metric was FALSE. TRUE if at least one incubation series was longer than hatchling size and FALSE at contrary
+#'   \item \code{stop.at.hatchling.metric} Take the value of NA if stop.at.hatchling.metric was FALSE. TRUE if at least one incubation series was longer than hatchling size and FALSE at contrary
+#'   \item \code{stop.at.hatchling.metric} Take the value of NA if stop.at.hatchling.metric was FALSE. TRUE if at least one incubation series was longer than hatchling size and FALSE at contrary
+#'   \item \code{stop.at.hatchling.metric} Take the value of NA if stop.at.hatchling.metric was FALSE. TRUE if at least one incubation series was longer than hatchling size and FALSE at contrary
+#' }
+#' If you indicate new set of temperatures, you must probably also indicate new hatchling.metric values.\cr
 #' Note: four species have predefined embryo stages. embryo.stages parameter can take the values:\cr
 #' \itemize{
 #'   \item \code{Caretta caretta.SCL}
@@ -115,54 +125,56 @@
 #'   \item \code{Podocnemis expansa.SCL}
 #'   \item \code{Generic.ProportionDevelopment}
 #'   }
-#' But remember that mass is not the best proxy to describe the growth of an embryo because it can decrease if the subtrate becomes dry.\cr
-#' The progress bar is based on both replicates and timeseries progress.\cr
+#' But remember that mass is not the best proxy to describe the growth of an embryo because it can decrease if the substrate becomes dry.\cr
+#' The progress bar is based on both replicates and timeseries progress. It necessitates the pbapply package.\cr
 #' If replicate.CI is null or 0, only maximum likelihood is used and no confidence interval is calculated.\cr
 #' If replicate.CI is 1, one random value for the parameters is used but no confidence interval is calculated.\cr
 #' In other cases, replicate.CI random samples are used to estimate confidence interval.
 #' @examples
 #' \dontrun{
 #' library(embryogrowth)
-#' data(resultNest_4p_SSM4p)
-#' summary.nests <- info.nests(resultNest_4p_SSM4p, out="summary", 
+#' data(resultNest_4p_SSM)
+#' # Some basic calculations to show the advantage of parallel computing
+#' system.time(summary.nests <- info.nests(x=resultNest_4p_SSM, out="summary", 
+#'   embryo.stages="Caretta caretta.SCL", replicate.CI=0, parallel=FALSE))
+#' system.time(summary.nests <- info.nests(x=resultNest_4p_SSM, out="summary", 
+#'   embryo.stages="Caretta caretta.SCL", replicate.CI=0, parallel=TRUE))
+#' system.time(summary.nests <- info.nests(x=resultNest_4p_SSM, out="summary", 
+#'   embryo.stages="Caretta caretta.SCL", replicate.CI=0, parallel=TRUE, progressbar=TRUE))
+#' system.time(summary.nests <- info.nests(x=resultNest_4p_SSM, out="likelihood", 
+#'   embryo.stages="Caretta caretta.SCL", replicate.CI=0, parallel=TRUE, progressbar=FALSE))
+#'   
+#' # By default parallel computing is TRUE but progressbar is FALSE
+#' # When out is "likelihood", it returns only the likelihood
+#' # otherwise, it returns a list with 3 objects "summary", 
+#' #        "dynamic.metric", and "summary.dynamic.metric".
+#' 
+#' summary.nests <- info.nests(resultNest_4p_SSM, out="summary", 
 #'   embryo.stages="Caretta caretta.SCL", 
 #'   replicate.CI=100, 
-#'   resultmcmc=resultNest_mcmc_4p_SSM4p, 
+#'   resultmcmc=resultNest_mcmc_4p_SSM, 
 #'   GTRN.CI="MCMC", 
-#'   progress=TRUE)
-#'   # Result is in summary.nests$summary
-#' infoall <- info.nests(resultNest_4p_SSM4p)
-#'   # Result is a value
-#' infoall.df <- info.nests(resultNest_4p_SSM4p, out="metric", 
+#'   progressbar=TRUE)
+#'   
+#' summary.nests <- info.nests(resultNest_4p_SSM, 
 #'   embryo.stages="Caretta caretta.SCL", 
-#'   replicate.CI=100, 
-#'   resultmcmc=resultNest_mcmc_4p_SSM4p, 
-#'   GTRN.CI="MCMC", 
-#'   progress=TRUE)
-#' # Result is in infoall.df$metric
-#' infoall.both <- info.nests(resultNest_4p_SSM4p, 
-#'   embryo.stages="Caretta caretta.SCL", 
-#'   out=c("metric", "summary"), replicate.CI=100, 
-#'   resultmcmc=resultNest_mcmc_4p_SSM4p, 
-#'   GTRN.CI="MCMC", 
-#'   progress=TRUE)
-#' # Results are in infoall.both$summary and in infoall.both$metric
-#' infoall.both <- info.nests(resultNest_4p_SSM4p, 
-#'   embryo.stages="Caretta caretta.SCL", 
-#'   out=c("metric", "summary"), replicate.CI=100, 
+#'   out="summary", replicate.CI=100, 
 #'   GTRN.CI="Hessian", 
-#'   progress=TRUE)
-#' infoall.both <- info.nests(resultNest_4p_SSM4p, 
+#'   progressbar=TRUE)
+#'   
+#' summary.nests <- info.nests(resultNest_4p_SSM, 
+#'   series = 1, 
 #'   embryo.stages="Caretta caretta.SCL", 
-#'   out=c("metric", "summary"), replicate.CI=100, 
+#'   out="summary", replicate.CI=100, 
 #'   GTRN.CI="SE", 
-#'   progress=TRUE)
+#'   progressbar=TRUE)
+#'   
 #' # Example of use of embryo.stages and TSP.borders:
-#'   summary.nests <- info.nests(resultNest_4p_SSM4p, out="summary", 
+#'   summary.nests <- info.nests(resultNest_4p_SSM, out="summary", 
 #'                             embryo.stages=c("10"=0.33, "11"=0.33, "12"=0.66, "13"=0.66), 
 #'                             TSP.borders = c(10, 12), 
 #'                             replicate.CI=100,
-#'                             progress=TRUE)
+#'                             progressbar=TRUE)
 #'                             
 #' #########################################
 #' # Sex ratio using Massey et al. method PM
@@ -178,135 +190,195 @@
 #'                                     temperatures=Incubation.temperature, 
 #'                                     equation="logistic", replicate.CI=NULL))
 #'                                     
-#' PM <- info.nests(resultNest_4p_SSM4p, 
+#' PM <- info.nests(x=resultNest_4p_SSM, 
+#'   GTRN.CI="Hessian", tsd.CI="Hessian", 
 #'   embryo.stages="Caretta caretta.SCL", replicate.CI=100, 
-#'   GTRN.CI="Hessian", 
-#'   out="summary", progress=TRUE, tsd=tsdL)
+#'   out="summary", progressbar=TRUE, tsd=tsdL)
 #'   
-#' sr_TSP_SCLW <- predict(tsdL, temperatures=PM$summary[, "TSP.GrowthWeighted.temperature.mean"], 
-#'               temperature.se=PM$summary[, "TSP.GrowthWeighted.temperature.se"])
 #' 
-#' plot_errbar(x=sr_TSP_SCLW["50%", ], y=PM$summary[, "PM.GrowthWeighted.mean"], 
-#'             x.minus=sr_TSP_SCLW["2.5%", ], 
-#'             x.plus=sr_TSP_SCLW["97.5%", ], 
-#'             errbar.y=2*PM$summary[, "PM.GrowthWeighted.se"], xlab="CTE SCL growth", 
-#'             ylab="PM Massey et al. 2016", xlim=c(0, 1), ylim=c(0, 1), las=1)
-#' segments(x0=0, y0=0, x1=1, y1=1, lty=2, col="red")
-#' 
-#' sr_TSP_TW <- predict(tsdL, temperatures=PM$summary[, "TSP.TimeWeighted.temperature.mean"], 
-#'               temperature.se=PM$summary[, "TSP.TimeWeighted.temperature.se"])
-#'               
-#' plot_errbar(x=sr_TSP_TW["50%", ], y=PM$summary[, "PM.GrowthWeighted.mean"], 
-#'             x.minus=sr_TSP_TW["2.5%", ], 
-#'             x.plus=sr_TSP_TW["97.5%", ], 
-#'             errbar.y=2*PM$summary[, "PM.GrowthWeighted.se"], xlab="CTE Time", 
-#'             ylab="PM Massey et al. 2016", xlim=c(0, 1), ylim=c(0, 1), las=1)
-#' segments(x0=0, y0=0, x1=1, y1=1, lty=2, col="red")
-#' 
-#' plot_errbar(x=sr_TSP_TW["50%", ], y=sr_TSP_SCLW["50%", ], 
-#'             x.minus=sr_TSP_TW["2.5%", ], 
-#'             x.plus=sr_TSP_TW["97.5%", ], 
-#'             y.minus=sr_TSP_SCLW["2.5%", ], 
-#'             y.plus=sr_TSP_SCLW["97.5%", ], xlab="CTE Time", 
-#'             ylab="CTE SCL", xlim=c(0, 1), ylim=c(0, 1), las=1)
-#' segments(x0=0, y0=0, x1=1, y1=1, lty=2, col="red")
+#' plot_errbar(x=PM$summary$TimeWeighted.temperature.mean, 
+#'             y=PM$summary$TSP.PM.GrowthWeighted.mean, 
+#'             y.minus=PM$summary$TSP.PM.GrowthWeighted.quantile_0.025, 
+#'             y.plus=PM$summary$TSP.PM.GrowthWeighted.quantile_0.975, 
+#'             xlab="CTE SCL growth", 
+#'             ylab="PM Massey et al. 2016", xlim=c(26, 32), ylim=c(0, 1), las=1)
 #' 
 #' # Relationship between growth and growth rate
 #' 
-#' infoall.df <- info.nests(resultNest_4p_SSM4p, out="metric", 
+#' infoall.df <- info.nests(x=resultNest_4p_SSM, out="summary", 
 #'   embryo.stages="Caretta caretta.SCL", 
 #'   replicate.CI=100, 
-#'   resultmcmc=resultNest_mcmc_4p_SSM4p, 
+#'   resultmcmc=resultNest_mcmc_4p_SSM, 
 #'   GTRN.CI="MCMC", 
-#'   progress=TRUE)
+#'   progressbar=TRUE)
+#'   
 #'   layout(1)
-#' plot(x=infoall.df$metric[[1]][, "Time"][-nrow(infoall.df$metric[[1]])], 
-#'      y=infoall.df$metric[[1]][, "R"][-nrow(infoall.df$metric[[1]])], 
+#' plot(x=infoall.df$dynamic.metric[[1]][, "Time"], 
+#'      y=infoall.df$dynamic.metric[[1]][, "Metric_50%"], 
 #'      type="l", las=1, bty="n", 
-#'      xlab="Time in minute", ylab="Growth Rate", ylim=c(0, 3E-5), xlim=c(0, 100000))
-#' plot(x=infoall.df$metric[[1]][, "Time"][-nrow(infoall.df$metric[[1]])], 
-#'      y=diff(infoall.df$metric[[1]][, "SCL"]), 
-#'      type="l", las=1, bty="n", 
-#'      xlab="Time in minute", ylab="Growth", ylim=c(0, 5), xlim=c(0, 100000))
-#' plot(x=infoall.df$metric[[1]][, "Time"][-nrow(infoall.df$metric[[1]])], 
-#'      y=diff(infoall.df$metric[[1]][, "SCL"])/diff(infoall.df$metric[[1]][, "Time"]), 
-#'      type="l", las=1, bty="n", 
-#'      xlab="Time in minute", ylab="Growth per minute", ylim=c(0, 0.0008), xlim=c(0, 100000))
-#' plot(x=infoall.df$metric[[1]][, "Time"][-nrow(infoall.df$metric[[1]])], 
-#'      y=(diff(infoall.df$metric[[1]][, "SCL"])/diff(infoall.df$metric[[1]][, "Time"])) / 
-#'        (infoall.df$metric[[1]][, "R"][-nrow(infoall.df$metric[[1]])]), 
-#'      type="l", las=1, bty="n", 
-#'      xlab="Time in minute", ylab="Ratio Actual Growth / Growth rate", 
-#'      ylim=c(0, 40), xlim=c(0, 100000))
+#'      xlab="Time in minute", ylab="Growth", ylim=c(0, 39), xlim=c(0, 100000))
+#' lines(x=infoall.df$dynamic.metric[[1]][, "Time"], 
+#'      y=infoall.df$dynamic.metric[[1]][, "Metric_2.5%"], lty=2)
+#' lines(x=infoall.df$dynamic.metric[[1]][, "Time"], 
+#'      y=infoall.df$dynamic.metric[[1]][, "Metric_97.5%"], lty=2)
 #' }
 #' @export
 
 
-info.nests <- function(x=NULL, parameters=NULL, NestsResult=NULL, 
-                       resultmcmc=NULL,
-                       hessian=NULL,
-                       GTRN.CI=NULL, 
-                       fixed.parameters=NULL, 
-                       SE=NULL, temperatures=NULL, derivate=NULL, 
-                       test=NULL, stopattest=FALSE, M0=NULL, series="all",
-                       TSP.borders=NULL, embryo.stages="Generic.ProportionDevelopment",
-                       TSP.begin=0, TSP.end=0.5, 
-                       replicate.CI=100, weight=NULL, out="likelihood", fill=NULL, 
-                       SexualisationTRN=NULL, SexualisationTRN.mcmc=NULL, 
-                       SexualisationTRN.CI=NULL, 
-                       metric.end.incubation=NA,
-                       metabolic.heating=0, 
-                       temperature.heterogeneity=0, 
-                       progress=FALSE, warnings=TRUE, parallel=TRUE, 
-                       tsd=NULL, tsd.CI=NULL, tsd.mcmc=NULL) {
+info.nests <- function(x=NULL                                                  , 
+                       parameters=NULL                                         , 
+                       NestsResult=NULL                                        , 
+                       resultmcmc=NULL                                         ,
+                       hessian=NULL                                            ,
+                       GTRN.CI=NULL                                            , 
+                       fixed.parameters=NULL                                   , 
+                       SE=NULL                                                 , 
+                       temperatures=NULL                                       , 
+                       integral=NULL                                           , 
+                       derivate=NULL                                           , 
+                       hatchling.metric=NULL                                   , 
+                       stop.at.hatchling.metric=FALSE                          , 
+                       M0=NULL                                                 , 
+                       series="all"                                            ,
+                       TSP.borders=NULL                                        , 
+                       embryo.stages=NULL                                      ,
+                       TSP.begin=0                                             , 
+                       TSP.end=0.5                                             , 
+                       replicate.CI=0                                          , 
+                       weight=NULL                                             , 
+                       out="likelihood"                                        , 
+                       fill=NULL                                               ,
+                       probs= c(0.025, 0.5, 0.975)                             , 
+                       SexualisationTRN=NULL                                   , 
+                       SexualisationTRN.mcmc=NULL                              , 
+                       SexualisationTRN.CI=NULL                                , 
+                       metric.end.incubation="observed"                        ,
+                       metabolic.heating=0                                     , 
+                       temperature.heterogeneity=0                             , 
+                       progressbar=FALSE                                       , 
+                       warnings=TRUE                                           , 
+                       parallel=TRUE                                           , 
+                       tsd=NULL                                                , 
+                       tsd.CI=NULL                                             , 
+                       tsd.mcmc=NULL                                           , 
+                       zero = 1E-9                                             ) {
   
-  # x=NULL; parameters=NULL; NestsResult=NULL; resultmcmc=NULL; fixed.parameters=NULL; SE=NULL; hessian=NULL; 
-  # GTRN.CI=NULL; temperatures=NULL; temperature.heterogeneity=0; metabolic.heating=0; derivate=NULL; test=NULL; 
-  # stopattest=FALSE; M0=NULL; series="all"; TSP.borders=NULL; embryo.stages="Generic.ProportionDevelopment"; 
-  # TSP.begin=0; TSP.end=0.5; replicate.CI=100; weight=NULL; out="Likelihood"; fill=NULL; SexualisationTRN.CI=NULL; 
-  # SexualisationTRN=NULL;SexualisationTRN.mcmc=NULL; metric.end.incubation=NA; progress=TRUE;warnings=TRUE; parallel=TRUE; 
+  # parameters=NULL; temperatures=NULL; fixed.parameters=NULL
+  # integral=NULL; hatchling.metric=NULL; derivate=NULL 
+  # weight=NULL; M0=NULL
+  
+  # x=NULL; NestsResult=NULL; resultmcmc=NULL
+  # SE=NULL; hessian=NULL 
+  # GTRN.CI=NULL; temperature.heterogeneity=0; metabolic.heating=0
+  # stop.at.hatchling.metric=FALSE; series="all"; TSP.borders=NULL
+  # embryo.stages=NULL
+  # TSP.begin=0; TSP.end=0.5; replicate.CI=100; out="Likelihood"
+  # probs= c(0.025, 0.5, 0.975)
+  # fill=NULL; SexualisationTRN.CI=NULL
+  # SexualisationTRN=NULL;SexualisationTRN.mcmc=NULL
+  # metric.end.incubation="observed"
+  # progressbar=FALSE;warnings=TRUE; parallel=TRUE
   # tsd=NULL; tsd.CI=NULL; tsd.mcmc=NULL
   
+  # NestsResult=resultNest_Florida
+  # series=1:156
+  # embryo.stages="Caretta caretta.SCL" 
+  # TSP.borders=NULL
+  # TSP.begin=0 
+  # TSP.end=0.5 
+  # SexualisationTRN=c('DHA' = 65.329132145227575, 'DHH' = 811.18443404950051, 'T12H' = 655.01294236106037)
+  # out="summary"
+  # replicate.CI = 0 
+  # progressbar=FALSE 
+  # parallel=TRUE
   
-  #  x=resultNest_4p_SSM4p; resultmcmc = resultNest_mcmc_4p_SSM4p; out <- "summary"
-  # temperatures = formated; parameters = structure(c(4.46266058827153e-03, 26.0095385510809, 35.5257746031439),.Names = c("Dallwitz_b1", "Dallwitz_b2", "Dallwitz_b3")); series = 1; out=c("likelihood"); derivate=dydt.linear; M0=1.7; test=c(Mean=1, SD=0.01)
-  #    library("deSolve")
-  #    parameters <- x
+  # x=resultNest_4p_SSM; out <- "summary"; embryo.stages="fitted"; replicate.CI=0; GTRN.CI="Hessian"; parallel=TRUE
+  # SexualisationTRN <- c('BeginTSP' = -1e+05, 'LengthTSP' = 0.96604492361218408)
   
-  windows <- (.Platform$OS.type == "windows")
+  
+  #  x=resultNest_4p_SSM; out <- "summary"; embryo.stages="Caretta caretta.SCL"; replicate.CI=100; GTRN.CI="Hessian"; parallel=TRUE
+  
+  
+  metric.end.incubation <- match.arg(arg=tolower(metric.end.incubation), choices=c("hatchling.metric", "observed"))
+  
+  if ((metric.end.incubation == "observed") & stop.at.hatchling.metric) {
+    stop("The option metric.end.incubation == 'observed' is not compatible with stop.at.hatchling.metric being TRUE")
+  }
+  
+  SSM <- getFromNamespace(".SSM", ns="embryogrowth")
   
   papply <- ifelse(parallel, detectCores(), 1)
   
-  q975 <- qnorm(0.975)
   if (class(x)=="NestsResult") NestsResult <- x
   if (class(x)=="numeric") parameters <- x
   
   out <- tolower(out)
-  out <- match.arg(out, choices = c("likelihood", "metric", "summary"), several.ok = TRUE)
+  out <- match.arg(out, choices = c("likelihood", "metric", "summary", "dynamic"), several.ok = FALSE)
   TSP.list <- embryogrowth::TSP.list
   
   
   if (class(NestsResult) == "NestsResult") {
     # temperatures est un objet Nests
     if (is.null(hessian)) hessian <- NestsResult$hessian
-    if (is.null(temperatures)) temperatures <- NestsResult$data
+    if (is.null(temperatures)) {
+      temperatures <- NestsResult$data
+      if (is.null(hatchling.metric)) hatchling.metric <- NestsResult$hatchling.metric
+    }
+    if (is.null(integral)) integral <- NestsResult$integral
     if (is.null(derivate)) derivate <- NestsResult$derivate
     if (is.null(weight)) weight <- NestsResult$weight
-    if (is.null(test)) test <- NestsResult$test
+    
     if (is.null(M0)) M0 <- NestsResult$M0
     if (is.null(fixed.parameters)) fixed.parameters <- NestsResult$fixed.parameters
     if (is.null(SE)) SE <- NestsResult$SE
     if (is.null(parameters)) parameters <- NestsResult$par
+  } else {
+    if (is.numeric(NestsResult) & is.null(parameters)) parameters <- NestsResult
   }
   
-  # GTRN.CI How to estimate CI for embryo growth thermal reaction norm; can be NULL, "SE", "MCMC", or "Hessian".
-  if (is.null(GTRN.CI)) GTRN.CI <- "null"
+  if (!is.null(integral)) {
+    if (!is.null(derivate)) {
+      if (warnings) warning("Both derivate and integral cannot be supplied. Only integral parameter will be used")
+      derivate <- NULL
+    }
+  }
+  
+  GTRN.CI <- ifelse(is.null(GTRN.CI), "null", GTRN.CI)
+  tsd.CI <- ifelse(is.null(tsd.CI), "null", tsd.CI)
+  SexualisationTRN.CI <- ifelse(is.null(SexualisationTRN.CI), "null", SexualisationTRN.CI)
+  
+  
+  if (is.null(replicate.CI)) replicate.CI <- 0
+  
+  # Si je ne fais que la vraisemblance, je n'ai pas besoin de CI
+  if (out == "likelihood") {
+    if (replicate.CI != 0) {
+      if (warnings) warning("No replicate can be used for likelihood out.")
+      replicate.CI <- 0
+    }
+  }
+  
+  
+  if (replicate.CI == 0) {
+    GTRN.CI <- "null"
+    SexualisationTRN.CI <- "null"
+    tsd.CI <- "null"
+  }
+  
+  if ((GTRN.CI == "null") & (tsd.CI == "null") & (SexualisationTRN.CI == "null")) {
+    # 15/9/2019: C'est une valeur mais sans resampling
+    replicate.CI <- 0
+  }
+  ####################################### #
+  # vérifie la conformité de GTRN.CI  #####
+  ####################################### #
+  
+  # GTRN.CI How to estimate CI for embryo growth thermal reaction norm; can be NULL, "SE", "MCMC", "pseudohessianfrommcmc", or "Hessian".
   GTRN.CI <- tolower(GTRN.CI)
-  GTRN.CI <- match.arg(GTRN.CI, choices = c("null", "se", "mcmc", "hessian"))
+  GTRN.CI <- match.arg(GTRN.CI, choices = c("null", "se", "mcmc", "hessian", "pseudohessianfrommcmc"))
   
   GTRN.CIr <- GTRN.CI
-  
-  if ((GTRN.CI == "mcmc") & is.null(resultmcmc)) {
+  if ((GTRN.CI == "mcmc" | GTRN.CI == "pseudohessianfrommcmc") & is.null(resultmcmc)) {
     GTRN.CIr <- "null"
     if (warnings) warning("GTRN.CI is indicated as MCMC but no resultmcmc is available.")
   }
@@ -321,15 +393,19 @@ info.nests <- function(x=NULL, parameters=NULL, NestsResult=NULL,
   }
   GTRN.CI <- GTRN.CIr
   
-  # SexualisationTRN.CI How to estimate CI for sexualization thermal reaction norm; can be NULL, "SE", "MCMC", or "Hessian".
-  if (is.null(SexualisationTRN.CI)) SexualisationTRN.CI <- "null"
   
+  ################################################### #
+  # vérifie la conformité de SexualisationTRN.CI  #####
+  ################################################### #
+  
+  
+  # SexualisationTRN.CI How to estimate CI for sexualization thermal reaction norm; can be NULL, "SE", "MCMC", "pseudohessianfrommcmc" or "Hessian".
   SexualisationTRN.CI <- tolower(SexualisationTRN.CI)
-  SexualisationTRN.CI <- match.arg(SexualisationTRN.CI, choices = c("null", "se", "mcmc", "hessian"))
+  SexualisationTRN.CI <- match.arg(SexualisationTRN.CI, choices = c("null", "se", "mcmc", "hessian", "pseudohessianfrommcmc"))
   SexualisationTRN.CIr <- SexualisationTRN.CI
   
-  if (SexualisationTRN.CI == "mcmc" & is.null(SexualisationTRN.mcmc)) {
-    SexualisationTRN.CIr <- NULL
+  if ((SexualisationTRN.CI == "mcmc" | SexualisationTRN.CI == "pseudohessianfrommcmc") & is.null(SexualisationTRN.mcmc)) {
+    SexualisationTRN.CIr <- "null"
     if (warnings) warning("SexualisationTRN.CI is indicated as MCMC but no SexualisationTRN.mcmc is available.")
   }
   if (SexualisationTRN.CI == "hessian") {
@@ -355,14 +431,16 @@ info.nests <- function(x=NULL, parameters=NULL, NestsResult=NULL,
   }
   SexualisationTRN.CI <- SexualisationTRN.CIr
   
+  ###################################### #
+  # vérifie la conformité de tsd.CI  #####
+  ###################################### #
   
-  # tsd.CI How to estimate CI for sex ratio thermal reaction norm; can be NULL, or "MCMC"
-  if (is.null(tsd.CI)) tsd.CI <- "null"
+  # tsd.CI How to estimate CI for sex ratio thermal reaction norm; can be NULL, "SE", "MCMC", "pseudohessianfrommcmc" or "Hessian".
   tsd.CI <- tolower(tsd.CI)
-  tsd.CI <- match.arg(tsd.CI, choices = c("null", "se", "mcmc", "hessian"))
+  tsd.CI <- match.arg(tsd.CI, choices = c("null", "se", "mcmc", "hessian", "pseudohessianfrommcmc"))
   tsd.CIr <- tsd.CI
   
-  if (tsd.CI == "mcmc" & is.null(tsd.mcmc)) {
+  if ((tsd.CI == "mcmc" | tsd.CI == "pseudohessianfrommcmc") & is.null(tsd.mcmc)) {
     tsd.CIr <- "null"
     if (warnings) warning("tsd.CI is indicated as MCMC but no tsd.mcmc is available.")
   }
@@ -374,7 +452,7 @@ info.nests <- function(x=NULL, parameters=NULL, NestsResult=NULL,
     } else {
       tsd.CIr <- "null"
     }
-    if ((tsd.CIr == "null") & warnings) warning("SexualisationTRN.CI is indicated as Hessian but no Hessian matrix is available.")
+    if ((tsd.CIr == "null") & warnings) warning("tsd.CI is indicated as Hessian but no Hessian matrix is available.")
   }
   if (tsd.CI == "se") {
     if (is.list(tsd)) {
@@ -384,176 +462,117 @@ info.nests <- function(x=NULL, parameters=NULL, NestsResult=NULL,
     } else {
       tsd.CIr <- "null"
     }
-    if ((tsd.CIr == "null") & warnings) warning("SexualisationTRN.CI is indicated as SE but no SE is available.")
+    if ((tsd.CIr == "null") & warnings) warning("tsd.CI is indicated as SE but no SE is available.")
   }
   tsd.CI <- tsd.CIr
   
-  
-  if (replicate.CI < 1) {
-    GTRN.CIr <- "null"
-    SexualisationTRN.CI <- "null"
-    tsd.CI <- "null"
-  }
-  
-  if ((GTRN.CI == "null") & (tsd.CI == "null") & (SexualisationTRN.CI == "null")) {
-    # 15/9/2019: C'est une valeur mais sans resampling
-    replicate.CI <- 1
-  }
-  # Si je ne fais que la vraisemblance, je n'ai pas besoin de CI
-  if (length(out) == 1) if (out == "likelihood") {
-    GTRN.CI <- "null"
-    SexualisationTRN.CI <- "null"
-    tsd.CI <- "null"
-    replicate.CI <- 1
-  }
+  ################################################### #
+  # Prepare  logicTransition et pipping_emergence #####
+  ################################################### #
   
   # dans x j'ai les parametres a ajuster
   # Il faut que je rajoute les fixes - 16/7/2012
   totpar <- c(parameters, fixed.parameters)
-  if (is.na(totpar["pipping_emergence"])) totpar <- c(totpar, pipping_emergence=0)
-  # logictransition vaut TRUE s'il n'y en a pas !
-  logicTransition <- (is.na(totpar["transition_P"]) | is.na(totpar["transition_S"]))
+  if (is.na(totpar["pipping_emergence"])) fixed.parameters <- c(fixed.parameters, pipping_emergence=0)
+  # logictransition vaut FALSE s'il n'y en a pas
   
-  # Il faut que je génère les valeurs soit random, soit ML avec replicats replcate.CI
+  logicTransition <- !(is.na(totpar["transition_P"]) | is.na(totpar["transition_S"]))
   
-  # Je génère un tableau avec replicate.CI réplicats pour GTRN
-  # les différentes solutions sont: null, SE, hessian ou mcmc
-  if (GTRN.CI == "mcmc") {
-    ########### Je donne un MCMC
-    ########### Je vais l'utiliser directement
-    # 15/09/2019: Je prends obligatoirement le premier; c'est faux
-    df_random <- matrix(data = rep(totpar, replicate.CI), byrow = TRUE, 
-                        nrow = replicate.CI, dimnames = list(c(NULL), names(totpar)))
-    samp <- sample(1:nrow(resultmcmc$resultMCMC[[1]]), replicate.CI, replace = TRUE)
-    df_random[1:replicate.CI, colnames(resultmcmc$resultMCMC[[1]])] <- resultmcmc$resultMCMC[[1]][samp, colnames(resultmcmc$resultMCMC[[1]])]
-  }
+  ##################################### #
+  # Créé la matrice des random GTRN #####
+  ##################################### #
   
-  if (GTRN.CI == "se") {
-    SE <- ifelse(is.infinite(SE), 0, SE)
-    df_random <- matrix(data = rep(totpar, replicate.CI), byrow = TRUE, 
-                        nrow = replicate.CI, dimnames = list(c(NULL), names(totpar)))
-    # 15/09/2019: Je prends obligatoirement le premier; c'est faux
-    for (ise in names(SE)) df_random[1:replicate.CI, ise] <- rnorm(n = replicate.CI, mean=totpar[ise], sd=SE[ise])
-  }
+  if (!is.null(SE)) SE <- ifelse(is.infinite(SE), 0, SE)
+  df_random <- RandomFromHessianOrMCMC(fitted.parameters = parameters      , 
+                                       fixed.parameters = fixed.parameters , 
+                                       se = SE                             ,
+                                       mcmc = resultmcmc                   , 
+                                       Hessian = hessian                   , 
+                                       method = GTRN.CI                    , 
+                                       replicates = replicate.CI           ,
+                                       
+                                       
+                                       
+                                       
+                                       chain=1                              , 
+                                       regularThin=TRUE                     , 
+                                       MinMax=NULL                          , 
+                                       probs=c(0.025, 0.5, 0.975)           , 
+                                       fn=NULL                              , 
+                                       silent=TRUE                          , 
+                                       ParTofn="par"                        )$random
   
-  if (GTRN.CI == "hessian") {
-    sigma <- solve(hessian)
-    s. <- svd(sigma)
-    R <- t(s.$v %*% (t(s.$u) * sqrt(pmax(s.$d, 0))))
-    df_random <- matrix(rnorm(replicate.CI * ncol(sigma)), nrow = replicate.CI, byrow = TRUE) %*% R
-    df_random <- sweep(df_random, 2, totpar[rownames(hessian)], "+")
-    colnames(df_random) <- rownames(hessian)
-    
-    ajouter <- matrix(rep(totpar[names(totpar)[!(names(totpar) %in% colnames(df_random))]], replicate.CI), 
-                      nrow=replicate.CI, byrow=TRUE,
-                      dimnames = list(c(NULL), names(totpar)[!(names(totpar) %in% colnames(df_random))]))
-    df_random <- cbind(df_random, ajouter)
-  }
   
-  if (GTRN.CI == "null") {
-    # il faut créer replicate.CI lignes
-    df_random <- matrix(rep(totpar, replicate.CI), nrow=replicate.CI, byrow=TRUE)
-    colnames(df_random) <- names(totpar)
-  }
+  ##################################### #
+  # Créé la matrice des random STRN #####
+  ##################################### #
+  
   if (is.list(SexualisationTRN)) {
-    totpar_SexualisationTRN <- c(SexualisationTRN$par, SexualisationTRN$fixed.parameters)
+    fitted.parameters_SexualisationTRN <- SexualisationTRN$par
+    fixed.parameters_SexualisationTRN <- SexualisationTRN$fixed.parameters
+    SexualisationTRN_SE <- SexualisationTRN$SE
+    SexualisationTRN_Hessian <- SexualisationTRN$hessian
   } else {
-    totpar_SexualisationTRN <- SexualisationTRN
+    fitted.parameters_SexualisationTRN <- SexualisationTRN
+    fixed.parameters_SexualisationTRN <- NULL
+    SexualisationTRN_SE <- NULL
+    SexualisationTRN_Hessian <- NULL
   }
   
-  if (is.null(totpar_SexualisationTRN)) {
+  if (is.null(fixed.parameters_SexualisationTRN) & is.null(fitted.parameters_SexualisationTRN)) {
     df_random_SexualisationTRN <- NULL
     SexualisationTRN.CI <- "null"
   } else {
-    # Je génère un tableau avec replicate.CI réplicats pour GTRN
-    # les différentes solutions sont: null, SE, hessian ou mcmc
-    if (SexualisationTRN.CI == "mcmc") {
-      df_random_SexualisationTRN <- matrix(data = rep(totpar_SexualisationTRN, replicate.CI), byrow = TRUE, 
-                                           nrow = replicate.CI, dimnames = list(c(NULL), names(totpar_SexualisationTRN)))
-      samp <- sample(1:nrow(SexualisationTRN.mcmc$resultMCMC[[1]]), replicate.CI, replace = TRUE)
-      df_random_SexualisationTRN[1:replicate.CI, colnames(SexualisationTRN.mcmc$resultMCMC[[1]])] <- SexualisationTRN.mcmc$resultMCMC[[1]][samp, colnames(SexualisationTRN.mcmc$resultMCMC[[1]])]
-    }
     
-    if (SexualisationTRN.CI == "se") {
-      SexualisationTRN_SE <- ifelse(is.infinite(SexualisationTRN$SE), 0, SexualisationTRN$SE)
-      df_random_SexualisationTRN <- matrix(data = rep(totpar_SexualisationTRN, replicate.CI), byrow = TRUE, 
-                                           nrow = replicate.CI, dimnames = list(c(NULL), names(totpar)))
-      # 15/09/2019: Je prends obligatoirement le premier; c'est faux
-      for (ise in names(SexualisationTRN_SE)) df_random_SexualisationTRN[1:replicate.CI, ise] <- rnorm(n = replicate.CI, mean=totpar_SexualisationTRN[ise], sd=SexualisationTRN_SE[ise])
-    }
-    
-    if (SexualisationTRN.CI == "hessian") {
-      sigma <- solve(SexualisationTRN$hessian)
-      s. <- svd(sigma)
-      R <- t(s.$v %*% (t(s.$u) * sqrt(pmax(s.$d, 0))))
-      df_random_SexualisationTRN <- matrix(rnorm(replicate.CI * ncol(sigma)), nrow = replicate.CI, byrow = TRUE) %*% R
-      df_random_SexualisationTRN <- sweep(df_random_SexualisationTRN, 2, totpar_SexualisationTRN[rownames(SexualisationTRN$hessian)], "+")
-      colnames(df_random_SexualisationTRN) <- rownames(SexualisationTRN$hessian)
-      
-      ajouter <- matrix(rep(totpar_SexualisationTRN[names(totpar_SexualisationTRN)[!(names(totpar_SexualisationTRN) %in% colnames(df_random_SexualisationTRN))]], replicate.CI), 
-                        nrow=replicate.CI, byrow=TRUE,
-                        dimnames = list(c(NULL), names(totpar_SexualisationTRN)[!(names(totpar_SexualisationTRN) %in% colnames(df_random_SexualisationTRN))]))
-      df_random_SexualisationTRN <- cbind(df_random_SexualisationTRN, ajouter)
-    }
-    
-    if (SexualisationTRN.CI == "null") {
-      # il faut créer replicate.CI lignes
-      df_random_SexualisationTRN <- matrix(rep(totpar_SexualisationTRN, replicate.CI), nrow=replicate.CI, byrow=TRUE)
-      colnames(df_random_SexualisationTRN) <- names(totpar_SexualisationTRN)
-    }
+    if (!is.null(SexualisationTRN_SE)) SexualisationTRN_SE <- ifelse(is.infinite(SexualisationTRN_SE), 0, SexualisationTRN_SE)
+    df_random_SexualisationTRN <- RandomFromHessianOrMCMC(fitted.parameters = fitted.parameters_SexualisationTRN, 
+                                                          fixed.parameters = fixed.parameters_SexualisationTRN, 
+                                                          mcmc = SexualisationTRN.mcmc,
+                                                          se = SexualisationTRN_SE, 
+                                                          method = SexualisationTRN.CI, 
+                                                          Hessian = SexualisationTRN_Hessian,
+                                                          replicates = replicate.CI)$random
   }
   
+  ##################################### #
+  # Créé la matrice des random tsd #####
+  ##################################### #
   
-  totpar_tsd <- c(tsd$par, tsd$fixed.parameters)
-  if (is.null(totpar_tsd)) {
+  tsd_fitted.parameters <- tsd$par
+  tsd_fixed.parameters <- tsd$fixed.parameters
+  if (is.null(tsd_fitted.parameters) & is.null(tsd_fixed.parameters)) {
     df_random_tsd <- NULL
     tsd.CI <- "null"
   } else {
-    # Je génère un tableau avec replicate.CI réplicats pour tsd
-    # les différentes solutions sont: null, SE, hessian ou mcmc
-    if (tsd.CI == "mcmc") {
-      df_random_tsd <- matrix(data = rep(totpar_tsd, replicate.CI), byrow = TRUE, 
-                              nrow = replicate.CI, dimnames = list(c(NULL), names(totpar_tsd)))
-      samp <- sample(1:nrow(tsd.mcmc$resultMCMC[[1]]), replicate.CI, replace = TRUE)
-      df_random_tsd[1:replicate.CI, colnames(tsd.mcmc$resultMCMC[[1]])] <- tsd.mcmc$resultMCMC[[1]][samp, colnames(tsd.mcmc$resultMCMC[[1]])]
-    }
+    tsd_SE <- tsd$SE
+    tsd_SE <- ifelse(is.infinite(tsd_SE), 0, tsd_SE)
     
-    if (tsd.CI == "se") {
-      tsd_SE <- ifelse(is.infinite(tsd$SE), 0, tsd$SE)
-      df_random_tsd <- matrix(data = rep(totpar_tsd, replicate.CI), byrow = TRUE, 
-                              nrow = replicate.CI, dimnames = list(c(NULL), names(totpar_tsd)))
-      # 15/09/2019: Je prends obligatoirement le premier; c'est faux
-      for (ise in names(tsd_SE)) df_random_tsd[1:replicate.CI, ise] <- rnorm(n = replicate.CI, mean=totpar_tsd[ise], sd=tsd_SE[ise])
-    }
-    
-    if (tsd.CI == "hessian") {
-      sigma <- solve(tsd$hessian)
-      s. <- svd(sigma)
-      R <- t(s.$v %*% (t(s.$u) * sqrt(pmax(s.$d, 0))))
-      df_random_tsd <- matrix(rnorm(replicate.CI * ncol(sigma)), nrow = replicate.CI, byrow = TRUE) %*% R
-      df_random_tsd <- sweep(df_random_tsd, 2, totpar_tsd[rownames(tsd$hessian)], "+")
-      colnames(df_random_tsd) <- rownames(tsd$hessian)
-      
-      ajouter <- matrix(rep(totpar[names(totpar_tsd)[!(names(totpar_tsd) %in% colnames(df_random_tsd))]], replicate.CI), 
-                        nrow=replicate.CI, byrow=TRUE,
-                        dimnames = list(c(NULL), names(totpar_tsd)[!(names(totpar_tsd) %in% colnames(df_random_tsd))]))
-      df_random_tsd <- cbind(df_random_tsd, ajouter)
-    }
-    
-    if (tsd.CI == "null") {
-      # il faut créer replicate.CI lignes
-      df_random_tsd <- matrix(rep(totpar_tsd, replicate.CI), nrow=replicate.CI, byrow=TRUE)
-      colnames(df_random_tsd) <- names(totpar_tsd)
-    }
+    df_random_tsd <- RandomFromHessianOrMCMC(fitted.parameters = tsd_fitted.parameters, 
+                                             fixed.parameters = tsd_fixed.parameters, 
+                                             mcmc = tsd.mcmc, 
+                                             se = tsd_SE, 
+                                             Hessian = tsd$hessian, 
+                                             method = tsd.CI, 
+                                             replicates = replicate.CI)$random
   }
   
-  ###########
-  # J'ai donc les 3 tableauxs: df_random, df_random_SexualisationTRN, et df_random_tsd
+  ##################################### #
+  # concatène les df_random         #####
+  ##################################### #
   
+  # if (!is.null(df_random_SexualisationTRN)) {
+  #   df_random <- cbind(df_random, df_random_SexualisationTRN)
+  # }
+  # if (!is.null(df_random_tsd)) {
+  #   df_random <- cbind(df_random, df_random_tsd)
+  # }
+  # df_random, df_random_tsd, df_random_SexualisationTRN
   
-  if (is.numeric(NestsResult) & is.null(parameters)) parameters <- NestsResult
+  ##################################### #
+  # Je sors les séries que je travaille
+  ##################################### #
   
-  NBTs <- temperatures[["IndiceT"]][3]
+  NBTs <- temperatures[["IndiceT"]]["NbTS"]
   
   if (is.null(series[1]) | (series[1]=="all")) {
     series <- rep(TRUE, NBTs)
@@ -561,6 +580,9 @@ info.nests <- function(x=NULL, parameters=NULL, NestsResult=NULL,
   
   # Je ne garde que les series que je dois travailler
   temperatures_ec <- temperatures[1:NBTs][series]
+  if (any(is.na(names(temperatures_ec)))) {
+    stop("The names of 'series' does not exist in series of temperature within 'NestsResult'")
+  }
   
   # Dans NBTs j'ai maintenant le nombre de series a travailler
   NBTs <- length(temperatures_ec)
@@ -569,91 +591,137 @@ info.nests <- function(x=NULL, parameters=NULL, NestsResult=NULL,
   name <- names(temperatures_ec)
   names(name) <- name
   
-  if (is.null(test)) {
+  # Je crée le df_random en rajoutant une colonne pour la série température
+  df_random <- as.data.frame(df_random)
+  df_random <- cbind(Series=rep(name[1], nrow(df_random)), df_random)
+  df_random_ec <- df_random
+  if (length(name) > 1) {
+    for (n in name[-1]) {
+      df_random_ec[, "Series"] <- rep(n, nrow(df_random_ec))
+      df_random <- rbind(df_random, df_random_ec)
+    }
+  }
+  
+  df_random_tsd <- as.data.frame(df_random_tsd)
+  df_random_tsd <- cbind(Series=rep(name[1], nrow(df_random_tsd)), df_random_tsd)
+  df_random_tsd_ec <- df_random_tsd
+  if (length(name) > 1) {
+    for (n in name[-1]) {
+      df_random_tsd_ec[, "Series"] <- rep(n, nrow(df_random_tsd_ec))
+      df_random_tsd <- rbind(df_random_tsd, df_random_tsd_ec)
+    }
+  }
+  
+  
+  df_random_SexualisationTRN <- as.data.frame(df_random_SexualisationTRN)
+  df_random_SexualisationTRN <- cbind(Series=rep(name[1], nrow(df_random_SexualisationTRN)), df_random_SexualisationTRN)
+  df_random_SexualisationTRN_ec <- df_random_SexualisationTRN
+  if (length(name) > 1) {
+    for (n in name[-1]) {
+      df_random_SexualisationTRN_ec[, "Series"] <- rep(n, nrow(df_random_SexualisationTRN_ec))
+      df_random_SexualisationTRN <- rbind(df_random_SexualisationTRN, df_random_SexualisationTRN_ec)
+    }
+  }
+  
+  ##################################### #
+  # Les tailles finales attendues
+  ##################################### #
+  
+  # Je crée un dataframe dans hatchling.metric
+  if (class(hatchling.metric) == "numeric") {
+    hatchling.metric <- data.frame(Mean=rep(hatchling.metric["Mean"], NBTs), 
+                                   SD=rep(hatchling.metric["SD"], NBTs), row.names=name)
+  }
+  
+  if (is.null(hatchling.metric) | any(is.na(hatchling.metric[name, "Mean"]))) {
     # si tous sont pareils, je reprends les memes
-    # Correction d'un bug, rajout de [[1]] dans result$test["Mean"][[1]][1] 30/7/2012
-    if (all(NestsResult$test["Mean"]==NestsResult$test["Mean"][[1]][1]) & all(NestsResult$test["SD"]==NestsResult$test["SD"][[1]][1])) {
-      test <- c(Mean=NestsResult$test["Mean"][[1]][1], SD=NestsResult$test["SD"][[1]][1])
+    # Correction d'un bug, rajout de [[1]] dans result$hatchling.metric["Mean"][[1]][1] 30/7/2012
+    if (all(NestsResult$hatchling.metric["Mean"]==NestsResult$hatchling.metric["Mean"][[1]][1]) & 
+        all(NestsResult$hatchling.metric["SD"]==NestsResult$hatchling.metric["SD"][[1]][1])) {
+      hatchling.metric <- c(Mean=NestsResult$hatchling.metric["Mean"][[1]][1], SD=NestsResult$hatchling.metric["SD"][[1]][1])
+      hatchling.metric <- data.frame(Mean=rep(hatchling.metric["Mean"], NBTs), 
+                                     SD=rep(hatchling.metric["SD"], NBTs), row.names=name)
     } else {	
-      stop("The hatchlings size (test parameter) must be provided.")
+      stop("The hatchlings size (hatchling.metric parameter) must be provided for all series.")
     }
   }
   
   
-  if (class(test) == "numeric") {
-    test <- data.frame(Mean=rep(test["Mean"], NBTs), SD=rep(test["SD"], NBTs), row.names=name)
-  }
+  ########################################################################################## #
+  # J'ai donc 1 tableau: df_random avec une ligne par réplicat parameters/series.     
+  # J'ai les tailles finales attendues dans un data.frame hatchling.metric avec deux colonnes            #
+  # J'ai aussi les tailles finales dans SCL.final  ? A vérifier                              #
+  # Dans name j'ai le nom des séries à travailler                                            #
+  ########################################################################################## #
   
-  if (is.null(metric.end.incubation)) {
-    metric.end.incubation <- rep(max(test[, "Mean"]), NBTs)
-    names(metric.end.incubation) <- name
-  }
-  # if (is.na(metric.end.incubation)) metric.end.incubation <- 1
+  # The theorem of Cauchy–Lipschitz (also known as the theorem of Picard–Lindelöf) 
+  # gives a set of conditions under which an initial value problem (also named Cauchy problem) has a unique solution.
   
-  if (length(metric.end.incubation) != NBTs | is.null(names(metric.end.incubation))) {
-    metric.end.incubation <- rep(metric.end.incubation, NBTs)[1:NBTs]
-    names(metric.end.incubation) <- name
-  }
+  # Je dois calculer la température moyenne pondérée par le temps d'incubation
+  # Les températures sont dans temperatures. C'est une liste formattée
   
-  if (class(embryo.stages)=="character") {
-    estages <- TSP.list[[gsub(" ", "_", embryo.stages)]]
-    if (is.null(estages)) {
-      stop("The TSP for ", embryo.stages, " does not exist")
+  # Les séries à travailler sont dans name
+  # temperature[name]
+  # Pour chacune je calcule la température moyenne
+  # Mais cela n'a de sens que si je n'ai pas de metabolic heating ou temperature.heterogeneity et si j'ai bien une taille finale attendue donc !stop.at.hatchling.metric
+  
+  
+  
+  ################################### #
+  # Lecture des stades pour la TSP ####
+  ################################### #
+  # Comme maintenant c'est une variable, je dois le rentrer dans la boucle
+  
+  if (any(class(embryo.stages)=="character")) {
+    if (embryo.stages == "fitted") {
+      embryo.stages = c("10"=invlogit(logit(0.33)), "11"=invlogit(logit(0.33)), 
+                        "12"=invlogit(logit(0.66)), "13"=invlogit(logit(0.66))) 
+      TSP.borders = c(10, 12)
     } else {
-      embryo.stages <- estages[, "metric"]
-      names(embryo.stages) <- estages[, "stages"]
-      TSP.borders <- c(attributes(estages)$TSP.begin.stages, attributes(estages)$TSP.end.stages)
+      estages <- TSP.list[[gsub(" ", "_", embryo.stages)]]
+      if (is.null(estages)) {
+        stop("The TSP for ", embryo.stages, " does not exist")
+      } else {
+        embryo.stages <- estages[, "metric"]
+        names(embryo.stages) <- estages[, "stages"]
+        TSP.borders <- c(attributes(estages)$TSP.begin.stages, attributes(estages)$TSP.end.stages)
+      }
     }
-  } else {
-    if (is.null(embryo.stages)) {
-      stop("embryo.stages cannot be NULL.")
-    }
-  }
-  
-  # La taille au dbut et fin de TSP devrait dependre de la taille finale
-  # A mditer
-  # C'est resolu le 16/9/2015
-  
-  if (!is.null(embryo.stages) & !is.null(TSP.borders)) {
-    size.begin.TSP <- embryo.stages[as.character(TSP.borders[1])]
-    if (TSP.begin != 0) {
-      size.begin.TSP <- size.begin.TSP+(embryo.stages[as.character(TSP.borders[1]+1)]-size.begin.TSP)*TSP.begin
-    }
-    
-    size.end.TSP <- mean(embryo.stages[as.character(TSP.borders[2])])
-    if (TSP.end != 0) {
-      size.end.TSP <- size.end.TSP+(embryo.stages[as.character(TSP.borders[2]+1)]-size.end.TSP)*TSP.end
-    }
-  } else {
-    size.end.TSP <- NA
-    size.begin.TSP <- NA
   }
   
   # dans name j'ai les noms des series
+  # prepare le data.frame pour les resultats ####
   
-  # prepare le data.frame pour les resultats
-  temperatures_ec2 <- universalmclapply(X=name, mc.cores = papply, FUN=function (xxx) {
-    #      temperatures_ec <- lapply(xx, function (xxx) {
-    # xxx <- 1
-    df <- as.data.frame(temperatures_ec[[xxx]])
+  temperatures_ec <- universalmclapply(X=name, mc.cores = papply, progressbar=FALSE, FUN=function (serie_en_cours) {
+    df <- as.data.frame(temperatures_ec[[serie_en_cours]])
     colnames(df) <- c("Time", "TempC", "TempK", "R", "SCL", "IndiceK")
+    if (df[1, "Time"] != 0) {
+      df <- rbind(df[1, ], df)
+      df[1, "Time"] <- 0
+    }
     
     
     if (!is.null(fill)) {
-      newt <- seq(from=fill, to=tail(df$Time, n=1L), by=fill)
+      newt <- seq(from=0, to=tail(df$Time, n=1L), by=fill)
       aretirer <- -which(!is.na(match(newt, df$Time)))
       if (!identical(aretirer, integer(0))) newt <- newt[aretirer]
-      df <- rbind(df, 
-                  data.frame(Time=newt, TempC=NA, 
-                             TempK=NA, R=NA, SCL=NA, IndiceK=NA)) 
-      df <- df[order(df$Time),]
+      if (!identical(newt, numeric(0))) {
+        df <- rbind(df, 
+                    data.frame(Time=newt, TempC=NA, 
+                               TempK=NA, R=NA, SCL=NA, IndiceK=NA)) 
+        df <- df[order(df$Time),]
+      }
     }
     
     df <- cbind(df, DeltaT=c(diff(df$Time), 0))
     
-    ind <- which(!is.na(df$TempC))      # get positions of nonmissing values
-    if(is.na(df$TempC[1]))             # if it begins with a missing, add the 
-      ind <- c(1,ind)        # first position to the indices
+    ind <- which(!is.na(df$TempC))      # get positions of non-missing values
+    if(is.na(df$TempC[1])) {            # if it begins with a missing, add the 
+      df$TempC[1] <- df$TempC[ind[1]]
+      df$TempK[1] <- df$TempK[ind[1]]
+      df$IndiceK[1] <- df$IndiceK[ind[1]]
+      ind <- c(1,ind) 
+    }# first position to the indices
     df$TempC <- rep(df$TempC[ind], times = diff(   # repeat the values at these indices
       c(ind, length(df$TempC) + 1) ))
     df$TempK <- rep(df$TempK[ind], times = diff(   # repeat the values at these indices
@@ -661,1084 +729,1287 @@ info.nests <- function(x=NULL, parameters=NULL, NestsResult=NULL,
     df$IndiceK <- rep(df$IndiceK[ind], times = diff(   # repeat the values at these indices
       c(ind, length(df$IndiceK) + 1) ))
     
+    df[, "SCL"] <- NA
     df[1, "SCL"] <- M0
+    df[, "IndiceK"] <- 1
     return(df)
   }, clusterExport=list(varlist=c("temperatures_ec", "fill", "M0"), 
                         envir = environment()), 
   clusterEvalQ=list(expr=expression(library(embryogrowth)))
   )
   
+  # Je les classe
+  temperatures_ec <- temperatures_ec[name]
   
+  ################################################################### #
+  # Je prépare le calcul avec tous les nids  et tous les réplicats ####
+  ################################################################### #
   
-  # Je remplace le temperature_ec avec la nouvelle version
-  temperatures_ec <- temperatures_ec2
+  AnalyseTraces <- universalmclapply(progressbar=progressbar, mc.cores = papply, X=1:nrow(df_random), 
+                                     FUN=function (ligne_df_random) {
+                                       
+                                       # ligne_df_random <- 1
+                                       
+                                       # print(ligne_df_random)
+                                       
+                                       serie_en_cours <- df_random[ligne_df_random, "Series"]
+                                       
+                                       df <- temperatures_ec[[serie_en_cours]]
+                                       
+                                       setpar <- c(unlist(df_random[ligne_df_random, -1, drop=TRUE]), unlist(df_random_tsd[ligne_df_random, -1, drop=TRUE]))
+                                       setpar_STRN <- unlist(df_random_SexualisationTRN[ligne_df_random, -1, drop=TRUE])
+                                       
+                                       
+                                       # Si je n'ai pas setpar_STRN, je le mets en uniforme; dans dbeta_mu, j'ai le logit de mu (0=0.5)
+                                       if (is.null(setpar_STRN)) setpar_STRN <- c(dbeta_mu=0, dbeta_v=1/12)
+                                       if (all(substr(names(setpar_STRN), 1, 6) != "dbeta_")) {
+                                         setpar_STRN["dbeta_mu"] <- 0
+                                         setpar_STRN["dbeta_v"] <- 1/12
+                                       }
+                                       
+                                       
+                                       transition_P <- setpar["transition_P"]
+                                       transition_S <- setpar["transition_S"]
+                                       
+                                       # "df_random_tsd", "df_random_SexualisationTRN"
+                                       
+                                       if (!is.na(setpar["K"])) {
+                                         Kval <- unname(setpar["K"])
+                                       } else {
+                                         Kval <- NULL
+                                       }
+                                       
+                                       if (length(temperature.heterogeneity)==1) {
+                                         tht <- 0
+                                         if (temperature.heterogeneity !=0) tht <- rnorm(1, 0, temperature.heterogeneity)
+                                       } else {
+                                         tht <- r2norm(1, 0, sd_low = temperature.heterogeneity[1], sd_high = temperature.heterogeneity[2])
+                                       }
+                                       
+                                       df[, "TempC"] <- df[, "TempC"] + tht
+                                       df[, "TempK"] <- df[, "TempK"] + tht
+                                       
+                                       meanSCL <- as.numeric(hatchling.metric[serie_en_cours, "Mean"])
+                                       sdSCL <- as.numeric(hatchling.metric[serie_en_cours, "SD"])
+                                       if (!is.na(setpar["rK"])) {
+                                         Kval <- unname(setpar["rK"]*meanSCL)
+                                       }
+                                       tmin <- df[, "Time"]
+                                       for (j in 2:nrow(df)) if (is.na(df[j, "TempK"])) df[j, "TempK"] <- df[j-1, "TempK"]
+                                       
+                                       dT <- df[, "DeltaT"]
+                                       y0 <- ypre <- df[1, "SCL"]
+                                       
+                                       if (!stop.at.hatchling.metric) {
+                                         if (!logicTransition) {  
+                                           # if ((metabolic.heating == 0) & 
+                                           #     ((length(temperature.heterogeneity) == 1) & 
+                                           #      (temperature.heterogeneity[1] ==0)) & (out=="likelihood")) {
+                                           #   indice.boucle <- nrow(df) - 1
+                                           # } else {
+                                           #   indice.boucle <- 1
+                                           # }
+                                           
+                                           indice.boucle <- 1
+                                           
+                                           # Je prends de 1 jusqu'à l'avant-dernier
+                                           for (i in indice.boucle:(nrow(df)-1)) {
+                                             timesunique <- c(tmin[i], tmin[i+1])
+                                             df[i, "TempK"] <- df[i, "TempK"]+metabolic.heating*(ypre/meanSCL)
+                                             CTE_inst <- df[i, "TempK"]
+                                             a_inst <- SSM(CTE_inst, setpar)[[1]]
+                                             param <- c(alpha=unname(a_inst), K=Kval)
+                                             if (!is.null(integral)) {
+                                               ypre <- integral(t=timesunique[2]-timesunique[1], size=ypre, parms=param)[1, "metric"]
+                                             } else {
+                                               out1 <- lsoda(ypre, timesunique, derivate, param)
+                                               ypre <- as.numeric(tail(out1[,2], n=1))
+                                             }
+                                             df[i, "R"] <- a_inst
+                                             df[i+1, "SCL"] <- ypre
+                                           }
+                                           df[nrow(df), "TempK"] <- df[nrow(df), "TempK"] + metabolic.heating*(ypre/meanSCL)
+                                           
+                                         } else {
+                                           for (i in 1:(nrow(df)-1)) {
+                                             timesunique <- c(tmin[i], tmin[i+1])
+                                             df[i, "TempK"] <- df[i, "TempK"]+metabolic.heating*(ypre/meanSCL)
+                                             CTE_inst <- df[i, "TempK"]
+                                             transition <- 1/(1+exp(transition_S*(ypre-transition_P)))
+                                             rT_inst < SSM(CTE_inst, setpar)
+                                             a_inst <- rT_inst[[1]]*transition+rT_inst[[2]]*(1-transition)
+                                             param <- c(alpha=unname(a_inst), K=Kval)
+                                             if (!is.null(integral)) {
+                                               ypre <- integral(t=timesunique[2]-timesunique[1], size=ypre, parms=param)[1, "metric"]
+                                             } else {
+                                               out1 <- lsoda(ypre, timesunique, derivate, param)
+                                               ypre <- as.numeric(tail(out1[,2], n=1))
+                                             }
+                                             df[i, "R"] <- a_inst
+                                             df[i+1, "SCL"] <- ypre
+                                           }
+                                           df[nrow(df), "TempK"] <- df[nrow(df), "TempK"] + metabolic.heating*(ypre/meanSCL)
+                                           
+                                         }
+                                         # je suis en stop.at.hatchling.metric
+                                       } else {
+                                         if (!logicTransition) {  
+                                           
+                                           for (i in 1:(nrow(df)-1)) {
+                                             timesunique <- c(tmin[i], tmin[i+1])
+                                             df[i, "TempK"] <- df[i, "TempK"]+metabolic.heating*(ypre/meanSCL)
+                                             CTE_inst <- df[i, "TempK"]
+                                             a_inst <- SSM(CTE_inst, setpar)[[1]]
+                                             param <- c(alpha=unname(a_inst), K=Kval)
+                                             
+                                             if (!is.null(integral)) {
+                                               ypre <- integral(t=timesunique[2]-timesunique[1], size=ypre, parms=param)[1, "metric"]
+                                             } else {
+                                               out1 <- lsoda(ypre, timesunique, derivate, param)
+                                               ypre <- as.numeric(tail(out1[,2], n=1))
+                                             }
+                                             
+                                             df[i, "R"] <- a_inst
+                                             df[i+1, "SCL"] <- ypre
+                                             if (ypre>meanSCL) {
+                                               break
+                                             }
+                                           }
+                                           
+                                         } else {
+                                           for (i in 1:(nrow(df)-1)) {
+                                             timesunique <- c(tmin[i], tmin[i+1])
+                                             df[i, "TempK"] <- df[i, "TempK"]+metabolic.heating*(ypre/meanSCL)
+                                             CTE_inst <- df[i, "TempK"]
+                                             transition <- 1/(1+exp(transition_S*(ypre-transition_P)))
+                                             rT_inst <- SSM(CTE_inst, setpar)
+                                             a_inst <- rT_inst[[1]]*transition+rT_inst[[2]]*(1-transition)
+                                             param <- c(alpha=unname(a_inst), K=Kval)
+                                             if (!is.null(integral)) {
+                                               ypre <- integral(t=timesunique[2]-timesunique[1], size=ypre, parms=param)[1, "metric"]
+                                             } else {
+                                               out1 <- lsoda(ypre, timesunique, derivate, param)
+                                               ypre <- as.numeric(tail(out1[,2], n=1))
+                                             }
+                                             df[i, "R"] <- a_inst
+                                             df[i+1, "SCL"] <- ypre
+                                             if (ypre>meanSCL) {
+                                               break
+                                             }
+                                           }
+                                           
+                                           # fin du else logictransition
+                                         }
+                                         # fin du else !stop.at.hatchling.metric
+                                       }
+                                       df[, "TempC"] <- df[, "TempK"] - 273.15
+                                       
+                                       if (stop.at.hatchling.metric) {
+                                         size.final <- ifelse(ypre < meanSCL, NA, meanSCL)
+                                       } else {
+                                         size.final <- ifelse(metric.end.incubation == "observed", ypre, meanSCL)
+                                       }
+                                       
+                                       if (!is.na(size.final)) {
+                                         
+                                         if (!is.null(embryo.stages)) {
+                                           
+                                           if (!is.na(setpar_STRN["BeginTSP"])) {
+                                             xxbt <- invlogit(setpar_STRN["BeginTSP"])
+                                             if (xxbt == 0) xxbt <- zero
+                                             if (xxbt > 0.95) xxbt <- 0.95
+                                             embryo.stages[as.character(TSP.borders[1])] <- xxbt
+                                             embryo.stages[as.character(TSP.borders[1]+1)] <- xxbt
+                                           }
+                                           if (!is.na(setpar_STRN["EndTSP"])) {
+                                             xxbt <- invlogit(setpar_STRN["EndTSP"]) 
+                                             if (xxbt == 0) xxbt <- zero
+                                             if (xxbt == 0.99) xxbt <- 0.99
+                                             embryo.stages[as.character(TSP.borders[2])] <- xxbt
+                                             embryo.stages[as.character(TSP.borders[2]+1)] <- xxbt
+                                           }
+                                           if (!is.na(setpar_STRN["LengthTSP"])) {
+                                             xxbt <- invlogit(setpar_STRN["BeginTSP"]+abs(setpar_STRN["LengthTSP"]))
+                                             if (xxbt == 0) xxbt <- zero
+                                             if (xxbt >= 0.99) xxbt <- 0.99
+                                             embryo.stages[as.character(TSP.borders[2])] <- xxbt 
+                                             embryo.stages[as.character(TSP.borders[2]+1)] <- xxbt
+                                           }
+                                           # Je ne comprends pas le mean ici - 2021-05-12
+                                           size.begin.TSP <- mean(embryo.stages[as.character(TSP.borders[1])])
+                                           if (TSP.begin != 0) {
+                                             size.begin.TSP <- size.begin.TSP+(embryo.stages[as.character(TSP.borders[1]+1)]-size.begin.TSP)*TSP.begin
+                                           }
+                                           
+                                           size.end.TSP <- mean(embryo.stages[as.character(TSP.borders[2])])
+                                           if (TSP.end != 0) {
+                                             size.end.TSP <- size.end.TSP+(embryo.stages[as.character(TSP.borders[2]+1)]-size.end.TSP)*TSP.end
+                                           }
+                                           
+                                           size.begin.TSP_ec <- size.begin.TSP*size.final
+                                           size.end.TSP_ec <- size.end.TSP*size.final
+                                           
+                                         } else {
+                                           size.end.TSP <- NA
+                                           size.begin.TSP <- NA
+                                           size.begin.TSP_ec <- NA
+                                           size.end.TSP_ec <- NA
+                                         }
+                                         
+                                         if (out == "likelihood") {
+                                         if (!is.na(sdSCL)) {
+                                           likelihood <- (-dnorm(ypre, mean=meanSCL, sd=sdSCL, log=TRUE))
+                                         } else {
+                                           likelihood <- ((ypre - meanSCL)^2)
+                                         }
+                                         
+                                         return(list(likelihood=likelihood))
+                                         }
+                                         
+                                         df_ec <- df
+                                         
+                                         
+                                         
+                                         ##### Estimate limit begin TSP #####
+                                         
+                                         if ((size.final < size.begin.TSP_ec) | is.na(size.begin.TSP_ec) | (max(df_ec[,"SCL"], na.rm = TRUE) < size.begin.TSP_ec)) {
+                                           time.begin.TSP <- NA
+                                           indice.begin.tsp <- NA
+                                         } else {
+                                           
+                                           
+                                           
+                                           if (size.begin.TSP_ec < df_ec[1,"SCL"]) {
+                                             size.begin.TSP_ec <- df_ec[1,"SCL"]+(df_ec[2,"SCL"] - df_ec[1,"SCL"])/10
+                                           }
+                                           indice.begin.tsp <- which(df_ec[,"SCL"]>(size.begin.TSP_ec))[1]-1
+                                           
+                                           
+                                           
+                                           df_ec <- rbind(df_ec[1:indice.begin.tsp, ], 
+                                                          data.frame(Time=c(df_ec[indice.begin.tsp,"Time"]+df_ec[indice.begin.tsp,"DeltaT"]/3, 
+                                                                            df_ec[indice.begin.tsp,"Time"]+df_ec[indice.begin.tsp,"DeltaT"]*2/3), 
+                                                                     TempC=c(df_ec[indice.begin.tsp,"TempC"], 
+                                                                             df_ec[indice.begin.tsp,"TempC"]), 
+                                                                     TempK=c(df_ec[indice.begin.tsp,"TempK"], 
+                                                                             df_ec[indice.begin.tsp,"TempK"]), 
+                                                                     R=c(NA, NA), 
+                                                                     SCL=c(NA, NA), 
+                                                                     IndiceK=c(0, 0), 
+                                                                     DeltaT=c(NA, NA)), 
+                                                          df_ec[(indice.begin.tsp+1):nrow(df_ec), ])
+                                           
+                                           # df_ec[, 'DeltaT'] <- c(diff(df_ec[, "Time"]), 0)
+                                           
+                                           df_ec[indice.begin.tsp, "DeltaT"] <- df_ec[indice.begin.tsp+1,"Time"]-df_ec[indice.begin.tsp,"Time"]
+                                           df_ec[indice.begin.tsp+1, "DeltaT"] <- df_ec[indice.begin.tsp+2,"Time"]-df_ec[indice.begin.tsp+1,"Time"]
+                                           df_ec[indice.begin.tsp+2, "DeltaT"] <- df_ec[indice.begin.tsp+3,"Time"]-df_ec[indice.begin.tsp+2,"Time"]
+                                           
+                                           # dt <- df_ec[, "DeltaT"]
+                                           # TK <- df_ec[, "TempK"]
+                                           
+                                           # CTE <- cumsum(dt*TK)/cumsum(dt)
+                                           CTE_inst <- df_ec[indice.begin.tsp, "TempK"]
+                                           
+                                           timesunique <- c(df_ec[indice.begin.tsp, "Time"], df_ec[indice.begin.tsp+1, "Time"])
+                                           if (!logicTransition) {
+                                             transition <- 1
+                                           } else {
+                                             transition <- 1/(1+exp(transition_S*(df_ec[indice.begin.tsp, "SCL"] - transition_P)))
+                                           }
+                                           # rT <- SSM(CTE[indice.begin.tsp], setpar)
+                                           rT_inst <- SSM(CTE_inst, setpar)
+                                           
+                                           # a <- rT[[1]]*transition+rT[[2]]*(1-transition)
+                                           a_inst <- rT_inst[[1]]*transition+rT_inst[[2]]*(1-transition)
+                                           param <- c(alpha=unname(a_inst), K=Kval)
+                                           if (!is.null(integral)) {
+                                             ypre <- integral(t=timesunique[2]-timesunique[1], size=df_ec[indice.begin.tsp, "SCL"], parms=param)[1, "metric"]
+                                           } else {
+                                             out1 <- lsoda(df_ec[indice.begin.tsp, "SCL"], timesunique, derivate, param)
+                                             ypre <- as.numeric(tail(out1[,2], n=1))
+                                           }
+                                           df_ec[indice.begin.tsp+1, "R"] <- a_inst
+                                           df_ec[indice.begin.tsp+1, "SCL"] <- ypre
+                                           
+                                           timesunique <- c(df_ec[indice.begin.tsp+1, "Time"], df_ec[indice.begin.tsp+2, "Time"])
+                                           if (!logicTransition) {
+                                             transition <- 1
+                                           } else {
+                                             transition <- 1/(1+exp(transition_S*(ypre - transition_P)))
+                                           }
+                                           
+                                           CTE_inst <- df_ec[indice.begin.tsp+1, "TempK"]
+                                           # rT <- SSM(CTE[indice.begin.tsp+1], setpar)
+                                           rT_inst <- SSM(CTE_inst, setpar)
+                                           # a <- rT[[1]]*transition+rT[[2]]*(1-transition)
+                                           a_inst <- rT_inst[[1]]*transition+rT_inst[[2]]*(1-transition)
+                                           param <- c(alpha=unname(a_inst), K=Kval)
+                                           if (!is.null(integral)) {
+                                             ypre <- integral(t=timesunique[2]-timesunique[1], size=ypre, 
+                                                              parms=param)[1, "metric"]
+                                           } else {
+                                             out1 <- lsoda(ypre, timesunique, derivate, param)
+                                             ypre <- as.numeric(tail(out1[,2], n=1))
+                                           }
+                                           df_ec[indice.begin.tsp+2, "R"] <- a_inst
+                                           df_ec[indice.begin.tsp+2, "SCL"] <- ypre
+                                           
+                                           # J'ai encadré le début de la TSP
+                                           
+                                           t <- df_ec[indice.begin.tsp:(indice.begin.tsp+3), "Time"]
+                                           SCL <- df_ec[indice.begin.tsp:(indice.begin.tsp+3), "SCL"]
+                                           
+                                           
+                                           l <- lm(t ~ poly(SCL, degree = 2))
+                                           time.begin.tsp <- predict(l, newdata = data.frame(SCL=size.begin.TSP_ec))
+                                           time.begin.tsp <- round(time.begin.tsp, 2)
+                                           if (time.begin.tsp <= 0) {
+                                             time.begin.tsp <- t[1]+zero
+                                           }
+                                           
+                                           indice.begin.tsp <- which(df_ec[,"Time"]>(time.begin.tsp))[1]-1
+                                           
+                                           df_ec <- rbind(df_ec[1:indice.begin.tsp, ], 
+                                                          data.frame(Time=time.begin.tsp, 
+                                                                     TempC=df_ec[indice.begin.tsp,"TempC"], 
+                                                                     TempK=df_ec[indice.begin.tsp,"TempK"], 
+                                                                     R=NA, 
+                                                                     SCL=NA, 
+                                                                     IndiceK=0, 
+                                                                     DeltaT=NA), 
+                                                          df_ec[(indice.begin.tsp+1):nrow(df_ec), ])
+                                           
+                                           # df_ec[, "DeltaT"] <- c(diff(df_ec[, "Time"]), 0)
+                                           
+                                           df_ec[indice.begin.tsp, "DeltaT"] <- df_ec[indice.begin.tsp+1, "Time"]-df_ec[indice.begin.tsp, "Time"]
+                                           df_ec[indice.begin.tsp+1, "DeltaT"] <- df_ec[indice.begin.tsp+2, "Time"]-df_ec[indice.begin.tsp+1, "Time"]
+                                           
+                                           # dt <- df_ec[, "DeltaT"]
+                                           # TK <- df_ec[, "TempK"]
+                                           # CTE <- cumsum(dt*TK)/cumsum(dt)
+                                           
+                                           
+                                           timesunique <- c(df_ec[indice.begin.tsp, "Time"], df_ec[indice.begin.tsp+1, "Time"])
+                                           if (!logicTransition) {
+                                             transition <- 1
+                                           } else {
+                                             transition <- 1/(1+exp(transition_S*(df_ec[indice.begin.tsp, "SCL"] - transition_P)))
+                                           }
+                                           # rT <- SSM(CTE[indice.begin.tsp], setpar)
+                                           CTE_inst <- df_ec[indice.begin.tsp, "TempK"]
+                                           rT_inst <- SSM(CTE_inst, setpar)
+                                           # a <- rT[[1]]*transition+rT[[2]]*(1-transition)
+                                           a_inst <- rT_inst[[1]]*transition+rT_inst[[2]]*(1-transition)
+                                           param <- c(alpha=unname(a_inst), K=Kval)
+                                           if (!is.null(integral)) {
+                                             ypre <- integral(t=timesunique[2]-timesunique[1], size=df_ec[indice.begin.tsp, "SCL"], parms=param)[1, "metric"]
+                                           } else {
+                                             out1 <- lsoda(df_ec[indice.begin.tsp, "SCL"], timesunique, derivate, param)
+                                             ypre <- as.numeric(tail(out1[,2], n=1))
+                                           }
+                                           df_ec[indice.begin.tsp+1, "R"] <- a_inst
+                                           df_ec[indice.begin.tsp+1, "SCL"] <- ypre
+                                           
+                                           indice.begin.tsp <- indice.begin.tsp+1
+                                           
+                                           rownames(df_ec)[indice.begin.tsp] <- "Begin TSP"
+                                           time.begin.TSP <- df_ec[indice.begin.tsp,"Time"]
+                                         }
+                                         
+                                         
+                                         ###### Estimate limit end TSP ####
+                                         
+                                         if ((size.final < size.end.TSP_ec) | is.na(size.end.TSP_ec) | (max(df_ec[,"SCL"], na.rm = TRUE) < size.end.TSP_ec)) {
+                                           time.end.TSP <- NA
+                                           indice.end.tsp <- NA
+                                         } else {
+                                           
+                                           if (size.end.TSP_ec < df_ec[1,"SCL"]) {
+                                             size.end.TSP_ec <- df_ec[1,"SCL"]+(df_ec[2,"SCL"] - df_ec[1,"SCL"])/10
+                                           }
+                                           
+                                           
+                                           ind_nonNA <- max(which(!is.na(df_ec[, "SCL"])))
+                                           if (size.end.TSP_ec >= df_ec[ind_nonNA,"SCL"]) {
+                                             size.end.TSP_ec <- df_ec[ind_nonNA-1,"SCL"] + (df_ec[ind_nonNA,"SCL"]-df_ec[ind_nonNA-1,"SCL"])/10
+                                           }
+                                           
+                                           if (size.end.TSP_ec <= df_ec[indice.begin.tsp, "SCL"]) {
+                                             size.end.TSP_ec <- df_ec[indice.begin.tsp, "SCL"]+(df_ec[indice.begin.tsp+1, "SCL"]-df_ec[indice.begin.tsp, "SCL"])/10
+                                           }
+                                           
+                                           indice.end.tsp <- which(df_ec[,"SCL"]>(size.end.TSP_ec))[1]-1
+                                           
+                                           df_ec <- rbind(df_ec[1:indice.end.tsp, ], 
+                                                          data.frame(Time=c(df_ec[indice.end.tsp,"Time"]+df_ec[indice.end.tsp,"DeltaT"]/3, 
+                                                                            df_ec[indice.end.tsp,"Time"]+df_ec[indice.end.tsp,"DeltaT"]*2/3), 
+                                                                     TempC=c(df_ec[indice.end.tsp,"TempC"], 
+                                                                             df_ec[indice.end.tsp,"TempC"]), 
+                                                                     TempK=c(df_ec[indice.end.tsp,"TempK"], 
+                                                                             df_ec[indice.end.tsp,"TempK"]), 
+                                                                     R=c(NA, NA), 
+                                                                     SCL=c(NA, NA), 
+                                                                     IndiceK=c(0, 0), 
+                                                                     DeltaT=c(NA, NA)), 
+                                                          df_ec[(indice.end.tsp+1):nrow(df_ec), ])
+                                           
+                                           # df_ec[, 'DeltaT'] <- c(diff(df_ec[, "Time"]), 0)
+                                           
+                                           # dt <- df_ec[, "DeltaT"]
+                                           # TK <- df_ec[, "TempK"]
+                                           
+                                           # sum(dt[1:(indice.end.tsp+1)]*TK[1:(indice.end.tsp+1)])/sum(dt[1:(indice.end.tsp+1)])
+                                           
+                                           # CTE <- cumsum(dt*TK)/cumsum(dt)
+                                           df_ec[indice.end.tsp, "DeltaT"] <- df_ec[indice.end.tsp+1,"Time"]-df_ec[indice.end.tsp,"Time"]
+                                           df_ec[indice.end.tsp+1, "DeltaT"] <- df_ec[indice.end.tsp+2,"Time"]-df_ec[indice.end.tsp+1,"Time"]
+                                           df_ec[indice.end.tsp+2, "DeltaT"] <- df_ec[indice.end.tsp+3,"Time"]-df_ec[indice.end.tsp+2,"Time"]
+                                           
+                                           
+                                           timesunique <- c(df_ec[indice.end.tsp, "Time"], df_ec[indice.end.tsp+1, "Time"])
+                                           if (!logicTransition) {
+                                             transition <- 1
+                                           } else {
+                                             transition <- 1/(1+exp(transition_S*(df_ec[indice.end.tsp, "SCL"] - transition_P)))
+                                           }
+                                           # rT <- SSM(CTE[indice.end.tsp], setpar)
+                                           # a <- rT[[1]]*transition+rT[[2]]*(1-transition)
+                                           CTE_inst <- df_ec[indice.end.tsp, "TempK"]
+                                           rT_inst <- SSM(CTE_inst, setpar)
+                                           a_inst <- rT_inst[[1]]*transition+rT_inst[[2]]*(1-transition)
+                                           param <- c(alpha=unname(a_inst), K=Kval)
+                                           if (!is.null(integral)) {
+                                             ypre <- integral(t=timesunique[2]-timesunique[1], size=df_ec[indice.end.tsp, "SCL"], 
+                                                              parms=param)[1, "metric"]
+                                           } else {
+                                             out1 <- lsoda(df_ec[indice.end.tsp, "SCL"], timesunique, derivate, param)
+                                             ypre <- as.numeric(tail(out1[,2], n=1))
+                                           }
+                                           df_ec[indice.end.tsp+1, "R"] <- a_inst
+                                           df_ec[indice.end.tsp+1, "SCL"] <- ypre
+                                           
+                                           timesunique <- c(df_ec[indice.end.tsp+1, "Time"], df_ec[indice.end.tsp+2, "Time"])
+                                           if (!logicTransition) {
+                                             transition <- 1
+                                           } else {
+                                             transition <- 1/(1+exp(transition_S*(ypre - transition_P)))
+                                           }
+                                           # rT <- SSM(CTE[indice.end.tsp+1], setpar)
+                                           # a <- rT[[1]]*transition+rT[[2]]*(1-transition)
+                                           CTE_inst <- df_ec[indice.end.tsp+1, "TempK"]
+                                           rT_inst <- SSM(CTE_inst, setpar)
+                                           a_inst <- rT_inst[[1]]*transition+rT_inst[[2]]*(1-transition)
+                                           param <- c(alpha=unname(a_inst), K=Kval)
+                                           if (!is.null(integral)) {
+                                             ypre <- integral(t=timesunique[2]-timesunique[1], size=ypre, 
+                                                              parms=param)[1, "metric"]
+                                           } else {
+                                             out1 <- lsoda(ypre, timesunique, derivate, param)
+                                             ypre <- as.numeric(tail(out1[,2], n=1))
+                                           }
+                                           df_ec[indice.end.tsp+2, "R"] <- a_inst
+                                           df_ec[indice.end.tsp+2, "SCL"] <- ypre
+                                           
+                                           t <- df_ec[indice.end.tsp:(indice.end.tsp+3), "Time"]
+                                           SCL <- df_ec[indice.end.tsp:(indice.end.tsp+3), "SCL"]
+                                           
+                                           l <- lm(t ~ poly(SCL, degree = 2))
+                                           time.end.tsp <- predict(l, newdata = data.frame(SCL=size.end.TSP_ec))
+                                           time.end.tsp <- round(time.end.tsp, 2)
+                                           
+                                           # plot(t, SCL); points(time.begin.tsp, size.begin.TSP_ec, col="red"); segments(x0=0, y0=size.begin.TSP_ec, x1=100000, y1=size.begin.TSP_ec, col="green")
+                                           
+                                           indice.end.tsp <- which(df_ec[,"Time"]>(time.end.tsp))[1]-1
+                                           
+                                           df_ec <- rbind(df_ec[1:indice.end.tsp, ], 
+                                                          data.frame(Time=time.end.tsp, 
+                                                                     TempC=df_ec[indice.end.tsp,"TempC"], 
+                                                                     TempK=df_ec[indice.end.tsp,"TempK"], 
+                                                                     R=NA, 
+                                                                     SCL=NA, 
+                                                                     IndiceK=0, 
+                                                                     DeltaT=NA), 
+                                                          df_ec[(indice.end.tsp+1):nrow(df_ec), ])
+                                           
+                                           # df_ec[, "DeltaT"] <- c(diff(df_ec[, "Time"]), 0)
+                                           # 
+                                           # dt <- df_ec[, "DeltaT"]
+                                           # TK <- df_ec[, "TempK"]
+                                           # CTE <- cumsum(dt*TK)/cumsum(dt)
+                                           
+                                           df_ec[indice.end.tsp, "DeltaT"] <- df_ec[indice.end.tsp+1, "Time"]-df_ec[indice.end.tsp, "Time"]
+                                           df_ec[indice.end.tsp+1, "DeltaT"] <- df_ec[indice.end.tsp+2, "Time"]-df_ec[indice.end.tsp+1, "Time"]
+                                           
+                                           
+                                           timesunique <- c(df_ec[indice.end.tsp, "Time"], df_ec[indice.end.tsp+1, "Time"])
+                                           if (!logicTransition) {
+                                             transition <- 1
+                                           } else {
+                                             transition <- 1/(1+exp(transition_S*(df_ec[indice.end.tsp, "SCL"] - transition_P)))
+                                           }
+                                           # rT <- SSM(CTE[indice.end.tsp], setpar)
+                                           # a <- rT[[1]]*transition+rT[[2]]*(1-transition)
+                                           CTE_inst <- df_ec[indice.end.tsp, "TempK"]
+                                           rT_inst <- SSM(CTE_inst, setpar)
+                                           a_inst <- rT_inst[[1]]*transition+rT_inst[[2]]*(1-transition)
+                                           
+                                           param <- c(alpha=unname(a_inst), K=Kval)
+                                           if (!is.null(integral)) {
+                                             ypre <- integral(t=timesunique[2]-timesunique[1], size=df_ec[indice.end.tsp, "SCL"], 
+                                                              parms=param)[1, "metric"]
+                                           } else {
+                                             out1 <- lsoda(df_ec[indice.end.tsp, "SCL"], timesunique, derivate, param)
+                                             ypre <- as.numeric(tail(out1[,2], n=1))
+                                           }
+                                           df_ec[indice.end.tsp+1, "R"] <- a_inst
+                                           df_ec[indice.end.tsp+1, "SCL"] <- ypre
+                                           
+                                           indice.end.tsp <- indice.end.tsp+1
+                                           
+                                           rownames(df_ec)[indice.end.tsp] <- "End TSP"
+                                           time.end.TSP <- df_ec[indice.end.tsp,"Time"]
+                                         }
+                                         
+                                         #### End of incubation for stop.at.hatchling.metric ##########
+                                         
+                                         # attSAT vaut NA si je ne suis pas en stop.at.hatchling.metric
+                                         # attSAT vaut TRUE si l'incubation a été jusquà meanSCL
+                                         # attSAT vaut FALSE si l'incubation n'a pas été jusqu'à meanSCL
+                                         
+                                         if (stop.at.hatchling.metric) {
+                                           
+                                           if (max(df_ec[,"SCL"], na.rm=TRUE) > meanSCL) {
+                                             attSAT <- TRUE
+                                             
+                                             indice.fin.incubation <- which(df_ec[,"SCL"]> meanSCL)[1]-1
+                                             
+                                             df_ec <- rbind(df_ec[1:indice.fin.incubation, ], 
+                                                            data.frame(Time=c(df_ec[indice.fin.incubation,"Time"]+df_ec[indice.fin.incubation,"DeltaT"]/3, 
+                                                                              df_ec[indice.fin.incubation,"Time"]+df_ec[indice.fin.incubation,"DeltaT"]*2/3), 
+                                                                       TempC=c(df_ec[indice.fin.incubation,"TempC"], 
+                                                                               df_ec[indice.fin.incubation,"TempC"]), 
+                                                                       TempK=c(df_ec[indice.fin.incubation,"TempK"], 
+                                                                               df_ec[indice.fin.incubation,"TempK"]), 
+                                                                       R=c(NA, NA), 
+                                                                       SCL=c(NA, NA), 
+                                                                       IndiceK=c(0, 0), 
+                                                                       DeltaT=c(NA, NA)), 
+                                                            df_ec[(indice.fin.incubation+1):nrow(df_ec), ])
+                                             
+                                             # df_ec[, 'DeltaT'] <- c(diff(df_ec[, "Time"]), 0)
+                                             # 
+                                             # dt <- df_ec[, "DeltaT"]
+                                             # TK <- df_ec[, "TempK"]
+                                             # 
+                                             # CTE <- cumsum(dt*TK)/cumsum(dt)
+                                             
+                                             df_ec[indice.fin.incubation, "DeltaT"] <- df_ec[indice.fin.incubation+1,"Time"]-df_ec[indice.fin.incubation,"Time"]
+                                             df_ec[indice.fin.incubation+1, "DeltaT"] <- df_ec[indice.fin.incubation+2,"Time"]-df_ec[indice.fin.incubation+1,"Time"]
+                                             df_ec[indice.fin.incubation+2, "DeltaT"] <- df_ec[indice.fin.incubation+3,"Time"]-df_ec[indice.fin.incubation+2,"Time"]
+                                             
+                                             
+                                             timesunique <- c(df_ec[indice.fin.incubation, "Time"], df_ec[indice.fin.incubation+1, "Time"])
+                                             if (!logicTransition) {
+                                               transition <- 1
+                                             } else {
+                                               transition <- 1/(1+exp(transition_S*(df_ec[indice.fin.incubation, "SCL"] - transition_P)))
+                                             }
+                                             # rT <- SSM(CTE[indice.fin.incubation], setpar)
+                                             # a <- rT[[1]]*transition+rT[[2]]*(1-transition)
+                                             
+                                             CTE_inst <- df_ec[indice.fin.incubation, "TempK"]
+                                             rT_inst <- SSM(CTE_inst, setpar)
+                                             a_inst <- rT_inst[[1]]*transition+rT_inst[[2]]*(1-transition)
+                                             
+                                             
+                                             param <- c(alpha=unname(a_inst), K=Kval)
+                                             if (!is.null(integral)) {
+                                               ypre <- integral(t=timesunique[2]-timesunique[1], size=df_ec[indice.fin.incubation, "SCL"], 
+                                                                parms=param)[1, "metric"]
+                                             } else {
+                                               out1 <- lsoda(df_ec[indice.fin.incubation, "SCL"], timesunique, derivate, param)
+                                               ypre <- as.numeric(tail(out1[,2], n=1))
+                                             }
+                                             df_ec[indice.fin.incubation+1, "R"] <- a_inst
+                                             df_ec[indice.fin.incubation+1, "SCL"] <- ypre
+                                             
+                                             timesunique <- c(df_ec[indice.fin.incubation+1, "Time"], df_ec[indice.fin.incubation+2, "Time"])
+                                             if (!logicTransition) {
+                                               transition <- 1
+                                             } else {
+                                               transition <- 1/(1+exp(transition_S*(ypre - transition_P)))
+                                             }
+                                             # rT <- SSM(CTE[indice.fin.incubation+1], setpar)
+                                             # a <- rT[[1]]*transition+rT[[2]]*(1-transition)
+                                             
+                                             CTE_inst <- df_ec[indice.fin.incubation+1, "TempK"]
+                                             rT_inst <- SSM(CTE_inst, setpar)
+                                             a_inst <- rT_inst[[1]]*transition+rT_inst[[2]]*(1-transition)
+                                             
+                                             param <- c(alpha=unname(a_inst), K=Kval)
+                                             if (!is.null(integral)) {
+                                               ypre <- integral(t=timesunique[2]-timesunique[1], size=ypre, parms=param)[1, "metric"]
+                                             } else {
+                                               out1 <- lsoda(ypre, timesunique, derivate, param)
+                                               ypre <- as.numeric(tail(out1[,2], n=1))
+                                             }
+                                             df_ec[indice.fin.incubation+2, "R"] <- a_inst
+                                             df_ec[indice.fin.incubation+2, "SCL"] <- ypre
+                                             
+                                             t <- df_ec[indice.fin.incubation:(indice.fin.incubation+3), "Time"]
+                                             SCL <- df_ec[indice.fin.incubation:(indice.fin.incubation+3), "SCL"]
+                                             
+                                             l <- lm(t ~ poly(SCL, degree = 2))
+                                             time.fin.incubation <- predict(l, newdata = data.frame(SCL=meanSCL))
+                                             time.fin.incubation <- round(time.fin.incubation, 2)
+                                             
+                                             # plot(t, SCL); points(time.begin.tsp, size.begin.TSP_ec, col="red"); segments(x0=0, y0=size.begin.TSP_ec, x1=100000, y1=size.begin.TSP_ec, col="green")
+                                             
+                                             indice.fin.incubation <- which(df_ec[,"Time"]>(time.fin.incubation))[1]-1
+                                             
+                                             df_ec <- rbind(df_ec[1:indice.fin.incubation, ], 
+                                                            data.frame(Time=time.fin.incubation, 
+                                                                       TempC=df_ec[indice.fin.incubation,"TempC"], 
+                                                                       TempK=df_ec[indice.fin.incubation,"TempK"], 
+                                                                       R=NA, 
+                                                                       SCL=NA, 
+                                                                       IndiceK=0, 
+                                                                       DeltaT=NA), 
+                                                            df_ec[(indice.fin.incubation+1):nrow(df_ec), ])
+                                             
+                                             df_ec[indice.fin.incubation, "DeltaT"] <- df_ec[indice.fin.incubation+1, "Time"]-df_ec[indice.fin.incubation, "Time"]
+                                             df_ec[indice.fin.incubation+1, "DeltaT"] <- df_ec[indice.fin.incubation+2, "Time"]-df_ec[indice.fin.incubation+1, "Time"]
+                                             
+                                             # df_ec[, "DeltaT"] <- c(diff(df_ec[, "Time"]), 0)
+                                             # 
+                                             # dt <- df_ec[, "DeltaT"]
+                                             # TK <- df_ec[, "TempK"]
+                                             # CTE <- cumsum(dt*TK)/cumsum(dt)
+                                             
+                                             
+                                             timesunique <- c(df_ec[indice.fin.incubation, "Time"], df_ec[indice.fin.incubation+1, "Time"])
+                                             if (!logicTransition) {
+                                               transition <- 1
+                                             } else {
+                                               transition <- 1/(1+exp(transition_S*(df_ec[indice.fin.incubation, "SCL"] - transition_P)))
+                                             }
+                                             # rT <- SSM(CTE[indice.fin.incubation], setpar)
+                                             # a <- rT[[1]]*transition+rT[[2]]*(1-transition)
+                                             
+                                             CTE_inst <- df_ec[indice.fin.incubation, "TempK"]
+                                             rT_inst <- SSM(CTE_inst, setpar)
+                                             a_inst <- rT_inst[[1]]*transition+rT_inst[[2]]*(1-transition)
+                                             
+                                             param <- c(alpha=unname(a_inst), K=Kval)
+                                             if (!is.null(integral)) {
+                                               ypre <- integral(t=timesunique[2]-timesunique[1], size=df_ec[indice.fin.incubation, "SCL"], 
+                                                                parms=param)[1, "metric"]
+                                             } else {
+                                               out1 <- lsoda(df_ec[indice.fin.incubation, "SCL"], timesunique, derivate, param)
+                                               ypre <- as.numeric(tail(out1[,2], n=1))
+                                             }
+                                             df_ec[indice.fin.incubation+1, "R"] <- a_inst
+                                             df_ec[indice.fin.incubation+1, "SCL"] <- ypre
+                                             
+                                             indice.fin.incubation <- indice.fin.incubation+1
+                                             
+                                             rownames(df_ec)[indice.fin.incubation] <- "End Incubation"
+                                             time.end.incubation <- df_ec[indice.fin.incubation,"Time"]
+                                             
+                                             # Maintenant je tronque df de faon  ne garder que jusqu'a time.end.incubation
+                                             # garde
+                                             df_ec <- df_ec[1:indice.fin.incubation,]
+                                             # Je garde la fin de l'incubation
+                                             df_ec[indice.fin.incubation, "IndiceK"] <- 1
+                                             df_ec[, "DeltaT"] <- c(diff(df_ec[, "Time"]), 0)
+                                           } else {
+                                             attSAT <- FALSE
+                                             indice.fin.incubation <- max(which(!is.na(df_ec[, "SCL"])))
+                                             rownames(df_ec)[indice.fin.incubation] <- "End Incubation"
+                                             time.end.incubation <- df_ec[indice.fin.incubation,"Time"]
+                                             df_ec[indice.fin.incubation, "IndiceK"] <- 1
+                                             
+                                             
+                                           }
+                                         } else {attSAT <- NA}
+                                         
+                                         
+                                         ################################## #
+                                         #    indice.begin.middlethird   ####
+                                         ################################## #
+                                         
+                                         # On peut la calculer seulement si attSAT == TRUE ou NA
+                                         
+                                         if (attSAT | is.na(attSAT)) {
+                                           time.begin.middlethird <- unname((tail(df_ec$Time, n=1L)-setpar["pipping_emergence"])/3)
+                                           indice.begin.middlethird <- which(df_ec[,"Time"]>time.begin.middlethird)[1]-1
+                                           df_ec <- rbind(df_ec[1:indice.begin.middlethird, ], 
+                                                          data.frame(Time=time.begin.middlethird, 
+                                                                     TempC=df_ec[indice.begin.middlethird, "TempK"]-273.15, 
+                                                                     TempK=df_ec[indice.begin.middlethird, "TempK"], 
+                                                                     R=NA, 
+                                                                     SCL=NA, 
+                                                                     IndiceK=0, 
+                                                                     DeltaT= NA), 
+                                                          df_ec[(indice.begin.middlethird+1):nrow(df_ec), ])
+                                           
+                                           df_ec[indice.begin.middlethird,"DeltaT"] <- df_ec[indice.begin.middlethird + 1,"Time"] - df_ec[indice.begin.middlethird,"Time"]
+                                           df_ec[indice.begin.middlethird + 1,"DeltaT"] <- df_ec[indice.begin.middlethird + 2,"Time"] - df_ec[indice.begin.middlethird + 1,"Time"]
+                                           
+                                           # sum(df_ec[1:10,"DeltaT"]); df_ec[10+1,"Time"]
+                                           # sum(df_ec[1:indice.begin.middlethird,"DeltaT"]); df_ec[indice.begin.middlethird+1,"Time"]
+                                           
+                                           # timei1 <- df_ec[indice.begin.middlethird + 1,"Time"]
+                                           # dt <- df_ec[1:indice.begin.middlethird, "DeltaT"]
+                                           # TK <- df_ec[1:indice.begin.middlethird, "TempK"]
+                                           # CTE <- sum(dt*TK)/sum(dt)
+                                           CTE_inst <- df_ec[indice.begin.middlethird, "TempK"]
+                                           timesunique <- c(df_ec[indice.begin.middlethird,"Time"], df_ec[indice.begin.middlethird + 1,"Time"])
+                                           if (!logicTransition) {
+                                             transition <- 1
+                                           } else {
+                                             transition <- 1/(1+exp(transition_S*(df_ec[indice.begin.middlethird, "SCL"] - transition_P)))
+                                           }
+                                           # rT <- SSM(CTE, setpar)
+                                           rT_inst <- SSM(CTE_inst, setpar)
+                                           # a <- rT[[1]]*transition+rT[[2]]*(1-transition)
+                                           a_inst <- rT_inst[[1]]*transition+rT_inst[[2]]*(1-transition)
+                                           param <- c(alpha=unname(a_inst), K=Kval)
+                                           if (!is.null(integral)) {
+                                             ypre <- integral(t=timesunique[2]-timesunique[1], size=df_ec[indice.begin.middlethird, "SCL"], parms=param)[1, "metric"]
+                                           } else {
+                                             out1 <- lsoda(df_ec[indice.begin.middlethird, "SCL"], timesunique, derivate, param)
+                                             ypre <- as.numeric(tail(out1[,2], n=1))
+                                           }
+                                           
+                                           df_ec[indice.begin.middlethird+1, "R"] <- a_inst
+                                           df_ec[indice.begin.middlethird+1, "SCL"] <- ypre
+                                           
+                                           rownames(df_ec)[indice.begin.middlethird+1] <- "Begin Middle-third"
+                                           size.begin.middlethird <- ypre
+                                         } else {
+                                           size.begin.middlethird <- NA
+                                           time.begin.middlethird <- NA
+                                         }
+                                         
+                                         ################################ #
+                                         #    indice.end.middlethird   ####
+                                         ################################ #
+                                         
+                                         # On peut la calculer seulement si attSAT == TRUE ou NA
+                                         
+                                         if (attSAT | is.na(attSAT)) {
+                                           time.end.middlethird <- unname((tail(df_ec$Time, n=1L)-setpar["pipping_emergence"])*2/3)
+                                           indice.end.middlethird <- which(df_ec[,"Time"]>time.end.middlethird)[1]-1
+                                           # Je calcul la taille
+                                           df_ec <- rbind(df_ec[1:indice.end.middlethird, ], 
+                                                          data.frame(Time=time.end.middlethird, 
+                                                                     TempC=df_ec[indice.end.middlethird, "TempK"]-273.15, 
+                                                                     TempK=df_ec[indice.end.middlethird, "TempK"], 
+                                                                     R=NA, 
+                                                                     SCL=NA, 
+                                                                     IndiceK=0, 
+                                                                     DeltaT=NA), 
+                                                          df_ec[(indice.end.middlethird+1):nrow(df_ec), ])
+                                           df_ec[indice.end.middlethird,"DeltaT"] <- df_ec[indice.end.middlethird + 1,"Time"] - df_ec[indice.end.middlethird,"Time"]
+                                           df_ec[indice.end.middlethird + 1,"DeltaT"] <- df_ec[indice.end.middlethird + 2,"Time"] - df_ec[indice.end.middlethird + 1,"Time"]
+                                           
+                                           # timei1 <- df_ec[indice.end.middlethird+1,"Time"]
+                                           # dt <- df_ec[1:indice.end.middlethird, "DeltaT"]
+                                           # TK <- df_ec[1:indice.end.middlethird, "TempK"]
+                                           # CTE <- sum(dt*TK)/sum(dt)
+                                           CTE_inst <- df_ec[indice.end.middlethird, "TempK"]
+                                           timesunique <- c(df_ec[indice.end.middlethird,"Time"], df_ec[indice.end.middlethird+1,"Time"])
+                                           if (!logicTransition) {
+                                             transition <- 1
+                                           } else {
+                                             transition <- 1/(1+exp(transition_S*(df_ec[indice.end.middlethird, "SCL"] - transition_P)))
+                                           }
+                                           # rT <- SSM(CTE, setpar)
+                                           rT_inst <- SSM(CTE_inst, setpar)
+                                           # a <- rT[[1]]*transition+rT[[2]]*(1-transition)
+                                           a_inst <- rT_inst[[1]]*transition+rT_inst[[2]]*(1-transition)
+                                           param <- c(alpha=unname(a_inst), K=Kval)
+                                           
+                                           if (!is.null(integral)) {
+                                             ypre <- integral(t=timesunique[2]-timesunique[1], size=df_ec[indice.end.middlethird, "SCL"], 
+                                                              parms=param)[1, "metric"]
+                                           } else {
+                                             out1 <- lsoda(df_ec[indice.end.middlethird, "SCL"], timesunique, derivate, param)
+                                             ypre <- as.numeric(tail(out1[,2], n=1))
+                                           }
+                                           
+                                           df_ec[indice.end.middlethird+1, "R"] <- a_inst
+                                           df_ec[indice.end.middlethird+1, "SCL"] <- ypre
+                                           rownames(df_ec)[indice.end.middlethird+1] <- "End Middle-third"
+                                           size.end.middlethird <- ypre
+                                         } else {
+                                           size.end.middlethird <- NA
+                                           time.end.middlethird <- NA
+                                         }
+                                         
+                                         
+                                         
+                                         df <- df_ec
+                                         
+                                         # df[, "DeltaT"] <- c(diff(df[, "Time"]), 0)
+                                         
+                                         indice.begin.middlethird <- which(rownames(df) == "Begin Middle-third")
+                                         if (identical(indice.begin.middlethird, integer(0))) indice.begin.middlethird <- NA
+                                         indice.end.middlethird <- which(rownames(df) == "End Middle-third")
+                                         if (identical(indice.end.middlethird, integer(0))) indice.end.middlethird <- NA
+                                         indice.fin.incubation <- nrow(df)
+                                         indice.begin.tsp <- which(rownames(df) == "Begin TSP")
+                                         indice.end.tsp <- which(rownames(df) == "End TSP")
+                                         
+                                         if (identical(integer(0), indice.end.tsp)) indice.end.tsp <- NA
+                                         if (identical(integer(0), indice.begin.tsp)) indice.begin.tsp <- NA
+                                         
+                                         ## Je viens de calculer la croissance de l'embryon
+                                         
+                                         if (out == "summary") {
+                                           
+                                           # Maintenant je calcule les summary
+                                           
+                                           TC <- df[1:(nrow(df)-1), "TempC"]
+                                           dt <- df[1:(nrow(df)-1), "DeltaT"]
+                                           dSCL <- diff(df[, "SCL"])
+                                           rT <- df[1:(nrow(df)-1), "R"]
+                                           Temperature.max <- max(TC)
+                                           TimeWeighted.temperature <- sum(TC*dt)/sum(dt)
+                                           GrowthWeighted.temperature <- sum(TC * dSCL)/sum(dSCL)
+                                           TimeWeighted.GrowthRateWeighted.temperature <- sum(TC * rT * dt)/sum(rT * dt)
+                                           
+                                           Incubation.length <- df[nrow(df), "Time"]
+                                           
+                                           if (!is.na(indice.begin.tsp) & !is.na(indice.end.tsp)) {
+                                             
+                                             TC <- df[indice.begin.tsp:(indice.end.tsp-1), "TempC"]
+                                             dt <- df[indice.begin.tsp:(indice.end.tsp-1), "DeltaT"]
+                                             dSCL <- diff(df[indice.begin.tsp:(indice.end.tsp), "SCL"])
+                                             rT <- df[indice.begin.tsp:(indice.end.tsp-1), "R"]
+                                             
+                                             TSP.TimeWeighted.temperature <- sum(TC*dt)/sum(dt)
+                                             TSP.GrowthWeighted.temperature <- sum(TC * dSCL)/sum(dSCL)
+                                             TSP.TimeWeighted.GrowthRateWeighted.temperature <- sum(TC * rT * dt)/sum(rT * dt)
+                                             
+                                             TSP.length <- unname(time.end.tsp - time.begin.tsp)
+                                             TSP.begin <- unname(time.begin.tsp)
+                                             TSP.end <- unname(time.end.tsp)
+                                             
+                                             
+                                             if (!is.null(setpar_STRN)) {
+                                               if (indice.begin.tsp == indice.end.tsp-1) {
+                                                 indice.end.tsp_ec <- indice.end.tsp+1
+                                               } else {
+                                                 indice.end.tsp_ec <- indice.end.tsp
+                                               }
+                                               TK <- df[indice.begin.tsp:(indice.end.tsp_ec-1), "TempK"]
+                                               TC <- df[indice.begin.tsp:(indice.end.tsp_ec-1), "TempC"]
+                                               dt <- df[indice.begin.tsp:(indice.end.tsp_ec-1), "DeltaT"]
+                                               dSCL <- diff(df[indice.begin.tsp:(indice.end.tsp_ec), "SCL"])
+                                               rT <- df[indice.begin.tsp:(indice.end.tsp_ec-1), "R"]
+                                               
+                                               if (all(names(setpar_STRN) != "Rho25")) {
+                                                 STRN_model <- rep(1, length(TK))
+                                               } else {
+                                                 STRN_model <- getFromNamespace(".SSM", ns="embryogrowth")(TK, setpar_STRN)[[1]]
+                                               }
+                                               SCL <- df[indice.begin.tsp:(indice.end.tsp_ec-1), "SCL"]
+                                               SCL <- (SCL-SCL[1])/(SCL[length(SCL)]-SCL[1])
+                                               SCL[SCL==0] <- min(zero, min(SCL[SCL != 0])/10)
+                                               SCL[SCL==1] <- max(1-zero, max(SCL[SCL != 1]) + (1-max(SCL[SCL != 1]))/10)                                               
+                                               
+                                               if (!is.na(setpar_STRN["dbeta_mu"])) {
+                                                 mu <- invlogit(setpar_STRN["dbeta_mu"])
+                                                 v <- abs(setpar_STRN["dbeta_v"])
+                                                 shape1 <- mu * (((mu * (1 - mu))/v) - 1)
+                                                 shape2 <- shape1 * (1 - mu)/mu
+                                                 model_beta <- dbeta(SCL, shape1=shape1, shape2=shape2) 
+                                                 
+                                                 
+                                               } else {
+                                                 shape1 <- abs(setpar_STRN["dbeta_shape1"])
+                                                 shape2 <- abs(setpar_STRN["dbeta_shape2"])
+                                                 model_beta <- dbeta(SCL, shape1=shape1, shape2=shape2) 
+                                               }
+                                          
+                                               
+                                               TSP.TimeWeighted.STRNWeighted.temperature <- sum(TC * dt * STRN_model * model_beta)/sum(dt * STRN_model * model_beta)
+                                               TSP.GrowthWeighted.STRNWeighted.temperature <- sum(TC * dSCL * STRN_model * model_beta)/sum(dSCL * STRN_model * model_beta)
+                                               TSP.TimeWeighted.GrowthRateWeighted.STRNWeighted.temperature <- sum(TC * dt * rT * STRN_model * model_beta)/sum(dt * rT * STRN_model * model_beta)
+                                             } else {
+                                               TSP.TimeWeighted.STRNWeighted.temperature <- NA
+                                               TSP.GrowthWeighted.STRNWeighted.temperature <- NA
+                                               TSP.TimeWeighted.GrowthRateWeighted.STRNWeighted.temperature <- NA
+                                             }
+                                             
+                                           } else {
+                                             TSP.PM.GrowthWeighted <- NA
+                                             TSP.PM.TimeWeighted.GrowthRateWeighted <- NA
+                                             TSP.PM.TimeWeighted <- NA
+                                             TSP.TimeWeighted.temperature <- NA
+                                             TSP.GrowthWeighted.temperature <- NA
+                                             TSP.TimeWeighted.GrowthRateWeighted.temperature <- NA
+                                             TSP.TimeWeighted.STRNWeighted.temperature <- NA
+                                             TSP.GrowthWeighted.STRNWeighted.temperature <- NA
+                                             TSP.TimeWeighted.GrowthRateWeighted.STRNWeighted.temperature <- NA
+                                             TSP.length <- NA
+                                           }
+                                           
+                                           if (!is.na(indice.begin.middlethird) & !is.na(indice.end.middlethird)) {
+                                             TC <- unname(df[indice.begin.middlethird:(indice.end.middlethird-1), "TempC"])
+                                             dt <- unname(df[indice.begin.middlethird:(indice.end.middlethird-1), "DeltaT"])
+                                             dSCL <- unname(diff(df[indice.begin.middlethird:(indice.end.middlethird), "SCL"]))
+                                             rT <- unname(df[indice.begin.middlethird:(indice.end.middlethird-1), "R"])
+                                             
+                                             MiddleThird.TimeWeighted.temperature <- sum(TC*dt)/sum(dt)
+                                             MiddleThird.GrowthWeighted.temperature <- sum(TC * dSCL)/sum(dSCL)
+                                             MiddleThird.TimeWeighted.GrowthRateWeighted.temperature <- sum(TC * rT * dt)/sum(rT * dt)
+                                             
+                                             MiddleThird.length <- unname(time.end.middlethird - time.begin.middlethird)
+                                             MiddleThird.begin <- unname(time.begin.middlethird)
+                                             MiddleThird.end <- unname(time.end.middlethird)
+                                             
+                                           } else {
+                                             MiddleThird.length <- NA
+                                             MiddleThird.begin <- NA
+                                             MiddleThird.end <- NA
+                                             MiddleThird.TimeWeighted.temperature <- NA
+                                             MiddleThird.GrowthWeighted.temperature <- NA
+                                             MiddleThird.TimeWeighted.GrowthRateWeighted.temperature <- NA
+                                           }
+                                           
+                                           if (!is.null(tsd)) {
+                                             tsdec <- tsd
+                                             tsdec$par <- setpar[names(tsd$par)]
+                                             tsdec$fixed.parameters <- setpar[names(tsd$fixed.parameters)]
+                                             PM <- predict(tsdec, temperatures = TC, replicate.CI = NULL)
+                                             
+                                             TSP.PM.GrowthWeighted <- sum(PM["50%", ]*dSCL)/sum(dSCL)
+                                             TSP.PM.TimeWeighted.GrowthRateWeighted <- sum(PM["50%", ]* rT * dt)/sum(rT * dt)
+                                             TSP.PM.TimeWeighted <- sum(PM["50%", ]* dt)/sum(dt)
+                                             
+                                             TSP.TimeWeighted.sexratio <- predict(tsd, temperatures = TSP.TimeWeighted.temperature, replicate.CI = NULL)["50%", 1, drop=TRUE]
+                                             TSP.GrowthWeighted.sexratio <- predict(tsd, temperatures = TSP.GrowthWeighted.temperature, replicate.CI = NULL)["50%", 1, drop=TRUE]
+                                             TSP.TimeWeighted.GrowthRateWeighted.sexratio <- predict(tsd, temperatures = TSP.TimeWeighted.GrowthRateWeighted.temperature, replicate.CI = NULL)["50%", 1, drop=TRUE]
+                                             
+                                             MiddleThird.TimeWeighted.sexratio <- predict(tsd, temperatures = MiddleThird.TimeWeighted.temperature, replicate.CI = NULL)["50%", 1, drop=TRUE]
+                                             MiddleThird.GrowthWeighted.sexratio <- predict(tsd, temperatures = MiddleThird.GrowthWeighted.temperature, replicate.CI = NULL)["50%", 1, drop=TRUE]
+                                             MiddleThird.TimeWeighted.GrowthRateWeighted.sexratio <- predict(tsd, temperatures = MiddleThird.TimeWeighted.GrowthRateWeighted.temperature, replicate.CI = NULL)["50%", 1, drop=TRUE]
+                                             
+                                             TimeWeighted.sexratio <- predict(tsd, temperatures = TimeWeighted.temperature, replicate.CI = NULL)["50%", 1, drop=TRUE]
+                                             GrowthWeighted.sexratio <- predict(tsd, temperatures = GrowthWeighted.temperature, replicate.CI = NULL)["50%", 1, drop=TRUE]
+                                             TimeWeighted.GrowthRateWeighted.sexratio <- predict(tsd, temperatures = TimeWeighted.GrowthRateWeighted.temperature, replicate.CI = NULL)["50%", 1, drop=TRUE]
+                                             
+                                             if (!is.na(TSP.TimeWeighted.STRNWeighted.temperature)) {
+                                               TSP.TimeWeighted.STRNWeighted.sexratio <- predict(tsd, temperatures = TSP.TimeWeighted.STRNWeighted.temperature, replicate.CI = NULL)["50%", 1, drop=TRUE]
+                                               TSP.GrowthWeighted.STRNWeighted.sexratio <- predict(tsd, temperatures = TSP.GrowthWeighted.STRNWeighted.temperature, replicate.CI = NULL)["50%", 1, drop=TRUE]
+                                               TSP.TimeWeighted.GrowthRateWeighted.STRNWeighted.sexratio <- predict(tsd, temperatures = TSP.TimeWeighted.GrowthRateWeighted.STRNWeighted.temperature, replicate.CI = NULL)["50%", 1, drop=TRUE]
+                                             } else {
+                                               TSP.TimeWeighted.STRNWeighted.sexratio <- NA
+                                               TSP.GrowthWeighted.STRNWeighted.sexratio <- NA
+                                               TSP.TimeWeighted.GrowthRateWeighted.STRNWeighted.sexratio <- NA
+                                             }
+                                             
+                                           } else {
+                                             TSP.PM.GrowthWeighted <- NA
+                                             TSP.PM.TimeWeighted.GrowthRateWeighted <- NA
+                                             TSP.PM.TimeWeighted <- NA
+                                             MiddleThird.TimeWeighted.sexratio <- NA
+                                             MiddleThird.GrowthWeighted.sexratio <- NA
+                                             MiddleThird.TimeWeighted.GrowthRateWeighted.sexratio <- NA
+                                             TimeWeighted.sexratio <- NA
+                                             GrowthWeighted.sexratio <- NA
+                                             TimeWeighted.GrowthRateWeighted.sexratio <- NA
+                                             TSP.TimeWeighted.sexratio <- NA 
+                                             TSP.GrowthWeighted.sexratio <- NA
+                                             TSP.TimeWeighted.GrowthRateWeighted.sexratio <- NA
+                                             TSP.TimeWeighted.STRNWeighted.sexratio <- NA
+                                             TSP.GrowthWeighted.STRNWeighted.sexratio <- NA
+                                             TSP.TimeWeighted.GrowthRateWeighted.STRNWeighted.sexratio <- NA
+                                           }
+                                           
+                                           
+                                           summary <- data.frame(series=serie_en_cours, 
+                                                                 Temperature.max=Temperature.max, 
+                                                                 TimeWeighted.temperature=TimeWeighted.temperature, 
+                                                                 GrowthWeighted.temperature=GrowthWeighted.temperature, 
+                                                                 TimeWeighted.GrowthRateWeighted.temperature=TimeWeighted.GrowthRateWeighted.temperature, 
+                                                                 TSP.TimeWeighted.temperature=TSP.TimeWeighted.temperature, 
+                                                                 TSP.GrowthWeighted.temperature=TSP.GrowthWeighted.temperature, 
+                                                                 TSP.TimeWeighted.GrowthRateWeighted.temperature=TSP.TimeWeighted.GrowthRateWeighted.temperature, 
+                                                                 TSP.TimeWeighted.STRNWeighted.temperature=TSP.TimeWeighted.STRNWeighted.temperature, 
+                                                                 TSP.GrowthWeighted.STRNWeighted.temperature=TSP.GrowthWeighted.STRNWeighted.temperature, 
+                                                                 TSP.TimeWeighted.GrowthRateWeighted.STRNWeighted.temperature=TSP.TimeWeighted.GrowthRateWeighted.STRNWeighted.temperature, 
+                                                                 TSP.length=TSP.length, 
+                                                                 TSP.begin=TSP.begin, 
+                                                                 TSP.end=TSP.end, 
+                                                                 TSP.PM.GrowthWeighted=TSP.PM.GrowthWeighted, 
+                                                                 TSP.PM.TimeWeighted.GrowthRateWeighted=TSP.PM.TimeWeighted.GrowthRateWeighted, 
+                                                                 TSP.PM.TimeWeighted=TSP.PM.TimeWeighted, 
+                                                                 Incubation.length=Incubation.length,
+                                                                 MiddleThird.length=MiddleThird.length,
+                                                                 MiddleThird.begin=MiddleThird.begin, 
+                                                                 MiddleThird.end=MiddleThird.end, 
+                                                                 MiddleThird.TimeWeighted.temperature=MiddleThird.TimeWeighted.temperature, 
+                                                                 MiddleThird.GrowthWeighted.temperature=MiddleThird.GrowthWeighted.temperature,
+                                                                 MiddleThird.TimeWeighted.GrowthRateWeighted.temperature=MiddleThird.TimeWeighted.GrowthRateWeighted.temperature, 
+                                                                 TSP.TimeWeighted.sexratio = TSP.TimeWeighted.sexratio, 
+                                                                 TSP.GrowthWeighted.sexratio = TSP.GrowthWeighted.sexratio, 
+                                                                 TSP.TimeWeighted.GrowthRateWeighted.sexratio = TSP.TimeWeighted.GrowthRateWeighted.sexratio,                             
+                                                                 TSP.TimeWeighted.STRNWeighted.sexratio = TSP.TimeWeighted.STRNWeighted.sexratio, 
+                                                                 TSP.GrowthWeighted.STRNWeighted.sexratio = TSP.GrowthWeighted.STRNWeighted.sexratio, 
+                                                                 TSP.TimeWeighted.GrowthRateWeighted.STRNWeighted.sexratio = TSP.TimeWeighted.GrowthRateWeighted.STRNWeighted.sexratio, 
+                                                                 MiddleThird.TimeWeighted.sexratio = MiddleThird.TimeWeighted.sexratio, 
+                                                                 MiddleThird.GrowthWeighted.sexratio = MiddleThird.GrowthWeighted.sexratio, 
+                                                                 MiddleThird.TimeWeighted.GrowthRateWeighted.sexratio = MiddleThird.TimeWeighted.GrowthRateWeighted.sexratio, 
+                                                                 TimeWeighted.sexratio = TimeWeighted.sexratio, 
+                                                                 GrowthWeighted.sexratio = GrowthWeighted.sexratio, 
+                                                                 TimeWeighted.GrowthRateWeighted.sexratio = TimeWeighted.GrowthRateWeighted.sexratio)
+                                           # je ne garde que les valeurs d'origine
+                                           df <- df[df[, "IndiceK"] == 1, ]
+                                           
+                                           indices.df <- data.frame(series=serie_en_cours, 
+                                                                    metric.begin.tsp = unname(size.begin.TSP_ec), 
+                                                                    metric.end.tsp = unname(size.end.TSP_ec), 
+                                                                    hatchling.metric.mean = unname(meanSCL), 
+                                                                    hatchling.metric.sd = unname(sdSCL), 
+                                                                    time.end.tsp = unname(time.end.TSP), 
+                                                                    time.begin.tsp = unname(time.begin.TSP), 
+                                                                    metric.end.incubation = unname(df[nrow(df), "SCL"]), 
+                                                                    time.begin.middlethird = unname(time.begin.middlethird), 
+                                                                    time.end.middlethird = unname(time.end.middlethird), 
+                                                                    stop.at.hatchling.metric = unname(attSAT))
+                                           
+                                         } else {
+                                           # Sinon, je stocke aussi les indices
+                                           # rownames(df) <- 1:nrow(df)
+                                           
+                                           summary <- NULL
+                                           
+                                           indices.df <- data.frame(series=serie_en_cours, 
+                                                                    metric.begin.tsp = unname(size.begin.TSP_ec), 
+                                                                    metric.end.tsp = unname(size.end.TSP_ec), 
+                                                                    hatchling.metric.mean = unname(meanSCL), 
+                                                                    hatchling.metric.sd = unname(sdSCL), 
+                                                                    time.end.tsp = unname(time.end.TSP), 
+                                                                    time.begin.tsp = unname(time.begin.TSP), 
+                                                                    metric.end.incubation = unname(df[nrow(df), "SCL"]), 
+                                                                    time.begin.middlethird = unname(time.begin.middlethird), 
+                                                                    time.end.middlethird = unname(time.end.middlethird), 
+                                                                    stop.at.hatchling.metric = unname(attSAT), 
+                                                                    indice.begin.middlethird = indice.begin.middlethird, 
+                                                                    indice.end.middlethird = indice.end.middlethird, 
+                                                                    indice.fin.incubation = indice.fin.incubation, 
+                                                                    indice.begin.tsp = indice.begin.tsp, 
+                                                                    indice.end.tsp = indice.end.tsp)
+                                           
+                                         }
+                                         df[, "DeltaT"] <- c(diff(df[, "Time"]), 0)
+                                         
+                                       } else {
+                                         # Je suis en stop.at.hatchling size mais trop court
+                                         indices.df <- NULL
+                                     
+                                         
+                                         
+                                         summary <- data.frame(series=serie_en_cours, 
+                                                               Temperature.max=max(df[, "TempC"], na.rm = TRUE), 
+                                                               TimeWeighted.temperature=sum(df[, "TempC"]*df[, "DeltaT"])/sum(df[, "DeltaT"]), 
+                                                               GrowthWeighted.temperature=NA, 
+                                                               TimeWeighted.GrowthRateWeighted.temperature=NA, 
+                                                               TSP.TimeWeighted.temperature=NA, 
+                                                               TSP.GrowthWeighted.temperature=NA, 
+                                                               TSP.TimeWeighted.GrowthRateWeighted.temperature=NA, 
+                                                               TSP.TimeWeighted.STRNWeighted.temperature=NA, 
+                                                               TSP.GrowthWeighted.STRNWeighted.temperature=NA, 
+                                                               TSP.TimeWeighted.GrowthRateWeighted.STRNWeighted.temperature=NA, 
+                                                               TSP.length=NA, 
+                                                               TSP.begin=NA, 
+                                                               TSP.end=NA, 
+                                                               TSP.PM.GrowthWeighted=NA, 
+                                                               TSP.PM.TimeWeighted.GrowthRateWeighted=NA, 
+                                                               TSP.PM.TimeWeighted=NA, 
+                                                               Incubation.length=NA,
+                                                               MiddleThird.length=NA,
+                                                               MiddleThird.begin=NA, 
+                                                               MiddleThird.end=NA, 
+                                                               MiddleThird.TimeWeighted.temperature=NA, 
+                                                               MiddleThird.GrowthWeighted.temperature=NA,
+                                                               MiddleThird.TimeWeighted.GrowthRateWeighted.temperature=NA, 
+                                                               TSP.TimeWeighted.sexratio = NA, 
+                                                               TSP.GrowthWeighted.sexratio = NA, 
+                                                               TSP.TimeWeighted.GrowthRateWeighted.sexratio = NA,                             
+                                                               TSP.TimeWeighted.STRNWeighted.sexratio = NA, 
+                                                               TSP.GrowthWeighted.STRNWeighted.sexratio = NA, 
+                                                               TSP.TimeWeighted.GrowthRateWeighted.STRNWeighted.sexratio = NA, 
+                                                               MiddleThird.TimeWeighted.sexratio = NA, 
+                                                               MiddleThird.GrowthWeighted.sexratio = NA, 
+                                                               MiddleThird.TimeWeighted.GrowthRateWeighted.sexratio = NA, 
+                                                               TimeWeighted.sexratio = NA, 
+                                                               GrowthWeighted.sexratio = NA, 
+                                                               TimeWeighted.GrowthRateWeighted.sexratio = NA)
+                                         df <- NULL
+                                         
+                                       }
+                                       
+                                        if (out == "summary") {
+                                          df <- NULL
+                                          indices.df <- NULL
+                                        }
+                                       
+                                       if (out != "summary") {
+                                         summary <- NULL
+                                       }
+                                       
+                                       returnlist <- list(x=list(metric=df, summary=summary, series=serie_en_cours, indices.df=indices.df))
+                                       names(returnlist) <- serie_en_cours
+                                       
+                                       return(returnlist)
+                                     }, 
+                                     clusterEvalQ=list(expr=expression(library("embryogrowth"))), 
+                                     clusterExport=list(varlist=c("temperatures_ec", 
+                                                                  "temperature.heterogeneity", 
+                                                                  "hatchling.metric", 
+                                                                  "df_random", 
+                                                                  "df_random_tsd", "df_random_SexualisationTRN", 
+                                                                  "metabolic.heating", 
+                                                                  "stop.at.hatchling.metric", 
+                                                                  "embryo.stages", 
+                                                                  "TSP.borders", 
+                                                                  "TSP.begin", 
+                                                                  "TSP.end", 
+                                                                  "logicTransition", 
+                                                                  "integral", 
+                                                                  "derivate", 
+                                                                  "out", 
+                                                                  "metric.end.incubation", "tsd"), 
+                                                        envir=environment())
+  )
   
-  returntotal.summary <- list()
-  returntotal.likelihood <- list()
-  returntotal.metric <- list()
+  if (out=="likelihood") {
+    return(sum(sapply(AnalyseTraces, FUN = function(x) x$likelihood)))
+  }
   
-  if (progress) pb <- txtProgressBar(min=0, max=replicate.CI, style=3)
+  if (out=="metric") {
+    metric <- lapply(AnalyseTraces, FUN=function(x) x[[1]]$metric)
+    names(metric) <- sapply(AnalyseTraces, FUN=function(x) x[[1]]$series)
+    metric <- metric[name]
+    indices.metric <- lapply(AnalyseTraces, FUN=function(x) x[[1]]$indices.df)
+    names(indices.metric) <- sapply(AnalyseTraces, FUN=function(x) x[[1]]$series)
+    indices.metric <- indices.metric[name]
+    
+    returnlist <- list(dynamic.metric=metric, indices.dynamic.metric=indices.metric)
+    return(returnlist)
+  }
   
-  SSM <- getFromNamespace(".SSM", ns="embryogrowth")
+  # Je crée le summary
   
-  for(sp in 1:replicate.CI) {
-    if (progress) setTxtProgressBar(pb, sp)
-    # sp <- 1      
-    # if (sp==48) browser()
-    #     print(sp)
-    
-    x <- df_random[sp, ]
-    names(x) <- gsub("^X", "", colnames(df_random))
-    if (!logicTransition) {
-      transition_P <- x["transition_P"]
-      transition_S <- x["transition_S"]
-    } else {
-      transition_P <- transition_S <- NULL
+  if (out == "summary") {
+  
+  summary_df <- as.data.frame(t(sapply(AnalyseTraces, FUN = function(x) x[[1]]$summary)))
+  summary.mean <- aggregate(summary_df[, -1], by=list(unlist(summary_df$series)), FUN=function(x) ifelse(all(is.na(unlist(x))), NA, mean(unlist(x), na.rm=TRUE)))
+  colnames(summary.mean) <- c("Series", paste0(colnames(summary.mean)[-1], ".mean"))
+  summary.se <- aggregate(summary_df[, -1], by=list(unlist(summary_df$series)), FUN=function(x) ifelse(all(is.na(unlist(x))), NA, sd(unlist(x), na.rm=TRUE)))
+  colnames(summary.se) <- c("Series", paste0(colnames(summary.se)[-1], ".se"))
+  
+  summary <- merge(x=summary.mean, y=summary.se, by.x="Series", by.y = "Series")
+  
+  if (!is.null(probs)) {
+    for (pr in probs) {
+      summary.quantile <- aggregate(summary_df[, -1], by=list(unlist(summary_df$series)), FUN=function(x) ifelse(all(is.na(unlist(x))), NA, quantile(unlist(x), probs = pr, na.rm=TRUE)))
+      colnames(summary.quantile) <- c("Series", paste0(colnames(summary.quantile)[-1], paste0(".quantile_", as.character(pr))))
+      summary <- merge(x=summary, y=summary.quantile, by.x="Series", by.y = "Series")
     }
+  }
+  
+  rownames(summary) <- summary$Series
+  summary <- summary[name, ]
+  
+  return(list(summary=summary))
+  
+  }
+  
+  # Là je suis en dynamic metric
+  
+  # Je crée le dynamic.metric
+  if (!stop.at.hatchling.metric) {
     
-    # Ce sont toutes les temperatures de tous les nids
+    df_list <- lapply(AnalyseTraces, FUN = function(x) x[[1]]$metric)
+    series_list <- sapply(AnalyseTraces, FUN = function(x) x[[1]]$series)
+    names(df_list) <- series_list
     
-    if (!is.null(df_random_SexualisationTRN)) {
-      x_SexualisationTRN <- df_random_SexualisationTRN[sp, ]
-      names(x_SexualisationTRN) <- gsub("^X", "", colnames(df_random_SexualisationTRN))
-    } else {
-      x_SexualisationTRN <- NULL
-    }
-    
-    if (!is.null(df_random_tsd)) {
-      x_tsd <- df_random_tsd[sp, ]
-      names(x_tsd) <- gsub("^X", "", colnames(df_random_tsd))
-    } else {
-      x_tsd <- NULL
-    }
-    
-    if (metabolic.heating == 0) {
-      tempK <- as.numeric(temperatures[["Temperatures"]])
-      rlist <- SSM(tempK, x)
-      r <- rlist[[1]]
-      r_L <- rlist[[2]]
-    }
-    
-    
-    if (!is.na(x["K"])) {
-      Kval <- unname(x["K"])
-    } else {
-      Kval <- NULL
-    }
-    
-    AnalyseTraces <- universalmclapply(mc.cores = papply, X=name, FUN=function (xxx) {
-      #      AnalyseTraces <- lapply(xx, function (xxx) {
-      # xxx <- 1
-      #       print(xxx)
-      # dans df, j'ai la serie en cours de travail
-      df <- temperatures_ec[[xxx]]
-      # C'est maintenant directement xxx
-      # namets <- names(temperatures_ec)[xxx]
+    replicate.CI <- ifelse(replicate.CI == 0, 1, replicate.CI)
+    dynamic.metric <-list()
+    for (serie_en_cours in unique(series_list)) {
       
-      # 1/6/2016:
+      df_list_ec <- df_list[series_list == serie_en_cours]
+      common_time <- table(round(unlist(lapply(df_list, FUN=function(x) x$Time)), 2))
+      common_time <- round(as.numeric(names(which(common_time == length(df_list_ec)))), 2)
       
-      if (length(temperature.heterogeneity)==1) {
-        tht <- 0
-        if (temperature.heterogeneity !=0) tht <- rnorm(1, 0, temperature.heterogeneity)
+      SCL_ec <- sapply(df_list_ec, FUN = function(x) {
+        dfl <- round(x$Time, 2)
+        x[dfl %in% common_time, "SCL"]
+      })
+      
+      if (all(class(SCL_ec) != "matrix")) {
+        # Je ne sais pas ce que c'est ça
+        max_t <- sapply(SCL_ec, FUN=length)
+        wmax_t <- which.max(max_t)
+        t_ec <- df_list_ec[[wmax_t]]$Time
+        max_t <- max(max_t)
+        SCL_ec <- lapply(SCL_ec, FUN=function(x) c(x, rep(tail(x, n=1), max_t-length(x))))
       } else {
-        tht <- r2norm(1, 0, sd_low = temperature.heterogeneity[1], sd_high = temperature.heterogeneity[2])
-      }
-      
-      df[, "TempC"] <- df[, "TempC"] + tht
-      df[, "TempK"] <- df[, "TempK"] + tht
-      
-      meanSCL <- as.numeric(test[xxx, "Mean"])
-      sdSCL <- as.numeric(test[xxx, "SD"])
-      
-      if (is.na(meanSCL)) stop("Check the test parameter. The size for time series does not exist.")
-      
-      if (!is.na(x["rK"])) {
-        Kval <- unname(x["rK"]*meanSCL)
-      }
-      
-      tmin <- df[, "Time"]
-      
-      ldt <- which(!is.na(df[, "TempC"]))
-      
-      # Si j'ai metabolic.heating != 0 ou tht != 0, je ne peux plus utiliser les index pour les r
-      
-      if ((metabolic.heating != 0) | (tht !=0)) {
-        
-        if (!stopattest) {
-          if (logicTransition) {  
-            for (i in 1:(length(ldt)-1)) {
-              y <- df[ldt[i], "SCL"]
-              range <- c(ldt[i]:ldt[i+1])
-              timesunique <- tmin[range]
-              df[ldt[i], "TempK"] <- df[ldt[i], "TempK"]+metabolic.heating*(y/meanSCL)
-              a <- SSM(df[ldt[i], "TempK"], x)[[1]]
-              param <- c(alpha=unname(a), K=Kval)
-              out1 <- lsoda(y, timesunique, derivate, param)
-              y <- as.numeric(tail(out1[,2], n=1))
-              df[c(ldt[i]:(ldt[i+1]-1)), "R"] <- a
-              df[range, "SCL"] <- out1[,2]
-            }
-            df[tail(ldt, 1), "TempK"] <- df[tail(ldt, 1), "TempK"] + metabolic.heating*(y/meanSCL)
-            df[, "TempC"] <- df[, "TempK"] - 273.15
-          } else {
-            for (i in 1:(length(tmin)-1)) {
-              y <- df[i, "SCL"]
-              timesunique <- c(tmin[i], tmin[i+1])
-              transition <- 1/(1+exp(transition_S*(y-transition_P)))
-              df[ldt[i], "TempK"] <- df[ldt[i], "TempK"]+metabolic.heating*(y/meanSCL)
-              rT <- SSM(df[ldt[i], "TempK"], x)
-              a <- rT[[1]]*transition+rT[[2]]*(1-transition)
-              param <- c(alpha=unname(a), K=Kval)
-              out1 <- lsoda(y, timesunique, derivate, param)
-              y <- as.numeric(tail(out1[,2], n=1))
-              df[i, "R"] <- a
-              df[i+1, "SCL"] <- y
-            }
-            df[tail(ldt, 1), "TempK"] <- df[tail(ldt, 1), "TempK"] + metabolic.heating*(y/meanSCL)
-            df[, "TempC"] <- df[, "TempK"] - 273.15
-          }
-          # je suis en stopattest
-        } else {
-          if (logicTransition) {  
-            for (i in 1:(length(ldt)-1)) {
-              y <- df[ldt[i], "SCL"]
-              range <- c(ldt[i]:ldt[i+1])
-              timesunique <- tmin[range]
-              df[ldt[i], "TempK"] <- df[ldt[i], "TempK"]+metabolic.heating*(y/meanSCL)
-              a <- SSM(df[ldt[i], "TempK"], x)[[1]]
-              param <- c(alpha=unname(a), K=Kval)
-              out1 <- lsoda(y, timesunique, derivate, param)
-              y <- as.numeric(tail(out1[,2], n=1))
-              df[c(ldt[i]:(ldt[i+1]-1)), "R"] <- a
-              df[range, "SCL"] <- out1[,2]
-              if (y>meanSCL) {
-                df <- df[1:ldt[i+1], ]
-                df <- df[1:which(df[, "SCL"] >meanSCL)[1],]
-                y <- tail(df[, "SCL"], n=1)
-                break
-              }
-              df[tail(ldt, 1), "TempK"] <- df[tail(ldt, 1), "TempK"] + metabolic.heating*(y/meanSCL)
-              df[, "TempC"] <- df[, "TempK"] - 273.15
-            }
-          } else {
-            for (i in 1:(length(tmin)-1)) {
-              y <- df[i, "SCL"]
-              timesunique <- c(tmin[i], tmin[i+1])
-              transition <- 1/(1+exp(transition_S*(y-transition_P)))
-              df[ldt[i], "TempK"] <- df[ldt[i], "TempK"]+metabolic.heating*(y/meanSCL)
-              rT <- SSM(df[ldt[i], "TempK"], x)
-              a <- rT[[1]]*transition+rT[[2]]*(1-transition)
-              param <- c(alpha=unname(a), K=Kval)
-              out1 <- lsoda(y, timesunique, derivate, param)
-              y <- as.numeric(tail(out1[,2], n=1))
-              df[i, "R"] <- a
-              df[i+1, "SCL"] <- y
-              if (y>meanSCL) {
-                df <- df[1:(i+1), ]
-                df <- df[1:which(df[, "SCL"] >meanSCL)[1],]
-                y <- tail(df[, "SCL"], n=1)
-                break
-                # fin du if
-              }
-              # fin du for
-            }
-            df[tail(ldt, 1), "TempK"] <- df[tail(ldt, 1), "TempK"] + metabolic.heating*(y/meanSCL)
-            df[, "TempC"] <- df[, "TempK"] - 273.15
-            # fin du else logictransition
-          }
-          # fin du else !stopattest
-        }
-        
-      } else {
-        
-        IndK <- df[, "IndiceK"]
-        
-        if (!stopattest) {
-          if (logicTransition) {  
-            for (i in 1:(length(ldt)-1)) {
-              y <- df[ldt[i], "SCL"]
-              range <- c(ldt[i]:ldt[i+1])
-              timesunique <- tmin[range]
-              a <- r[IndK[ldt[i]]]
-              param <- c(alpha=unname(a), K=Kval)
-              out1 <- lsoda(y, timesunique, derivate, param)
-              y <- as.numeric(tail(out1[,2], n=1))
-              df[c(ldt[i]:(ldt[i+1]-1)), "R"] <- a
-              df[range, "SCL"] <- out1[,2]
-            }
-          } else {
-            for (i in 1:(length(tmin)-1)) {
-              y <- df[i, "SCL"]
-              timesunique <- c(tmin[i], tmin[i+1])
-              transition <- 1/(1+exp(transition_S*(y-transition_P)))
-              if (!is.na(IndK[i])) tk <- IndK[i]
-              a <- r[tk]*transition+r_L[tk]*(1-transition)
-              param <- c(alpha=unname(a), K=Kval)
-              out1 <- lsoda(y, timesunique, derivate, param)
-              y <- as.numeric(tail(out1[,2], n=1))
-              df[i, "R"] <- a
-              df[i+1, "SCL"] <- y
-            }
-          }
-          # je suis en stopattest
-        } else {
-          if (logicTransition) {  
-            for (i in 1:(length(ldt)-1)) {
-              y <- df[ldt[i], "SCL"]
-              range <- c(ldt[i]:ldt[i+1])
-              timesunique <- tmin[range]
-              a <- r[IndK[ldt[i]]]
-              param <- c(alpha=unname(a), K=Kval)
-              out1 <- lsoda(y, timesunique, derivate, param)
-              y <- as.numeric(tail(out1[,2], n=1))
-              df[c(ldt[i]:(ldt[i+1]-1)), "R"] <- a
-              df[range, "SCL"] <- out1[,2]
-              if (y>meanSCL) {
-                df <- df[1:ldt[i+1], ]
-                df <- df[1:which(df[, "SCL"] >meanSCL)[1],]
-                y <- tail(df[, "SCL"], n=1)
-                break
-              }
-            }
-          } else {
-            for (i in 1:(length(tmin)-1)) {
-              y <- df[i, "SCL"]
-              timesunique <- c(tmin[i], tmin[i+1])
-              transition <- 1/(1+exp(transition_S*(y-transition_P)))
-              if (!is.na(IndK[i])) tk <- IndK[i]
-              a <- r[tk]*transition+r_L[tk]*(1-transition)
-              param <- c(alpha=unname(a), K=Kval)
-              out1 <- lsoda(y, timesunique, derivate, param)
-              y <- as.numeric(tail(out1[,2], n=1))
-              df[i, "R"] <- a
-              df[i+1, "SCL"] <- y
-              if (y>meanSCL) {
-                df <- df[1:(i+1), ]
-                df <- df[1:which(df[, "SCL"] >meanSCL)[1],]
-                y <- tail(df[, "SCL"], n=1)
-                break
-                # fin du if
-              }
-              # fin du for
-            }
-            # fin du else logictransition
-          }
-          # fin du else !stopattest
-        }
-        # fin du else metabolic.heating
-      }
-      
-      if (any(out=="likelihood")) {
-        # dans y j'ai une valeur de taille finale
-        # print(-dnorm(y, mean=meanSCL, sd=sdSCL, log=TRUE))
-        if (!is.na(sdSCL)) {
-          return(-dnorm(y, mean=meanSCL, sd=sdSCL, log=TRUE))
-        } else {
-          return((y-meanSCL)^2)
-        }
+        t_ec <- common_time
       }
       
       
-      #       if (out=="metric" | out=="summary") { 
-      # si metric ou summary
-      # les valeurs sont fausses pour transition
+      if (all(class(SCL_ec) != "data.frame")) SCL_ec <- as.data.frame(SCL_ec)
+      metric_ec <- t(apply(SCL_ec, MARGIN = 1, FUN = function(x) quantile(x, probs = probs)))
+      colnames(metric_ec) <- paste0("Metric_", colnames(metric_ec))
       
-      # je suis sois en metric soit en summary
+      R_ec <- sapply(df_list_ec, FUN = function(x) x[round(x$Time, 2) %in% t_ec, "R"])
+      # R_ec <- lapply(R_ec, FUN=function(x) c(x, rep(tail(x, n=1), max_t-length(x))))
+      if (all(class(R_ec) != "data.frame")) R_ec <- as.data.frame(R_ec)
+      Rx_ec <- t(apply(R_ec, MARGIN = 1, FUN = function(x) quantile(x, probs = probs, na.rm = TRUE)))
+      colnames(Rx_ec) <- paste0("R_", colnames(Rx_ec))
       
-      ###############################
-      #     indice.begin.tsp        #
-      ###############################
-      
-      # 16/9/2015 Mme si je suis en stopattest, je prends la valeur finale si trop court        
-      #       if (stopattest) {
-      #          meanSCL_ec <- meanSCL
-      #        } else {
-      #          meanSCL_ec <- tail(df[,"SCL"], n=1)
-      #        }
-      
-      meanSCL_ec <- y
-      
-      
-      
-      if (stopattest & meanSCL_ec <= meanSCL) {
-        # warning(paste("Serie", xxx, "for replicate", sp, "stops before the mean hatchling metric"))
-        retWrong <- FALSE
-        attributes(retWrong)$error <- paste("Serie", xxx, "for replicate", sp, "stops before the mean hatchling metric")
-        return(retWrong)
-      }
-      
-      
-      if (is.na(metric.end.incubation[xxx])) {
-        size.begin.TSP_ec <- size.begin.TSP*meanSCL_ec
-        size.end.TSP_ec <- size.end.TSP*meanSCL_ec
-      } else {
-        size.begin.TSP_ec <- size.begin.TSP*metric.end.incubation[xxx]
-        size.end.TSP_ec <- size.end.TSP*metric.end.incubation[xxx]
-      }
-      
-      df_ec <- df
-      
-      if (meanSCL_ec < size.begin.TSP_ec) {
-        time.begin.TSP <- NA
-        indice.begin.tsp <- NA
-      } else {
-        
-        repeat {
-          indice.begin.tsp <- which(df_ec[,"SCL"]>(size.begin.TSP_ec))[1]-1
-          if (is.na(indice.begin.tsp)) break
-          # la vrai TSP commence entre indice.begin.tsp et indice.begin.tsp+1
-          timei1 <- df_ec[indice.begin.tsp,"Time"]+df_ec[indice.begin.tsp,"DeltaT"]*1/3
-          timei2 <- df_ec[indice.begin.tsp,"Time"]+df_ec[indice.begin.tsp,"DeltaT"]*2/3
-          timesunique <- c(df_ec[indice.begin.tsp, "Time"], timei1, timei2, df_ec[indice.begin.tsp+1, "Time"])
-          # si je suis en transition, je dois recalculer R
-          a <- df_ec[indice.begin.tsp, "R"]
-          param <- c(alpha=unname(a), K=Kval)
-          y <- df_ec[indice.begin.tsp, "SCL"]
-          names(y) <- "SCL"
-          dfpol <- lsoda(y, timesunique, derivate, param)
-          df_ec <- data.frame(Time=timesunique, R=a, SCL=dfpol[,"SCL"])
-          df_ec <- cbind(df_ec, DeltaT=c(diff(df_ec[, "Time"]), 0))
-          if (df_ec[1, "DeltaT"]<1) break
-        }
-        indice.begin.tsp <- which(df_ec[,"SCL"]>(size.begin.TSP_ec))[1]-1
-        if (is.na(indice.begin.tsp)) indice.begin.tsp <- 4
-        time.begin.TSP <- df_ec[indice.begin.tsp,"Time"]
-        indice.begin.tsp <- which(df[,"SCL"]>(size.begin.TSP_ec))[1]-1
-      }
-      
-      ###############################
-      #       indice.end.tsp        #
-      ###############################
-      
-      df_ec <- df
-      
-      if (meanSCL_ec < size.end.TSP_ec) {
-        time.end.TSP <- NA
-        indice.end.tsp <- NA
-      } else {
-        
-        repeat {
-          indice.end.tsp <- which(df_ec[,"SCL"]>(size.end.TSP_ec))[1]-1
-          if (is.na(indice.end.tsp)) break
-          # la vrai TSP fini entre indice.end.tsp et indice.end.tsp+1
-          timei1 <- df_ec[indice.end.tsp,"Time"]+df_ec[indice.end.tsp,"DeltaT"]*1/3
-          timei2 <- df_ec[indice.end.tsp,"Time"]+df_ec[indice.end.tsp,"DeltaT"]*2/3
-          timesunique <- c(df_ec[indice.end.tsp, "Time"], timei1, timei2, df_ec[indice.end.tsp+1, "Time"])
-          # si je suis en transition, je dois recalculer R
-          a <- df_ec[indice.end.tsp, "R"]
-          param <- c(alpha=unname(a), K=Kval)
-          y <- df_ec[indice.end.tsp, "SCL"]
-          names(y) <- "SCL"
-          dfpol <- lsoda(y, timesunique, derivate, param)
-          df_ec <- data.frame(Time=timesunique, R=a, SCL=dfpol[,"SCL"])
-          df_ec <- cbind(df_ec, DeltaT=c(diff(df_ec[, "Time"]), 0))
-          if (df_ec[1, "DeltaT"]<1) break
-        }
-        indice.end.tsp <- which(df_ec[,"SCL"]>(size.end.TSP_ec))[1]-1
-        if (is.na(indice.end.tsp)) indice.end.tsp <- 4
-        time.end.TSP <- df_ec[indice.end.tsp,"Time"]
-        indice.end.tsp <- which(df[,"SCL"]>(size.end.TSP_ec))[1]-1
-      }
-      
-      
-      # C'est necessaire pour estimer les temperatures moyennes
-      # on doit les garder
-      
-      if (any(out=="summary")) {
-        
-        if (!is.na(indice.end.tsp) & !is.na(indice.begin.tsp)) {
-          
-          if (indice.begin.tsp!=indice.end.tsp)  {
-            
-            df <- rbind(df[1:indice.begin.tsp,], 
-                        c(Time=time.begin.TSP, 
-                          TempC=df[indice.begin.tsp,"TempC"], 
-                          TempK=df[indice.begin.tsp,"TempK"], 
-                          R=df[indice.begin.tsp,"R"], 
-                          SCL=size.begin.TSP_ec, 
-                          IndiceK=df[indice.begin.tsp,"IndiceK"], 
-                          DeltaT=NA),
-                        df[(indice.begin.tsp+1):indice.end.tsp,],
-                        c(Time=time.end.TSP, 
-                          TempC=df[indice.end.tsp,"TempC"], 
-                          TempK=df[indice.end.tsp,"TempK"], 
-                          R=df[indice.end.tsp,"R"], 
-                          SCL=size.end.TSP_ec, 
-                          IndiceK=df[indice.end.tsp,"IndiceK"], 
-                          DeltaT=NA),
-                        df[(indice.end.tsp+1):nrow(df),])
-          } else {
-            df <- rbind(df[1:indice.begin.tsp,], 
-                        c(Time=time.begin.TSP, 
-                          TempC=df[indice.begin.tsp,"TempC"], 
-                          TempK=df[indice.begin.tsp,"TempK"], 
-                          R=df[indice.begin.tsp,"R"], 
-                          SCL=size.begin.TSP_ec, 
-                          IndiceK=df[indice.begin.tsp,"IndiceK"], 
-                          DeltaT=NA),
-                        c(Time=time.end.TSP, 
-                          TempC=df[indice.end.tsp,"TempC"], 
-                          TempK=df[indice.end.tsp,"TempK"], 
-                          R=df[indice.end.tsp,"R"], 
-                          SCL=size.end.TSP_ec, 
-                          IndiceK=df[indice.end.tsp,"IndiceK"], 
-                          DeltaT=NA),
-                        df[(indice.end.tsp+1):nrow(df),])
-          }
-          
-          df[, "DeltaT"] <- c(diff(df[, "Time"]), 0)
-        }
-        
-      }
-      
-      ###############################
-      #   indice.fin.incubation     #
-      ###############################
-      # si je suis en stopattest, il faut que je calcule la vraie valeur de fin
-      if (stopattest) {
-        
-        if (tail(df[,"SCL"], n=1L)>meanSCL) {
-          attSAT <- TRUE
-          df_ec <- df
-          
-          repeat {
-            indice.fin.incubation <- which(df_ec[,"SCL"]>(meanSCL))[1]-1
-            if (is.na(indice.fin.incubation)) break
-            timei1 <- df_ec[indice.fin.incubation,"Time"]+df_ec[indice.fin.incubation,"DeltaT"]*1/3
-            timei2 <- df_ec[indice.fin.incubation,"Time"]+df_ec[indice.fin.incubation,"DeltaT"]*2/3
-            timesunique <- c(df_ec[indice.fin.incubation, "Time"], timei1, timei2, df_ec[indice.fin.incubation+1, "Time"])
-            # si je suis en transition, je dois recalculer R
-            a <- df_ec[indice.fin.incubation, "R"]
-            param <- c(alpha=unname(a), K=Kval)
-            y <- df_ec[indice.fin.incubation, "SCL"]
-            names(y) <- "SCL"
-            dfpol <- lsoda(y, timesunique, derivate, param)
-            df_ec <- data.frame(Time=timesunique, R=a, SCL=dfpol[,"SCL"])
-            df_ec <- cbind(df_ec, DeltaT=c(diff(df_ec[, "Time"]), 0))
-            if (df_ec[1, "DeltaT"]<1) break
-          }
-          
-          indice.end.incubation <- which(df_ec[,"SCL"]>(meanSCL))[1]-1
-          if (is.na(indice.end.incubation)) indice.end.incubation <- 4
-          time.end.incubation <- df_ec[indice.end.incubation,"Time"]
-          indice.end.incubation <- which(df[,"SCL"]>(meanSCL))[1]-1
-          
-          # Maintenant je tronque df de faon  ne garder que jusqu'a time.end.incubation
-          # garde
-          df <- df[df[, "SCL"]<meanSCL,]
-          df <- rbind(df, c(Time=time.end.incubation, 
-                            TempC=tail(df$TempC, n=1L), tempK=tail(df$TempK, n=1L), 
-                            R=NA, SCL=meanSCL, 
-                            IndiceK=tail(df$IndiceK, n=1L), DeltaT=0))
-          df[, "DeltaT"] <- c(diff(df[, "Time"]), 0)
-        } else {attSAT <- FALSE}
-      } else {attSAT <- NA}
-      
-      ###################################
-      #    indice.begin.middlethird     #
-      ###################################
-      
-      time.begin.middlethird <- (tail(df$Time, n=1L)-totpar["pipping_emergence"])*1/3
-      indice.begin.middlethird <- which(df[,"Time"]>time.begin.middlethird)[1]-1
-      # Je calcul la taille
-      timesunique <- c(df[indice.begin.middlethird, "Time"], time.begin.middlethird, df[indice.begin.middlethird+1, "Time"])
-      # si je suis en transition, je dois recalculer R
-      a <- df[indice.begin.middlethird, "R"]
-      param <- c(alpha=unname(a), K=Kval)
-      y <- df[indice.begin.middlethird, "SCL"]
-      names(y) <- "SCL"
-      dfpol <- lsoda(y, timesunique, derivate, param)
-      size.begin.middlethird <- dfpol[2, "SCL"]
-      
-      #################################
-      #    indice.end.middlethird     #
-      #################################
-      
-      time.end.middlethird <- (tail(df$Time, n=1L)-totpar["pipping_emergence"])*2/3
-      indice.end.middlethird <- which(df[,"Time"]>time.end.middlethird)[1]-1
-      # Je calcul la taille
-      timesunique <- c(df[indice.end.middlethird, "Time"], time.end.middlethird, df[indice.end.middlethird+1, "Time"])
-      # si je suis en transition, je dois recalculer R
-      a <- df[indice.end.middlethird, "R"]
-      param <- c(alpha=unname(a), K=Kval)
-      y <- df[indice.end.middlethird, "SCL"]
-      names(y) <- "SCL"
-      dfpol <- lsoda(y, timesunique, derivate, param)
-      size.end.middlethird <- dfpol[2, "SCL"]
-      
-      
-      if (any(out=="summary")) {
-        if (indice.begin.middlethird!=indice.end.middlethird) {
-          
-          df <- rbind(df[1:indice.begin.middlethird,], 
-                      c(Time=time.begin.middlethird, 
-                        TempC=df[indice.begin.middlethird,"TempC"], 
-                        TempK=df[indice.begin.middlethird,"TempK"], 
-                        R=df[indice.begin.middlethird,"R"], 
-                        SCL=size.begin.middlethird, 
-                        IndiceK=df[indice.begin.middlethird,"IndiceK"], 
-                        DeltaT=NA),
-                      df[(indice.begin.middlethird+1):indice.end.middlethird,],
-                      c(Time=time.end.middlethird, 
-                        TempC=df[indice.end.middlethird,"TempC"], 
-                        TempK=df[indice.end.middlethird,"TempK"], 
-                        R=df[indice.end.middlethird,"R"], 
-                        SCL=size.end.middlethird, 
-                        IndiceK=df[indice.end.middlethird,"IndiceK"], 
-                        DeltaT=NA),
-                      df[(indice.end.middlethird+1):nrow(df),])
-        } else {
-          df <- rbind(df[1:indice.begin.middlethird,], 
-                      c(Time=time.begin.middlethird, 
-                        TempC=df[indice.begin.middlethird,"TempC"], 
-                        TempK=df[indice.begin.middlethird,"TempK"], 
-                        R=df[indice.begin.middlethird,"R"], 
-                        SCL=size.begin.middlethird, 
-                        IndiceK=df[indice.begin.middlethird,"IndiceK"], 
-                        DeltaT=NA),
-                      c(Time=time.end.middlethird, 
-                        TempC=df[indice.end.middlethird,"TempC"], 
-                        TempK=df[indice.end.middlethird,"TempK"], 
-                        R=df[indice.end.middlethird,"R"], 
-                        SCL=size.end.middlethird, 
-                        IndiceK=df[indice.end.middlethird,"IndiceK"], 
-                        DeltaT=NA),
-                      df[(indice.end.middlethird+1):nrow(df),])
-        }
-        
-        df[,"DeltaT"] <- c(diff(df[,"Time"]), 0)
-      }
-      
-      #######################
-      # fin des indices     #
-      #######################                        
-      
-      rownames(df) <- 1:nrow(df)
-      if (any(out=="summary")) {
-        attributes(df)$indice.end.tsp <- unname(which(df[, "Time"]==time.end.TSP)[1])
-        attributes(df)$indice.begin.tsp <- unname(which(df[, "Time"]==time.begin.TSP)[1])
-        attributes(df)$indice.begin.middlethird <- unname(which(df[, "Time"]==time.begin.middlethird)[1])
-        attributes(df)$indice.end.middlethird <- unname(which(df[, "Time"]==time.end.middlethird)[1])
-      }
-      attributes(df)$metric.begin.tsp <- unname(size.begin.TSP_ec)
-      attributes(df)$metric.end.tsp <-  unname(size.end.TSP_ec)
-      attributes(df)$test.mean <- unname(meanSCL)
-      attributes(df)$test.sd <- unname(sdSCL)
-      attributes(df)$time.end.tsp <- unname(time.end.TSP)
-      attributes(df)$time.begin.tsp <- unname(time.begin.TSP)
-      attributes(df)$metric.end.incubation <- unname(metric.end.incubation[xxx])
-      attributes(df)$time.begin.middlethird <- unname(time.begin.middlethird)
-      attributes(df)$time.end.middlethird <- unname(time.end.middlethird)
-      attributes(df)$stopattest <- unname(attSAT)
-      return(df)
-      # fin de si metric ou summary
-      #        }
-      # fin du mcapply
-    }, 
-    clusterEvalQ=list(expr=expression(library("embryogrowth"))), 
-    clusterExport=list(varlist=c("temperatures_ec", 
-                                 "temperature.heterogeneity", 
-                                 "test", 
-                                 "x", 
-                                 "x_SexualisationTRN", 
-                                 "x_tsd", 
-                                 "metabolic.heating", 
-                                 "stopattest", 
-                                 "logicTransition", 
-                                 "derivate", 
-                                 "out", 
-                                 "size.begin.TSP", 
-                                 "size.end.TSP", 
-                                 "metric.end.incubation", 
-                                 "totpar"), 
-                       envir=environment())
-    )
-    
-    
-    
-    
-    if (any(out=="likelihood")) {
-      L <- unlist(AnalyseTraces)
-      # names(L) <- names(AnalyseTraces)
-      # dans L j'ai un vecteur avec le nom
-      # il faut que j'applique le weight
-      if (!is.null(weight))	L <- L*weight[names(L)]
-      returntotal.likelihood <- (sum(L))
-    }
-    
-    if (any(out=="metric")) {
-      returntotal.metric <- c(returntotal.metric, list(AnalyseTraces))
-    }
-    
-    if (any(out=="summary")) {
-      
-      if (any(unlist(lapply(AnalyseTraces, function(x) {attributes(x) <- NULL; identical(x = x, y=FALSE)})))) {
-        if (warnings) warning("replicate ", sp, ": Something goes wrong")
-        summarydf <- data.frame(
-          Temperature.max=NA,
-          TimeWeighted.temperature.mean=NA,
-          GrowthWeighted.temperature.mean=NA,
-          GrowthRateWeighted.temperature.mean=NA,
-          TSP.TimeWeighted.temperature.mean=NA,
-          TSP.GrowthWeighted.temperature.mean=NA,
-          TSP.GrowthRateWeighted.temperature.mean=NA,
-          TSP.STRNWeighted.temperature.mean=NA,
-          TSP.GrowthWeighted.STRNWeighted.temperature.mean=NA,
-          TSP.GrowthRateWeighted.STRNWeighted.temperature.mean=NA,
-          TSP.length.mean=NA,
-          TSP.begin.mean=NA,
-          TSP.end.mean=NA,
-          PM.GrowthWeighted.mean=NA,
-          PM.GrowthRateWeighted.mean=NA, 
-          PM.TimeWeighted.mean=NA, 
-          Incubation.length.mean=NA,
-          Middlethird.length.mean=NA,
-          Middlethird.begin.mean=NA,
-          Middlethird.end.mean=NA,
-          MiddleThird.TimeWeighted.temperature.mean=NA,
-          MiddleThird.GrowthWeighted.temperature.mean=NA, 
-          MiddleThird.GrowthRateWeighted.temperature.mean=NA, 
-          CTEA.TSP_CTEA.2ndT=NA, 
-          CTEW.TSP_CTEW.2ndT=NA
-        )
-        returntotal.summary <- c(returntotal.summary, list(summarydf))
-      } else {
-        Temperature.max <- unlist(lapply(AnalyseTraces, function(x) max(x[, "TempC"])))
-        TimeWeighted.temperature.mean <- unlist(lapply(AnalyseTraces, function(x) sum(x[, "TempC"]*x[, "DeltaT"])/sum(x[, "DeltaT"])))
-        GrowthWeighted.temperature.mean <- unlist(lapply(AnalyseTraces, 
-                                                       function(x) {
-                                                         x2 <- x[, "TempC"]
-                                                         dSCL <- c(diff(x[, "SCL"]), 0)
-                                                         sum(x2*dSCL)/sum(dSCL)
-                                                       }))
-        GrowthRateWeighted.temperature.mean <- unlist(lapply(AnalyseTraces, 
-                                                         function(x) {
-                                                           x2 <- x[, "TempC"]
-                                                           dGR <- x[, "R"]
-                                                           sum(x2*dGR)/sum(dGR)
-                                                         }))
-        
-        TSP.TimeWeighted.temperature.mean <- unlist(lapply(AnalyseTraces, 
-                                                           function(x) {
-                                                             if (!is.na(attributes(x)$indice.begin.tsp) & !is.na(attributes(x)$indice.end.tsp)) {
-                                                               x2 <- x[(attributes(x)$indice.begin.tsp):(attributes(x)$indice.end.tsp-1), ]
-                                                               sum(x2[, "TempC"]*x2[, "DeltaT"])/sum(x2[, "DeltaT"])
-                                                             } else {NA}
-                                                           }))
-        TSP.GrowthWeighted.temperature.mean <- unlist(lapply(AnalyseTraces, 
-                                                           function(x) {
-                                                             if (!is.na(attributes(x)$indice.begin.tsp) & !is.na(attributes(x)$indice.end.tsp)) {
-                                                               x2 <- x[(attributes(x)$indice.begin.tsp):(attributes(x)$indice.end.tsp-1), "TempC"]
-                                                               dSCL <- c(diff(x[, "SCL"]), 0)[(attributes(x)$indice.begin.tsp):(attributes(x)$indice.end.tsp-1)]
-                                                               sum(x2*dSCL)/sum(dSCL)
-                                                             } else {NA}
-                                                           }))
+      # if (length(t_ec) != nrow(metric_ec)) print(serie_en_cours)
+      df_TC <- df_list_ec[[1]]
 
-        TSP.GrowthRateWeighted.temperature.mean <- unlist(lapply(AnalyseTraces, 
-                                                             function(x) {
-                                                               if (!is.na(attributes(x)$indice.begin.tsp) & !is.na(attributes(x)$indice.end.tsp)) {
-                                                                 x2 <- x[(attributes(x)$indice.begin.tsp):(attributes(x)$indice.end.tsp-1), "TempC"]
-                                                                 dGR <- x[(attributes(x)$indice.begin.tsp):(attributes(x)$indice.end.tsp-1), "R"]
-                                                                 sum(x2*dGR)/sum(dGR)
-                                                               } else {NA}
-                                                             }))
-        
-                
-        if (!is.null(tsd)) {
-          PM.GrowthWeighted.mean <- unlist(lapply(AnalyseTraces, 
-                                   function(x) {
-                                     if (!is.na(attributes(x)$indice.begin.tsp) & !is.na(attributes(x)$indice.end.tsp)) {
-                                       x2 <- x[(attributes(x)$indice.begin.tsp):(attributes(x)$indice.end.tsp-1), "TempC"]
-                                       dSCL <- c(diff(x[, "SCL"]), 0)[(attributes(x)$indice.begin.tsp):(attributes(x)$indice.end.tsp-1)]
-                                       tsdec <- tsd
-                                       tsdec$par <- x_tsd
-                                       tsdec$fixed.parameters <- NULL
-                                       PM <- predict(tsd, temperatures = x2, replicate.CI = NULL)
-                                       sum(PM["50%", ]*dSCL)/sum(dSCL)
-                                     } else {NA}
-                                   }))
-          PM.GrowthRateWeighted.mean <- unlist(lapply(AnalyseTraces, 
-                                                  function(x) {
-                                                    if (!is.na(attributes(x)$indice.begin.tsp) & !is.na(attributes(x)$indice.end.tsp)) {
-                                                      x2 <- x[(attributes(x)$indice.begin.tsp):(attributes(x)$indice.end.tsp-1), "TempC"]
-                                                      dGR <- x[(attributes(x)$indice.begin.tsp):(attributes(x)$indice.end.tsp-1), "R"]
-                                                      tsdec <- tsd
-                                                      tsdec$par <- x_tsd
-                                                      tsdec$fixed.parameters <- NULL
-                                                      PM <- predict(tsd, temperatures = x2, replicate.CI = NULL)
-                                                      sum(PM["50%", ]*dGR)/sum(dGR)
-                                                    } else {NA}
-                                                  }))
-          PM.TimeWeighted.mean <- unlist(lapply(AnalyseTraces, 
-                                                function(x) {
-                                                  if (!is.na(attributes(x)$indice.begin.tsp) & !is.na(attributes(x)$indice.end.tsp)) {
-                                                    x2 <- x[(attributes(x)$indice.begin.tsp):(attributes(x)$indice.end.tsp-1), ]
-                                                    tsdec <- tsd
-                                                    tsdec$par <- x_tsd
-                                                    tsdec$fixed.parameters <- NULL
-                                                    PM <- predict(tsd, temperatures = x2[, "TempC"], replicate.CI = NULL)
-                                                    sum(PM["50%", ]*x2[, "DeltaT"])/sum(x2[, "DeltaT"])
-                                                  } else {NA}
-                                                }))
-        } else {
-          PM.GrowthWeighted.mean <- rep(NA, length(AnalyseTraces))
-          PM.GrowthRateWeighted.mean <- rep(NA, length(AnalyseTraces))
-          PM.TimeWeighted.mean <- rep(NA, length(AnalyseTraces))
-        }
-        
-        if (is.null(SexualisationTRN)) {
-          TSP.STRNWeighted.temperature.mean <- rep(NA, length(AnalyseTraces))
-          names(TSP.STRNWeighted.temperature.mean) <- name
-          TSP.GrowthWeighted.STRNWeighted.temperature.mean <- rep(NA, length(AnalyseTraces))
-          names(TSP.GrowthWeighted.STRNWeighted.temperature.mean) <- name
-          TSP.GrowthRateWeighted.STRNWeighted.temperature.mean <- rep(NA, length(AnalyseTraces))
-          names(TSP.GrowthRateWeighted.STRNWeighted.temperature.mean) <- name
-          
-        } else {
-          
-          STRN <- x_SexualisationTRN
-          
-          TSP.STRNWeighted.temperature.mean <- unlist(lapply(AnalyseTraces, 
-                                                             function(x) {
-                                                               if (!is.na(attributes(x)$indice.begin.tsp) & !is.na(attributes(x)$indice.end.tsp)) {
-                                                                 # dans x[, "TempC"] j'ai les temperatures en Celsius
-                                                                 x2 <- x[(attributes(x)$indice.begin.tsp):(attributes(x)$indice.end.tsp-1), ]
-                                                                 
-                                                                 STRN_model <- getFromNamespace(".SSM", ns="embryogrowth")(x2[, "TempK"], STRN)[[1]]
-                                                                 sum(x2[, "TempC"]*x2[, "DeltaT"]*STRN_model)/sum(x2[, "DeltaT"]*STRN_model)
-                                                               } else {NA}
-                                                             }))
-          
-          TSP.GrowthWeighted.STRNWeighted.temperature.mean <- unlist(lapply(AnalyseTraces, 
-                                                                          function(x) {
-                                                                            if (!is.na(attributes(x)$indice.begin.tsp) & !is.na(attributes(x)$indice.end.tsp)) {
-                                                                              # dans x[, "TempC"] j'ai les temperatures en Celsius
-                                                                              x2 <- x[(attributes(x)$indice.begin.tsp):(attributes(x)$indice.end.tsp-1), ]
-                                                                              
-                                                                              STRN_model <- getFromNamespace(".SSM", ns="embryogrowth")(x2[, "TempK"], STRN)[[1]]
-                                                                              dSCL <- c(diff(x[, "SCL"]), 0)[(attributes(x)$indice.begin.tsp):(attributes(x)$indice.end.tsp-1)]
-                                                                              sum(x2[, "TempC"]*dSCL*STRN_model)/sum(dSCL*STRN_model)
-                                                                            } else {NA}
-                                                                          }))
-          TSP.GrowthRateWeighted.STRNWeighted.temperature.mean <- unlist(lapply(AnalyseTraces, 
-                                                                            function(x) {
-                                                                              if (!is.na(attributes(x)$indice.begin.tsp) & !is.na(attributes(x)$indice.end.tsp)) {
-                                                                                # dans x[, "TempC"] j'ai les temperatures en Celsius
-                                                                                x2 <- x[(attributes(x)$indice.begin.tsp):(attributes(x)$indice.end.tsp-1), ]
-                                                                                
-                                                                                STRN_model <- getFromNamespace(".SSM", ns="embryogrowth")(x2[, "TempK"], STRN)[[1]]
-                                                                                dGR <- x2[, "R"]
-                                                                                sum(x2[, "TempC"]*dGR*STRN_model)/sum(dGR*STRN_model)
-                                                                              } else {NA}
-                                                                            }))
-          
-        }
-        
-        TSP.length.mean <- unlist(lapply(AnalyseTraces, 
-                                         function(x) {
-                                           if (!is.na(attributes(x)$indice.begin.tsp) & !is.na(attributes(x)$indice.end.tsp)) {
-                                             t1 <- attributes(x)$time.begin.tsp
-                                             t2 <- attributes(x)$time.end.tsp
-                                             return(t2-t1)
-                                           } else {NA}
-                                         }))
-        TSP.begin.mean <- unlist(lapply(AnalyseTraces, 
-                                        function(x) {
-                                          return(attributes(x)$time.begin.tsp)
-                                        }))
-        TSP.end.mean <- unlist(lapply(AnalyseTraces, 
-                                      function(x) {
-                                        return(attributes(x)$time.end.tsp)
-                                      }))
-        Middlethird.length.mean <- unlist(lapply(AnalyseTraces, 
-                                                 function(x) {
-                                                   t1 <- attributes(x)$time.begin.middlethird
-                                                   t2 <- attributes(x)$time.end.middlethird
-                                                   return(t2-t1)
-                                                 }))
-        Middlethird.begin.mean <- unlist(lapply(AnalyseTraces, 
-                                                function(x) {
-                                                  return(attributes(x)$time.begin.middlethird)
-                                                }))
-        Middlethird.end.mean <- unlist(lapply(AnalyseTraces, 
-                                              function(x) {
-                                                return(attributes(x)$time.end.middlethird)
-                                              }))
-        Incubation.length.mean <- unlist(lapply(AnalyseTraces, 
-                                                function(x) {
-                                                  return(x[nrow(x), "Time"])
-                                                }))
-        
-        MiddleThird.TimeWeighted.temperature.mean <- unlist(lapply(AnalyseTraces, 
-                                                                   function(x) {
-                                                                     if (!is.na(attributes(x)$indice.begin.middlethird) & !is.na(attributes(x)$indice.end.middlethird)) {
-                                                                       x2 <- x[(attributes(x)$indice.begin.middlethird):(attributes(x)$indice.end.middlethird-1), ]
-                                                                       sum(x2[, "TempC"]*x2[, "DeltaT"])/sum(x2[, "DeltaT"])
-                                                                     } else {NA}
-                                                                   }))
-        
-        MiddleThird.GrowthWeighted.temperature.mean <- unlist(lapply(AnalyseTraces, 
-                                                                   function(x) {
-                                                                     if (!is.na(attributes(x)$indice.begin.middlethird) & !is.na(attributes(x)$indice.end.middlethird)) {
-                                                                       x2 <- x[(attributes(x)$indice.begin.middlethird):(attributes(x)$indice.end.middlethird-1), "TempC"]
-                                                                       dSCL <- c(diff(x[, "SCL"]), 0)[(attributes(x)$indice.begin.middlethird):(attributes(x)$indice.end.middlethird-1)]
-                                                                       sum(x2*dSCL)/sum(dSCL)
-                                                                     } else {NA}
-                                                                   }))
-        MiddleThird.GrowthRateWeighted.temperature.mean <- unlist(lapply(AnalyseTraces, 
-                                                                     function(x) {
-                                                                       if (!is.na(attributes(x)$indice.begin.middlethird) & !is.na(attributes(x)$indice.end.middlethird)) {
-                                                                         x2 <- x[(attributes(x)$indice.begin.middlethird):(attributes(x)$indice.end.middlethird-1), "TempC"]
-                                                                         dGR <- x[(attributes(x)$indice.begin.middlethird):(attributes(x)$indice.end.middlethird-1), "R"]
-                                                                         sum(x2*dGR)/sum(dGR)
-                                                                       } else {NA}
-                                                                     }))
-        
-        CTEA.TSP_CTEA.2ndT <- TSP.TimeWeighted.temperature.mean-MiddleThird.TimeWeighted.temperature.mean
-        
-        CTEW.TSP_CTEW.2ndT <- TSP.GrowthWeighted.temperature.mean-MiddleThird.GrowthWeighted.temperature.mean
-        
-        summarydf <- data.frame(
-          Temperature.max=Temperature.max,
-          TimeWeighted.temperature.mean=TimeWeighted.temperature.mean, 
-          GrowthWeighted.temperature.mean=GrowthWeighted.temperature.mean, 
-          GrowthRateWeighted.temperature.mean=GrowthRateWeighted.temperature.mean, 
-          TSP.TimeWeighted.temperature.mean=TSP.TimeWeighted.temperature.mean,
-          TSP.GrowthWeighted.temperature.mean=TSP.GrowthWeighted.temperature.mean,
-          TSP.GrowthRateWeighted.temperature.mean=TSP.GrowthRateWeighted.temperature.mean,
-          TSP.STRNWeighted.temperature.mean=TSP.STRNWeighted.temperature.mean,
-          TSP.GrowthWeighted.STRNWeighted.temperature.mean=TSP.GrowthWeighted.STRNWeighted.temperature.mean,
-          TSP.GrowthRateWeighted.STRNWeighted.temperature.mean=TSP.GrowthRateWeighted.STRNWeighted.temperature.mean,
-          TSP.length.mean=TSP.length.mean,
-          TSP.begin.mean=TSP.begin.mean,
-          TSP.end.mean=TSP.end.mean,
-          PM.GrowthWeighted.mean=PM.GrowthWeighted.mean, 
-          PM.GrowthRateWeighted.mean=PM.GrowthRateWeighted.mean, 
-          PM.TimeWeighted.mean=PM.TimeWeighted.mean, 
-          Incubation.length.mean=Incubation.length.mean,
-          Middlethird.length.mean=Middlethird.length.mean,
-          Middlethird.begin.mean=Middlethird.begin.mean,
-          Middlethird.end.mean=Middlethird.end.mean,
-          MiddleThird.TimeWeighted.temperature.mean=MiddleThird.TimeWeighted.temperature.mean,
-          MiddleThird.GrowthWeighted.temperature.mean=MiddleThird.GrowthWeighted.temperature.mean,
-          MiddleThird.GrowthRateWeighted.temperature.mean=MiddleThird.GrowthRateWeighted.temperature.mean,
-          CTEA.TSP_CTEA.2ndT=CTEA.TSP_CTEA.2ndT,
-          CTEW.TSP_CTEW.2ndT=CTEW.TSP_CTEW.2ndT
-        )
-        returntotal.summary <- c(returntotal.summary, list(summarydf))
-        
+      metric_ec <- list(cbind(Time=t_ec, DeltaT=c(0, diff(t_ec)), TempC=df_TC[round(df_TC$Time, 2) %in% t_ec, "TempC"], metric_ec, Rx_ec))
+      names(metric_ec) <- serie_en_cours
+      dynamic.metric <- c(dynamic.metric, metric_ec)
+    }
+    
+    summary_dynamic.metric <- as.data.frame(t(sapply(AnalyseTraces, FUN = function(x) x[[1]]$indices.df)))
+    summary_dynamic.metric.mean <- aggregate(summary_dynamic.metric[, -1], by=list(unlist(summary_dynamic.metric$series)), FUN=function(x) ifelse(all(is.na(unlist(x))), NA, mean(unlist(x), na.rm=TRUE)))
+    colnames(summary_dynamic.metric.mean) <- c("Series", paste0(colnames(summary_dynamic.metric.mean)[-1], ".mean"))
+    summary_dynamic.metric.se <- aggregate(summary_dynamic.metric[, -1], by=list(unlist(summary_dynamic.metric$series)), FUN=function(x) ifelse(all(is.na(unlist(x))), NA, sd(unlist(x), na.rm=TRUE)))
+    colnames(summary_dynamic.metric.se) <- c("Series", paste0(colnames(summary_dynamic.metric.se)[-1], ".se"))
+    
+    sdm <- merge(x=summary_dynamic.metric.mean, y=summary_dynamic.metric.se, by.x="Series", by.y = "Series")
+    
+    if (!is.null(probs)) {
+      for (pr in probs) {
+        summary_dynamic.metric.quantile <- aggregate(summary_dynamic.metric[, -1], by=list(unlist(summary_dynamic.metric$series)), FUN=function(x) ifelse(all(is.na(unlist(x))), NA, quantile(unlist(x), probs = pr, na.rm=TRUE)))
+        colnames(summary_dynamic.metric.quantile) <- c("Series", paste0(colnames(summary_dynamic.metric.quantile)[-1], paste0(".quantile_", as.character(pr))))
+        sdm <- merge(x=sdm, y=summary_dynamic.metric.quantile, by.x="Series", by.y = "Series")
       }
     }
-    
-    # fin de la boucle des replicats
+  } else {
+    sdm <- NULL
+    dynamic.metric <- NULL
   }
   
-  if (any(out=="likelihood")) return(returntotal.likelihood)
+
   
-  ret.summary <- NULL
-  ret.metric <- NULL
+  dynamic.metric <- dynamic.metric[name]
   
-  if (any(out=="metric")) {
-    
-    # Il faut d'abord que je retire les temps crees pour le debut et la fin de la TSP
-    # En fait le plus simple serait que je ne les mette pas si 
-    # je suis en metric, seulement en summary
-    
-    # je sors la longeur max de la serie
-    lmax <- sapply(returntotal.metric, function(x) sapply(x, function(y) dim(y)[1]))
-    if (class(lmax)=="matrix") lmax <- lmax[,1]
-    lmax <- aggregate(lmax, by=list(names(lmax)), max)
-    rownames(lmax) <- lmax[,1]
-    
-    # l1 <- length(meanTotal[[j]])
-    # l2 <- length(meanTotal_i[[j]])
-    
-    # D'abord je sors les valeurs pour le premier de la serie des randoms
-    
-    meanTotal <- lapply(returntotal.metric[[1]], function(x) x[,"SCL"])
-    
-    meanTotal <- lapply(name, function(x) c(meanTotal[[x]], rep(0, lmax[x, 2]-length(meanTotal[[x]]))))
-    
-    nbdif0 <- lapply(meanTotal, function(x) ifelse(x != 0, 1, 0))
-    
-    meanTotal2 <- lapply(returntotal.metric[[1]], function(x) x[,"SCL"]^2)
-    meanTotal2 <- lapply(name, function(x) c(meanTotal2[[x]], rep(0, lmax[x, 2]-length(meanTotal2[[x]]))))
-    meanRTotal <- lapply(returntotal.metric[[1]], function(x) x[,"R"])
-    meanRTotal <- lapply(name, function(x) c(meanRTotal[[x]], rep(0, lmax[x, 2]-length(meanRTotal[[x]]))))
-    meanRTotal2 <- lapply(returntotal.metric[[1]], function(x) x[,"R"]^2)
-    meanRTotal2 <- lapply(name, function(x) c(meanRTotal2[[x]], rep(0, lmax[x, 2]-length(meanRTotal2[[x]]))))
-    
-    att <- lapply(returntotal.metric[[1]], function(x) c(
-      attributes(x)[["time.begin.tsp"]], 
-      attributes(x)[["time.end.tsp"]], 
-      attributes(x)[["time.begin.middlethird"]],
-      attributes(x)[["time.end.middlethird"]],
-      attributes(x)[["metric.begin.tsp"]],
-      attributes(x)[["metric.end.tsp"]], 
-      attributes(x)[["test.mean"]], 
-      attributes(x)[["test.sd"]], 
-      attributes(x)[["metric.end.incubation"]]
-    ))
-    att2 <- lapply(returntotal.metric[[1]], function(x) c(
-      attributes(x)[["time.begin.tsp"]]^2, 
-      attributes(x)[["time.end.tsp"]]^2, 
-      attributes(x)[["time.begin.middlethird"]]^2,
-      attributes(x)[["time.end.middlethird"]]^2,
-      attributes(x)[["metric.begin.tsp"]]^2,
-      attributes(x)[["metric.end.tsp"]]^2, 
-      attributes(x)[["test.mean"]]^2, 
-      attributes(x)[["test.sd"]]^2, 
-      attributes(x)[["metric.end.incubation"]]^2
-    ))
-    att_sat <- lapply(returntotal.metric[[1]], function(x) c(
-      attributes(x)[["stopattest"]]
-    ))
-    
-    if (length(returntotal.metric) != 1) {
-      for (i in 2:length(returntotal.metric)) {
-        meanTotal_i <- lapply(returntotal.metric[[i]], function(x) x[,"SCL"])
-        meanTotal_i <- lapply(name, function(x) c(meanTotal_i[[x]], rep(0, lmax[x, 2]-length(meanTotal_i[[x]]))))
-        
-        meanTotal2_i <- lapply(returntotal.metric[[i]], function(x) x[,"SCL"]^2)
-        meanTotal2_i <- lapply(name, function(x) c(meanTotal2_i[[x]], rep(0, lmax[x, 2]-length(meanTotal2_i[[x]]))))
-        
-        meanRTotal_i <- lapply(returntotal.metric[[i]], function(x) x[,"R"])
-        meanRTotal_i <- lapply(name, function(x) c(meanRTotal_i[[x]], rep(0, lmax[x, 2]-length(meanRTotal_i[[x]]))))
-        
-        meanRTotal2_i <- lapply(returntotal.metric[[i]], function(x) x[,"R"]^2)
-        meanRTotal2_i <- lapply(name, function(x) c(meanRTotal2_i[[x]], rep(0, lmax[x, 2]-length(meanRTotal2_i[[x]]))))
-        
-        att_i <- lapply(returntotal.metric[[i]], function(x) c(
-          attributes(x)[["time.begin.tsp"]], 
-          attributes(x)[["time.end.tsp"]], 
-          attributes(x)[["time.begin.middlethird"]],
-          attributes(x)[["time.end.middlethird"]],
-          attributes(x)[["metric.begin.tsp"]],
-          attributes(x)[["metric.end.tsp"]], 
-          attributes(x)[["test.mean"]], 
-          attributes(x)[["test.sd"]], 
-          attributes(x)[["metric.end.incubation"]]
-        ))
-        att2_i <- lapply(returntotal.metric[[i]], function(x) c(
-          attributes(x)[["time.begin.tsp"]]^2, 
-          attributes(x)[["time.end.tsp"]]^2, 
-          attributes(x)[["time.begin.middlethird"]]^2,
-          attributes(x)[["time.end.middlethird"]]^2,
-          attributes(x)[["metric.begin.tsp"]]^2,
-          attributes(x)[["metric.end.tsp"]]^2, 
-          attributes(x)[["test.mean"]]^2, 
-          attributes(x)[["test.sd"]]^2, 
-          attributes(x)[["metric.end.incubation"]]^2
-        ))
-        att_sat_i <- lapply(returntotal.metric[[i]], function(x) c(
-          attributes(x)[["stopattest"]]
-        ))   
-        
-        for(j in 1:length(meanTotal_i)) {
-          meanTotal[[j]] <- meanTotal[[j]]+meanTotal_i[[j]]
-          meanTotal2[[j]] <- meanTotal2[[j]]+meanTotal2_i[[j]]
-          meanRTotal[[j]] <- meanRTotal[[j]]+meanRTotal_i[[j]]
-          meanRTotal2[[j]] <- meanRTotal2[[j]]+meanRTotal2_i[[j]]
-          
-          nbdif1 <- ifelse(meanTotal_i[[j]] != 0, 1, 0)
-          
-          nbdif0[[j]] <- nbdif0[[j]] + nbdif1
-          
-          att[[j]] <- att[[j]]+att_i[[j]]
-          att2[[j]] <- att2[[j]]+att2_i[[j]]
-          att_sat[[j]] <- att_sat[[j]] | att_sat_i[[j]]
-          
-        }
-      }
-    }
-    
-    
-    ret <- returntotal.metric[[1]]
-    
-    # sum(a^2)-length(a)*mean(a)^2)/(length(a)-1)
-    # dans meantotal j'ai une liste avec la moyenne des tailles pour chaque temps
-    # dans meantotal2, j'ai la moyenne des carres des tailles
-    
-    for(j in name) {
-      
-      # j prend l'indice des differents nids suivis
-      # nbdif0 est le nombre de donnees utilisables; si >1 calcule le SE des tailles dans se_i
-      se_i <- ifelse(nbdif0[[j]]>1, 
-                     (meanTotal2[[j]]-nbdif0[[j]]*(meanTotal[[j]]/nbdif0[[j]])^2)/(nbdif0[[j]]-1), 
-                     NA)
-      se_i <- ifelse(is.na(se_i), NA, sqrt(ifelse(se_i<=0, 0,se_i)))
-      # calcul le SE de R pour chaque temps dans seR_i
-      seR_i <- ifelse(nbdif0[[j]]>1, 
-                      (meanRTotal2[[j]]-nbdif0[[j]]*(meanRTotal[[j]]/nbdif0[[j]])^2)/(nbdif0[[j]]-1),
-                      NA)
-      seR_i <- ifelse(is.na(seR_i), NA, sqrt(ifelse(seR_i<=0, 0,seR_i)))
-      
-      # dans ret, j'ai une liste avec tous les tableaux complets
-      # "Time"    "TempC"   "TempK"   "R"       "SCL"     "IndiceK" "DeltaT"
-      intret <- ret[[j]]
-      # lmax est un data.frame avec le nom de la serie et l'indice max
-      
-      if (lmax[j, 2] != dim(intret)[1]) {
-        missinglines <- rep(NA, lmax[j, 2]-dim(intret)[1])
-        intret <- rbind(intret, data.frame(Time=missinglines, TempC=missinglines, TempK=missinglines,
-                                           R=missinglines, SCL=missinglines, IndiceK=missinglines, 
-                                           DeltaT=missinglines))
-      }
-      
-      
-      ret[[j]] <- cbind(intret, mean.SCL=meanTotal[[j]]/nbdif0[[j]], 
-                        mean.R=meanRTotal[[j]]/nbdif0[[j]], 
-                        se.SCL=se_i, se.R=seR_i)
-      
-      # je fais les attributs
-      mean_att_i <- att[[j]]/replicate.CI
-      se_att_i <- (att2[[j]]-replicate.CI*mean_att_i^2)/(replicate.CI-1)
-      se_att_i <- sqrt(ifelse(se_att_i<=0, 0, se_att_i))
-      attributes(ret[[j]])$time.begin.tsp <- mean_att_i[1]
-      attributes(ret[[j]])$time.end.tsp <- mean_att_i[2]
-      attributes(ret[[j]])$time.begin.middlethird <- mean_att_i[3]
-      attributes(ret[[j]])$time.end.middlethird <- mean_att_i[4]
-      attributes(ret[[j]])$metric.begin.tsp <- mean_att_i[5]
-      attributes(ret[[j]])$metric.end.tsp <- mean_att_i[6]
-      attributes(ret[[j]])$test.mean <- mean_att_i[7]
-      attributes(ret[[j]])$test.sd <- mean_att_i[8]
-      attributes(ret[[j]])$metric.end.incubation <- mean_att_i[9]
-      attributes(ret[[j]])$time.begin.tsp.se <- se_att_i[1]
-      attributes(ret[[j]])$time.end.tsp.se <- se_att_i[2]
-      attributes(ret[[j]])$time.begin.middlethird.se <- se_att_i[3]
-      attributes(ret[[j]])$time.end.middlethird.se <- se_att_i[4]
-      attributes(ret[[j]])$stopattest <- att_sat[[j]]
-      
-      
-    }
-    ret.metric <- ret
-  }
+  rownames(sdm) <- sdm$Series
+  sdm <- sdm[name, ]
   
-  
-  if (any(out=="summary")) {
-    
-    # save(returntotal.summary, file="returntotal.summary.Rdata")
-    
-    if (replicate.CI != 1) {
-      
-      a <- lapply(returntotal.summary, function(x) as.matrix(x))
-      b <- array(unlist(a), dim=c(dim(a[[1]]), length(a)), dimnames = list(rownames(a[[1]]), colnames(a[[1]]), NULL))
-      
-      meanTotal <- apply(b, MARGIN=c(1, 2), FUN=mean, na.rm = TRUE)
-      df_se <- apply(b, MARGIN=c(1, 2), FUN=sd, na.rm = TRUE)
-      
-      colnames(df_se) <- paste0(gsub("(.+)\\.mean", "\\1", colnames(df_se)), ".se")
-      ret.summary <- cbind(meanTotal, df_se)
-      
-    } else {
-      
-      df_se <- as.matrix(returntotal.summary[[1]])
-      df_se[, ] <- NA
-      df_se <- as.data.frame(df_se)
-      colnames(df_se) <- paste0(gsub("(.+)\\.mean", "\\1", colnames(df_se)), ".se")
-      
-      ret.summary <- cbind(returntotal.summary[[1]], df_se)
-    }
-  }
-  return(list(metric=ret.metric, summary=ret.summary))
+  return(list(dynamic.metric=dynamic.metric, summary.dynamic.metric=sdm))
 }

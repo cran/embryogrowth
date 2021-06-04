@@ -83,7 +83,7 @@ HatchingSuccess.fit <- function(par=NULL, data=stop("data must be provided"),
                              'MaxHS' = 0.99)
   
   lw <- c('S.low' = 0, 'S.high' = 0, 'P.low' = 10, 'P.high' = 20, 'MaxHS' = 0, K1.low=-10, K1.high=-10, K2.low=-10, K2.high=-10)[names(par)]
-  hg <- c('S.low' = 5, 'S.high' = 5, 'P.low' = 30, 'P.high' = 40, 'MaxHS' = 1, K1.low=+10, K1.high=+10, K2.low=+10, K2.high=+10)[names(par)]
+  hg <- c('S.low' = 5, 'S.high' = 5, 'P.low' = 50, 'P.high' = 100, 'MaxHS' = 1, K1.low=+10, K1.high=+10, K2.low=+10, K2.high=+10)[names(par)]
   
   g <- suppressWarnings(optim(par=par, fn=HatchingSuccess.lnL, 
                               fixed.parameters=fixed.parameters, 
@@ -94,6 +94,8 @@ HatchingSuccess.fit <- function(par=NULL, data=stop("data must be provided"),
                               lower=lw, 
                               upper=hg, 
                               data=data, hessian = FALSE))
+  
+  N <- sum(data[, column.Hatched]) + sum(data[, column.NotHatched])
   
   # g$par["S.low"] <- abs(g$par["S.low"])
   # g$par["S.high"] <- abs(g$par["S.high"])
@@ -113,6 +115,11 @@ HatchingSuccess.fit <- function(par=NULL, data=stop("data must be provided"),
     g$SE <- SEfromHessian(g$hessian)
   }
   g$AIC <- 2*g$value+2*length(g$par)
+  # Correction le 23/11/2020
+  g$AICc <- g$AIC +(2*length(par)*(length(par)+1))/(sum(N)-length(par)-1)
+  # Correction le 23/11/2020
+  g$BIC <- 2*g$value+ length(par)*log(sum(N))
+  
   g$data <- data
   g$column.Incubation.temperature <- column.Incubation.temperature
   g$column.Hatched <- column.Hatched

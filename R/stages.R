@@ -1,6 +1,6 @@
 #' Database of embryonic development and thermosensitive period of development for sex determination
 #' @title Database of of embryonic development and thermosensitive period of development for sex determination
-#' @author Marc Girondot \email{marc.girondot@@u-psud.fr}
+#' @author Marc Girondot \email{marc.girondot@@universite-paris-saclay.fr}
 #' @docType data
 #' @name stages
 #' @encoding UTF-8

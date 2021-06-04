@@ -9,10 +9,10 @@
 #' @examples
 #' \dontrun{
 #' library(embryogrowth)
-#' data(resultNest_4p_SSM4p)
-#' logLik(resultNest_4p_SSM4p)
-#' AIC(resultNest_4p_SSM4p)
-#' nobs(resultNest_4p_SSM4p)
+#' data(resultNest_4p_SSM)
+#' logLik(resultNest_4p_SSM)
+#' AIC(resultNest_4p_SSM)
+#' nobs(resultNest_4p_SSM)
 #' }
 #' @method nobs NestsResult
 #' @export

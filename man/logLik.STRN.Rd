@@ -23,9 +23,9 @@ logLik.STRN Return Log Likelihood of a fit
 \examples{
 \dontrun{
 library(embryogrowth)
-data(resultNest_4p_SSM4p)
-logLik(resultNest_4p_SSM4p)
-AIC(resultNest_4p_SSM4p)
+data(resultNest_4p_SSM)
+logLik(resultNest_4p_SSM)
+AIC(resultNest_4p_SSM)
 }
 }
 \author{

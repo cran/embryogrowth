@@ -1,6 +1,6 @@
 #' hist.Nests shows the histogram of temperatures with set of nests
 #' @title Show the histogram of temperatures with set of nests
-#' @author Marc Girondot \email{marc.girondot@@u-psud.fr}
+#' @author Marc Girondot \email{marc.girondot@@universite-paris-saclay.fr}
 #' @return A list with an histogram object with information on histogram or 
 #' NULL if no series was selected and the complete set of temperatures used.
 #' @param x Data formated using formatdata.
@@ -38,7 +38,7 @@ p3p <- list(...)
 # }
 
 
-NbTS <- nids[["IndiceT"]][3]
+NbTS <- nids[["IndiceT"]]["NbTS"]
 if (series[[1]]=="all") {
 	series<-rep(TRUE, NbTS)
 } else {

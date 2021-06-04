@@ -13,18 +13,20 @@
   hessian = NULL,
   SE = NULL,
   temperatures = NULL,
+  integral = NULL,
   derivate = NULL,
-  test = NULL,
-  stopattest = FALSE,
+  hatchling.metric = NULL,
+  stop.at.hatchling.metric = FALSE,
   M0 = NULL,
   weight = NULL,
   series = "all",
   TSP.borders = NULL,
   embryo.stages = NULL,
+  STRN = NULL,
   TSP.begin = 0,
   TSP.end = 0.5,
   replicate.CI = 100,
-  metric.end.incubation = NULL,
+  metric.end.incubation = "observed",
   col.stages = "blue",
   col.PT = "red",
   col.TSP = "gray",
@@ -44,7 +46,7 @@
   show.temperatures = TRUE,
   show.PT = TRUE,
   PT = c(mean = NA, SE = NA),
-  show.test = TRUE,
+  show.hatchling.metric = TRUE,
   add = FALSE,
   lab.third = "2nd third of incubation",
   at.lab.third = 10,
@@ -77,11 +79,13 @@
 
 \item{temperatures}{Timeseries of temperatures formatted using formatNests(). Will replace the one in result.}
 
-\item{derivate}{Function used to fit embryo growth: dydt.Gompertz, dydt.exponential or dydt.linear}
+\item{integral}{Function used to fit embryo growth: integral.Gompertz, integral.exponential or integral.linear}
 
-\item{test}{Mean and SD of size of hatchlings}
+\item{derivate}{Function used to fit embryo growth: dydt.Gompertz, dydt.exponential or dydt.linear. It will replace the one in NestsResult.}
 
-\item{stopattest}{TRUE or FALSE. If TRUE, the model stops when proxy of size reached the mean test size.}
+\item{hatchling.metric}{Mean and SD of size of hatchlings}
+
+\item{stop.at.hatchling.metric}{TRUE or FALSE. If TRUE, the model stops when proxy of size reached the mean hatchling.metric size.}
 
 \item{M0}{Measure of hatchling size proxi at laying date}
 
@@ -93,13 +97,15 @@
 
 \item{embryo.stages}{The embryo stages. At least TSP.borders stages must be provided to estimate TSP borders. See note.}
 
+\item{STRN}{An object obtained from STRN()}
+
 \item{TSP.begin}{Where TSP begin during the stage of beginning? In relative proportion of the stage.}
 
 \item{TSP.end}{Where TSP begin during the stage of ending? In relative proportion of the stage.}
 
 \item{replicate.CI}{Number of replicates to estimate CI. If 1, no CI is estimated.}
 
-\item{metric.end.incubation}{The expected metric at the end of incubation. Used to calibrate TSP size. If NULL, take the maximum Mean of the test parameter. If NA, use the actual final size. Can be a vector and is recycled if necessary.}
+\item{metric.end.incubation}{The expected metric at the end of incubation. Used to calibrate TSP size. If NULL, take the maximum Mean of the hatchling.metric parameter. If NA, use the actual final size. Can be a vector and is recycled if necessary.}
 
 \item{col.stages}{The color of the stages}
 
@@ -139,7 +145,7 @@
 
 \item{PT}{Value for pivotal temperature, mean and SE}
 
-\item{show.test}{TRUE or FALSE, does the hatchling size should be displayed}
+\item{show.hatchling.metric}{TRUE or FALSE, does the hatchling size should be displayed}
 
 \item{add}{If TRUE, all the curves are shown on the same graph}
 
@@ -180,7 +186,7 @@ embryo.stages=structure(c(8.4, 9.4, 13.6, 13.8, 18.9, 23.5, 32.2, 35.2, 35.5, 38
 .Names = c("21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31"))\cr
  indicates that the stages 21 begins at the relative size of 8.4/39.33.\cr
 Series can be indicated as the name of the series, its number or succesion of TRUE or FALSE. "all" indicates that all series must be printed.\cr
-show.fioritures parameter does not affect show.test option.\cr
+show.fioritures parameter does not affect show.hatchling.metric option.\cr
 Note: Four species have predefined embryo stages. embryo.stages parameter can take the values:\cr
 \itemize{
   \item \code{Caretta caretta.SCL}
@@ -197,40 +203,40 @@ plot.NestsResult Plot the embryo growth
 \examples{
 \dontrun{
 library(embryogrowth)
-data(resultNest_4p_SSM4p)
-plot(resultNest_4p_SSM4p, xlim=c(0,70), ylimT=c(22, 32), ylimS=c(0,45), series=1,  
+data(resultNest_4p_SSM)
+plot(resultNest_4p_SSM, xlim=c(0,70), ylimT=c(22, 32), ylimS=c(0,45), series=1,  
 	    SE=c(DHA=1.396525, DHH=4.101217, T12H=0.04330405, Rho25=1.00479), 
 	    GTRN.CI = "SE", replicate.CI = 100, 
 	    embryo.stages="Caretta caretta.SCL")
-plot(resultNest_4p_SSM4p, xlim=c(0,70), ylimT=c(22, 32), ylimS=c(0,45), series=1, 
+plot(resultNest_4p_SSM, xlim=c(0,70), ylimT=c(22, 32), ylimS=c(0,45), series=1, 
 	    GTRN.CI = "Hessian", replicate.CI = 100, 
 	    embryo.stages="Caretta caretta.SCL")
-plot(resultNest_4p_SSM4p, xlim=c(0,70), ylimT=c(22, 32), ylimS=c(0,45), series=1,  
-     resultmcmc = resultNest_mcmc_4p_SSM4p, 
+plot(resultNest_4p_SSM, xlim=c(0,70), ylimT=c(22, 32), ylimS=c(0,45), series=1,  
+     resultmcmc = resultNest_mcmc_4p_SSM, 
 	    GTRN.CI = "MCMC", replicate.CI = 100, 
      embryo.stages="Caretta caretta.SCL")
 # to plot all the nest at the same time, use
-plot(resultNest_4p_SSM4p, xlim=c(0,70), ylimT=c(22, 32), ylimS=c(0,45),  
+plot(resultNest_4p_SSM, xlim=c(0,70), ylimT=c(22, 32), ylimS=c(0,45),  
 	    series="all", show.fioritures=FALSE, add=TRUE, 
 	    embryo.stages="Caretta caretta.SCL")
 # to use color different for series
-plot(resultNest_4p_SSM4p, xlim=c(0,70), ylimT=c(22, 32), ylimS=c(0,45), add=TRUE, 
+plot(resultNest_4p_SSM, xlim=c(0,70), ylimT=c(22, 32), ylimS=c(0,45), add=TRUE, 
 	    series="all", show.fioritures=FALSE, col.S=c(rep("black", 5), rep("red", 6)), 
 	    embryo.stages="Caretta caretta.SCL")
 	    
 # to plot all the temperature profiles
 
 par(mar=c(4, 4, 1, 1))
-plot(resultNest_4p_SSM4p$data[[1]][, 1]/60/24,
-     resultNest_4p_SSM4p$data[[1]][, 2], bty="n", 
+plot(resultNest_4p_SSM$data[[1]][, 1]/60/24,
+     resultNest_4p_SSM$data[[1]][, 2], bty="n", 
      las=1, xlab="Days of incubation", 
      ylab=expression("Temperatures in "*degree*"C"), 
      type="l", xlim=c(0,70),ylim=c(20, 35))
      
      for (i in 2:21) {
           par(new=TRUE)
-          plot(resultNest_4p_SSM4p$data[[i]][, 1]/60/24,
-          resultNest_4p_SSM4p$data[[i]][, 2], bty="n", 
+          plot(resultNest_4p_SSM$data[[i]][, 1]/60/24,
+          resultNest_4p_SSM$data[[i]][, 2], bty="n", 
           las=1, xlab="", ylab="", type="l", xlim=c(0,70),
           ylim=c(20, 35), axes = FALSE)
      }

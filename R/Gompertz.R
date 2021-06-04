@@ -21,10 +21,10 @@
 #' # pfixed <- c(K=82.33) or rK=82.33/39.33
 #' pfixed <- c(rK=2.093313)
 #' # K or rK are not used for dydt.linear or dydt.exponential
-#' resultNest_4p_SSM4p <- searchR(parameters=x, fixed.parameters=pfixed,  
+#' resultNest_4p_SSM <- searchR(parameters=x, fixed.parameters=pfixed,  
 #' 	temperatures=formated, derivate=dydt.Gompertz, M0=1.7,  
-#' 	test=c(Mean=39.33, SD=1.92))
-#' data(resultNest_4p_SSM4p)
+#' 	hatchling.metric=c(Mean=39.33, SD=1.92))
+#' data(resultNest_4p_SSM)
 #' }
 #' @export
 

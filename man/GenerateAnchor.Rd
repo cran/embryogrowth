@@ -43,11 +43,11 @@ data(nest)
 formated <- FormatNests(nest, previous=NULL)
 newp <- GenerateAnchor(nests=formated)
 newp <- GenerateAnchor(nests=formated, number.anchors=10)
-data(resultNest_4p_SSM4p)
-newp <- GenerateAnchor(nests=resultNest_4p_SSM4p, number.anchors=7)
-newp <- GenerateAnchor(nests=resultNest_4p_SSM4p, temperatures=seq(from=20,
+data(resultNest_4p_SSM)
+newp <- GenerateAnchor(nests=resultNest_4p_SSM, number.anchors=7)
+newp <- GenerateAnchor(nests=resultNest_4p_SSM, temperatures=seq(from=20,
  to=35, length.out=10))
-newp <- GenerateAnchor(nests=resultNest_4p_SSM4p, number.anchors=7)
+newp <- GenerateAnchor(nests=resultNest_4p_SSM, number.anchors=7)
 newp <- c(newp, Scale=1)
 }
 }

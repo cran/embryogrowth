@@ -1,7 +1,7 @@
 
-.gradientRichardson<-function(x, temperatures, derivate, weight,
-                              test, M0, fixed.parameters) {
+.gradientRichardson <- function(x, temperatures, integral, weight, derivate, 
+                              hatchling.metric, M0, fixed.parameters) {
 	return(numDeriv::grad(info.nests, x, method="Richardson", temperatures=temperatures, 
-	                      derivate=derivate, weight=weight,
-	                      test=test, M0=M0, fixed.parameters=fixed.parameters))
+	                      integral=integral, weight=weight, derivate=derivate, 
+	                      hatchling.metric=hatchling.metric, M0=M0, fixed.parameters=fixed.parameters))
 	}

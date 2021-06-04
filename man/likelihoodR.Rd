@@ -9,8 +9,9 @@ likelihoodR(
   parameters = NULL,
   fixed.parameters = NULL,
   temperatures = NULL,
+  integral = NULL,
   derivate = NULL,
-  test = NULL,
+  hatchling.metric = NULL,
   M0 = NULL,
   hessian = FALSE,
   weight = NULL,
@@ -27,9 +28,11 @@ likelihoodR(
 
 \item{temperatures}{Timeseries of temperatures}
 
-\item{derivate}{Function used to fit embryo growth: dydt.Gompertz, dydt.exponential or dydt.linear}
+\item{integral}{Function used to fit embryo growth: integral.Gompertz, integral.exponential or integral.linear}
 
-\item{test}{Mean and SD of size of hatchlings}
+\item{derivate}{Function used to fit embryo growth: dydt.Gompertz, dydt.exponential or dydt.linear. It will replace the one in NestsResult.}
+
+\item{hatchling.metric}{Mean and SD of size of hatchlings}
 
 \item{M0}{Measure of hatchling size or mass proxi at laying date}
 
@@ -65,12 +68,12 @@ x <- structure(c(118.768297442004, 475.750095909406, 306.243694918151,
 116.055824800264), .Names = c("DHA", "DHH", "T12H", "Rho25"))
 # pfixed <- c(K=82.33) or rK=82.33/39.33
 pfixed <- c(rK=2.093313)
-# K or rK are not used for dydt.linear or dydt.exponential
+# K or rK are not used for integral.linear or integral.exponential
 LresultNest_4p <- likelihoodR(parameters=x, fixed.parameters=pfixed,  
-	temperatures=formated, derivate=dydt.Gompertz, M0=1.7,  
-	test=c(Mean=39.33, SD=1.92))
-data(resultNest_4p_SSM4p)
-LresultNest_4p <- likelihoodR(result=resultNest_4p_SSM4p)
+	temperatures=formated, integral=integral.Gompertz, M0=1.7,  
+	hatchling.metric=c(Mean=39.33, SD=1.92))
+data(resultNest_4p_SSM)
+LresultNest_4p <- likelihoodR(result=resultNest_4p_SSM)
 }
 }
 \author{

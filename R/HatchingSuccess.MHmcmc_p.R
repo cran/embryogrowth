@@ -21,7 +21,7 @@
 #'          
 #' g <- HatchingSuccess.fit(par=par, data=totalIncubation_Cc)
 #' pMCMC <- HatchingSuccess.MHmcmc_p(g, accept=TRUE)
-#' mcmc <- HatchingSuccesss.MHmcmc(result=g, parameters = pMCMC, 
+#' mcmc <- HatchingSuccess.MHmcmc(result=g, parameters = pMCMC, 
 #'                   adaptive=TRUE, n.iter=100000, trace=1000)
 #' }
 #' @export
@@ -48,7 +48,7 @@ HatchingSuccess.MHmcmc_p<-function(result=NULL, parameters=NULL, fixed.parameter
   allpar <- c(parameters, fixed.parameters)
 
 # 7/2/2014, ajout de la nouvelle version des parametres
-# #' par <- c(S.low=0.5, S.high=0.3,  P.low=25, deltaP=10, MaxHS=logit(0.8)) 
+# #' par <- c(S.low=0.5, S.high=0.3,  P.low=25, deltaP=10, MaxHS=0.8) 
   
   P.low <- abs(allpar["P.low"])
   deltaP <- abs(allpar["deltaP"])

@@ -1,4 +1,4 @@
-#' plot.HatchingSuccess plot result of HatchingSuccess.fit() or HatchingSuccesss.MHmcmc() that best describe hatching success
+#' plot.HatchingSuccess plot result of HatchingSuccess.fit() or HatchingSuccess.MHmcmc() that best describe hatching success
 #' @title Plot results of HatchingSuccess.fit() that best describe hatching success
 #' @author Marc Girondot
 #' @return Nothing
@@ -10,7 +10,7 @@
 #' @param bty bty graphival parameter
 #' @param las las graphical parameter
 #' @param replicates Number of replicates to estimate confidence interval
-#' @param resultmcmc Results obtained using HatchingSuccesss.MHmcmc()
+#' @param resultmcmc Results obtained using HatchingSuccess.MHmcmc()
 #' @param col.observations Color of observations
 #' @param pch.observations Character used for observation (no observations if NULL)
 #' @param cex.observations Size of characters for observations
@@ -41,7 +41,7 @@
 #'                                !is.na(Total) & Total != 0)
 #' 
 #' par <- c(S.low=0.5, S.high=0.3, 
-#'          P.low=25, deltaP=10, MaxHS=logit(0.8))
+#'          P.low=25, deltaP=10, MaxHS=0.8)
 #'          
 #' HatchingSuccess.lnL(par=par, data=totalIncubation_Cc)
 #' 

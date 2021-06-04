@@ -35,23 +35,23 @@ x <- structure(c(109.683413821537, 614.969219372661, 306.386903812694,
  
 pfixed <- c(rK=1.208968)
 resultNest_4p_SSM <- searchR(parameters=x, fixed.parameters=pfixed, 
-	temperatures=formated, derivate=dydt.Gompertz, M0=0.3470893, 
-	test=c(Mean=39.33, SD=1.92))
+	temperatures=formated, integral=integral.Gompertz, M0=0.3470893, 
+	hatchling.metric=c(Mean=39.33, SD=1.92))
 	
 plotR(result=resultNest_4p_SSM, show.hist = TRUE,
-             ylim=c(0, 8), curves="ML quantiles")
+             ylim=c(0, 8), curve="ML quantiles")
 
 # Now use the fited parameters from resultNest_4p_SSM with  
 # the constant incubation temperatures:
 
 plot(resultNest_4p_SSM, temperatures=tempConst_f,  
-	stopattest=TRUE, series="T30", xlim=c(0,50),  
-	ylimT=c(22, 32), test=c(Mean=39.33, SD=1.92), 
+	stop.at.hatchling.metric=TRUE, series="T30", xlim=c(0,50),  
+	ylimT=c(22, 32), hatchling.metric=c(Mean=39.33, SD=1.92), 
 	embryo.stages="Caretta caretta.SCL")
 	
 plot(resultNest_4p_SSM, temperatures=tempConst_f,  
-	stopattest=TRUE, series="T25", xlim=c(0,120),  
-	ylimT=c(22, 32), test=c(Mean=39.33, SD=1.92), 
+	stop.at.hatchling.metric=TRUE, series="T25", xlim=c(0,120),  
+	ylimT=c(22, 32), hatchling.metric=c(Mean=39.33, SD=1.92), 
 	embryo.stages="Caretta caretta.SCL")
 	
 }
@@ -61,6 +61,6 @@ Girondot, M., Kaska, Y., 2014. A model to predict the thermal reaction
 norm for the embryo growth rate from field data. Journal of Thermal Biology 45, 96-102.
 }
 \author{
-Marc Girondot \email{marc.girondot@u-psud.fr}
+Marc Girondot \email{marc.girondot@universite-paris-saclay.fr}
 }
 \keyword{datasets}

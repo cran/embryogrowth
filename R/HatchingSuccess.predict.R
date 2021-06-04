@@ -5,8 +5,8 @@
 #' @param temperature A vector of temperatures.
 #' @param probs Quantiles.
 #' @param replicates Number of replicates to estimate the confidence interval.
-#' @param object The return of a fit done with HatchingSuccesss.fit().
-#' @param resultmcmc Results obtained using HatchingSuccesss.MHmcmc()
+#' @param object The return of a fit done with HatchingSuccess.fit().
+#' @param resultmcmc Results obtained using HatchingSuccess.MHmcmc()
 #' @param chain Chain to use in resultmcmc
 #' @param ... Not used
 #' @description Set of functions to study the hatching success.\cr

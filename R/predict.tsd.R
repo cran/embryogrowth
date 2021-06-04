@@ -46,10 +46,13 @@ predict.tsd <- function(object, temperatures=NULL, durations=NULL,
   
   # object <- NULL; resultmcmc=NULL; chain=1;replicate.CI=10000; temperatures=NULL; durations=NULL;SD.temperatures= NULL; SD.durations=NULL;probs=c(0.025, 0.5, 0.975)
   
-  temperatures <- c(temperatures, durations)
-  SD.temperatures <- c(SD.temperatures, SD.durations)
+  # temperatures <- c(temperatures, durations)
+  # SD.temperatures <- c(SD.temperatures, SD.durations)
   
-  if (is.null(temperatures)) temperatures <- object$temperatures
+  if (is.null(temperatures)  & is.null(durations)) {
+    temperatures <- object$temperatures
+    durations <- object$durations
+  }
 
   o <- P_TRT(x=object, resultmcmc=resultmcmc, chain=chain, l=NULL, 
                 replicate.CI=replicate.CI, temperatures=temperatures, durations=durations,

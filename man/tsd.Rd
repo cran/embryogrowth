@@ -18,6 +18,7 @@ tsd(
   equation = "logistic",
   replicate.CI = 10000,
   range.CI = 0.95,
+  SE = TRUE,
   replicate.NullDeviance = 1000,
   control = list(maxit = 1000),
   print = TRUE
@@ -44,11 +45,13 @@ tsd(
 
 \item{fixed.parameters}{Parameters that will not be changed}
 
-\item{equation}{Could be "logistic", "Hill", "A-logistic", "Hulin", "Double-A-logistic", "flexit" or "GSD"}
+\item{equation}{Can be "logistic", "Hill", "A-logistic", "Hulin", "Double-A-logistic", "flexit", "GSD", "logit", "probit"}
 
 \item{replicate.CI}{Number of replicates to estimate confidence intervals}
 
 \item{range.CI}{The range of confidence interval for estimation, default=0.95}
+
+\item{SE}{If FALSE, does not estimate SE of parameters. Can be use when something wrong happens.}
 
 \item{replicate.NullDeviance}{Number of replicates to estimate null distribution of deviance}
 
@@ -69,7 +72,7 @@ In Girondot (1999), l was 0.05 and then the TRT was defined as being the range o
 For other models, TRT is calculated numerically.\cr
 The basic model is logistic one. This model has the particularity to have a symmetric shape around P.\cr
 The other models have been built to alleviate this constraint. Hill and A-logistic models can be asymmetric, but it is impossible to control independently the low and high transitions.\cr
-Hulin model is assymmetric but the control of asymmetry is difficult to manage./cr
+Hulin model is assymmetric but the control of asymmetry is difficult to manage.\cr
 If asymmetric model is selected, it is always better to use flexit model.
 \deqn{if dose < P then (1 + (2^K1 - 1) *  exp(4 * S1 * (P - x)))^(-1/K1)}{if dose < P then (1 + (2^K1 - 1) *  exp(4 * S1 * (P - x)))^(-1/K1)}
 \deqn{if dose > P then 1-((1 + (2^K2 - 1) * exp(4 * S2 * (x - P)))^(-1/K2)}{if dose > P then 1-((1 + (2^K2 - 1) * exp(4 * S2 * (x - P)))^(-1/K2)}
@@ -286,6 +289,8 @@ Girondot, M. 1999. Statistical description of temperature-dependent sex determin
 Godfrey, M.H., Delmas, V., Girondot, M., 2003. Assessment of patterns of temperature-dependent sex determination using maximum likelihood model selection. Ecoscience 10, 265-272.
 
 Hulin, V., Delmas, V., Girondot, M., Godfrey, M.H., Guillon, J.-M., 2009. Temperature-dependent sex determination and global change: are some species at greater risk? Oecologia 160, 493-506.
+
+Abreu-Grobois, F.A., Morales-Mérida, B.A., Hart, C.E., Guillon, J.-M., Godfrey, M.H., Navarro, E., Girondot, M., 2020. Recent advances on the estimation of the thermal reaction norm for sex ratios. PeerJ 8, e8451.
 }
 \seealso{
 Other Functions for temperature-dependent sex determination: 

@@ -42,7 +42,7 @@ par <- c(S.low=0.5, S.high=0.3,
          
 g <- HatchingSuccess.fit(par=par, data=totalIncubation_Cc)
 pMCMC <- HatchingSuccess.MHmcmc_p(g, accept=TRUE)
-mcmc <- HatchingSuccesss.MHmcmc(result=g, parameters = pMCMC, 
+mcmc <- HatchingSuccess.MHmcmc(result=g, parameters = pMCMC, 
                   adaptive=TRUE, n.iter=100000, trace=1000)
 }
 }

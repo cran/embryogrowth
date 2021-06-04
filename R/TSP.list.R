@@ -1,6 +1,6 @@
 #' Database of thermosensitive period of development for sex determination
 #' @title Database of thermosensitive period of development for sex determination
-#' @author Marc Girondot \email{marc.girondot@@u-psud.fr}
+#' @author Marc Girondot \email{marc.girondot@@universite-paris-saclay.fr}
 #' @docType data
 #' @name TSP.list
 #' @description Database of thermosensitive period of development for sex determination.\cr

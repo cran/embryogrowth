@@ -11,18 +11,20 @@
 #' @param fixed.parameters Another set of parameters if result is not provided.
 #' @param SE Standard error for each parameter if result is not provided, or replace the one in NestsResult. Use SE=NA to remove SE from NestResult
 #' @param temperatures Timeseries of temperatures formatted using formatNests(). Will replace the one in result.
-#' @param derivate Function used to fit embryo growth: dydt.Gompertz, dydt.exponential or dydt.linear
-#' @param test Mean and SD of size of hatchlings
+#' @param integral Function used to fit embryo growth: integral.Gompertz, integral.exponential or integral.linear
+#' @param derivate Function used to fit embryo growth: dydt.Gompertz, dydt.exponential or dydt.linear. It will replace the one in NestsResult.
+#' @param hatchling.metric Mean and SD of size of hatchlings
 #' @param weight Weights of the different nests to estimate likelihood
-#' @param stopattest TRUE or FALSE. If TRUE, the model stops when proxy of size reached the mean test size.
+#' @param stop.at.hatchling.metric TRUE or FALSE. If TRUE, the model stops when proxy of size reached the mean hatchling.metric size.
 #' @param M0 Measure of hatchling size proxi at laying date
 #' @param series The name or number of the series to be displayed. Only one series can be displayed at a time.
 #' @param TSP.borders The limits of TSP in stages. See embryo.stages parameter.
 #' @param embryo.stages The embryo stages. At least TSP.borders stages must be provided to estimate TSP borders. See note.
+#' @param STRN An object obtained from STRN()
 #' @param TSP.begin Where TSP begin during the stage of beginning? In relative proportion of the stage.
 #' @param TSP.end Where TSP begin during the stage of ending? In relative proportion of the stage.
 #' @param replicate.CI Number of replicates to estimate CI. If 1, no CI is estimated.
-#' @param metric.end.incubation The expected metric at the end of incubation. Used to calibrate TSP size. If NULL, take the maximum Mean of the test parameter. If NA, use the actual final size. Can be a vector and is recycled if necessary.
+#' @param metric.end.incubation The expected metric at the end of incubation. Used to calibrate TSP size. If NULL, take the maximum Mean of the hatchling.metric parameter. If NA, use the actual final size. Can be a vector and is recycled if necessary.
 #' @param col.stages The color of the stages
 #' @param col.temperatures The color of the temperatures
 #' @param col.TSP The color of the TSP
@@ -42,7 +44,7 @@
 #' @param show.PT TRUE or FALSE, does the pivotal temperature should be displayed?
 #' @param show.fioritures If FALSE, set show.PT, show.temperatures, show.stages, show.TSP, show.third to FALSE, GTRN.CI to NULL
 #' @param PT Value for pivotal temperature, mean and SE
-#' @param show.test TRUE or FALSE, does the hatchling size should be displayed
+#' @param show.hatchling.metric TRUE or FALSE, does the hatchling size should be displayed
 #' @param lab.third Label for 2nd third of incubation
 #' @param at.lab.third Position of Label for 2nd third of incubation [default=10]; y-lim is scaled by at.lab.third
 #' @param at.lab.TSP Position of Label for TSP [default=8]; y-lim is scaled by at.lab.third
@@ -63,7 +65,7 @@
 #' .Names = c("21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31"))\cr
 #'  indicates that the stages 21 begins at the relative size of 8.4/39.33.\cr
 #' Series can be indicated as the name of the series, its number or succesion of TRUE or FALSE. "all" indicates that all series must be printed.\cr
-#' show.fioritures parameter does not affect show.test option.\cr
+#' show.fioritures parameter does not affect show.hatchling.metric option.\cr
 #' Note: Four species have predefined embryo stages. embryo.stages parameter can take the values:\cr
 #' \itemize{
 #'   \item \code{Caretta caretta.SCL}
@@ -76,40 +78,40 @@
 #' @examples
 #' \dontrun{
 #' library(embryogrowth)
-#' data(resultNest_4p_SSM4p)
-#' plot(resultNest_4p_SSM4p, xlim=c(0,70), ylimT=c(22, 32), ylimS=c(0,45), series=1,  
+#' data(resultNest_4p_SSM)
+#' plot(resultNest_4p_SSM, xlim=c(0,70), ylimT=c(22, 32), ylimS=c(0,45), series=1,  
 #' 	    SE=c(DHA=1.396525, DHH=4.101217, T12H=0.04330405, Rho25=1.00479), 
 #' 	    GTRN.CI = "SE", replicate.CI = 100, 
 #' 	    embryo.stages="Caretta caretta.SCL")
-#' plot(resultNest_4p_SSM4p, xlim=c(0,70), ylimT=c(22, 32), ylimS=c(0,45), series=1, 
+#' plot(resultNest_4p_SSM, xlim=c(0,70), ylimT=c(22, 32), ylimS=c(0,45), series=1, 
 #' 	    GTRN.CI = "Hessian", replicate.CI = 100, 
 #' 	    embryo.stages="Caretta caretta.SCL")
-#' plot(resultNest_4p_SSM4p, xlim=c(0,70), ylimT=c(22, 32), ylimS=c(0,45), series=1,  
-#'      resultmcmc = resultNest_mcmc_4p_SSM4p, 
+#' plot(resultNest_4p_SSM, xlim=c(0,70), ylimT=c(22, 32), ylimS=c(0,45), series=1,  
+#'      resultmcmc = resultNest_mcmc_4p_SSM, 
 #' 	    GTRN.CI = "MCMC", replicate.CI = 100, 
 #'      embryo.stages="Caretta caretta.SCL")
 #' # to plot all the nest at the same time, use
-#' plot(resultNest_4p_SSM4p, xlim=c(0,70), ylimT=c(22, 32), ylimS=c(0,45),  
+#' plot(resultNest_4p_SSM, xlim=c(0,70), ylimT=c(22, 32), ylimS=c(0,45),  
 #' 	    series="all", show.fioritures=FALSE, add=TRUE, 
 #' 	    embryo.stages="Caretta caretta.SCL")
 #' # to use color different for series
-#' plot(resultNest_4p_SSM4p, xlim=c(0,70), ylimT=c(22, 32), ylimS=c(0,45), add=TRUE, 
+#' plot(resultNest_4p_SSM, xlim=c(0,70), ylimT=c(22, 32), ylimS=c(0,45), add=TRUE, 
 #' 	    series="all", show.fioritures=FALSE, col.S=c(rep("black", 5), rep("red", 6)), 
 #' 	    embryo.stages="Caretta caretta.SCL")
 #' 	    
 #' # to plot all the temperature profiles
 #' 
 #' par(mar=c(4, 4, 1, 1))
-#' plot(resultNest_4p_SSM4p$data[[1]][, 1]/60/24,
-#'      resultNest_4p_SSM4p$data[[1]][, 2], bty="n", 
+#' plot(resultNest_4p_SSM$data[[1]][, 1]/60/24,
+#'      resultNest_4p_SSM$data[[1]][, 2], bty="n", 
 #'      las=1, xlab="Days of incubation", 
 #'      ylab=expression("Temperatures in "*degree*"C"), 
 #'      type="l", xlim=c(0,70),ylim=c(20, 35))
 #'      
 #'      for (i in 2:21) {
 #'           par(new=TRUE)
-#'           plot(resultNest_4p_SSM4p$data[[i]][, 1]/60/24,
-#'           resultNest_4p_SSM4p$data[[i]][, 2], bty="n", 
+#'           plot(resultNest_4p_SSM$data[[i]][, 1]/60/24,
+#'           resultNest_4p_SSM$data[[i]][, 2], bty="n", 
 #'           las=1, xlab="", ylab="", type="l", xlim=c(0,70),
 #'           ylim=c(20, 35), axes = FALSE)
 #'      }
@@ -118,49 +120,120 @@
 #' @export
 
 
-plot.NestsResult <-
-function(x, ..., parameters=NULL, fixed.parameters=NULL, 
-         resultmcmc = NULL,
-         hessian = NULL,
-         SE=NULL, temperatures=NULL, derivate=NULL, 
-         test=NULL, stopattest=FALSE, M0=NULL, weight=NULL, series="all",
-         TSP.borders=NULL, embryo.stages=NULL,
-         TSP.begin=0, TSP.end=0.5, 
-         replicate.CI=100, 
-         metric.end.incubation=NULL,
-         col.stages="blue", col.PT="red", col.TSP="gray", 
-         col.temperatures="green", col.S="black", 
-         lty.temperatures=1, lwd.temperatures=2, ylimT=NULL, ylimS=NULL, xlim=NULL,
-         show.stages=TRUE, show.TSP=TRUE, show.third=TRUE, 
-         GTRN.CI=NULL,  
-         show.metric=TRUE, 
-         show.fioritures=TRUE, 
-         show.temperatures=TRUE, show.PT=TRUE, PT=c(mean=NA, SE=NA), show.test=TRUE, 
-         add=FALSE, 
-         lab.third="2nd third of incubation", at.lab.third=10, lab.PT="PT", lab.stages="Stages", 
-         at.lab.TSP=8, lab.TSP="TSP", 
-         mar = c(4, 5, 4, 5) + 0.3, 
-         xlab="Days of incubation", ylabT=expression("Temperature in " * degree * "C"), 
-         ylabS= "Embryo metric", progress=TRUE, parallel=TRUE) {
-
-#  parameters=NULL; fixed.parameters=NULL; resultmcmc = NULL; SE=NULL; temperatures=NULL; derivate=NULL; test=NULL; stopattest=FALSE; M0=NULL; weight=NULL; series="all"; TSP.borders=NULL; embryo.stages="Caretta caretta.SCL"; TSP.begin=0; TSP.end=0.5; replicate.CI=100; metric.end.incubation=NULL; col.stages="blue"; col.PT="red"; col.TSP="gray"; col.temperatures="green"; col.S="black"; lty.temperatures=1; lwd.temperatures=2; ylimT=NULL; ylimS=NULL; xlim=NULL; show.stages=TRUE; show.TSP=TRUE; show.third=TRUE; CI=NULL;  show.metric=TRUE; show.fioritures=TRUE; show.temperatures=TRUE; show.PT=TRUE; PT=c(mean=NA, SE=NA); show.test=TRUE; add=FALSE; lab.third="2nd third of incubation"; at.lab.third=4; lab.PT="PT"; lab.stages="Stages"; mar = c(4, 5, 4, 5) + 0.3; xlab="Days of incubation"; ylabT=expression("Temperatures in " * degree * "C"); ylabS= "Embryo metric"; progress=TRUE;parallel=TRUE
-#  x <- resultNest_4p_SSM4p; xlim=c(0,70); ylimT=c(22, 32); ylimS=c(0,45); series=1; resultmcmc = result_mcmc_4p; embryo.stages="Caretta caretta.SCL"; replicate.CI = 100
+plot.NestsResult <- function(x                                                  , 
+                             ...                                                , 
+                             parameters=NULL                                    , 
+                             fixed.parameters=NULL                              , 
+                             resultmcmc = NULL                                  ,
+                             hessian = NULL                                     ,
+                             SE=NULL                                            , 
+                             temperatures=NULL                                  , 
+                             integral=NULL                                      , 
+                             derivate=NULL                                      , 
+                             hatchling.metric=NULL                              , 
+                             stop.at.hatchling.metric=FALSE                     , 
+                             M0=NULL                                            , 
+                             weight=NULL                                        , 
+                             series="all"                                       ,
+                             TSP.borders=NULL                                   , 
+                             embryo.stages=NULL                                 ,
+                             STRN=NULL                                          ,
+                             TSP.begin=0                                        , 
+                             TSP.end=0.5                                        , 
+                             replicate.CI=100                                   , 
+                             metric.end.incubation="observed"                   ,
+                             col.stages="blue"                                  , 
+                             col.PT="red"                                       , 
+                             col.TSP="gray"                                     , 
+                             col.temperatures="green"                           , 
+                             col.S="black"                                      , 
+                             lty.temperatures=1                                 , 
+                             lwd.temperatures=2                                 , 
+                             ylimT=NULL                                         , 
+                             ylimS=NULL                                         , 
+                             xlim=NULL                                          ,
+                             show.stages=TRUE                                   , 
+                             show.TSP=TRUE                                      , 
+                             show.third=TRUE                                    , 
+                             GTRN.CI=NULL                                       ,  
+                             show.metric=TRUE                                   , 
+                             show.fioritures=TRUE                               , 
+                             show.temperatures=TRUE                             , 
+                             show.PT=TRUE                                       , 
+                             PT=c(mean=NA, SE=NA)                               , 
+                             show.hatchling.metric=TRUE                         , 
+                             add=FALSE                                          , 
+                             lab.third="2nd third of incubation"                , 
+                             at.lab.third=10                                    , 
+                             lab.PT="PT"                                        , 
+                             lab.stages="Stages"                                , 
+                             at.lab.TSP=8                                       , 
+                             lab.TSP="TSP"                                      , 
+                             mar = c(4, 5, 4, 5) + 0.3                          , 
+                             xlab="Days of incubation"                          , 
+                             ylabT=expression("Temperature in " * degree * "C") , 
+                             ylabS= "Embryo metric"                             , 
+                             progress=TRUE                                      , 
+                             parallel=TRUE                                      ) {
+  
+  #  parameters=NULL; fixed.parameters=NULL; resultmcmc = NULL; SE=NULL; temperatures=NULL; integral=NULL; derivate=NULL; hatchling.metric=NULL; stop.at.hatchling.metric=FALSE; M0=NULL; weight=NULL; series="all"; TSP.borders=NULL; embryo.stages="Caretta caretta.SCL"; TSP.begin=0; TSP.end=0.5; replicate.CI=100; metric.end.incubation="observed"; col.stages="blue"; col.PT="red"; col.TSP="gray"; col.temperatures="green"; col.S="black"; lty.temperatures=1; lwd.temperatures=2; ylimT=NULL; ylimS=NULL; xlim=NULL; show.stages=TRUE; show.TSP=TRUE; show.third=TRUE; CI=NULL;  show.metric=TRUE; show.fioritures=TRUE; show.temperatures=TRUE; show.PT=TRUE; PT=c(mean=NA, SE=NA); show.hatchling.metric=TRUE; add=FALSE; lab.third="2nd third of incubation"; at.lab.third=4; lab.PT="PT"; lab.stages="Stages"; mar = c(4, 5, 4, 5) + 0.3; xlab="Days of incubation"; ylabT=expression("Temperatures in " * degree * "C"); ylabS= "Embryo metric"; progress=TRUE;parallel=TRUE
+  # lab.third="2nd third of incubation"; at.lab.third=10; lab.PT="PT"; lab.stages="Stages"; at.lab.TSP=8; lab.TSP="TSP"
+  #  x <- resultNest_4p_SSM; xlim=c(0,70); ylimT=c(22, 32); ylimS=c(0,45); series=1; resultmcmc = resultNest_mcmc_4p_SSM; embryo.stages="Caretta caretta.SCL"; replicate.CI = 100
   
   TSP.list <- embryogrowth::TSP.list
   if (!is.null(GTRN.CI)) GTRN.CI <- tolower(GTRN.CI)
   
   if(is.null(embryo.stages) & ((show.stages) | (show.TSP))) {
-    stop("You must indicate embryo stages.")
+    warning("You must indicate embryo stages to use show.stages or show.TSP.")
+    show.stages <- FALSE
+    show.TSP <- FALSE
   }
   
   if (class(embryo.stages)=="character") {
-    estages <- TSP.list[[gsub(" ", "_", embryo.stages)]]
-    if (is.null(estages)) {
-      stop("The TSP for ", embryo.stages, " does not exist")
+    if (embryo.stages == "fitted") {
+      embryo.stages = c("10"=invlogit(logit(0.33)), "11"=invlogit(logit(0.33)), 
+                        "12"=invlogit(logit(0.66)), "13"=invlogit(logit(0.66))) 
+      TSP.borders = c(10, 12)
+      if (!is.null(STRN)) {
+        setpar_STRN <- c(STRN$par, STRN$fixedparameter)
+        if (is.null(STRN$zero)) {
+          zero <- 1E-9
+        } else {
+          zero <- STRN$zero
+        }
+        if (!is.na(setpar_STRN["BeginTSP"])) {
+          xxbt <- invlogit(setpar_STRN["BeginTSP"])
+          if (xxbt == 0) xxbt <- zero
+          if (xxbt > 0.95) xxbt <- 0.95
+          embryo.stages[as.character(TSP.borders[1])] <- xxbt
+          embryo.stages[as.character(TSP.borders[1]+1)] <- xxbt
+        }
+        if (!is.na(setpar_STRN["EndTSP"])) {
+          xxbt <- invlogit(setpar_STRN["EndTSP"]) 
+          if (xxbt == 0) xxbt <- zero
+          if (xxbt == 1) xxbt <- 1 - zero
+          embryo.stages[as.character(TSP.borders[2])] <- xxbt
+          embryo.stages[as.character(TSP.borders[2]+1)] <- xxbt
+        }
+        if (!is.na(setpar_STRN["LengthTSP"])) {
+          xxbt <- invlogit(setpar_STRN["BeginTSP"]+abs(setpar_STRN["LengthTSP"]))
+          if (xxbt == 0) xxbt <- zero
+          if (xxbt == 1) xxbt <- 1 - zero
+          embryo.stages[as.character(TSP.borders[2])] <- xxbt 
+          embryo.stages[as.character(TSP.borders[2]+1)] <- xxbt
+        }
+      }
+      
     } else {
-      embryo.stages <- estages[, "metric"]
-      names(embryo.stages) <- estages[, "stages"]
-      TSP.borders <- c(attributes(estages)$TSP.begin.stages, attributes(estages)$TSP.end.stages)
+      
+      estages <- TSP.list[[gsub(" ", "_", embryo.stages)]]
+      if (is.null(estages)) {
+        stop("The TSP for ", embryo.stages, " does not exist")
+      } else {
+        embryo.stages <- estages[, "metric"]
+        names(embryo.stages) <- estages[, "stages"]
+        TSP.borders <- c(attributes(estages)$TSP.begin.stages, attributes(estages)$TSP.end.stages)
+      }
     }
   }
   
@@ -174,9 +247,10 @@ function(x, ..., parameters=NULL, fixed.parameters=NULL,
   NestsResult <- x
   
   if (is.null(temperatures)) temperatures <- NestsResult$data
+  if (is.null(integral)) integral <- NestsResult$integral
   if (is.null(derivate)) derivate <- NestsResult$derivate
   if (is.null(weight)) weight <- NestsResult$weight
-  if (is.null(test)) test <- NestsResult$test
+  if (is.null(hatchling.metric)) hatchling.metric <- NestsResult$hatchling.metric
   if (is.null(M0)) M0 <- NestsResult$M0
   if (is.null(fixed.parameters)) fixed.parameters <- NestsResult$fixed.parameters
   if (is.null(SE)) SE <- NestsResult$SE
@@ -193,7 +267,7 @@ function(x, ..., parameters=NULL, fixed.parameters=NULL,
     if (GTRN.CI == "hessian" & is.null(hessian)) GTRN.CI <- NULL
     if (replicate.CI <= 1) GTRN.CI <- NULL
   }
-
+  
   
   # 27/1/2013
   if (!show.fioritures) {
@@ -210,225 +284,246 @@ function(x, ..., parameters=NULL, fixed.parameters=NULL,
     replicate.CI <- 1
   }
   
-###############################
-#### je compte le nombre de series  faire
-###############################
-
-
-NbTS <- temperatures[["IndiceT"]][3]
-if (series[[1]]=="all") {
-	series<-rep(TRUE, NbTS)
-} else {
-	if (any(!is.logical(series))) {
-		if (is.numeric(series)) {
-			seriesx <- rep(FALSE, NbTS)
-			seriesx[series] <- TRUE
-		} else {
-			seriesx <- (names(temperatures[1:NbTS])==series)
-		}
-		series <- seriesx
-	} else {
-# c'est des valeurs logiques, je verifie si le bon nombre, sinon je complete
-		if (length(series)!=NbTS) {
-			series <- rep(series, NbTS)
-			series <- series[1:NbTS]
-		}
-	}
-}
-
-nbseries <- sum(series)
-
-if (nbseries==0) {
-	stop("No series has been selected")
-}
-
-# fais du recyclage des couleurs des sries si ncessaire
-cptcol.S <- 0
-col.S <- rep(col.S, nbseries)[1:nbseries]
-
-########################
-#### Je teste les series
-########################
-if (progress) pb <- txtProgressBar(min=0, max=NbTS, style=3)
-
-for(seriesx in 1:NbTS) {
+  ###############################
+  #### je compte le nombre de series  faire
+  ###############################
   
-    if (progress) setTxtProgressBar(pb, seriesx)
   
-  if (series[seriesx]) {
-    cptcol.S <- cptcol.S+1
-    metric.summary <- info.nests(NestsResult=NULL, parameters=parameters, 
-                         fixed.parameters=fixed.parameters, 
-                         resultmcmc = resultmcmc, 
-                         hessian=hessian,
-                         SE=SE, temperatures=temperatures, derivate=derivate, 
-                         test=test, stopattest=stopattest, M0=M0, series=seriesx,
-                         TSP.borders=TSP.borders, embryo.stages=embryo.stages,
-                         TSP.begin=TSP.begin, TSP.end=TSP.end, 
-                         replicate.CI=replicate.CI, GTRN.CI = GTRN.CI, 
-                         weight=NULL, out=c("summary", "metric"), 
-                         fill=60, 
-                         SexualisationTRN=NULL, SexualisationTRN.mcmc=NULL, 
-                         SexualisationTRN.CI=NULL, 
-                         metric.end.incubation=metric.end.incubation,
-                         progress=FALSE, parallel=parallel)
-     par(mar=mar)
-     
-     troispoints <- tryCatch(list(...), error=function(e) list())
-     # troispoints <- list()
-     
-     if (add==FALSE | cptcol.S==1) {
-      par(new=FALSE)
-      L1 <- list(type = "n", axes = TRUE, bty = "n", xlab = xlab, ylab = ylabS, lwd=2, yaxs="r", xaxs="r", ylim=ylimS, xlim=xlim, main="", col=col.S[cptcol.S])
-      L2 <- modifyList(list(x=metric.summary$metric[[1]]$Time/(60*24), y=metric.summary$metric[[1]]$SCL), troispoints)
-      do.call(plot, modifyList(L1, L2) )
-     }
-     
-     ylimS <- unname(ScalePreviousPlot()$ylim[1:2])
-     xlim <- unname(ScalePreviousPlot()$xlim[1:2])
-     
-     if (show.TSP) {
-       par(new=TRUE)
-       plot(1,1, xlim=xlim, ylim=ylimS, axes=FALSE, type="n", xlab="", ylab="")
-       x1 <- xlim[1]
-       x2 <- xlim[2]
-       ty1 <- attributes(metric.summary$metric[[1]])$metric.begin.tsp
-       ty2 <- attributes(metric.summary$metric[[1]])$metric.end.tsp
-       polygon(x=c(x1, x2, x2, x1), y=c(ty1, ty1, ty2, ty2), col=col.TSP, border=NA)
-#       text(x=x1+5, y=ty1+(ty2-ty1)/2, labels="TSP")
-       x1 <- attributes(metric.summary$metric[[1]])$time.begin.tsp/(24*60)
-       x2 <- attributes(metric.summary$metric[[1]])$time.end.tsp/(24*60)
-       ty1 <- ylimS[1]
-       ty2 <- ylimS[2]
-       polygon(x=c(x1, x2, x2, x1), y=c(ty1, ty1, ty2, ty2), col=col.TSP, border=NA)
-#       text(x=x1+(x2-x1)/2, y=ty1+5, labels="TSP")
-     }
-     
-     
-     if (show.temperatures) {
-       # na.omit(metric.summary$metric[[1]][, c("Time", "TempC")])
-       x <- na.omit(metric.summary$metric[[1]][, c("Time", "TempC")])[, "Time"]/(60*24)
-       y <- na.omit(metric.summary$metric[[1]][, c("Time", "TempC")])[, "TempC"]
-       
-       Lx <- modifyList(as.list(troispoints), list(x=x, y=y, axes = FALSE, xlab = "", ylab = "", main="")) 
-       L <- modifyList(list(type = "l", bty = "n", xlab = "", ylab = "", xlim=xlim, ylim=ylimT, main="", las=1, col=col.temperatures, lty=lty.temperatures, lwd=lwd.temperatures), Lx) 
-       par(new=TRUE)
-       do.call(plot, L) 
-       
-       cex.y2 <- par("cex.axis")
-       if (!is.null(troispoints$cex.axis)) cex.y2 <- troispoints$cex.axis
-       cex.lab2 <- par("cex.lab")
-       if (!is.null(troispoints$cex.lab)) cex.lab2 <- troispoints$cex.lab
-       
-       axis(side=4, ylim=ylimT, las=1, cex.axis=cex.y2)
-       mtext(ylabT, side=4, line=3, cex=cex.lab2*par("cex"))
-       
-       if (show.PT & !is.na(PT[1])) {
-         
-         segments(0, PT[1], xlim[2]+xlim[2]*0.05, PT[1], lwd=2, col=col.PT, xpd=TRUE)
-         text(xlim[2]+6, PT[1], xpd=TRUE, labels=lab.PT, col=col.PT, cex=0.8)
-         if (!is.na(PT[2])) {
-           segments(0, PT[1]+PT[2]*2, xlim[2]+xlim[2]*0.05, PT[1]+PT[2]*2, lwd=2, col=col.PT, lty=2, xpd=TRUE)
-           segments(0, PT[1]-PT[2]*2, xlim[2]+xlim[2]*0.05, PT[1]-PT[2]*2, lwd=2, col=col.PT, lty=2, xpd=TRUE)
-         }
-         
-       }
-     }
-     
-     if (show.TSP) {
-       par(new=TRUE)
-       plot(1,1, xlim=xlim, ylim=ylimS, axes=FALSE, type="n", xlab="", ylab="")
-       x1 <- xlim[1]
-       x2 <- xlim[2]
-       ty1 <- attributes(metric.summary$metric[[1]])$metric.begin.tsp
-       ty2 <- attributes(metric.summary$metric[[1]])$metric.end.tsp
-#       polygon(x=c(x1, x2, x2, x1), y=c(ty1, ty1, ty2, ty2), col=col.TSP, border=NA)
-       text(x=x1+5, y=ty1+(ty2-ty1)/2, labels=lab.TSP)
-       x1 <- attributes(metric.summary$metric[[1]])$time.begin.tsp/(24*60)
-       x2 <- attributes(metric.summary$metric[[1]])$time.end.tsp/(24*60)
-       ty1 <- ylimS[1]
-       ty2 <- ylimS[2]
-#       polygon(x=c(x1, x2, x2, x1), y=c(ty1, ty1, ty2, ty2), col=col.TSP, border=NA)
-       text(x=x1+(x2-x1)/2, y=ty1+ty2/at.lab.TSP, labels=lab.TSP, xpd=TRUE)
-     }
-     
-     par(new=TRUE)
-     L1 <- list(type = "n", axes = FALSE, bty = "n", xlab = "", ylab = "", yaxs="r", xaxs="r", ylim=ylimS, xlim=xlim, main="")
-     L2 <- c(list(x=metric.summary$metric[[1]]$Time/(60*24), y=metric.summary$metric[[1]]$SCL), as.list(troispoints))
-     do.call(plot, modifyList(L1, L2) )
-     
-     if (show.metric) {
-      x <- metric.summary$metric[[1]]$Time/(60*24)
-       y <- metric.summary$metric[[1]]$SCL
-       L1 <- list(type = "l", lwd=2, col=col.S[cptcol.S])
-      L2 <- c(list(x=x, y=y), as.list(troispoints))
-     
-      do.call(plot_add, modifyList(L1, L2) )
-     }
-     
-     if (GTRN.CI != "null") {
-       yp <- y+2*metric.summary$metric[[1]]$se.SCL
-       L2 <- c(list(x=x, y=yp, lty=2), as.list(troispoints))
-       do.call(plot_add, modifyList(L1, L2) )
-       yp <- y-2*metric.summary$metric[[1]]$se.SCL
-       L2 <- c(list(x=x, y=yp, lty=2), as.list(troispoints))
-       do.call(plot_add, modifyList(L1, L2) )
-     }
-     
-
-     
-     if (show.test) {
-       mean.ts <- attributes(metric.summary$metric[[1]])$test.mean
-       sd.ts <- attributes(metric.summary$metric[[1]])$test.sd
-       segments(0, mean.ts, xlim[2]+0.05*xlim[2], mean.ts, lwd=2, xpd=TRUE)
-       if (!is.na(sd.ts)) {
-            segments(0, mean.ts-2*sd.ts,  xlim[2]+0.05*xlim[2], mean.ts-2*sd.ts, lwd=1, lty=2, xpd=TRUE)
-            segments(0, mean.ts+2*sd.ts,  xlim[2]+0.05*xlim[2], mean.ts+2*sd.ts, lwd=1, lty=2, xpd=TRUE)
-       }
-     }
-     
-     if (show.third) {
-       x1 <- attributes(metric.summary$metric[[1]])$time.begin.middlethird/(24*60)
-       x2 <- attributes(metric.summary$metric[[1]])$time.end.middlethird/(24*60)
-       ty1 <- ylimS[1]
-       ty2 <- ylimS[2]+ylimS[2]/40
-       
-           segments(x1, ty1, x1, ty2, lwd=1, lty=3, xpd=TRUE)
-           segments(x2, ty1, x2, ty2, lwd=1, lty=3, xpd=TRUE)
-           par(xpd=TRUE)
-           getFromNamespace(".Arrows", ns="HelpersMG")(x1, ylimS[2]+1, x2, ylimS[2]+1, code=3)
-           text(x1+(x2-x1)/2, ylimS[2]+ylimS[2]/at.lab.third, labels=lab.third, xpd=TRUE)
-     }
-     
-     
-     if (show.stages) {
-       ## on affiche les stades
-       
-       for(i in 1:length(embryo.stages_ini)) {
-         y1=embryo.stages_ini[i]*attributes(metric.summary$metric[[1]])$metric.end.incubation
-         segments(0, y1, xlim[2]-4, y1, lwd=1, lty=2, col=col.stages)
-         text(xlim[2]-3*(as.numeric(i)%%2), y1, labels=names(embryo.stages_ini[i]), col=col.stages, cex=0.7)
-       }
-       par(xpd=TRUE)
-       text(xlim[2]-2, ylimS[2]+3, labels=lab.stages, col=col.stages, cex=0.7)
-     }
-     
- 
-     
-     # je rtablis l'axe de la mtrique
-     #  par(new=TRUE)
-     #  L1 <- list(type = "n", axes = FALSE, bty = "n", xlab = "", ylab = "", yaxs="r", xaxs="r", ylim=ylimS, xlim=xlim, main="")
-     #  L2 <- c(list(x=metric.summary$metric[[1]]$Time/(60*24), y=metric.summary$metric[[1]]$SCL), as.list(troispoints))
-     #  do.call(plot, modifyList(L1, L2) )
-     
-     
-     # fin de test si on doit faire la srie
+  NbTS <- temperatures[["IndiceT"]]["NbTS"]
+  if (series[[1]]=="all") {
+    series<-rep(TRUE, NbTS)
+  } else {
+    if (any(!is.logical(series))) {
+      if (is.numeric(series)) {
+        seriesx <- rep(FALSE, NbTS)
+        seriesx[series] <- TRUE
+      } else {
+        seriesx <- (names(temperatures[1:NbTS])==series)
+      }
+      series <- seriesx
+    } else {
+      # c'est des valeurs logiques, je verifie si le bon nombre, sinon je complete
+      if (length(series)!=NbTS) {
+        series <- rep(series, NbTS)
+        series <- series[1:NbTS]
+      }
+    }
   }
   
-  # fin des sries
-}
-
-# fin de la fonction
+  nbseries <- sum(series)
+  
+  if (nbseries==0) {
+    stop("No series has been selected")
+  }
+  
+  # fais du recyclage des couleurs des sries si ncessaire
+  cptcol.S <- 0
+  col.S <- rep(col.S, nbseries)[1:nbseries]
+  
+  ########################
+  #### Je tes_te les series
+  ########################
+  if (progress) pb <- txtProgressBar(min=0, max=length(which(series)), style=3)
+  
+  
+  for(seriesx in which(series)) {
+    
+    # seriesx <- 1
+    
+    
+    cptcol.S <- cptcol.S + 1
+    if (progress) setTxtProgressBar(pb, cptcol.S)
+    
+    metric.summary <- info.nests(NestsResult=NULL                                  , 
+                                 parameters=parameters                             , 
+                                 fixed.parameters=fixed.parameters                 , 
+                                 resultmcmc = resultmcmc                           , 
+                                 hessian=hessian                                   ,
+                                 SE=SE, temperatures=temperatures                  , 
+                                 integral=integral                                 , 
+                                 derivate=derivate                                 , 
+                                 hatchling.metric=hatchling.metric                 , 
+                                 stop.at.hatchling.metric=stop.at.hatchling.metric , 
+                                 M0=M0                                             , 
+                                 series=seriesx                                    ,
+                                 TSP.borders=TSP.borders                           , 
+                                 embryo.stages=embryo.stages                       ,
+                                 TSP.begin=TSP.begin                               , 
+                                 TSP.end=TSP.end                                   , 
+                                 replicate.CI=replicate.CI                         , 
+                                 GTRN.CI = GTRN.CI                                 , 
+                                 weight=NULL                                       , 
+                                 out="dynamic"                                     , 
+                                 fill=60                                           , 
+                                 SexualisationTRN=NULL                             , 
+                                 SexualisationTRN.mcmc=NULL                        , 
+                                 SexualisationTRN.CI=NULL                          , 
+                                 metric.end.incubation=metric.end.incubation       ,
+                                 progressbar=FALSE                                 ,
+                                 parallel=parallel                                 ,
+                                 probs= c(0.025, 0.5, 0.975)                       , 
+                                 metabolic.heating=0                               , 
+                                 temperature.heterogeneity=0                       , 
+                                 warnings=TRUE                                     , 
+                                 tsd=NULL                                          , 
+                                 tsd.CI=NULL                                       , 
+                                 tsd.mcmc=NULL                                     , 
+                                 zero = 1E-9                                       )
+    par(mar=mar)  
+    
+    troispoints <- tryCatch(list(...), error=function(e) list())
+    # troispoints <- list()
+    
+    if (add==FALSE | cptcol.S==1) {
+      par(new=FALSE)
+      L1 <- list(type = "n", axes = TRUE, bty = "n", xlab = xlab, ylab = ylabS, lwd=2, yaxs="r", xaxs="r", ylim=ylimS, xlim=xlim, main="", col=col.S[cptcol.S])
+      L2 <- modifyList(list(x=metric.summary$dynamic.metric[[1]][, "Time"]/(60*24), y=metric.summary$dynamic.metric[[1]][, "Metric_50%"]), troispoints)
+      do.call(plot, modifyList(L1, L2) )
+    }
+    
+    ylimS <- unname(ScalePreviousPlot()$ylim[1:2])
+    xlim <- unname(ScalePreviousPlot()$xlim[1:2])
+    
+    if (show.TSP) {
+      par(new=TRUE)
+      plot(1,1, xlim=xlim, ylim=ylimS, axes=FALSE, type="n", xlab="", ylab="")
+      x1 <- xlim[1]
+      x2 <- xlim[2]
+      ty1 <- metric.summary$summary.dynamic.metric[1, "metric.begin.tsp.mean"]
+      ty2 <- metric.summary$summary.dynamic.metric[1, "metric.end.tsp.mean"]
+      polygon(x=c(x1, x2, x2, x1), y=c(ty1, ty1, ty2, ty2), col=col.TSP, border=NA)
+      
+      #       text(x=x1+5, y=ty1+(ty2-ty1)/2, labels="TSP")
+      x1 <- metric.summary$summary.dynamic.metric[1, "time.begin.tsp.mean"]/(24*60)
+      x2 <- metric.summary$summary.dynamic.metric[1, "time.end.tsp.mean"]/(24*60)
+      ty1 <- ylimS[1]
+      ty2 <- ylimS[2]
+      polygon(x=c(x1, x2, x2, x1), y=c(ty1, ty1, ty2, ty2), col=col.TSP, border=NA)
+      #       text(x=x1+(x2-x1)/2, y=ty1+5, labels="TSP")
+    }
+    
+    
+    if (show.temperatures) {
+      # na.omit(metric.summary$metric[[1]][, c("Time", "TempC")])
+      x <- metric.summary$dynamic.metric[[1]][, "Time"]/(60*24)
+      y <- metric.summary$dynamic.metric[[1]][, "TempC"]
+      
+      Lx <- modifyList(as.list(troispoints), list(x=x, y=y, axes = FALSE, xlab = "", ylab = "", main="")) 
+      L <- modifyList(list(type = "l", bty = "n", xlab = "", ylab = "", xlim=xlim, ylim=ylimT, main="", las=1, col=col.temperatures, lty=lty.temperatures, lwd=lwd.temperatures), Lx) 
+      par(new=TRUE)
+      do.call(plot, L) 
+      
+      cex.y2 <- par("cex.axis")
+      if (!is.null(troispoints$cex.axis)) cex.y2 <- troispoints$cex.axis
+      cex.lab2 <- par("cex.lab")
+      if (!is.null(troispoints$cex.lab)) cex.lab2 <- troispoints$cex.lab
+      
+      axis(side=4, ylim=ylimT, las=1, cex.axis=cex.y2)
+      mtext(ylabT, side=4, line=3, cex=cex.lab2*par("cex"))
+      
+      if (show.PT & !is.na(PT[1])) {
+        
+        segments(0, PT[1], xlim[2]+xlim[2]*0.05, PT[1], lwd=2, col=col.PT, xpd=TRUE)
+        text(xlim[2]+6, PT[1], xpd=TRUE, labels=lab.PT, col=col.PT, cex=0.8)
+        if (!is.na(PT[2])) {
+          segments(0, PT[1]+PT[2]*2, xlim[2]+xlim[2]*0.05, PT[1]+PT[2]*2, lwd=2, col=col.PT, lty=2, xpd=TRUE)
+          segments(0, PT[1]-PT[2]*2, xlim[2]+xlim[2]*0.05, PT[1]-PT[2]*2, lwd=2, col=col.PT, lty=2, xpd=TRUE)
+        }
+        
+      }
+    }
+    
+    if (show.TSP) {
+      par(new=TRUE)
+      plot(1,1, xlim=xlim, ylim=ylimS, axes=FALSE, type="n", xlab="", ylab="")
+      x1 <- xlim[1]
+      x2 <- xlim[2]
+      ty1 <- metric.summary$summary.dynamic.metric[1, "metric.begin.tsp.mean"]
+      ty2 <- metric.summary$summary.dynamic.metric[1, "metric.end.tsp.mean"]
+      #       polygon(x=c(x1, x2, x2, x1), y=c(ty1, ty1, ty2, ty2), col=col.TSP, border=NA)
+      text(x=x1+5, y=ty1+(ty2-ty1)/2, labels=lab.TSP)
+      x1 <- metric.summary$summary.dynamic.metric[1, "time.begin.tsp.mean"]/(24*60)
+      x2 <- metric.summary$summary.dynamic.metric[1, "time.end.tsp.mean"]/(24*60)
+      ty1 <- ylimS[1]
+      ty2 <- ylimS[2]
+      #       polygon(x=c(x1, x2, x2, x1), y=c(ty1, ty1, ty2, ty2), col=col.TSP, border=NA)
+      text(x=x1+(x2-x1)/2, y=ty1+ty2/at.lab.TSP, labels=lab.TSP, xpd=TRUE)
+    }
+    
+    par(new=TRUE)
+    L1 <- list(type = "n", axes = FALSE, bty = "n", xlab = "", ylab = "", yaxs="r", xaxs="r", ylim=ylimS, xlim=xlim, main="")
+    L2 <- c(list(x=metric.summary$metric[[1]]$Time/(60*24), y=metric.summary$metric[[1]]$SCL), as.list(troispoints))
+    do.call(plot, modifyList(L1, L2) )
+    
+    if (show.metric) {
+      x <- metric.summary$dynamic.metric[[1]][, "Time"]/(60*24)
+      y <- metric.summary$dynamic.metric[[1]][, "Metric_50%"]
+      L1 <- list(type = "l", lwd=2, col=col.S[cptcol.S])
+      L2 <- c(list(x=x, y=y), as.list(troispoints))
+      
+      do.call(plot_add, modifyList(L1, L2) )
+    }
+    
+    if (GTRN.CI != "null") {
+      yp <- metric.summary$dynamic.metric[[1]][, "Metric_2.5%"]
+      L2 <- c(list(x=x, y=yp, lty=2), as.list(troispoints))
+      do.call(plot_add, modifyList(L1, L2) )
+      yp <- metric.summary$dynamic.metric[[1]][, "Metric_97.5%"]
+      L2 <- c(list(x=x, y=yp, lty=2), as.list(troispoints))
+      do.call(plot_add, modifyList(L1, L2) )
+    }
+    
+    
+    
+    if (show.hatchling.metric) {
+      mean.ts <- metric.summary$summary.dynamic.metric[1, "hatchling.metric.mean.mean"]
+      sd.ts <- metric.summary$summary.dynamic.metric[1, "hatchling.metric.sd.mean"]
+      segments(0, mean.ts, xlim[2]+0.05*xlim[2], mean.ts, lwd=2, xpd=TRUE)
+      if (!is.na(sd.ts)) {
+        segments(0, mean.ts-2*sd.ts,  xlim[2]+0.05*xlim[2], mean.ts-2*sd.ts, lwd=1, lty=2, xpd=TRUE)
+        segments(0, mean.ts+2*sd.ts,  xlim[2]+0.05*xlim[2], mean.ts+2*sd.ts, lwd=1, lty=2, xpd=TRUE)
+      }
+    }
+    
+    if (show.third) {
+      x1 <- metric.summary$summary.dynamic.metric[1, "time.begin.middlethird.mean"]/(24*60)
+      x2 <- metric.summary$summary.dynamic.metric[1, "time.end.middlethird.mean"]/(24*60)
+      ty1 <- ylimS[1]
+      ty2 <- ylimS[2]+ylimS[2]/40
+      
+      segments(x1, ty1, x1, ty2, lwd=1, lty=3, xpd=TRUE)
+      segments(x2, ty1, x2, ty2, lwd=1, lty=3, xpd=TRUE)
+      par(xpd=TRUE)
+      getFromNamespace(".Arrows", ns="HelpersMG")(x1, ylimS[2]+1, x2, ylimS[2]+1, code=3)
+      text(x1+(x2-x1)/2, ylimS[2]+ylimS[2]/at.lab.third, labels=lab.third, xpd=TRUE)
+    }
+    
+    
+    if (show.stages) {
+      ## on affiche les stades
+      
+      for(i in 1:length(embryo.stages_ini)) {
+        y1=embryo.stages_ini[i]*metric.summary$summary.dynamic.metric[1, "metric.end.incubation.mean"]
+        segments(0, y1, xlim[2]-4, y1, lwd=1, lty=2, col=col.stages)
+        text(xlim[2]-3*(as.numeric(i)%%2), y1, labels=names(embryo.stages_ini[i]), col=col.stages, cex=0.7)
+      }
+      par(xpd=TRUE)
+      text(xlim[2]-2, ylimS[2]+3, labels=lab.stages, col=col.stages, cex=0.7)
+    }
+    
+    
+    
+    # je rtablis l'axe de la mtrique
+    #  par(new=TRUE)
+    #  L1 <- list(type = "n", axes = FALSE, bty = "n", xlab = "", ylab = "", yaxs="r", xaxs="r", ylim=ylimS, xlim=xlim, main="")
+    #  L2 <- c(list(x=metric.summary$metric[[1]]$Time/(60*24), y=metric.summary$metric[[1]]$SCL), as.list(troispoints))
+    #  do.call(plot, modifyList(L1, L2) )
+    
+    
+    # fin des sries
+  }
+  
+  # fin de la fonction
 }
 
 

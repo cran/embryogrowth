@@ -1,6 +1,6 @@
 #' Result of the fit using the nest database using trigonometric function
 #' @title Result of the fit using the nest database using trigonometric function
-#' @author Marc Girondot \email{marc.girondot@@u-psud.fr}
+#' @author Marc Girondot \email{marc.girondot@@universite-paris-saclay.fr}
 #' @docType data
 #' @name resultNest_4p_trigo
 #' @encoding UTF-8
@@ -17,17 +17,17 @@
 #' data(nest)
 #' formated <- FormatNests(nest)
 #' x <- ChangeSSM(temperatures = (200:350)/10,
-#'                parameters = resultNest_4p_SSM4p$par,
+#'                parameters = resultNest_4p_SSM$par,
 #'                initial.parameters = structure(c(3, 20, 40, 32), 
 #'                          .Names = c("Max", "LengthB", "LengthE", "Peak")), 
 #'                control=list(maxit=1000))
 #' pfixed <- c(rK=2.093313)
 #' resultNest_4p_trigo <- searchR(parameters=x$par, fixed.parameters=pfixed, 
-#'                          temperatures=formated, derivate=dydt.Gompertz, M0=1.7, 
-#'                          test=c(Mean=39.33, SD=1.92))
+#'                          temperatures=formated, integral=integral.Gompertz, M0=1.7, 
+#'                          hatchling.metric=c(Mean=39.33, SD=1.92))
 #' plotR(resultNest_4p_trigo, ylim=c(0, 3))
 #' plotR(resultNest_4p_trigo, ylim=c(0, 3), ylimH = c(0, 0.9), show.hist=TRUE)
-#' compare_AIC(SSM=resultNest_4p_SSM4p, trigonometric=resultNest_4p_trigo)
+#' compare_AIC(SSM=resultNest_4p_SSM, trigonometric=resultNest_4p_trigo)
 #' }
 #' @format A list with fitted information about data(nest)
 NULL

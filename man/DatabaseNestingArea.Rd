@@ -36,7 +36,7 @@ Wallace, B. P., DiMatteo, A. D., Hurley, B. J., Finkbeiner,
             and research across multiple scales. Plos One, 5, e15465.
 }
 \author{
-Marc Girondot \email{marc.girondot@u-psud.fr}
+Marc Girondot \email{marc.girondot@universite-paris-saclay.fr}
 
 Maria Sousa Martins \email{maria.esmartins@gmail.com}
 }

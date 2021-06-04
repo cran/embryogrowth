@@ -36,44 +36,67 @@
 #' # "T12H", "DHA",  "DHH", "Rho25"
 #' # Or
 #' # "T12L", "T12H", "DHA",  "DHH", "DHL", "Rho25"
-#' x <- structure(c(118.768297442004, 475.750095909406, 306.243694918151, 
-#' 116.055824800264), .Names = c("DHA", "DHH", "T12H", "Rho25"))
-#' # pfixed <- c(K=82.33) or rK=82.33/39.33
-#' pfixed <- c(rK=2.093313)
-#' resultNest_4p_SSM4p <- searchR(parameters=x, fixed.parameters=pfixed,  
-#' 	temperatures=formated, derivate=dydt.Gompertz, M0=1.7,  
-#' 	test=c(Mean=39.33, SD=1.92))
-#' data(resultNest_4p_SSM4p)
-#' pMCMC <- TRN_MHmcmc_p(resultNest_4p_SSM4p, accept=TRUE)
+#' ############################################################################
+#' pfixed <- c(rK=1.208968)
+#' M0 = 0.3470893 
+#' ############################################################################
+#' # 4 parameters
+#' ############################################################################
+#' x c('DHA' = 109.31113503282113, 'DHH' = 617.80695919563857, 
+#'     'T12H' = 306.38890489505093, 'Rho25' = 229.37265815800225)
+#'     
+#' resultNest_4p_SSM <- searchR(parameters=x, fixed.parameters=pfixed, 
+#' 	temperatures=formated, integral=integral.Gompertz, M0=M0, 
+#' 	hatchling.metric=c(Mean=39.33, SD=1.92))
+#' data(resultNest_4p_SSM)
+#' plot(resultNest_4p_SSM, xlim=c(0,70), ylimT=c(22, 32), ylimS=c(0,45), series=1, 
+#' embryo.stages="Caretta caretta.SCL")
+#' ############################################################################
+#' pMCMC <- TRN_MHmcmc_p(resultNest_4p_SSM, accept=TRUE)
 #' # Take care, it can be very long; several days
-#' resultNest_mcmc_4p_SSM4p <- GRTRN_MHmcmc(result=resultNest_4p_SSM4p, 
+#' resultNest_mcmc_4p_SSM <- GRTRN_MHmcmc(result=resultNest_4p_SSM, 
 #'    adaptive = TRUE,
 #' 		parametersMCMC=pMCMC, n.iter=10000, n.chains = 1,  
 #' 		n.adapt = 0, thin=1, trace=TRUE)
-#' data(resultNest_mcmc_4p_SSM4p)
-#' out <- as.mcmc(resultNest_mcmc_4p_SSM4p)
+#' # The SDProp in pMCMC at the beginning of the Markov chain can 
+#' # be considered as non-optimal. However, the values at the end 
+#' # of the Markoc chain are better due to the use of the option
+#' # adaptive = TRUE. Then a good strategy is to run again the MCMC
+#' # with this final set:
+#' pMCMC[, "SDProp"] <- resultNest_mcmc_4p_SSM$parametersMCMC$SDProp.end
+#' # Also, take the set of parameters fitted as maximim likelihood
+#' # as initial set of value
+#' pMCMC[, "Init"] <- as.parameters(resultNest_mcmc_4p_SSM)
+#' # Then I run again the MCMC; it will ensure to get the optimal distribution
+#' resultNest_mcmc_4p_SSM <- GRTRN_MHmcmc(result=resultNest_4p_SSM, 
+#'    adaptive = TRUE,
+#' 		parametersMCMC=pMCMC, n.iter=10000, n.chains = 1,  
+#' 		n.adapt = 0, thin=1, trace=TRUE)
+#' 		
+#' data(resultNest_mcmc_4p_SSM)
+#' out <- as.mcmc(resultNest_mcmc_4p_SSM)
 #' # This out can be used with coda package
 #' # Test for stationarity and length of chain
 #' require(coda)
 #' heidel.diag(out)
 #' raftery.diag(out)
 #' # plot() can use the direct output of GRTRN_MHmcmc() function.
-#' plot(resultNest_mcmc_4p_SSM4p, parameters=1, xlim=c(0,550))
-#' plot(resultNest_mcmc_4p_SSM4p, parameters=3, xlim=c(290,320))
+#' plot(resultNest_mcmc_4p_SSM, parameters=1, xlim=c(0,550))
+#' plot(resultNest_mcmc_4p_SSM, parameters=3, xlim=c(290,320))
 #' # summary() permits to get rapidly the standard errors for parameters
 #' # They are store in the result also.
-#' se <- result_mcmc_4p_SSM4p$SD
+#' se <- result_mcmc_4p_SSM$SD
 #' # the confidence interval is better estimated by:
 #' apply(out[[1]], 2, quantile, probs=c(0.025, 0.975))
 #' # The use of the intermediate method is as followed;
 #' # Here the total mcmc iteration is 10000, but every 1000, intermediate
 #' # results are saved in file intermediate1000.Rdata:
-#' resultNest_mcmc_4p_SSM4p <- GRTRN_MHmcmc(result=resultNest_4p_SSM4p, 
+#' resultNest_mcmc_4p_SSM <- GRTRN_MHmcmc(result=resultNest_4p_SSM, 
 #' parametersMCMC=pMCMC, n.iter=10000, n.chains = 1,  
 #' n.adapt = 0, thin=1, trace=TRUE, 
 #' intermediate=1000, filename="intermediate1000.Rdata")
 #' # If run has been stopped for any reason, it can be resumed with:
-#' resultNest_mcmc_4p_SSM4p <- GRTRN_MHmcmc(previous="intermediate1000.Rdata")
+#' resultNest_mcmc_4p_SSM <- GRTRN_MHmcmc(previous="intermediate1000.Rdata")
 #' # Example to use of the epsilon parameter to get confidence level
 #' resultNest_4p_epsilon <- resultNest_4p
 #' resultNest_4p_epsilon$fixed.parameters <- c(resultNest_4p_epsilon$par, 
@@ -122,9 +145,9 @@ GRTRN_MHmcmc <- function(result=NULL, n.iter=10000,
     if (is.null(trace)) trace <- FALSE
     print(parametersMCMC)
     # 29/1/2014; Ajout de result$weight
-    # n.iter=n.iter; parameters=parametersMCMC; n.chains = n.chains; n.adapt = n.adapt; thin=thin; trace=trace; data=list(data=result$data, derivate=result$derivate, test=result$test, M0=result$M0, fixed.parameters=result$fixed.parameters, weight=result$weight); likelihood=getFromNamespace(".fonctionMCMC", ns="embryogrowth"); intermediate=intermediate; filename=filename; previous=previous
-    # 3/12/2015 j'avais un data=list(data=result$data, derivate=result$derivate, 
-    # test=result$test, M0=result$M0, fixed.parameters=result$fixed.parameters, 
+    # n.iter=n.iter; parameters=parametersMCMC; n.chains = n.chains; n.adapt = n.adapt; thin=thin; trace=trace; data=list(data=result$data, integral=result$integral, hatchling.metric=result$hatchling.metric, M0=result$M0, fixed.parameters=result$fixed.parameters, weight=result$weight); likelihood=getFromNamespace(".fonctionMCMC", ns="embryogrowth"); intermediate=intermediate; filename=filename; previous=previous
+    # 3/12/2015 j'avais un data=list(data=result$data, integral=result$integral, 
+    # hatchling.metric=result$hatchling.metric, M0=result$M0, fixed.parameters=result$fixed.parameters, 
     # weight=result$weight)
     out <- MHalgoGen(n.iter=n.iter, parameters=parametersMCMC, 
                      n.chains = n.chains, n.adapt = n.adapt, thin=thin, trace=trace, 
@@ -132,11 +155,11 @@ GRTRN_MHmcmc <- function(result=NULL, n.iter=10000,
                      intermediate=intermediate, filename=filename, previous=previous, 
                      parallel=parallel, 
                      adaptive=adaptive, adaptive.lag=adaptive.lag, adaptive.fun=adaptive.fun,
-                     temperatures=result$data, derivate=result$derivate, 
-                     test=result$test, M0=result$M0, 
+                     temperatures=result$data, integral=result$integral, 
+                     hatchling.metric=result$hatchling.metric, M0=result$M0, 
                      fixed.parameters=result$fixed.parameters, 
                      weight=result$weight, out="Likelihood", 
-                     progress=FALSE, warnings=FALSE, 
+                     progressbar=FALSE, warnings=FALSE, 
                      likelihood=getFromNamespace("info.nests", ns = "embryogrowth"))
     
   }

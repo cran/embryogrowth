@@ -6,9 +6,9 @@
 #' @description Add a transition parameter on a set of parameters or remove it
 #' @examples
 #' \dontrun{
-#' data(resultNest_6p_SSM6p)
+#' data(resultNest_6p_SSM)
 #' # Get a set of parameters without transition
-#' x1 <- resultNest_6p_SSM6p$par
+#' x1 <- resultNest_6p_SSM$par
 #' # Generate a set of parameters with transition
 #' x2 <- switch.transition(x1)
 #' # Generate a set of parameters without transition

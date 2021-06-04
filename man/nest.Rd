@@ -28,6 +28,6 @@ Girondot, M. & Kaska, Y. 2014. A model to predict the thermal
          Thermal Biology. 45, 96-102.
 }
 \author{
-Marc Girondot \email{marc.girondot@u-psud.fr}
+Marc Girondot \email{marc.girondot@universite-paris-saclay.fr}
 }
 \keyword{datasets}

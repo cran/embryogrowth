@@ -27,10 +27,10 @@ hist.NestsResult shows the histogram of temperatures with set of nests
 \examples{
 \dontrun{
 library(embryogrowth)
-data(resultNest_4p_SSM4p)
-h <- hist(resultNest_4p_SSM4p, series=c(1:5))
+data(resultNest_4p_SSM)
+h <- hist(resultNest_4p_SSM, series=c(1:5))
 }
 }
 \author{
-Marc Girondot \email{marc.girondot@u-psud.fr}
+Marc Girondot \email{marc.girondot@universite-paris-saclay.fr}
 }

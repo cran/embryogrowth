@@ -24,13 +24,13 @@ shinyUI(fluidPage(
     , p(strong("The embryogrowth R package is a set of tools used 
                to model embryo growth and sexual phenotype linked to 
                temperature."))
-    , p("This web server version v. 4.00 is a simplified version of the complete tools available ", 
+    , p("This web server version v. 4.01 is a simplified version of the complete tools available ", 
         a("here."
           , href="https://cran.r-project.org/package=embryogrowth"
           , target="_blank"))
     , p("Embryogrowth package is developped by "
         , a("Marc Girondot"
-            , href="http://max2.ese.u-psud.fr/epc/conservation/Girondot/Publications/Marc.html"
+            , href="https://max2.ese.u-psud.fr/epc/conservation/index.html"
             , target="_blank"))
     , p(paste0("Database version ", as.character(DatabaseTSD$Version[1])))
   )

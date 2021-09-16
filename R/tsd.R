@@ -266,6 +266,8 @@ tsd <- function(df=NULL                                            ,
   # parameters.initial = c(P=29.19); fixed.parameters = c(S=-0.21)
   equation <- tolower(equation)
   
+  if (is.null(replicate.CI)) replicate.CI <- 0
+  
   equation <- match.arg(equation, 
                         choices = c("logistic", "hill", "a-logistic", "hulin", 
                                     "double-a-logistic", "flexit", "gsd", 

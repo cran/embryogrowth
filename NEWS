@@ -1,8 +1,14 @@
 THIS IS THE CHANGELOG OF THE "embryogrowth" PACKAGE
 
-            CHANGES IN VERSION 8.1 (2021-06-04)
+            CHANGES IN VERSION 8.2 (2021-09-16)
 
-* New CRAN version - 8.1 (2020-10-20)
+* New CRAN version - 8.2 (2021-06-29)
+
+            CHANGES IN VERSION 8.1-7 (2021-08-20)
+
+* New CRAN version - 8.1 (2021-06-29)
+* tsd() accepts replicate.CI being null - 8.1-1 (2021-07-13)
+* MovingIncubation() accepts metabolic.heating being different from 0 - 8.1-5 (2021-08-19)
 
             CHANGES IN VERSION 8.0-42 (2021-06-03)
 

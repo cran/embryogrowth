@@ -34,6 +34,7 @@ plotR(
   main = "",
   xlab = expression("Temperature in " * degree * "C"),
   ylab = NULL,
+  yaxt = "s",
   bty = "n",
   las = 1,
   by.temperature = 0.1,
@@ -107,6 +108,8 @@ plotR(
 
 \item{ylab}{Label for y axis}
 
+\item{yaxt}{The yaxt parameter of y-axis}
+
 \item{bty}{Box around the pot}
 
 \item{las}{Orientation for labels in y axis}
@@ -132,7 +135,7 @@ plotR(
 \item{mar}{The value of par("mar"). If null, it will use default depending on show.dist. If NA, does not change par("mar").}
 }
 \value{
-The value of scaleY to be used with other plotR function
+A list with the value of scaleY to be used with other plotR function and the plot data in xy list element
 }
 \description{
 Show the fitted growth rate dependent on temperature and its density.\cr

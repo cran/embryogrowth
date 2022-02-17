@@ -1,6 +1,6 @@
-d921a6622008ced3cd6b6601f9e49cb1 *DESCRIPTION
+d14b6cd271d5c34040fd6a7c8968610b *DESCRIPTION
 c320ad795a8ce4ff0f51f02adebe00bd *NAMESPACE
-74b6be92d03a78f89e85d5365c6074a1 *NEWS
+348340155bdbf86dee2419f46b2b2f7d *NEWS
 4c17b9f2d0b411d3792a7b1bba736bf6 *R/ChangeSSM.R
 e006785b580cb00868cc80be62f11ab1 *R/DatabaseNestingArea.R
 8d82b2d4bd3b5a77436d9030f494abd7 *R/DatabaseTSD.R
@@ -21,7 +21,7 @@ e89560d0fad80e1c719ab177ff9e0b90 *R/HatchingSuccess.logLik.R
 010dec8b482bf6792f16119870e8f798 *R/HatchingSuccess.nobs.R
 a6cd09d9a9e97c2bc09a855510c9bbf4 *R/HatchingSuccess.predict.R
 2be5d7ecf7c5dce1d79a26c606287fe2 *R/Linear.R
-5afec93de7cb7912be99d3e3536d3b83 *R/MovingIncubation.R
+56548a7fa33cfae87e3ff28fbd712f52 *R/MovingIncubation.R
 e90251ec34a516be01f3e5358486d247 *R/P_TRT.R
 12a73e2be44de76e9ec9dde628fe03d6 *R/SSM.R
 5539acd6da370954894eae5110e46c42 *R/STRN.R
@@ -30,7 +30,7 @@ e5783a800e9685321ddbbd5b8bad2eba *R/STRN_fit.R
 ea813effa45eaf4f23e3d0ac158aa764 *R/TRN_MHmcmc_p.R
 74b553a6da7f47cf6839367719b0c3b3 *R/TSP.list.R
 b15d39333823efdc9506380a3e161f32 *R/calibrate.datalogger.R
-209d026c0bfb3ef4329308d655396529 *R/embryogrowth-package.R
+568786b83c5d0607b7587843efdd29a1 *R/embryogrowth-package.R
 25bed032eeadc50012ebaf0c3cd8c939 *R/fitSSM.R
 abe6d8b2b255d5aefb27e537bb3faaa9 *R/gradientRichardson.R
 c033829d8a6e280ae4fe1bb710d3d857 *R/hessianRichardson.R
@@ -50,8 +50,8 @@ b6309f34e0ec792ec7abf054283d2e90 *R/movement.R
 be19e18c36458445de68e89a898610a2 *R/nobs.NestsResult.R
 1abd030451f6e9e73cdd7771fb6ea88a *R/plot.HatchingSuccess.R
 789d8997111ff528b74c92c8c48c0b00 *R/plot.NestsResult.R
-e8ea0c0e191c252925afdefe5b7afc66 *R/plot.tsd.R
-08c0d0627c097da61c40719047916aa0 *R/plotR.R
+544d95baed7e4992ee874bc7de050b7d *R/plot.tsd.R
+cd3c3f1c8340869f2ad71a2c666f231e *R/plotR.R
 7516e8b7524c22925b034e7c00f75be8 *R/plot_transition.R
 8f87f841e7a4b2727887dadc2ee0ed44 *R/predict.tsd.R
 1659dc2c32f16a3c3be14998f0eb4ff6 *R/resultNest_3p_Dallwitz.R
@@ -75,7 +75,7 @@ f8dedd7cd38dbee87445179d556e1694 *R/summary.Nests.R
 25c31f8fd3e7c034dc05d9d5940a15d5 *R/switch.transition.R
 ef1cdf8c6f34fd5e56b18e1a6c891c29 *R/tempConst.R
 ed781003852b9fede598b9d39e63d593 *R/test.parallel.R
-abbca065b59d96f827e76119b1619f6a *R/tsd.R
+a130c1cb216081fed3a0da7c3d267598 *R/tsd.R
 dbc86e5a47eade3dd22cfb772b620a7c *R/tsd_MHmcmc.R
 b51814a95942a749899fb7ba070db38a *R/tsd_MHmcmc_p.R
 d496b1cad4c11c084631af763c8adf5a *R/tsd_fit.R
@@ -83,9 +83,9 @@ d496b1cad4c11c084631af763c8adf5a *R/tsd_fit.R
 562708edc61e761d347ed416de0afb62 *R/web.tsd.R
 fc0ce90aead7f9fc54190f710331e9ad *R/weightmaxentropy.R
 528a376ebf9d682e9155e43d61ae3403 *R/weightmaxentropy_fit.R
-22eefef25b1e5bad1b86d1cd3746a7d1 *data/DatabaseNestingArea.rda
-27d9cafd4e884a415adf070844bb234b *data/DatabaseTSD.rda
-7a90eec082487151b11a7aec0a9d3d1e *data/TSP.list.rda
+28ce91fc7f13ee03169b84b49debad7e *data/DatabaseNestingArea.rda
+f86c21bdbc07d955dc4825af41f6da15 *data/DatabaseTSD.rda
+0f03b50ff52509b03a883144c2a53250 *data/TSP.list.rda
 770c90f067030dbdd71dd01a82179f3b *data/nest.rda
 e84e75a13b3fc153dd94305f808fa97b *data/resultNest_3p_Dallwitz.rda
 0ce7b16ae89876900fce0aad2415bf7e *data/resultNest_3p_Weibull.rda
@@ -102,7 +102,7 @@ e0e6a32ff99590edd6c27bc57e34bdc2 *data/resultNest_6p_SSM.rda
 8dcbae41efe35e80761df110ba39aae0 *data/resultNest_mcmc_6p_SSM.rda
 a73f02daea23ee27c4f4e6b084b5cdc3 *data/resultNest_mcmc_newp.rda
 194677c05d547d98ad46d1e5b0ece641 *data/resultNest_newp.rda
-52977b0b7f95f9b56b5393b396bb22a1 *data/stages.rda
+103c54a0361ab21b31bdd007fa368eb4 *data/stages.rda
 18f46b18447fcd2d122d722229e20722 *data/tempConst.rda
 0cef9f4a197446c8bc681ee040ff8b13 *inst/shiny/server.R
 92c1dc41f63c371a0dc0d14c57931fa2 *inst/shiny/ui.R
@@ -121,7 +121,7 @@ ffbaf89096c5e055f882af0778227eb0 *man/HatchingSuccess.MHmcmc_p.Rd
 5243c1260dae2ad1d300cc9db205403c *man/HatchingSuccess.fit.Rd
 b1b268cc713ebcb60ae836c44284955c *man/HatchingSuccess.lnL.Rd
 3aa64e93c928041fa5d1c6e002af464a *man/HatchingSuccess.model.Rd
-6606ab020883e05f2e7c2b7922e5b51f *man/MovingIncubation.Rd
+14ecce00c8f7d66b043d792d9a0155b3 *man/MovingIncubation.Rd
 f56c30be5bb0d87c86dbfb0aababbcca *man/P_TRT.Rd
 9728142295261211e8d06699ab234985 *man/STRN.Rd
 5877d6850d75f063f14a4d34b130ef4e *man/STRN_MHmcmc.Rd
@@ -131,8 +131,8 @@ a5c0d505b3f25a551abd2fc281d590ac *man/TSP.list.Rd
 437484c59e4109d64cff3e48d03b5368 *man/dydt.Gompertz.Rd
 afebe2254fef30771685f3f6086b0862 *man/dydt.exponential.Rd
 458d22837ab3882ae4c58b82aeaab43d *man/dydt.linear.Rd
-a3e13d9f77f7b8b33127da05db94bb28 *man/embryogrowth-package.Rd
-23bf7955247458bbe07e16124e8fd037 *man/figures/E.png
+4c075954a4e8db1bba8dd362af7b7c45 *man/embryogrowth-package.Rd
+9e1d50e527041d7163acbdd000b132d7 *man/figures/E.png
 0ff7aafb97ad17b030abbf6eab409468 *man/hist.Nests.Rd
 a990101a5d68c154e470819fb6772ff4 *man/hist.NestsResult.Rd
 58338c5464dca2b354cfae337cefb5db *man/info.nests.Rd
@@ -151,7 +151,7 @@ b5679508d97e679627ceb532c5590e11 *man/nobs.NestsResult.Rd
 f38391253181e663891e91a415684d0a *man/plot.HatchingSuccess.Rd
 33a31a1b4a6c8bb5591f7c1dd462b8b8 *man/plot.NestsResult.Rd
 ff1965b71c97053e7d2a0c6453b96983 *man/plot.tsd.Rd
-17c7362296dc7cbe5529ce6ac2d37c54 *man/plotR.Rd
+e8e03b77f9111e6e7a724c45224c6ffb *man/plotR.Rd
 eee9d84bb5231911a15108195c010cdf *man/plot_transition.Rd
 1d9a7c8ff0e1c45feaacaaa8644b1e66 *man/predict.HatchingSuccess.Rd
 3ada3754c360f91282ef8ceceeb82868 *man/predict.tsd.Rd
@@ -176,7 +176,7 @@ eaef04c74529d149299d28315a71eaad *man/resultNest_mcmc_4p_SSM.Rd
 9cdb708e197378cb71007449e1ca3b1e *man/switch.transition.Rd
 ba7a70bbc47c1d1534800463fb1ce84e *man/tempConst.Rd
 8942d2a125c55aac79758e0a7ee1445b *man/test.parallel.Rd
-325978300863dccb542b9e9bfffef0d2 *man/tsd.Rd
+fc26661d99629a9ebe5d853ab639a3ff *man/tsd.Rd
 2ce52b73ec1f08857eafcb4156236fa8 *man/tsd_MHmcmc.Rd
 8d407f39b8dd9f21e976359d14ced74b *man/tsd_MHmcmc_p.Rd
 73c63545cf7489fcdfded4d70bb623f8 *man/uncertainty.datalogger.Rd

@@ -1,8 +1,16 @@
 THIS IS THE CHANGELOG OF THE "embryogrowth" PACKAGE
 
-            CHANGES IN VERSION 8.2 (2021-09-16)
+            CHANGES IN VERSION 8.3-4 (2022-02-17)
+
+* New CRAN version - 8.3 (2022-01-31)
+* Minor change for figure in documentation - 8.3-1 (2022-02-17)
+
+            CHANGES IN VERSION 8.2-15 (2022-01-26)
 
 * New CRAN version - 8.2 (2021-06-29)
+* Add option "pseudohessianfrommcmc" for movingincubation - 8.2-1 (2021-10-06)
+* plotR() return a list with two elements, scaleY and xy - 8.2-4 (2021-11-19)
+* plot.tsd() return a data.frame with model - 8.2-6 (2022-01-11)
 
             CHANGES IN VERSION 8.1-7 (2021-08-20)
 

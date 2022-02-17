@@ -1,7 +1,7 @@
 #' plotR shows the fitted growth rate dependent on temperature and the density of the mcmc
 #' @title Show the fitted growth rate dependent on temperature and its density
 #' @author Marc Girondot
-#' @return The value of scaleY to be used with other plotR function
+#' @return A list with the value of scaleY to be used with other plotR function and the plot data in xy list element
 #' @param result A result object or a list of result objects
 #' @param resultmcmc A result object from GRTN_MHmcmc() function
 #' @param chain The chain to use in resultmcmc
@@ -31,6 +31,7 @@
 #' @param lwdCI The type of lines
 #' @param ylim Range of values for y-axis
 #' @param xlim Range of values for x-axis
+#' @param yaxt The yaxt parameter of y-axis
 #' @param by.temperature Step to built the temperatures
 #' @param scaleY Scaling factor for y axis or "auto"
 #' @param show.density TRUE or FALSE for use with Hessian or MCMC
@@ -128,6 +129,7 @@ plotR <-
            main=""                                                                         ,
            xlab = expression("Temperature in "*degree*"C")                                 , 
            ylab = NULL                                                                     , 
+           yaxt = "s"                                                                       ,
            bty = "n"                                                                       , 
            las = 1                                                                         , 
            by.temperature=0.1                                                              , 
@@ -144,6 +146,8 @@ plotR <-
     # result = NULL; resultmcmc=NULL; chain=1; parameters = NULL; fixed.parameters = NULL; hessian = NULL; replicate.CI=1000; probs=0.95; temperatures  = NULL;curve = "ML quantiles"; set.par=1; ylim=c(0, 5); xlim=c(20,35); cex.lab = 1; cex.axis = 1;scaleY="auto"; lty=1; ltyCI=3; lwd=1; lwdCI=1; colramp=colorRampPalette(c("white", rgb(red = 0.5, green = 0.5, blue = 0.5))); bandwidth = c(0.3, 0.05); pch = ""; main=""; col = "black"; col.polygon="grey"; polygon=FALSE; xlab = expression("Temperature in"*degree*"C"); ylab = NULL; bty = "n"; las = 1; by.temperature=0.1; show.density=FALSE;new=TRUE;show.hist=FALSE; ylimH = NULL; atH = NULL;ylabH="Temperature density";breaks = "Sturges";log.hist=FALSE;mar=NULL
     # resultmcmc = resultNest_mcmc_4p_SSM
     # result = resultNest_4p_SSM
+    
+    return_Out <- NULL
     
     curve <- tolower(curve)
     curve <- match.arg(curve, choices = c("mcmc quantiles", "mcmc mean-sd", "ml", "ml quantiles", "ml mean-se", "none"))
@@ -296,7 +300,8 @@ plotR <-
                       ylab=ylab, 
                       ylim=ylim, xlim = xlim, nbin = 128, postPlotHook=NULL, 
                       cex.axis=cex.axis, 
-                      cex.lab=cex.lab)
+                      cex.lab=cex.lab, 
+                      yaxt=yaxt)
       } else {
         par(new=TRUE)
         smoothScatter(x=MatrixRforSmooth[, 1], y=MatrixRforSmooth[, 2], bty = "n",  pch=pch, 
@@ -311,7 +316,8 @@ plotR <-
                       xlim = ScalePreviousPlot()$xlim[1:2], 
                       nbin = 128, postPlotHook=NULL, 
                       axes=FALSE,
-                      new=FALSE)
+                      new=FALSE, 
+                      yaxt=yaxt)
       }
     } else {
       if (new) {
@@ -325,7 +331,8 @@ plotR <-
              ylim=ylim, 
              xlim = xlim, 
              cex.axis=cex.axis, 
-             cex.lab=cex.lab)
+             cex.lab=cex.lab, 
+             yaxt=yaxt)
       }
     }
     
@@ -338,6 +345,10 @@ plotR <-
     }
     
     if ((curve == "ml quantiles") | (curve == ("mcmc quantiles"))) {
+      return_Out <- data.frame(x=SynthesisMatrixRforTempsAndReplicates["temperatures", ], 
+                               y=SynthesisMatrixRforTempsAndReplicates["X50", ], 
+                               y.lower=SynthesisMatrixRforTempsAndReplicates["X2.5", ], 
+                               y.upper=SynthesisMatrixRforTempsAndReplicates["X97.5", ])
       if (polygon) {
         vy <- c(SynthesisMatrixRforTempsAndReplicates["X2.5", ], rev(SynthesisMatrixRforTempsAndReplicates["X97.5", ]))
         vy <- ifelse(vy<ylim[1], ylim[1], vy)
@@ -345,20 +356,34 @@ plotR <-
         polygon(x=vx, y=vy, col=col.polygon, border = NA)
       }
       
-      dxy <- data.frame(x=SynthesisMatrixRforTempsAndReplicates["temperatures", ], y=ifelse(SynthesisMatrixRforTempsAndReplicates["X50", ]>=ylim[1] & SynthesisMatrixRforTempsAndReplicates["X50", ]<=ylim[2], SynthesisMatrixRforTempsAndReplicates["X50", ], NA))
+      dxy <- data.frame(x=SynthesisMatrixRforTempsAndReplicates["temperatures", ], 
+                        y=ifelse(SynthesisMatrixRforTempsAndReplicates["X50", ]>=ylim[1] & SynthesisMatrixRforTempsAndReplicates["X50", ]<=ylim[2], 
+                                 SynthesisMatrixRforTempsAndReplicates["X50", ], 
+                                 NA))
       dxy <- na.omit(dxy)
       lines(x = dxy$x, y=dxy$y, lty=lty, lwd=lwd, col=col)
       
-      dxy <- data.frame(x=SynthesisMatrixRforTempsAndReplicates["temperatures", ], y=ifelse(SynthesisMatrixRforTempsAndReplicates["X2.5", ]>=ylim[1] & SynthesisMatrixRforTempsAndReplicates["X2.5", ]<=ylim[2], SynthesisMatrixRforTempsAndReplicates["X2.5", ], NA))
+      dxy <- data.frame(x=SynthesisMatrixRforTempsAndReplicates["temperatures", ], 
+                        y=ifelse(SynthesisMatrixRforTempsAndReplicates["X2.5", ]>=ylim[1] & SynthesisMatrixRforTempsAndReplicates["X2.5", ]<=ylim[2], 
+                                 SynthesisMatrixRforTempsAndReplicates["X2.5", ], 
+                                 NA))
       dxy <- na.omit(dxy)
       lines(x = dxy$x, y=dxy$y, lty=ltyCI, lwd=lwdCI, col=col)
       
-      dxy <- data.frame(x=SynthesisMatrixRforTempsAndReplicates["temperatures", ], y=ifelse(SynthesisMatrixRforTempsAndReplicates["X97.5", ]>=ylim[1] & SynthesisMatrixRforTempsAndReplicates["X97.5", ]<=ylim[2], SynthesisMatrixRforTempsAndReplicates["X97.5", ], NA))
+      dxy <- data.frame(x=SynthesisMatrixRforTempsAndReplicates["temperatures", ], 
+                        y=ifelse(SynthesisMatrixRforTempsAndReplicates["X97.5", ]>=ylim[1] & SynthesisMatrixRforTempsAndReplicates["X97.5", ]<=ylim[2], 
+                                 SynthesisMatrixRforTempsAndReplicates["X97.5", ], 
+                                 NA))
       dxy <- na.omit(dxy)
       lines(x = dxy$x, y=dxy$y, lty=ltyCI, lwd=lwdCI, col=col)
     }
     
     if ((curve == "mcmc mean-sd") | (curve == "ml mean-se")) {
+      return_Out <- data.frame(x=SynthesisMatrixRforTempsAndReplicates["temperatures", ], 
+                               y=SynthesisMatrixRforTempsAndReplicates["Mean", ], 
+                               y.lower=SynthesisMatrixRforTempsAndReplicates["Mean", ]-1.96*SynthesisMatrixRforTempsAndReplicates["sd", ], 
+                               y.upper=SynthesisMatrixRforTempsAndReplicates["Mean", ]+1.96*SynthesisMatrixRforTempsAndReplicates["sd", ])
+      
       if (polygon) {
         vy <- c(SynthesisMatrixRforTempsAndReplicates["Mean", ]+1.96*SynthesisMatrixRforTempsAndReplicates["sd", ], rev(SynthesisMatrixRforTempsAndReplicates["Mean", ]-1.96*SynthesisMatrixRforTempsAndReplicates["sd", ]))
         vy <- ifelse(vy<ylim[1], ylim[1], vy)
@@ -366,21 +391,33 @@ plotR <-
         polygon(x=vx, y=vy, col=col.polygon, border = NA)
       }
       
-      dxy <- data.frame(x=SynthesisMatrixRforTempsAndReplicates["temperatures", ], y=ifelse(SynthesisMatrixRforTempsAndReplicates["Mean", ]>=ylim[1] & SynthesisMatrixRforTempsAndReplicates["Mean", ]<=ylim[2], SynthesisMatrixRforTempsAndReplicates["Mean", ], NA))
+      dxy <- data.frame(x=SynthesisMatrixRforTempsAndReplicates["temperatures", ], 
+                        y=ifelse(SynthesisMatrixRforTempsAndReplicates["Mean", ]>=ylim[1] & SynthesisMatrixRforTempsAndReplicates["Mean", ]<=ylim[2], 
+                                 SynthesisMatrixRforTempsAndReplicates["Mean", ], 
+                                 NA))
       dxy <- na.omit(dxy)
       lines(x = dxy$x, y=dxy$y, lty=lty, lwd=lwd, col=col)
       
-      dxy <- data.frame(x=SynthesisMatrixRforTempsAndReplicates["temperatures", ], y=ifelse((SynthesisMatrixRforTempsAndReplicates["Mean", ]-1.96*SynthesisMatrixRforTempsAndReplicates["sd", ])>=ylim[1] & (SynthesisMatrixRforTempsAndReplicates["Mean", ]-1.96*SynthesisMatrixRforTempsAndReplicates["sd", ])<=ylim[2], SynthesisMatrixRforTempsAndReplicates["Mean", ]-1.96*SynthesisMatrixRforTempsAndReplicates["sd", ], NA))
+      dxy <- data.frame(x=SynthesisMatrixRforTempsAndReplicates["temperatures", ], 
+                        y=ifelse((SynthesisMatrixRforTempsAndReplicates["Mean", ]-1.96*SynthesisMatrixRforTempsAndReplicates["sd", ])>=ylim[1] & (SynthesisMatrixRforTempsAndReplicates["Mean", ]-1.96*SynthesisMatrixRforTempsAndReplicates["sd", ])<=ylim[2], SynthesisMatrixRforTempsAndReplicates["Mean", ]-1.96*SynthesisMatrixRforTempsAndReplicates["sd", ], NA))
       dxy <- na.omit(dxy)
       lines(x = dxy$x, y=dxy$y, lty=ltyCI, lwd=lwdCI, col=col)
       
-      dxy <- data.frame(x=SynthesisMatrixRforTempsAndReplicates["temperatures", ], y=ifelse((SynthesisMatrixRforTempsAndReplicates["Mean", ]+1.96*SynthesisMatrixRforTempsAndReplicates["sd", ])>=ylim[1] & (SynthesisMatrixRforTempsAndReplicates["Mean", ]+1.96*SynthesisMatrixRforTempsAndReplicates["sd", ])<=ylim[2], SynthesisMatrixRforTempsAndReplicates["Mean", ]+1.96*SynthesisMatrixRforTempsAndReplicates["sd", ], NA))
+      dxy <- data.frame(x=SynthesisMatrixRforTempsAndReplicates["temperatures", ], 
+                        y=ifelse((SynthesisMatrixRforTempsAndReplicates["Mean", ]+1.96*SynthesisMatrixRforTempsAndReplicates["sd", ])>=ylim[1] & (SynthesisMatrixRforTempsAndReplicates["Mean", ]+1.96*SynthesisMatrixRforTempsAndReplicates["sd", ])<=ylim[2], SynthesisMatrixRforTempsAndReplicates["Mean", ]+1.96*SynthesisMatrixRforTempsAndReplicates["sd", ], NA))
       dxy <- na.omit(dxy)
       lines(x = dxy$x, y=dxy$y, lty=ltyCI, lwd=lwdCI, col=col)
     }
     
     if (curve == "ml") {
-      dxy <- data.frame(x=SynthesisMatrixRforTempsAndReplicates["temperatures", ], y=ifelse(SynthesisMatrixRforTempsAndReplicates["Mean", ]>=ylim[1] & SynthesisMatrixRforTempsAndReplicates["Mean", ]<=ylim[2], SynthesisMatrixRforTempsAndReplicates["Mean", ], NA))
+      return_Out <- data.frame(x=SynthesisMatrixRforTempsAndReplicates["temperatures", ], 
+                               y=SynthesisMatrixRforTempsAndReplicates["Mean", ], 
+                               y.lower=NA, 
+                               y.upper=NA)
+      
+      
+      dxy <- data.frame(x=SynthesisMatrixRforTempsAndReplicates["temperatures", ], 
+                        y=ifelse(SynthesisMatrixRforTempsAndReplicates["Mean", ]>=ylim[1] & SynthesisMatrixRforTempsAndReplicates["Mean", ]<=ylim[2], SynthesisMatrixRforTempsAndReplicates["Mean", ], NA))
       dxy <- na.omit(dxy)
       lines(x = dxy$x, y=dxy$y, lty=lty, lwd=lwd, col=col)
     }
@@ -434,9 +471,9 @@ plotR <-
       
       par(new=TRUE)
       # je retablis l'echelle des y et celle de R
-      plot(x = 1, y=1, ylim=ylim, xlim=xlim, xlab="", ylab="", axes=FALSE, bty="n", type="n")
+      plot(x = 1, y=1, ylim=ylim, xlim=xlim, xlab="", ylab="", axes=FALSE, bty="n", type="n", yaxt=yaxt)
 
     }
     
-    return(invisible(scaleY))
+    return(invisible(list(scaleY=scaleY, xy=return_Out)))
   }

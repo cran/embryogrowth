@@ -42,17 +42,17 @@ MovingIncubation(
 
 \item{resultmcmc}{A mcmc result. Will be used rather than SE if provided.}
 
-\item{GTRN.CI}{How to estimate CI for embryo growth thermal reaction norm; can be NULL, "SE", "MCMC", or "Hessian".}
+\item{GTRN.CI}{How to estimate CI for embryo growth thermal reaction norm; can be NULL, "SE", "MCMC", "pseudohessianfrommcmc" or "Hessian".}
 
 \item{tsd}{A object from tsd() that describe the thermal react norm of sex ratio at constant temperatures}
 
-\item{tsd.CI}{How to estimate CI for sex ratio thermal reaction norm; Can be NULL, "SE", "MCMC", or "Hessian".}
+\item{tsd.CI}{How to estimate CI for sex ratio thermal reaction norm; Can be NULL, "SE", "MCMC", "pseudohessianfrommcmc" or "Hessian".}
 
 \item{tsd.mcmc}{A object from tsd_MHmcmc()}
 
 \item{SexualisationTRN}{A model for sexualisation thermal reaction norm during TSP obtained using STRN()}
 
-\item{SexualisationTRN.CI}{How to estimate CI of sexualisation thermal reaction norm. Can be NULL, "SE", "MCMC", or "Hessian".}
+\item{SexualisationTRN.CI}{How to estimate CI of sexualisation thermal reaction norm. Can be NULL, "SE", "MCMC", "pseudohessianfrommcmc" or "Hessian".}
 
 \item{SexualisationTRN.mcmc}{MCMC object for STRN.}
 

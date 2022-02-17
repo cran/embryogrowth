@@ -281,6 +281,36 @@ Podocnemis_expansa_Valenzuela_1997 <- subset(Podocnemis_expansa,
 
 PeL1997 <- tsd(df=Podocnemis_expansa_Valenzuela_1997)
 
+# Gekko japonicus
+
+Gekko_japonicus <- subset(DatabaseTSD, !is.na(Sexed) & (Sexed != 0) & 
+Species=="Gekko japonicus")
+model_TSDII_gj <- tsd(Gekko_japonicus, males.freq=TRUE, 
+                   parameters.initial=c(P_low=26, S_low=1.5, 
+                                        P_high=31, S_high=-1.5), 
+                   equation="logistic")
+plot(model_TSDII_gj, lab.TRT = "TRT l = 5 \%")
+print(model_TSDII_gj)
+prior <- tsd_MHmcmc_p(result = model_TSDII_gj, accept = TRUE)
+prior <- structure(list(
+  Density = c("dnorm", "dnorm", "dnorm", "dnorm"), 
+  Prior1 = c(26, 0.3, 31, -0.4), 
+  Prior2 = c(2, 1, 2, 1), 
+  SDProp = c(2, 0.5, 2, 0.5), 
+  Min = c(25, -2, 25, -2), 
+  Max = c(35, 2, 35, 2), 
+  Init = c(26, 0.3, 31, -0.4)), 
+  row.names = c("P_low",  "S_low", "P_high", "S_high"), 
+  class = "data.frame")
+  
+result_mcmc_tsd_gj <- tsd_MHmcmc(result=model_TSDII_gj, 
+parametersMCMC=prior, n.iter=10000, n.chains = 1,  
+n.adapt = 0, thin=1, trace=FALSE, adaptive=TRUE)
+summary(result_mcmc_tsd_gj)
+plot(result_mcmc_tsd_gj, parameters="P_low", scale.prior=TRUE, xlim=c(20, 30), las=1)
+plot(result_mcmc_tsd_gj, parameters="P_high", scale.prior=TRUE, xlim=c(25, 35), las=1)
+plot(model_TSDII_gj, resultmcmc = result_mcmc_tsd_gj)
+
 }
 }
 \references{

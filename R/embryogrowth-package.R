@@ -3,8 +3,8 @@
 #' \tabular{ll}{
 #'  Package: \tab embryogrowth\cr
 #'  Type: \tab Package\cr
-#'  Version: \tab 8.2 build 1473\cr
-#'  Date: \tab 2021-09-16\cr
+#'  Version: \tab 8.3-4 build 1499\cr
+#'  Date: \tab 2022-02-17\cr
 #'  License: \tab GPL (>= 2)\cr
 #'  LazyLoad: \tab yes\cr
 #'  }
@@ -16,8 +16,8 @@
 #' The latest version of this package can always been installed using:\cr
 #' install.packages("http://max2.ese.u-psud.fr/epc/conservation/CRAN/HelpersMG.tar.gz", repos=NULL, type="source")\cr
 #' install.packages("http://max2.ese.u-psud.fr/epc/conservation/CRAN/embryogrowth.tar.gz", repos=NULL, type="source")
-#' \if{html}{\figure{E.png}{options: alt="embryogrowth logo", width="200pt", align="right"}}
-#' \if{latex}{\figure{E.png}{options: width="200pt"}}
+#' \if{html}{\figure{E.png}{options: alt="embryogrowth logo", align="right"}}
+#' \if{latex}{\figure{E.png}}
 #' @references Girondot, M. & Kaska, Y. 2014. A model to predict the thermal 
 #'          reaction norm for the embryo growth rate from field data. Journal of
 #'          Thermal Biology. 45, 96-102.
@@ -132,6 +132,13 @@
 #'             ylim=c(0, 4), show.density=TRUE, show.hist=TRUE, 
 #'             curve = "MCMC quantiles", 
 #'             ylimH=c(0,0.5), atH=c(0, 0.1, 0.2))
+#' 
+#' # How many times this package has been download
+#' library(cranlogs)
+#' embryogrowth <- cran_downloads("embryogrowth", from = "2014-08-16", 
+#'                             to = Sys.Date() - 1) 
+#' sum(embryogrowth$count)
+#' plot(embryogrowth$date, embryogrowth$count, type="l", bty="n")
 #' }
 
 NULL

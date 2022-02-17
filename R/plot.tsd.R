@@ -196,7 +196,13 @@ plot.tsd <- function(x, ...,
     a <- do.call(plot_errbar, L1) 
   }
   
+  out_sr <- NULL
+  
   if ((!is.null(o$sexratio_quantiles)) & (show.model)) {
+    
+    out_sr <- t(o$sexratio_quantiles)
+    out_sr <- cbind(Temperatures=as.numeric(colnames(o$sexratio_quantiles)), 
+                    out_sr)
     
     xi <- as.numeric(colnames(o$sexratio_quantiles))
     p <- o$sexratio_quantiles[2, ]
@@ -253,7 +259,7 @@ plot.tsd <- function(x, ...,
       
     }
   }
-  
+  return(invisible(out_sr))
 }
 
 

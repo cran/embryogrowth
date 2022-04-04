@@ -20,16 +20,16 @@
 Generate_hatchling_metric <-
 function(series=stop("A result object or names of series must be provided"), hatchling.metric=NULL, previous=NULL) {
 
-	if (is.null(hatchling.metric) & (class(series)!="NestsResult")) {
+	if (is.null(hatchling.metric) & (!inherits(series, "NestsResult"))) { #(class(series)!="NestsResult")) {
 		stop("hatchling.metric or a result from searchR() must be provided")
 	}
 	
-	if (class(series)=="NestsResult") {
+	if (inherits(series, "NestsResult")) { #(class(series)=="NestsResult") {
 		if (is.null(hatchling.metric)) testec <- series$hatchling.metric
 		series <- series$data
 	}
 	
-	if (class(series)=="Nests") {
+	if (inherits(series, "Nests")) { #(class(series)=="Nests") {
 		series <- names(series)
 		series <- series[1:(series$IndiceT["NbTS"])]
 	}

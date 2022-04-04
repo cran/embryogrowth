@@ -49,7 +49,7 @@ FormatNests <-
     
     # previous=NULL; simplify=TRUE; weight=NULL
     
-    if (class(data)=="Nests") {
+    if (inherits(data, "Nests")) { #(class(data)=="Nests") {
       
       nidsEC <- data[1:data$IndiceT["NbTS"]]
       for(i in 1:length(nidsEC)) {

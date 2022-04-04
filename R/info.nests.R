@@ -309,15 +309,17 @@ info.nests <- function(x=NULL                                                  ,
   
   papply <- ifelse(parallel, detectCores(), 1)
   
-  if (class(x)=="NestsResult") NestsResult <- x
-  if (class(x)=="numeric") parameters <- x
+  if (inherits(x, "NestsResult")) # (class(x)=="NestsResult") 
+    NestsResult <- x
+  if (inherits(x, "numeric")) # (class(x)=="numeric") 
+    parameters <- x
   
   out <- tolower(out)
   out <- match.arg(out, choices = c("likelihood", "metric", "summary", "dynamic"), several.ok = FALSE)
   TSP.list <- embryogrowth::TSP.list
   
   
-  if (class(NestsResult) == "NestsResult") {
+  if (inherits(NestsResult, "NestsResult")) { # (class(NestsResult) == "NestsResult") {
     # temperatures est un objet Nests
     if (is.null(hessian)) hessian <- NestsResult$hessian
     if (is.null(temperatures)) {
@@ -628,7 +630,7 @@ info.nests <- function(x=NULL                                                  ,
   ##################################### #
   
   # Je crée un dataframe dans hatchling.metric
-  if (class(hatchling.metric) == "numeric") {
+  if (inherits(hatchling.metric, "numeric")) { # (class(hatchling.metric) == "numeric") {
     hatchling.metric <- data.frame(Mean=rep(hatchling.metric["Mean"], NBTs), 
                                    SD=rep(hatchling.metric["SD"], NBTs), row.names=name)
   }
@@ -672,7 +674,7 @@ info.nests <- function(x=NULL                                                  ,
   ################################### #
   # Comme maintenant c'est une variable, je dois le rentrer dans la boucle
   
-  if (any(class(embryo.stages)=="character")) {
+  if (inherits(embryo.stages, "character")) { # (any(class(embryo.stages)=="character")) {
     if (embryo.stages == "fitted") {
       embryo.stages = c("10"=invlogit(logit(0.33)), "11"=invlogit(logit(0.33)), 
                         "12"=invlogit(logit(0.66)), "13"=invlogit(logit(0.66))) 
@@ -960,7 +962,12 @@ info.nests <- function(x=NULL                                                  ,
                                          if (!is.na(sdSCL)) {
                                            likelihood <- (-dnorm(ypre, mean=meanSCL, sd=sdSCL, log=TRUE))
                                          } else {
+                                           if (is.na(parameters["SD"])) {
                                            likelihood <- ((ypre - meanSCL)^2)
+                                           } else {
+                                             # 28/3/2022
+                                             likelihood <- (-dnorm(ypre, mean=meanSCL, sd=parameters["SD"], log=TRUE))
+                                           }
                                          }
                                          
                                          return(list(likelihood=likelihood))
@@ -1954,7 +1961,8 @@ info.nests <- function(x=NULL                                                  ,
         x[dfl %in% common_time, "SCL"]
       })
       
-      if (all(class(SCL_ec) != "matrix")) {
+      # Donc ça n'est pas matrix
+      if (!inherits(SCL_ec, "matrix")) { # (all(class(SCL_ec) != "matrix")) {
         # Je ne sais pas ce que c'est ça
         max_t <- sapply(SCL_ec, FUN=length)
         wmax_t <- which.max(max_t)
@@ -1966,13 +1974,15 @@ info.nests <- function(x=NULL                                                  ,
       }
       
       
-      if (all(class(SCL_ec) != "data.frame")) SCL_ec <- as.data.frame(SCL_ec)
+      if  (!inherits(SCL_ec, "data.frame")) # (all(class(SCL_ec) != "data.frame")) 
+        SCL_ec <- as.data.frame(SCL_ec)
       metric_ec <- t(apply(SCL_ec, MARGIN = 1, FUN = function(x) quantile(x, probs = probs)))
       colnames(metric_ec) <- paste0("Metric_", colnames(metric_ec))
       
       R_ec <- sapply(df_list_ec, FUN = function(x) x[round(x$Time, 2) %in% t_ec, "R"])
       # R_ec <- lapply(R_ec, FUN=function(x) c(x, rep(tail(x, n=1), max_t-length(x))))
-      if (all(class(R_ec) != "data.frame")) R_ec <- as.data.frame(R_ec)
+      if (!inherits(R_ec, "data.frame")) # (all(class(R_ec) != "data.frame")) 
+        R_ec <- as.data.frame(R_ec)
       Rx_ec <- t(apply(R_ec, MARGIN = 1, FUN = function(x) quantile(x, probs = probs, na.rm = TRUE)))
       colnames(Rx_ec) <- paste0("R_", colnames(Rx_ec))
       

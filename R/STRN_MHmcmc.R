@@ -141,7 +141,7 @@ STRN_MHmcmc <- function(result=NULL, n.iter=10000,
   
   fin <- try(summary(out), silent=TRUE)
   
-  if (class(fin)=="try-error") {
+  if (inherits(fin, "try-error")) { #(class(fin)=="try-error") {
     lp <- rep(NA, nrow(out$parametersMCMC$parameters))
     names(lp) <- rownames(out$parametersMCMC$parameters)
     out <- c(out, TimeSeriesSE=list(lp))

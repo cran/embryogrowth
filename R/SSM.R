@@ -28,19 +28,20 @@
     
     if (is.na(parms["Dallwitz_b4"])) parms <- c(parms, Dallwitz_b4 = 6)
     if (is.na(parms["Dallwitz_b5"])) parms <- c(parms, Dallwitz_b5 =0.4)
-    T <- T - 273.15
+    T_ec <- T - 273.15
     if (1+parms["Dallwitz_b4"] <= 0) {
-      rT_L <- rT <- rep(NA, length(T))
+      rT_L <- rT <- rep(NA, length(T_ec))
     } else {
       c1 <- 1/(1+0.28*parms["Dallwitz_b4"]+0.72*log(1+parms["Dallwitz_b4"]))
       
       
       c2 <- 1+parms["Dallwitz_b4"]/(1+1.5*parms["Dallwitz_b4"]+0.39*parms["Dallwitz_b4"]^2)
-      u <- (T-parms["Dallwitz_b3"])/(parms["Dallwitz_b3"]-parms["Dallwitz_b2"])-c1
+      u <- (T_ec-parms["Dallwitz_b3"])/(parms["Dallwitz_b3"]-parms["Dallwitz_b2"])-c1
       v <- (u + exp(parms["Dallwitz_b4"]*u))/c2
       rT <- 1E-5*abs(parms["Dallwitz_b1"]*10^(-v^2*(1-parms["Dallwitz_b5"]+parms["Dallwitz_b5"]*v^2)))
       rT_L <- rT
     }
+    
   } else {
     
     if (any(nm=="k")) {
@@ -58,7 +59,7 @@
       if (any(nm == "Peak")) {
         
         # Comme ca Peak est en degree Celsius
-        T <- T - 273.15
+        T_ec <- T - 273.15
         
         if (any(nm == "LengthB")) {
           
@@ -83,10 +84,10 @@
           xpar["MaxMinE"]<-xpar["Max"]-xpar["MinE"]
           
           # Modele sinusoidal
-          rT <- 1E-5*ifelse(T<xpar["Begin"], xpar["MinB"],
-                            ifelse(T<xpar["PmoinsF"], ((1+cos(pi*(xpar["PmoinsF"]-T)/xpar["PmoinsFB"]))/2)*xpar["MaxMinB"]+xpar["MinB"],
-                                   ifelse(T<xpar["PplusF"], xpar["Max"],
-                                          ifelse(T<xpar["End"], ((1+cos(pi*(T-(xpar["PplusF"]))/xpar["EPplusF"]))/2)*xpar["MaxMinE"]+xpar["MinE"],
+          rT <- 1E-5*ifelse(T_ec<xpar["Begin"], xpar["MinB"],
+                            ifelse(T_ec<xpar["PmoinsF"], ((1+cos(pi*(xpar["PmoinsF"]-T_ec)/xpar["PmoinsFB"]))/2)*xpar["MaxMinB"]+xpar["MinB"],
+                                   ifelse(T_ec<xpar["PplusF"], xpar["Max"],
+                                          ifelse(T_ec<xpar["End"], ((1+cos(pi*(T_ec-(xpar["PplusF"]))/xpar["EPplusF"]))/2)*xpar["MaxMinE"]+xpar["MinE"],
                                                  xpar["MinE"]
                                           )
                                    )
@@ -94,7 +95,7 @@
           )
           
         } else {
-          Tlogique <- ((T-parms["Peak"]) < 0)
+          Tlogique <- ((T_ec-parms["Peak"]) < 0)
           
           if (!is.na(parms["sd"])) parms["sdL"] <- parms["sdH"] <- parms["sd"]
           
@@ -225,6 +226,19 @@
   if (is.na(epsilon)) epsilon <- 0
   epsilon_L <- parms["epsilon_L"]/1E7
   if (is.na(epsilon_L)) epsilon_L <- 0
+  
+  if (any(nm=="Threshold_Low")) {
+    pth <- parms["Threshold_Low"]
+    if (pth < 100) pth <- pth + 273.15
+    rT <- ifelse(T < pth, 0, rT)
+    rT_L <- ifelse(T < pth, 0, rT_L)
+  }
+  if (any(nm=="Threshold_High")) {
+    pth <- parms["Threshold_High"]
+    if (pth < 100) pth <- pth + 273.15
+    rT <- ifelse(T > pth, 0, rT)
+    rT_L <- ifelse(T > pth, 0, rT_L)
+  }
   
   return(list(unname(rT+epsilon), unname(rT_L+epsilon_L)))
   

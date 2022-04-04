@@ -1,9 +1,18 @@
 THIS IS THE CHANGELOG OF THE "embryogrowth" PACKAGE
 
-            CHANGES IN VERSION 8.3-4 (2022-02-17)
+            CHANGES IN VERSION 8.4 (2022-04-04)
+
+* New CRAN version - 8.4 (2022-04-04)
+
+            CHANGES IN VERSION 8.3-26 (2022-04-02)
 
 * New CRAN version - 8.3 (2022-01-31)
 * Minor change for figure in documentation - 8.3-1 (2022-02-17)
+* New url to update the package before to be uploaded to CRAN - 8.3-5 (2022-02-24)
+* Check for update at startup - 8.3-6 (2022-03-28)
+* New parameter SD for final size when proportion of development is used - 8.3-7 (2022-03-28)
+* New parameters Threshold_High and Threshold_Low - 8.3-17 (2022-04-01)
+* Function TRN_MHmcmc_p() has been simplified - 8.3-20 (2022-04-02)
 
             CHANGES IN VERSION 8.2-15 (2022-01-26)
 

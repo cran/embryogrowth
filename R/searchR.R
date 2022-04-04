@@ -224,16 +224,17 @@
 #'                          temperatures=formated, integral=integral.Gompertz, M0=M0, 
 #'                          hatchling.metric=c(Mean=39.33, SD=1.92))
 #'                          
-#' ###########################################
+#' ###############################################################
 #' # example with thermal reaction norm fitted from Dallwitz model
-#' ############################################
+#' ###############################################################
 #' # See: Dallwitz, M.J., Higgins, J.P., 1992. User’s guide to DEVAR. A computer 
 #' # program for estimating development rate as a function of temperature. CSIRO Aust 
 #' # Div Entomol Rep 2, 1-23.
 #' 
 #' # Note that Dallwitz model has many problems and I recommend to not use it:
 #' # - The 3-parameters is too highly constraint
-#' # - The 5 parameters produced infinite outputs for some sets of parameters
+#' # - The 5 parameters produced infinite outputs for some sets of parameters that
+#' #   can be generated while using delta method.
 #' 
 #' x <- c('Dallwitz_b1' = 4.8854060791241816, 
 #'        'Dallwitz_b2' = 20.398366565842029, 
@@ -306,7 +307,34 @@
 #'  plotR(resultNest_PropDev_5p_Dallwitz, ylim=c(0, 1.5), curve="ML", new=FALSE, col="red")
 #'  compare_AICc(Dallwitz3p=resultNest_PropDev_3p_Dallwitz, 
 #'               Dallwitz5p=resultNest_PropDev_5p_Dallwitz)
+#'               
+#' ###########################################################################
+#' # Dalwitz model with proportion of development and fitted SD for final size
+#' ###########################################################################
 #' 
+#' x <- c('Dallwitz_b1' = 1.4886497996404355, 
+#'        'Dallwitz_b2' = 10.898310418085916, 
+#'        'Dallwitz_b3' = 31.263224721068056, 
+#'        'Dallwitz_b4' = 6.1624623077734535, 
+#'        'Dallwitz_b5' = -1.0027132357973265, 
+#'        'SD' = 0.041829475961912894)
+#' resultNest_PropDev_5p_Dallwitz <- searchR(parameters=x, fixed.parameters=NULL, 
+#'                          temperatures=formated, integral=integral.linear, M0=0, 
+#'                          hatchling.metric=c(Mean=1))
+#'  plotR(resultNest_PropDev_5p_Dallwitz, ylim=c(0, 1.5), curve="ML")
+#'  # Note that the standard error of the curve cannot be estimated with delta method. 
+#'  # MCMC should be used
+#'  plot(x=resultNest_PropDev_5p_Dallwitz, ylimS=c(0,1), xlim=c(0,60), series=2, 
+#'          embryo.stages="Generic.ProportionDevelopment")
+#'          
+#' ##############################################################################         
+#' # Parameters Threshold_Low and Threshold_High are used to truncate growth rate
+#' ##############################################################################         
+#' 
+#' plotR(result=resultNest_PropDev_5p_Dallwitz, 
+#'      fixed.parameters=c(Threshold_Low=26, 
+#'                         Threshold_High=33), 
+#'      ylim=c(0, 1.5), curve="ML")
 #' }
 #' @export
 
@@ -374,7 +402,12 @@ searchR <- function(parameters=stop('Initial set of parameters must be provided'
   
   if (any(is.na(hatchling.metricuse[, "SD"]))) {
     hatchling.metricuse[, "SD"] <- NA
-    message("Fit criteria will be SSE.")
+    if (is.na(c(fixed.parameters, parameters)["SD"])) {
+      message("Fit criteria will be SSE.")
+    } else {
+      # 28/3/2022
+      message("Fit criteria will be -Ln L with fitted sd for hatchling size.")
+    }
   } else {
     message("Fit criteria will be -Ln L.")
   }
@@ -442,7 +475,7 @@ searchR <- function(parameters=stop('Initial set of parameters must be provided'
   print(d(result$par))
   
   
-  if (any(is.na(hatchling.metricuse[, "SD"]))) {
+  if ((any(is.na(hatchling.metricuse[, "SD"]))) & (is.na(x["SD"]))) {
     result$criteria <- "SSE"
     result$hessian <- NULL
     res <- rep(NA, length(parameters))
@@ -450,9 +483,6 @@ searchR <- function(parameters=stop('Initial set of parameters must be provided'
     
   } else {
     result$criteria <- "-Ln L"
-    
-    
-    
     
     mathessian <- try(numDeriv::hessian(getFromNamespace("info.nests", ns="embryogrowth"), 
                                         x=result$par, 
@@ -489,7 +519,7 @@ searchR <- function(parameters=stop('Initial set of parameters must be provided'
   # Avant *5. Correction du 17/7/2012
   k <- length(parameters)
   n <- unname(result$data$IndiceT["NbTS"])
-  if (all(!is.na(hatchling.metricuse[, "SD"]))) {
+  if ((all(!is.na(hatchling.metricuse[, "SD"]))) | (!is.na(result$par["SD"]))) {
     result$AIC <- 2*result$value+2*k
     result$AICc <- result$AIC + (2*k*(k+1))/(n-k-1)
     result$BIC <- 2*result$value + k * log(n)

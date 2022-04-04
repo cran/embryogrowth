@@ -61,7 +61,8 @@ if (is.null(temperatures)) {
 if (!is.null(parameters)) {
 	newx <- .SSM(temperatures, parameters)[[1]]*1E5
 } else 
-  if (class(nests)=="NestsResult") 	newx <- .SSM(temperatures, nests$par)[[1]]*1E5
+  if (inherits(nests, "NestsResult"))  #(class(nests)=="NestsResult") 	
+    newx <- .SSM(temperatures, nests$par)[[1]]*1E5
 
 
 names(newx) <- temperatures

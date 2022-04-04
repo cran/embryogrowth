@@ -189,7 +189,7 @@ plot.NestsResult <- function(x                                                  
     show.TSP <- FALSE
   }
   
-  if (class(embryo.stages)=="character") {
+  if (inherits(embryo.stages, "character")) { # (class(embryo.stages)=="character") {
     if (embryo.stages == "fitted") {
       embryo.stages = c("10"=invlogit(logit(0.33)), "11"=invlogit(logit(0.33)), 
                         "12"=invlogit(logit(0.66)), "13"=invlogit(logit(0.66))) 
@@ -480,8 +480,12 @@ plot.NestsResult <- function(x                                                  
       sd.ts <- metric.summary$summary.dynamic.metric[1, "hatchling.metric.sd.mean"]
       segments(0, mean.ts, xlim[2]+0.05*xlim[2], mean.ts, lwd=2, xpd=TRUE)
       if (!is.na(sd.ts)) {
-        segments(0, mean.ts-2*sd.ts,  xlim[2]+0.05*xlim[2], mean.ts-2*sd.ts, lwd=1, lty=2, xpd=TRUE)
-        segments(0, mean.ts+2*sd.ts,  xlim[2]+0.05*xlim[2], mean.ts+2*sd.ts, lwd=1, lty=2, xpd=TRUE)
+        segments(0, mean.ts-1.96*sd.ts,  xlim[2]+0.05*xlim[2], mean.ts-1.96*sd.ts, lwd=1, lty=2, xpd=TRUE)
+        segments(0, mean.ts+1.96*sd.ts,  xlim[2]+0.05*xlim[2], mean.ts+1.96*sd.ts, lwd=1, lty=2, xpd=TRUE)
+      }
+      if (!is.na(parameters["SD"])) {
+        segments(0, mean.ts-1.96*parameters["SD"],  xlim[2]+0.05*xlim[2], mean.ts-1.96*parameters["SD"], lwd=1, lty=2, xpd=TRUE)
+        segments(0, mean.ts+1.96*parameters["SD"],  xlim[2]+0.05*xlim[2], mean.ts+1.96*parameters["SD"], lwd=1, lty=2, xpd=TRUE)
       }
     }
     

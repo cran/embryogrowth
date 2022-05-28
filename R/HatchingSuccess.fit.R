@@ -125,7 +125,7 @@ HatchingSuccess.fit <- function(par=NULL, data=stop("data must be provided"),
   g$column.Hatched <- column.Hatched
   g$column.NotHatched <- column.NotHatched
   
-  class(g) <- "HatchingSuccess"
+  g <- addS3Class(g, "HatchingSuccess")
   return(g)
 }
 

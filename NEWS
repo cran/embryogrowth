@@ -1,8 +1,14 @@
 THIS IS THE CHANGELOG OF THE "embryogrowth" PACKAGE
 
-            CHANGES IN VERSION 8.4 (2022-04-04)
+            CHANGES IN VERSION 8.5 (2022-05-28)
+
+* New CRAN version - 8.5 (2022-05-28)
+
+            CHANGES IN VERSION 8.4-10 (2022-05-05)
 
 * New CRAN version - 8.4 (2022-04-04)
+* Better managment of class - 8.4-1 (2022-04-21)
+* Side effect of new class managment for STRN_MHmcmc() is corrected - 8.4-9 (2022-05-05)
 
             CHANGES IN VERSION 8.3-26 (2022-04-02)
 

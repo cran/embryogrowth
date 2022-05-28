@@ -2,7 +2,7 @@
 % Please edit documentation in R/plotR.R
 \name{plotR}
 \alias{plotR}
-\title{Show the fitted growth rate dependent on temperature and its density}
+\title{Plot the fitted growth rate dependent on temperature and its density}
 \usage{
 plotR(
   result = NULL,
@@ -146,7 +146,7 @@ The curve "MCMC mean-SD" uses the mcmc replicates to build a symetric credibilit
 The parameter curve is case insensitive. If only parameters is given, curve must be ML.
 }
 \details{
-plotR shows the fitted growth rate dependent on temperature and the density of the mcmc
+plotR plots the fitted growth rate dependent on temperature and the density of the mcmc
 }
 \examples{
 \dontrun{
@@ -196,5 +196,5 @@ plotR(resultmcmc=resultNest_mcmc_4p_SSM, ylim=c(0, 8),
 }
 }
 \author{
-Marc Girondot
+Marc Girondot \email{marc.girondot@gmail.com}
 }

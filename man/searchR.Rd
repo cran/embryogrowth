@@ -380,5 +380,5 @@ Girondot, M., Kaska, Y., 2014. A model to predict the thermal reaction norm for 
 Schoolfield, R.M., Sharpe, P.J., Magnuson, C.E., 1981. Non-linear regression of biological temperature-dependent rate models based on absolute reaction-rate theory. Journal of Theoretical Biology 88, 719-731.
 }
 \author{
-Marc Girondot
+Marc Girondot \email{marc.girondot@gmail.com}
 }

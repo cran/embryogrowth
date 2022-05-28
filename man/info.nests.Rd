@@ -312,5 +312,5 @@ lines(x=infoall.df$dynamic.metric[[1]][, "Time"],
 }
 }
 \author{
-Marc Girondot
+Marc Girondot \email{marc.girondot@gmail.com}
 }

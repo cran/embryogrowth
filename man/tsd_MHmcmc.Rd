@@ -16,7 +16,9 @@ tsd_MHmcmc(
   batchSize = sqrt(n.iter),
   adaptive = FALSE,
   adaptive.lag = 500,
-  adaptive.fun = function(x) {     ifelse(x > 0.234, 1.3, 0.7) },
+  adaptive.fun = function(x) {
+     ifelse(x > 0.234, 1.3, 0.7)
+ },
   intermediate = NULL,
   filename = "intermediate.Rdata",
   previous = NULL
@@ -138,6 +140,6 @@ Other Functions for temperature-dependent sex determination:
 \code{\link{tsd}()}
 }
 \author{
-Marc Girondot
+Marc Girondot \email{marc.girondot@gmail.com}
 }
 \concept{Functions for temperature-dependent sex determination}

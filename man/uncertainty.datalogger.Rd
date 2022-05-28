@@ -10,7 +10,9 @@ uncertainty.datalogger(
   accuracy = 0.5,
   resolution = 1,
   replicates = 10000,
-  method = function(x) {     2 * qnorm(0.975) * sd(x) }
+  method = function(x) {
+     2 * qnorm(0.975) * sd(x)
+ }
 )
 }
 \arguments{

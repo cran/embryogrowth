@@ -1,6 +1,6 @@
-#' plotR shows the fitted growth rate dependent on temperature and the density of the mcmc
-#' @title Show the fitted growth rate dependent on temperature and its density
-#' @author Marc Girondot
+#' plotR plots the fitted growth rate dependent on temperature and the density of the mcmc
+#' @title Plot the fitted growth rate dependent on temperature and its density
+#' @author Marc Girondot \email{marc.girondot@@gmail.com}
 #' @return A list with the value of scaleY to be used with other plotR function and the plot data in xy list element
 #' @param result A result object or a list of result objects
 #' @param resultmcmc A result object from GRTN_MHmcmc() function
@@ -154,12 +154,12 @@ plotR <-
     
     SSM <- getFromNamespace(".wrapperSSM", ns="embryogrowth")
     
-    if (any(class(result)=="mcmcComposite")) {
+    if (inherits(result, "mcmcComposite")) {
       resultmcmc <- result
       result <- NULL
     }
     
-    if (any(class(result)=="numeric")) {
+    if (inherits(result, "numeric")) {
       parameters <- result
       result <- NULL
     }

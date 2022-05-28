@@ -335,6 +335,6 @@ Other Functions for temperature-dependent sex determination:
 \code{\link{tsd_MHmcmc}()}
 }
 \author{
-Marc Girondot
+Marc Girondot \email{marc.girondot@gmail.com}
 }
 \concept{Functions for temperature-dependent sex determination}

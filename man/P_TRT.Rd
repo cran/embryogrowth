@@ -27,7 +27,7 @@ P_TRT(
 
 \item{fixed.parameters}{Set of fixed parameters}
 
-\item{chain}{What chain to be used is resultmcmc is provided}
+\item{chain}{What chain to be used if resultmcmc is provided}
 
 \item{equation}{What equation should be used. Must be provided if x is not a result of tsd()}
 
@@ -106,6 +106,6 @@ Other Functions for temperature-dependent sex determination:
 \code{\link{tsd}()}
 }
 \author{
-Marc Girondot
+Marc Girondot \email{marc.girondot@gmail.com}
 }
 \concept{Functions for temperature-dependent sex determination}

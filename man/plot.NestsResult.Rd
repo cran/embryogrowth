@@ -243,5 +243,5 @@ plot(resultNest_4p_SSM$data[[1]][, 1]/60/24,
 }
 }
 \author{
-Marc Girondot
+Marc Girondot \email{marc.girondot@gmail.com}
 }

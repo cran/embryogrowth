@@ -1,6 +1,6 @@
 #' Generate_hatchling_metric Generate a data.frame that can be used as test value for searchR()
 #' @title Generate a data.frame that can be used as test value for searchR()
-#' @author Marc Girondot
+#' @author Marc Girondot \email{marc.girondot@@gmail.com}
 #' @return A data.frame with size or mass at hatching for each nest
 #' @param series Name of series or object from searchR()
 #' @param hatchling.metric Size or mass at hatching. Will be recycled if necessary
@@ -18,7 +18,8 @@
 
 
 Generate_hatchling_metric <-
-function(series=stop("A result object or names of series must be provided"), hatchling.metric=NULL, previous=NULL) {
+function(series=stop("A result object or names of series must be provided"), 
+         hatchling.metric=NULL, previous=NULL) {
 
 	if (is.null(hatchling.metric) & (!inherits(series, "NestsResult"))) { #(class(series)!="NestsResult")) {
 		stop("hatchling.metric or a result from searchR() must be provided")

@@ -16,7 +16,9 @@ STRN_MHmcmc(
   batchSize = sqrt(n.iter),
   adaptive = FALSE,
   adaptive.lag = 500,
-  adaptive.fun = function(x) {     ifelse(x > 0.234, 1.3, 0.7) },
+  adaptive.fun = function(x) {
+     ifelse(x > 0.234, 1.3, 0.7)
+ },
   parallel = TRUE,
   intermediate = NULL,
   filename = "intermediate.Rdata",
@@ -121,5 +123,5 @@ plot(outMCMC, parameters=3)
 }
 }
 \author{
-Marc Girondot
+Marc Girondot \email{marc.girondot@gmail.com}
 }

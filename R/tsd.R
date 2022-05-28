@@ -1,6 +1,6 @@
 #' tsd estimates the parameters that best describe temperature-dependent sex determination
 #' @title Estimate the parameters that best describe temperature-dependent sex determination
-#' @author Marc Girondot
+#' @author Marc Girondot \email{marc.girondot@@gmail.com}
 #' @return A list the pivotal temperature, transitional range of temperatures and their SE
 #' @param males A vector with male numbers
 #' @param females A vector with female numbers
@@ -305,7 +305,7 @@ tsd <- function(df=NULL                                            ,
                         several.ok = FALSE)
   
   if (!is.null(df)) {
-    if (class(df)!="data.frame" & class(df)!="matrix") {
+    if ((!inherits(df, "data.frame")) & (!inherits(df, "matrix"))) {
       stop("df parameter must be a data.frame or a matrix")
     }
     
@@ -464,7 +464,7 @@ tsd <- function(df=NULL                                            ,
   
   if (equation != "gsd") {
     
-    class(result) <- "tsd"
+    result <- addS3Class(result, "tsd")
     # result <<- result
     o <- P_TRT(x=result, l=l, 
                replicate.CI = replicate.CI, 
@@ -535,6 +535,6 @@ tsd <- function(df=NULL                                            ,
     }
   }
   
-  class(result) <- "tsd"
+  result <- addS3Class(result, "tsd")
   return(invisible(result))
 }

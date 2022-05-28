@@ -1,6 +1,6 @@
 #' STRN_MHmcmc runs the Metropolis-Hastings algorithm for STRN (Bayesian MCMC)
 #' @title Metropolis-Hastings algorithm for Sexualisation Thermal Reaction Norm
-#' @author Marc Girondot
+#' @author Marc Girondot \email{marc.girondot@@gmail.com}
 #' @return A list with resultMCMC being mcmc.list object, resultLnL being likelihoods and parametersMCMC being the parameters used
 #' @param result An object obtained after a STRN fit
 #' @param parametersMCMC A set of parameters used as initial point for searching with information on priors
@@ -125,8 +125,7 @@ STRN_MHmcmc <- function(result=NULL, n.iter=10000,
                    adaptive=adaptive, adaptive.lag=adaptive.lag, adaptive.fun=adaptive.fun,
                    intermediate=intermediate, filename=filename, previous=previous)
   
-  
-  
+  fin <- try(summary(out), silent=TRUE)
   
   if (batchSize>=n.iter/2) {
     print("batchSize cannot be larger than half the number of iterations.")
@@ -137,11 +136,7 @@ STRN_MHmcmc <- function(result=NULL, n.iter=10000,
     out <- c(out, BatchSE=list(coda::batchSE(out$resultMCMC, batchSize=batchSize)))
   }
   
-  class(out) <- "mcmcComposite"
-  
-  fin <- try(summary(out), silent=TRUE)
-  
-  if (inherits(fin, "try-error")) { #(class(fin)=="try-error") {
+  if (inherits(fin, "try-error")) { 
     lp <- rep(NA, nrow(out$parametersMCMC$parameters))
     names(lp) <- rownames(out$parametersMCMC$parameters)
     out <- c(out, TimeSeriesSE=list(lp))
@@ -151,7 +146,7 @@ STRN_MHmcmc <- function(result=NULL, n.iter=10000,
     out <- c(out, SD=list(fin$statistics[,"SD"]))
   }
   
-  class(out) <- "mcmcComposite"
+  out <- addS3Class(out, "mcmcComposite")
   
   return(out)
 }

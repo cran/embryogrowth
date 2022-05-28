@@ -164,11 +164,11 @@ GRTRN_MHmcmc <- function(result=NULL, n.iter=10000,
     
   }
   
-  class(out) <- "mcmcComposite"
+  out <- addS3Class(out, "mcmcComposite")
   
   fin <- try(summary(out), silent=TRUE)
   
-  if (inherits(fin, "try-error")) { #(class(fin)=="try-error") {
+  if (inherits(fin, "try-error")) { 
     lp <- rep(NA, nrow(out$parametersMCMC$parameters))
     names(lp) <- rownames(out$parametersMCMC$parameters)
     out <- c(out, TimeSeriesSE=list(lp))
@@ -183,7 +183,7 @@ GRTRN_MHmcmc <- function(result=NULL, n.iter=10000,
     }
   }
   
-  class(out) <- "mcmcComposite"
+  out <- addS3Class(out, "mcmcComposite")
   
   return(out)
 }

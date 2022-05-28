@@ -84,6 +84,8 @@ HatchingSuccess.MHmcmc <- function(result=stop("Give a result of HatchingSuccess
                    adaptive=adaptive, adaptive.lag=adaptive.lag, adaptive.fun=adaptive.fun,
                    intermediate=intermediate, filename=filename, previous=previous)
   
+  fin <- try(summary(out), silent=TRUE)
+  
   if (batchSize>=n.iter/2) {
     print("batchSize cannot be larger than half the number of iterations.")
     rese <- rep(NA, dim(parametersMCMC)[1])
@@ -93,11 +95,9 @@ HatchingSuccess.MHmcmc <- function(result=stop("Give a result of HatchingSuccess
     out <- c(out, BatchSE=list(coda::batchSE(out$resultMCMC, batchSize=batchSize)))
   }
   
-  class(out) <- "mcmcComposite"
+  # class(out) <- "mcmcComposite"
   
-  fin <- try(summary(out), silent=TRUE)
-  
-  if (inherits(fin, "try-error")) { #(class(fin)=="try-error") {
+  if (inherits(fin, "try-error")) { 
     lp <- rep(NA, nrow(out$parametersMCMC$parameters))
     names(lp) <- rownames(out$parametersMCMC$parameters)
     out <- c(out, TimeSeriesSE=list(lp))
@@ -107,7 +107,7 @@ HatchingSuccess.MHmcmc <- function(result=stop("Give a result of HatchingSuccess
     out <- c(out, SD=list(fin$statistics[,"SD"]))
   }
   
-  class(out) <- "mcmcComposite"
+  out <- addS3Class(out, "mcmcComposite")
   
   return(out)
 }

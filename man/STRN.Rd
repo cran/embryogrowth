@@ -269,5 +269,5 @@ L <- STRN(Initial_STRN=NULL                                                     
 }
 }
 \author{
-Marc Girondot
+Marc Girondot \email{marc.girondot@gmail.com}
 }

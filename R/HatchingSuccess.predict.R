@@ -107,7 +107,7 @@ predict.HatchingSuccess <- function(object, ...,
   }
   
   CIq <- apply(CI, MARGIN = 1, FUN = function(x) {quantile(x, probs = probs)})
-  if (any(class(CIq)=="numeric")) CIq <- matrix(data=CIq, ncol=length(temperature))
+  if (inherits(CIq, "numeric")) CIq <- matrix(data=CIq, ncol=length(temperature))
   colnames(CIq) <- as.character(temperature)
   
   return(CIq)

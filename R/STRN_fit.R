@@ -75,7 +75,7 @@
   
   if (is.null(tsd)) {
     tsd <- list(par=parTSD, equation=equation)
-    class(tsd) <- "tsd"
+    tsd <- addS3Class(tsd, "tsd")
   }
   if (!is.null(parTSD)) {
     tsd$par <- parTSD

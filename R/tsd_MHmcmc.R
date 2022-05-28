@@ -1,6 +1,6 @@
 #' tsd_MHmcmc runs the Metropolis-Hastings algorithm for tsd (Bayesian MCMC)
 #' @title Metropolis-Hastings algorithm for Sex ratio
-#' @author Marc Girondot
+#' @author Marc Girondot \email{marc.girondot@@gmail.com}
 #' @return A list with resultMCMC being mcmc.list object, resultLnL being likelihoods and parametersMCMC being the parameters used
 #' @param n.iter Number of iterations for each step
 #' @param parametersMCMC A set of parameters used as initial point for searching with information on priors
@@ -114,6 +114,8 @@ tsd_MHmcmc <- function(result=stop("A result of tsd() fit must be provided"), n.
                    adaptive=adaptive, adaptive.lag=adaptive.lag, adaptive.fun=adaptive.fun,
                    intermediate=intermediate, filename=filename, previous=previous)
   
+  fin <- try(summary(out), silent=TRUE)
+  
   if (batchSize>=n.iter/2) {
     print("batchSize cannot be larger than half the number of iterations.")
     rese <- rep(NA, dim(parametersMCMC)[1])
@@ -126,11 +128,7 @@ tsd_MHmcmc <- function(result=stop("A result of tsd() fit must be provided"), n.
   out$resultML <- result
   out$equation <- result$equation
   
-  class(out) <- "mcmcComposite"
-  
-  fin <- try(summary(out), silent=TRUE)
-  
-  if (inherits(fin, "try-error")) { # (class(fin)=="try-error") {
+  if (inherits(fin, "try-error")) { 
     lp <- rep(NA, nrow(out$parametersMCMC$parameters))
     names(lp) <- rownames(out$parametersMCMC$parameters)
     out <- c(out, TimeSeriesSE=list(lp))
@@ -140,7 +138,7 @@ tsd_MHmcmc <- function(result=stop("A result of tsd() fit must be provided"), n.
     out <- c(out, SD=list(fin$statistics[,"SD"]))
   }
   
-  class(out) <- "mcmcComposite"
+  out <- addS3Class(out, "mcmcComposite")
   
   return(out)
 }

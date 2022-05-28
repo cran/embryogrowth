@@ -1,11 +1,11 @@
 #' P_TRT estimates the transitional range of temperatures based on a set of parameters
 #' @title Estimate the transitional range of temperatures based on a set of parameters
-#' @author Marc Girondot
+#' @author Marc Girondot \email{marc.girondot@@gmail.com}
 #' @return A list with a P_TRT object containing a matrix with lower and higher bounds for TRT, TRT and P and a P_TRT_quantiles object with quantiles for each and a sexratio_quantiles object
 #' @param x Set of parameters or a result of tsd()
 #' @param fixed.parameters Set of fixed parameters
 #' @param resultmcmc A result of tsd_MHmcmc()
-#' @param chain What chain to be used is resultmcmc is provided
+#' @param chain What chain to be used if resultmcmc is provided
 #' @param temperatures If provided returns the sex ratio and its quantiles for each temperature
 #' @param durations If provided returns the sex ratio and its quantiles for each duration
 #' @param SD.temperatures SD of temperatures
@@ -66,7 +66,7 @@ P_TRT <- function(x=NULL, resultmcmc=NULL, fixed.parameters=NULL,
   if (is.null(x) & is.null(resultmcmc)) stop("Or x or resultmcmc must be provided")
   if (!is.null(temperatures) & !is.null(durations)) stop("Temperatures and durations cannot be provided at the same time")
   
-  if (any(class(x) == "tsd")) {
+  if (inherits(x, "tsd")) {
     type <- x$type
   } else {
     if (!is.null(temperatures)) {
@@ -79,12 +79,12 @@ P_TRT <- function(x=NULL, resultmcmc=NULL, fixed.parameters=NULL,
   if (!is.null(replicate.CI)) if (replicate.CI == 0) replicate.CI <- NULL
   
   # Si j'ai un result mcmc mais pas de replicate.CI, je ne l'utilise pas
-  if (is.null(replicate.CI) & any(class(resultmcmc)=="mcmcComposite")) {
+  if (is.null(replicate.CI) & inherits(resultmcmc, "mcmcComposite")) {
     message("The mcmc result is not used because replicate.CI is null or 0")
     resultmcmc <- NULL
   }
   
-  if (is.null(replicate.CI) & any(class(x)=="mcmcComposite")) {
+  if (is.null(replicate.CI) & inherits(x, "mcmcComposite")) {
     stop("The mcmc result cannot be used because replicate.CI is null or 0")
   }
   
@@ -99,17 +99,17 @@ P_TRT <- function(x=NULL, resultmcmc=NULL, fixed.parameters=NULL,
   
   # TRT.limits <- c(1, 90)
   
-  if (any(class(x)=="mcmcComposite") | any(class(resultmcmc)=="mcmcComposite")) {
-    if (any(class(x)=="mcmcComposite")) {
+  if (inherits(x, "mcmcComposite") | inherits(resultmcmc, "mcmcComposite")) {
+    if (inherits(x, "mcmcComposite")) {
       par <- x$resultMCMC[[chain]]
       if (is.null(equation)) equation <- x$equation
       fixed.parameters <- x$fixed.parameters
       names.par <- colnames(x$resultMCMC[[chain]])
     }
-    if (any(class(resultmcmc)=="mcmcComposite")) {
+    if (inherits(resultmcmc, "mcmcComposite")) {
       par <- resultmcmc$resultMCMC[[chain]]
       names.par <- colnames(resultmcmc$resultMCMC[[chain]])
-      if (any(class(x)=="tsd")) {
+      if (inherits(x, "tsd")) {
         equation <- x$equation
         fixed.parameters <- x$fixed.parameters
       }
@@ -126,7 +126,7 @@ P_TRT <- function(x=NULL, resultmcmc=NULL, fixed.parameters=NULL,
     par <- par[sp, , drop = FALSE]
     
   } else {
-    if (any(class(x)=="tsd")) {
+    if (inherits(x, "tsd")) {
       equation <- x$equation
       names.par <- names(x$par)
       fixed.parameters <- x$fixed.parameters
@@ -325,7 +325,7 @@ P_TRT <- function(x=NULL, resultmcmc=NULL, fixed.parameters=NULL,
       }
       
     } else {
-      if (any(class(x)=="numeric")) {
+      if (inherits(x, "numeric")) {
         names.par <- names(x)
         par <- matrix(x$par, nrow = 1)
         colnames(par) <- names.par
@@ -756,7 +756,7 @@ P_TRT <- function(x=NULL, resultmcmc=NULL, fixed.parameters=NULL,
       prsrT <- as.matrix(prsrT)
     } else {
       prsrT <- apply(t(srT), MARGIN = 2, function(xxx) quantile(xxx, probs = probs, na.rm = TRUE))
-      if (any(class(prsrT) == "numeric")) {
+      if (inherits(prsrT, "numeric")) {
         prsrT <- matrix(prsrT, nrow = 1)
         rownames(prsrT) <- paste0(as.character(probs*100), "%")
       }

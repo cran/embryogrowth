@@ -1,6 +1,6 @@
 #' searchR fits the parameters that best represent nest incubation data.
 #' @title Fit the parameters that best represent nest incubation data.
-#' @author Marc Girondot
+#' @author Marc Girondot \email{marc.girondot@@gmail.com}
 #' @return A result object
 #' @param parameters A set of parameters used as initial point for searching
 #' @param fixed.parameters A set of parameters that will not be changed
@@ -539,7 +539,7 @@ searchR <- function(parameters=stop('Initial set of parameters must be provided'
   result$weight <- weight
   
   
-  class(result) <- "NestsResult"
+  result <- addS3Class(result, "NestsResult")
   
   return(result)
   

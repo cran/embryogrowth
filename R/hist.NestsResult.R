@@ -27,7 +27,7 @@ p3p <- list(...)
 # j'ai un objet de resultat
 # je prends les donnees
 nids <- x$data
-class(nids) <- "Nests"
+nids <- addS3Class(nids, "Nests")
 
 L <- modifyList(list(x=nids), p3p)
 L <- modifyList(L, list(series=series))

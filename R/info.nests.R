@@ -1,6 +1,6 @@
 #' Calculate statistics about nests
 #' @title Calculte statistics about nests
-#' @author Marc Girondot
+#' @author Marc Girondot \email{marc.girondot@@gmail.com}
 #' @return Return or the total likelihood or a list with $metric and $summary depending on out parameter
 #' @param x A set of parameters to model the embryo growth thermal reaction norm or a NestsResult object.
 #' @param parameters A set of parameters to model the embryo growth thermal reaction norm. It will replace the parameters included in NestsResult (same as x).
@@ -309,9 +309,9 @@ info.nests <- function(x=NULL                                                  ,
   
   papply <- ifelse(parallel, detectCores(), 1)
   
-  if (inherits(x, "NestsResult")) # (class(x)=="NestsResult") 
+  if (inherits(x, "NestsResult")) 
     NestsResult <- x
-  if (inherits(x, "numeric")) # (class(x)=="numeric") 
+  if (inherits(x, "numeric")) 
     parameters <- x
   
   out <- tolower(out)
@@ -319,7 +319,7 @@ info.nests <- function(x=NULL                                                  ,
   TSP.list <- embryogrowth::TSP.list
   
   
-  if (inherits(NestsResult, "NestsResult")) { # (class(NestsResult) == "NestsResult") {
+  if (inherits(NestsResult, "NestsResult")) { 
     # temperatures est un objet Nests
     if (is.null(hessian)) hessian <- NestsResult$hessian
     if (is.null(temperatures)) {
@@ -630,7 +630,7 @@ info.nests <- function(x=NULL                                                  ,
   ##################################### #
   
   # Je crée un dataframe dans hatchling.metric
-  if (inherits(hatchling.metric, "numeric")) { # (class(hatchling.metric) == "numeric") {
+  if (inherits(hatchling.metric, "numeric")) { 
     hatchling.metric <- data.frame(Mean=rep(hatchling.metric["Mean"], NBTs), 
                                    SD=rep(hatchling.metric["SD"], NBTs), row.names=name)
   }
@@ -674,7 +674,7 @@ info.nests <- function(x=NULL                                                  ,
   ################################### #
   # Comme maintenant c'est une variable, je dois le rentrer dans la boucle
   
-  if (inherits(embryo.stages, "character")) { # (any(class(embryo.stages)=="character")) {
+  if (inherits(embryo.stages, "character")) { 
     if (embryo.stages == "fitted") {
       embryo.stages = c("10"=invlogit(logit(0.33)), "11"=invlogit(logit(0.33)), 
                         "12"=invlogit(logit(0.66)), "13"=invlogit(logit(0.66))) 
@@ -1962,7 +1962,7 @@ info.nests <- function(x=NULL                                                  ,
       })
       
       # Donc ça n'est pas matrix
-      if (!inherits(SCL_ec, "matrix")) { # (all(class(SCL_ec) != "matrix")) {
+      if (!inherits(SCL_ec, "matrix")) { 
         # Je ne sais pas ce que c'est ça
         max_t <- sapply(SCL_ec, FUN=length)
         wmax_t <- which.max(max_t)
@@ -1974,14 +1974,14 @@ info.nests <- function(x=NULL                                                  ,
       }
       
       
-      if  (!inherits(SCL_ec, "data.frame")) # (all(class(SCL_ec) != "data.frame")) 
+      if  (!inherits(SCL_ec, "data.frame")) 
         SCL_ec <- as.data.frame(SCL_ec)
       metric_ec <- t(apply(SCL_ec, MARGIN = 1, FUN = function(x) quantile(x, probs = probs)))
       colnames(metric_ec) <- paste0("Metric_", colnames(metric_ec))
       
       R_ec <- sapply(df_list_ec, FUN = function(x) x[round(x$Time, 2) %in% t_ec, "R"])
       # R_ec <- lapply(R_ec, FUN=function(x) c(x, rep(tail(x, n=1), max_t-length(x))))
-      if (!inherits(R_ec, "data.frame")) # (all(class(R_ec) != "data.frame")) 
+      if (!inherits(R_ec, "data.frame")) 
         R_ec <- as.data.frame(R_ec)
       Rx_ec <- t(apply(R_ec, MARGIN = 1, FUN = function(x) quantile(x, probs = probs, na.rm = TRUE)))
       colnames(Rx_ec) <- paste0("R_", colnames(Rx_ec))

@@ -16,7 +16,9 @@ GRTRN_MHmcmc(
   parallel = TRUE,
   adaptive = FALSE,
   adaptive.lag = 500,
-  adaptive.fun = function(x) {     ifelse(x > 0.234, 1.3, 0.7) },
+  adaptive.fun = function(x) {
+     ifelse(x > 0.234, 1.3, 0.7)
+ },
   intermediate = NULL,
   filename = "intermediate.Rdata",
   previous = NULL

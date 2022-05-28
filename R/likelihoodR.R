@@ -1,6 +1,6 @@
 #' likelihoodR estimates the likelihood of a set of parameters for nest incubation data 
 #' @title Estimate the likelihood of a set of parameters for nest incubation data
-#' @author Marc Girondot
+#' @author Marc Girondot \email{marc.girondot@@gmail.com}
 #' @return A result object
 #' @param result A object obtained after searchR or likelihoodR
 #' @param parameters A set of parameters
@@ -197,7 +197,7 @@ resultnest$weight <- weight
 # Je stocke aussi les paramtres fixe-16/7/2012
 resultnest$fixed.parameters <- fixed.parameters
 
-class(resultnest) <- "NestsResult"
+resultnest <- addS3Class(resultnest, "NestsResult")
 
 return(resultnest)
 

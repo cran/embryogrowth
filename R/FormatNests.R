@@ -1,6 +1,6 @@
 #' FormatNests creates a dataset of class "Nests" to be used with searchR
 #' @title Create a dataset of class Nests to be used with searchR
-#' @author Marc Girondot
+#' @author Marc Girondot \email{marc.girondot@@gmail.com}
 #' @return A list with all the nests formated to be used with searchR.
 #' @param data Data to be newly formated
 #' @param previous Data already formated
@@ -147,7 +147,7 @@ FormatNests <-
     
     nidsEC[["weight"]] <- weight
     
-    class(nidsEC) <- "Nests"
+    nidsEC <- addS3Class(nidsEC, "Nests")
     
     # 27/4/2015
     

@@ -77,5 +77,5 @@ LresultNest_4p <- likelihoodR(result=resultNest_4p_SSM)
 }
 }
 \author{
-Marc Girondot
+Marc Girondot \email{marc.girondot@gmail.com}
 }

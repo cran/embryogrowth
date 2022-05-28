@@ -36,5 +36,5 @@ testsize2 <- Generate_hatchling_metric(series=resultNest_4p_SSM,
 }
 }
 \author{
-Marc Girondot
+Marc Girondot \email{marc.girondot@gmail.com}
 }

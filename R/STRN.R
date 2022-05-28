@@ -1,6 +1,6 @@
 #' STRN estimates the parameters that best describe the sexualisation thermal reaction norm within the TSP
 #' @title Estimate the parameters that best describe the sexualisation thermal reaction norm within the TSP
-#' @author Marc Girondot
+#' @author Marc Girondot \email{marc.girondot@@gmail.com}
 #' @return The list with object return by optim() 
 #' @param Initial_STRN Values for initial model of Sexualisation Thermal Reaction Norm or tsd model
 #' @param fixed.parameters Value for Sexualisation Thermal Reaction Norm or tsd model that will not be changed
@@ -375,7 +375,7 @@ STRN <- function(Initial_STRN=NULL                                              
   
   
   
-  class(result) <- "STRN"
+  result <- addS3Class(result, "STRN")
   
   return(invisible(result))
 }

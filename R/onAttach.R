@@ -9,7 +9,7 @@
     readLines(con=conn)), silent = TRUE
   )
   close(con=conn)
-  if (!(is.null(version_get)) & (class(version_get) != "try-error")) {
+  if (!(is.null(version_get)) & (!inherits(version_get, "try-error"))) {
     if (package_version(actual, strict = TRUE) < package_version(version_get, strict = TRUE)) {
       packageStartupMessage('An update is available; use:\ninstall.packages("https://hebergement.universite-paris-saclay.fr/marcgirondot/CRAN/embryogrowth.tar.gz", repos=NULL, type="source")')
     } else {

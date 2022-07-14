@@ -66,7 +66,7 @@ predict.HatchingSuccess <- function(object, ...,
     CI <- matrix(data = NA , ncol=replicates, nrow=length(temperature))
     
     for (c in 1:replicates) {
-      CI[, c] <- HatchingSuccess.model(par=par[c, ], temperature)
+      CI[, c] <- HatchingSuccess.model(par=c(par[c, ], object$fixed.parameters), temperature)
     }
     
   } else {
@@ -75,12 +75,11 @@ predict.HatchingSuccess <- function(object, ...,
       
       CI <- matrix(data = NA , ncol=replicates, nrow=length(temperature))
       
-      if (requireNamespace("lmf")) {
+      # if (requireNamespace("lmf")) {
         vcov <- solve(object$hessian)
         # 2019-05-31 : if replicate.CI == 1, renvoie quand même un nombre random
-        par <- getFromNamespace("rmnorm", ns="lmf")(n = replicates, mean = object$par, vcov)
-        # par <- getFromNamespace("rmnorm", ns="lmf")(n = replicate.CI-1, mean = x$par, vcov)
-        # par <- rbind(x$par, par)
+        par <- rmnorm(n = replicates, mean = object$par, vcov)
+        
         if (!is.matrix(par)) {
           par <- matrix(par, nrow = 1)
           colnames(par) <- names(object$par)
@@ -89,20 +88,20 @@ predict.HatchingSuccess <- function(object, ...,
         for (c in 1:replicates) {
           parec <- par[c, ]
           names(parec) <- colnames(object$hessian)
-          CI[, c] <- HatchingSuccess.model(par=parec, temperature)
+          CI[, c] <- HatchingSuccess.model(par=c(parec, object$fixed.parameters), temperature)
         }
-      } else {
-        warning("The package lmf should be present to better estimate confidence interval taking into account covariances.")
-        for (c in 1:replicates) {
-          SE <- object$SE
-          x <- structure(rnorm(n = 5, mean=par, sd=SE), .Names=names(par))
-          CI[, c] <- HatchingSuccess.model(par=x, temperature)
-        }
-        
-      }
+      # } else {
+      #   warning("The package lmf should be present to better estimate confidence interval taking into account covariances.")
+      #   for (c in 1:replicates) {
+      #     SE <- object$SE
+      #     x <- structure(rnorm(n = 5, mean=par, sd=SE), .Names=names(par))
+      #     CI[, c] <- HatchingSuccess.model(par=c(x, object$fixed.parameters), temperature)
+      #   }
+      #   
+      # }
     } else {
       CI <- matrix(data = NA , ncol=1, nrow=length(temperature))
-      CI[, 1] <- HatchingSuccess.model(par, temperature)
+      CI[, 1] <- HatchingSuccess.model(c(par, object$fixed.parameters), temperature)
     }
   }
   

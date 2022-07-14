@@ -1,8 +1,15 @@
 THIS IS THE CHANGELOG OF THE "embryogrowth" PACKAGE
 
-            CHANGES IN VERSION 8.5 (2022-05-28)
+            CHANGES IN VERSION 8.6 (2022-07-14)
+
+* New CRAN version - 8.6 (2022-07-14)
+
+            CHANGES IN VERSION 8.5-17 (2022-07-13)
 
 * New CRAN version - 8.5 (2022-05-28)
+* The hatching success model can be defined only with one parameter, MaxHS or MeanHS - 8.5-1 (2022-05-29)
+* Fixed.parameters are used in plot of HatchingSuccess - 8.5-11 (2022-06-06)
+* Tentatively solve a problem in movingincubation in Windows when parallel is TRUE - 8.5-16 (2022-07-13)
 
             CHANGES IN VERSION 8.4-10 (2022-05-05)
 

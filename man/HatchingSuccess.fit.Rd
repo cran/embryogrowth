@@ -90,6 +90,40 @@ plot(MCMC, parameters = "MaxHS")
 plot(x=g.logistic, what = c("observations", "ML", "CI"), 
         replicates=10000, resultmcmc=MCMC)
 
+####### Exemple with Chelonia mydas
+totalIncubation_Cm <- subset(DatabaseTSD, 
+Species=="Chelonia mydas" & 
+  Note != "Sinusoidal pattern" & 
+  !is.na(Total) & Total != 0 & 
+  !is.na(NotHatched) & !is.na(Hatched))
+  
+  totalIncubation_Cm$NotHatched <- totalIncubation_Cm$NotHatched + 
+  ifelse(!is.na(totalIncubation_Cm$Undeveloped), totalIncubation_Cm$Undeveloped, 0)
+  
+  
+  plot(x=totalIncubation_Cm$Incubation.temperature, 
+  y=totalIncubation_Cm$Hatched/totalIncubation_Cm$Total, bty="n", las=1, 
+  xlab="Constant incubation temperature", ylab="Proportion of hatching")
+
+par <- c(S.low=0.5, S.high=0.3, 
+         P.low=25, deltaP=10, MaxHS=0.8)
+
+g.logistic <- HatchingSuccess.fit(par=par, data=totalIncubation_Cm)
+plot(g.logistic)
+
+pMCMC <- HatchingSuccess.MHmcmc_p(g.logistic, accept=TRUE)
+mcmc <- HatchingSuccess.MHmcmc(result=g.logistic, parameters = pMCMC, 
+                  adaptive=TRUE, n.iter=100000, trace=1000)
+par <- as.parameters(mcmc)
+par <- as.parameters(mcmc, index="median")
+
+plot(mcmc, parameters=c("P.low"))
+plot(mcmc, parameters=c("deltaP"))
+plot(mcmc, parameters=c("S.low"))
+plot(mcmc, parameters=c("S.high"))
+plot(mcmc, parameters=c("MaxHS"))
+
+plot(g.logistic, resultmcmc=mcmc, what = c("observations", "CI"))
 }
 }
 \seealso{

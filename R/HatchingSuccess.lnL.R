@@ -16,7 +16,8 @@
 #' totalIncubation_Cc <- subset(DatabaseTSD, 
 #'                              Species=="Caretta caretta" & 
 #'                                Note != "Sinusoidal pattern" & 
-#'                                !is.na(Total) & Total != 0)
+#'                                !is.na(Total) & Total != 0 & 
+#'                                !is.na(NotHatched) & !is.na(Hatched))
 #' 
 #' par <- c(S.low=0.5, S.high=0.3, 
 #'          P.low=25, deltaP=10, MaxHS=0.8)

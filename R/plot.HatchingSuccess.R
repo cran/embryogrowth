@@ -105,7 +105,7 @@ plot.HatchingSuccess <- function(x, xlim=c(20, 40), ylim=c(0, 1),
   
   
   p3p <- modifyList(p3p, list(x=temperatures, 
-                              y=HatchingSuccess.model(par=x$par, temperature = temperatures), 
+                              y=HatchingSuccess.model(par=c(x$par, x$fixed.parameters), temperature = temperatures), 
                               xlim=xlim, type=type.ML, xlab=xlab, ylab=ylab, bty=bty, las=las, 
                               ylim=ylim, col=col.ML, lty=lty.ML, lwd=lwd.ML))
   

@@ -264,7 +264,7 @@ MovingIncubation <-
                                       return(cbind(Time=times[temp], out.incubation, row.names=NULL))
                                     }, 
                                     mc.cores = ifelse(parallel, detectCores(), 1), 
-                                    clusterEvalQ=expression(library(embryogrowth)), 
+                                    clusterEvalQ=list(expression(library(embryogrowth))), 
                                     clusterExport=list(varlist=c("nbtp", "times", 
                                                                  "tsd", "tsd.mcmc", "tsd.CI", 
                                                                  "temperatures", "metabolic.heating", 

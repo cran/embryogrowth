@@ -3,8 +3,8 @@
 #' \tabular{ll}{
 #'  Package: \tab embryogrowth\cr
 #'  Type: \tab Package\cr
-#'  Version: \tab 8.5 build 1537\cr
-#'  Date: \tab 2022-05-28\cr
+#'  Version: \tab 8.6 build 1557\cr
+#'  Date: \tab 2022-07-14\cr
 #'  License: \tab GPL (>= 2)\cr
 #'  LazyLoad: \tab yes\cr
 #'  }

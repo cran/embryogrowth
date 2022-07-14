@@ -131,7 +131,7 @@ P_TRT <- function(x=NULL, resultmcmc=NULL, fixed.parameters=NULL,
       names.par <- names(x$par)
       fixed.parameters <- x$fixed.parameters
       if (!is.null(replicate.CI) & (!is.null(x$hessian))) {
-        if (suppressPackageStartupMessages(requireNamespace("lmf"))) {
+        # if (suppressPackageStartupMessages(requireNamespace("lmf"))) {
           partot <- matrix(x$par, nrow=1)
           colnames(partot) <- names.par
           partot <- partot[-1, , drop=FALSE]
@@ -154,8 +154,8 @@ P_TRT <- function(x=NULL, resultmcmc=NULL, fixed.parameters=NULL,
             lm <- nrow(partot)
             if (is.null(lm)) lm <- 0
             # 2019-05-31 : if replicate.CI == 1, renvoie quand même un nombre random
-            par <- getFromNamespace("rmnorm", ns="lmf")(n = replicate.CI-lm, mean = x$par, vcov)
-            # par <- getFromNamespace("rmnorm", ns="lmf")(n = replicate.CI-1, mean = x$par, vcov)
+            par <- rmnorm(n = replicate.CI-lm, mean = x$par, vcov)
+            
             # par <- rbind(x$par, par)
             if (!is.matrix(par)) {
               par <- matrix(par, nrow = 1)
@@ -314,11 +314,11 @@ P_TRT <- function(x=NULL, resultmcmc=NULL, fixed.parameters=NULL,
           # if (!identical(colK, integer(0))) {
           #   par <- par[sign(x$par[colK])==sign(par[, colK]), ]
           # }
-        } else {
-          warning("The package lmf is required to estimate confidence interval.")
-          par <- matrix(x$par, nrow = 1)
-          colnames(par) <- names.par
-        }
+        # } else {
+        #   warning("The package lmf is required to estimate confidence interval.")
+        #   par <- matrix(x$par, nrow = 1)
+        #   colnames(par) <- names.par
+        # }
       } else {
         par <- matrix(x$par, nrow = 1)
         colnames(par) <- names.par

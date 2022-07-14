@@ -30,6 +30,17 @@
 
 
 HatchingSuccess.model <- function(par, temperature) {
+  
+  if (!identical(which(names(par) == "MeanHS"), integer(0))) {
+    names(par)[which(names(par) == "MeanHS")] <- "MaxHS"
+  }
+  
+  if (length(par) == 1) {
+    if (is.null(names(par))) names(par) <- "MaxHS"
+  }
+  
+  par <- par[!is.na(par)]
+  
   P.low <- par["P.low"]
   deltaP <- abs(par["deltaP"])
   P.high <- abs(par["P.high"])
@@ -37,6 +48,12 @@ HatchingSuccess.model <- function(par, temperature) {
   if (is.na(P.low)) P.low <- P.high - deltaP
   if (is.na(P.high)) P.high <- P.low + deltaP
   if (is.na(deltaP)) deltaP <- P.high - P.low
+  
+  if (is.na(P.low)) P.low <- 0
+  if (is.na(P.high)) P.high <- 100
+  
+  if (is.na(par["S.low"])) par <- c(par, S.low=100)
+  if (is.na(par["S.high"])) par <- c(par, S.high=100)
   
   if (is.na(par["K1.low"])) par <- c(par, K1.low=0)
   if (is.na(par["K2.low"])) par <- c(par, K2.low=0)
@@ -52,7 +69,7 @@ HatchingSuccess.model <- function(par, temperature) {
   
   
   model <- m.low*m.high*par["MaxHS"]
-  return(model)
+  return(unname(model))
 }
 
 

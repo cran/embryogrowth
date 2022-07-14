@@ -63,7 +63,7 @@
 #'              curve = "MCMC quantiles", show.density=TRUE)
 #' #################
 #' plotR(resultmcmc=resultNest_mcmc_4p_SSM, 
-#'              curve = "MCMC quantiles", polygon=TRUE)
+#'              curve = "MCMC quantiles", polygon=TRUE, ylim=c(0, 10))
 #' #################
 #' plotR(resultmcmc=resultNest_mcmc_6p_SSM, ylim=c(0,8), 
 #'       curve = "MCMC quantiles", polygon=TRUE, col.polygon = rgb(0, 1, 0, 1))
@@ -77,7 +77,7 @@
 #'              curve = "MCMC quantiles", show.density=FALSE)
 #' plotR(resultmcmc=resultNest_mcmc_6p_SSM, col="red", ylim=c(0, 8), 
 #'              curve = "MCMC quantiles", show.density=FALSE, 
-#'              new=FALSE, scaleY=sy)
+#'              new=FALSE, scaleY=sy$scaleY)
 #' #################
 #' sy <- plotR(result=resultNest_6p_SSM, curve="none", 
 #'              scaleY=1E5, 

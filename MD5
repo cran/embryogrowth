@@ -1,6 +1,6 @@
-eb6bc5af251fad3b31329923286ed610 *DESCRIPTION
+05cafed1171aca0e7616ceaf34f13b44 *DESCRIPTION
 c320ad795a8ce4ff0f51f02adebe00bd *NAMESPACE
-97a5c174f70605935b8691e49c872a6c *NEWS
+e2af4a90e81ff404624fb108b4cce7d4 *NEWS
 4c17b9f2d0b411d3792a7b1bba736bf6 *R/ChangeSSM.R
 e006785b580cb00868cc80be62f11ab1 *R/DatabaseNestingArea.R
 8d82b2d4bd3b5a77436d9030f494abd7 *R/DatabaseTSD.R
@@ -30,7 +30,7 @@ d7fac2970783c5f8199b853a9f9ff12a *R/STRN_fit.R
 89d87bda90b3bd233e7e196b71b5fde0 *R/TRN_MHmcmc_p.R
 74b553a6da7f47cf6839367719b0c3b3 *R/TSP.list.R
 b15d39333823efdc9506380a3e161f32 *R/calibrate.datalogger.R
-1da2c92f44746796e3a8ab780f20ac47 *R/embryogrowth-package.R
+70a5bd0c10dd4b90d0a2835f4bba4271 *R/embryogrowth-package.R
 25bed032eeadc50012ebaf0c3cd8c939 *R/fitSSM.R
 abe6d8b2b255d5aefb27e537bb3faaa9 *R/gradientRichardson.R
 c033829d8a6e280ae4fe1bb710d3d857 *R/hessianRichardson.R
@@ -76,7 +76,7 @@ f8dedd7cd38dbee87445179d556e1694 *R/summary.Nests.R
 25c31f8fd3e7c034dc05d9d5940a15d5 *R/switch.transition.R
 ef1cdf8c6f34fd5e56b18e1a6c891c29 *R/tempConst.R
 ed781003852b9fede598b9d39e63d593 *R/test.parallel.R
-973a801456539158ff8ed2e2daca20e8 *R/tsd.R
+64975a317543a3cdd03e497b50934c19 *R/tsd.R
 afb3425c081e67d39071b95db18e4b52 *R/tsd_MHmcmc.R
 b51814a95942a749899fb7ba070db38a *R/tsd_MHmcmc_p.R
 d496b1cad4c11c084631af763c8adf5a *R/tsd_fit.R
@@ -106,7 +106,7 @@ a73f02daea23ee27c4f4e6b084b5cdc3 *data/resultNest_mcmc_newp.rda
 5bc0ae61871d70cf6859ad724aafa7a5 *data/stages.rda
 18f46b18447fcd2d122d722229e20722 *data/tempConst.rda
 0cef9f4a197446c8bc681ee040ff8b13 *inst/shiny/server.R
-92c1dc41f63c371a0dc0d14c57931fa2 *inst/shiny/ui.R
+3d02ea6c1061c04d04f801f2258980c2 *inst/shiny/ui.R
 ca0c55ff62aff6ad66c52bd78b65810f *inst/shiny/www/PDF.png
 7df61d5f7c749e4e8b3c736ffe3972e5 *man/ChangeSSM.Rd
 3a48419852db7a23e06e1790284b53cc *man/DatabaseNestingArea.Rd
@@ -132,8 +132,8 @@ a5c0d505b3f25a551abd2fc281d590ac *man/TSP.list.Rd
 437484c59e4109d64cff3e48d03b5368 *man/dydt.Gompertz.Rd
 afebe2254fef30771685f3f6086b0862 *man/dydt.exponential.Rd
 458d22837ab3882ae4c58b82aeaab43d *man/dydt.linear.Rd
-c98ad042380d9de30d759e18b1337a77 *man/embryogrowth-package.Rd
-9e1d50e527041d7163acbdd000b132d7 *man/figures/E.png
+ccbee9e025e3e618b38f402af9fd00d8 *man/embryogrowth-package.Rd
+7e559ff0804e47ed4ce10138f0405478 *man/figures/E.png
 0ff7aafb97ad17b030abbf6eab409468 *man/hist.Nests.Rd
 a990101a5d68c154e470819fb6772ff4 *man/hist.NestsResult.Rd
 1819f329227759394a6df1d05e97e615 *man/info.nests.Rd

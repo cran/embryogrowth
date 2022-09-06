@@ -378,8 +378,8 @@ tsd <- function(df=NULL                                            ,
                    AIC= 2*value + 2*0, 
                    AICc= 2*value + (2*0*(0+1))/(sum(N)-0-1), 
                    BIC= 2*value + 0
-                   )
-
+    )
+    
     
     #    limit.low.TRT <- min(temperatures)
     #    limit.high.TRT <- max(temperatures)	
@@ -506,11 +506,13 @@ tsd <- function(df=NULL                                            ,
         print(paste0("The transitional range of ", result$type, "s is ", sprintf("%.3f",o$P_TRT_quantiles[2, "TRT"]), " CI", as.character(range.CI*100), "% ", sprintf("%.3f",min(o$P_TRT_quantiles[1, "TRT"], o$P_TRT_quantiles[3, "TRT"])), ";", sprintf("%.3f",max(o$P_TRT_quantiles[1, "TRT"], o$P_TRT_quantiles[3, "TRT"]))))
         print(paste0("The lower limit of transitional range of ", result$type, "s is ", sprintf("%.3f",o$P_TRT_quantiles[2, "lower.limit.TRT"]), " CI", as.character(range.CI*100), "% ", sprintf("%.3f",min(o$P_TRT_quantiles[1, "lower.limit.TRT"], o$P_TRT_quantiles[3, "lower.limit.TRT"])), ";", sprintf("%.3f", max(o$P_TRT_quantiles[1, "lower.limit.TRT"], o$P_TRT_quantiles[3, "lower.limit.TRT"]))))
         print(paste0("The upper limit of transitional range of ", result$type, "s is ", sprintf("%.3f",o$P_TRT_quantiles[2, "higher.limit.TRT"]), " CI", as.character(range.CI*100), "% ", sprintf("%.3f",min(o$P_TRT_quantiles[1, "higher.limit.TRT"], o$P_TRT_quantiles[3, "higher.limit.TRT"])), ";", sprintf("%.3f",max(o$P_TRT_quantiles[1, "higher.limit.TRT"], o$P_TRT_quantiles[3, "higher.limit.TRT"]))))
+        if (!is.na(result$par["S"])) print(paste0("The S parameter value is ", sprintf("%.3f",result$par["S"])))
       } else {
         print(paste0("The pivotal ", result$type, " is ", sprintf("%.3f",o$P_TRT_quantiles[2, "PT"])))
         print(paste0("The transitional range of ", result$type, "s is ", sprintf("%.3f",o$P_TRT_quantiles[2, "TRT"])))
         print(paste0("The lower limit of transitional range of ", result$type, "s is ", sprintf("%.3f",o$P_TRT_quantiles[2, "lower.limit.TRT"])))
         print(paste0("The upper limit of transitional range of ", result$type, "s is ", sprintf("%.3f",o$P_TRT_quantiles[2, "higher.limit.TRT"])))
+        if (!is.na(result$par["S"])) print(paste0("The S parameter value is ", sprintf("%.3f",result$par["S"])))
       }
     } else {
       if (!is.null(replicate.CI)) {
@@ -522,6 +524,7 @@ tsd <- function(df=NULL                                            ,
         print(paste0("The upper transitional range of ", result$type, "s is ", sprintf("%.3f",o$P_TRT_quantiles[2, "TRT_high"]), " CI", as.character(range.CI*100), "% ", sprintf("%.3f",min(o$P_TRT_quantiles[1, "TRT_high"], o$P_TRT_quantiles[3, "TRT_high"])), ";", sprintf("%.3f",max(o$P_TRT_quantiles[1, "TRT_high"], o$P_TRT_quantiles[3, "TRT_high"]))))
         print(paste0("The lower limit of upper transitional range of ", result$type, "s is ", sprintf("%.3f",o$P_TRT_quantiles[2, "lower.limit.TRT_high"]), " CI", as.character(range.CI*100), "% ", sprintf("%.3f",min(o$P_TRT_quantiles[1, "lower.limit.TRT_high"], o$P_TRT_quantiles[3, "lower.limit.TRT_high"])), ";", sprintf("%.3f", max(o$P_TRT_quantiles[1, "lower.limit.TRT_high"], o$P_TRT_quantiles[3, "lower.limit.TRT_high"]))))
         print(paste0("The upper limit of upper transitional range of ", result$type, "s is ", sprintf("%.3f",o$P_TRT_quantiles[2, "higher.limit.TRT_high"]), " CI", as.character(range.CI*100), "% ", sprintf("%.3f",min(o$P_TRT_quantiles[1, "higher.limit.TRT_high"], o$P_TRT_quantiles[3, "higher.limit.TRT_high"])), ";", sprintf("%.3f",max(o$P_TRT_quantiles[1, "higher.limit.TRT_high"], o$P_TRT_quantiles[3, "higher.limit.TRT_high"]))))
+        if (!is.na(result$par["S"])) print(paste0("The S parameter value is ", sprintf("%.3f",result$par["S"])))
       } else {
         print(paste0("The lower pivotal ", result$type, " is ", sprintf("%.3f",o$P_TRT_quantiles[2, "PT_low"])))
         print(paste0("The lower transitional range of ", result$type, "s is ", sprintf("%.3f",o$P_TRT_quantiles[2, "TRT_low"])))
@@ -531,6 +534,7 @@ tsd <- function(df=NULL                                            ,
         print(paste0("The upper transitional range of ", result$type, "s is ", sprintf("%.3f",o$P_TRT_quantiles[2, "TRT_high"])))
         print(paste0("The lower limit of upper transitional range of ", result$type, "s is ", sprintf("%.3f",o$P_TRT_quantiles[2, "lower.limit.TRT_high"])))
         print(paste0("The upper limit of upper transitional range of ", result$type, "s is ", sprintf("%.3f",o$P_TRT_quantiles[2, "higher.limit.TRT_high"])))
+        if (!is.na(result$par["S"])) print(paste0("The S parameter value is ", sprintf("%.3f",result$par["S"])))
       }
     }
   }

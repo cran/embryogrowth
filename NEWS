@@ -1,8 +1,13 @@
 THIS IS THE CHANGELOG OF THE "embryogrowth" PACKAGE
 
-            CHANGES IN VERSION 8.6 (2022-07-14)
+            CHANGES IN VERSION 8.7 (2022-09-06)
+
+* New CRAN version - 8.7 (2022-09-06)
+
+            CHANGES IN VERSION 8.6-7 (2022-08-22)
 
 * New CRAN version - 8.6 (2022-07-14)
+* Fix align for html5 - 8.6-7 (2022-08-22)
 
             CHANGES IN VERSION 8.5-17 (2022-07-13)
 

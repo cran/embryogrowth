@@ -3,8 +3,8 @@
 #' \tabular{ll}{
 #'  Package: \tab embryogrowth\cr
 #'  Type: \tab Package\cr
-#'  Version: \tab 8.6 build 1557\cr
-#'  Date: \tab 2022-07-14\cr
+#'  Version: \tab 8.7 build 1566\cr
+#'  Date: \tab 2022-09-06\cr
 #'  License: \tab GPL (>= 2)\cr
 #'  LazyLoad: \tab yes\cr
 #'  }
@@ -16,7 +16,7 @@
 #' The latest version of this package can always been installed using:\cr
 #' install.packages("https://hebergement.universite-paris-saclay.fr/marcgirondot/CRAN/HelpersMG.tar.gz", repos=NULL, type="source")\cr
 #' install.packages("https://hebergement.universite-paris-saclay.fr/marcgirondot/CRAN/embryogrowth.tar.gz", repos=NULL, type="source")
-#' \if{html}{\figure{E.png}{options: alt="embryogrowth logo", align="right"}}
+#' \if{html}{\figure{E.png}{options: alt="embryogrowth logo"}}
 #' \if{latex}{\figure{E.png}}
 #' @references Girondot, M. & Kaska, Y. 2014. A model to predict the thermal 
 #'          reaction norm for the embryo growth rate from field data. Journal of

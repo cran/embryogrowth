@@ -28,7 +28,7 @@ shinyUI(fluidPage(
         a("here."
           , href="https://cran.r-project.org/package=embryogrowth"
           , target="_blank"))
-    , p("Embryogrowth package is developped by "
+    , p(paste0("Embryogrowth package ", packageVersion("embryogrowth"), " is developped by ")
         , a("Marc Girondot"
             , href="https://max2.ese.u-psud.fr/epc/conservation/index.html"
             , target="_blank"))

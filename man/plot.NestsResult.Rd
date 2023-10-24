@@ -194,6 +194,7 @@ Note: Four species have predefined embryo stages. embryo.stages parameter can ta
   \item \code{Emys orbicularis.SCL}
   \item \code{Emys orbicularis.mass}
   \item \code{Podocnemis expansa.SCL}
+  \item \code{Lepidochelys olivacea.SCL}
   \item \code{Generic.ProportionDevelopment}
   }
 }

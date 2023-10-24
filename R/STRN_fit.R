@@ -96,20 +96,27 @@
                    fill=fill                                                    ,
                    progressbar = FALSE                                          ,
                    warnings = FALSE                                             ,
-                   zero=zero                                                    
+                   zero=zero                                                    , 
+                   verbose = verbose
   )
   sr <- rr$summary[serafaire, sexratio]
   
   if (out=="likelihood") {
     if (is.null(Sexed) | is.null(Males)) {
+      # message(paste0("Likelihood=+Inf\n", d(parSTRN), collapse = " "))
       return(+Inf)
     } else {
       Sexed <- Sexed[serafaire]
       Males <- Males[serafaire]
       sr <- ifelse(sr == 0, zero, sr)
       sr <- ifelse(sr == 1, 1-zero, sr)
-      return(-sum(dbinom(prob=sr, 
-                         size=Sexed, x=Males, log=TRUE)))
+      Lsr <- -sum(dbinom(prob=sr, 
+                         size=Sexed, x=Males, log=TRUE))
+      if (is.na(Lsr)) {
+        message(paste0("Likelihood=", as.character(Lsr)))
+        message(paste0("Error in sex ratio estimation:\nSexualisationTRN=", d(parSTRN), collapse = " "))
+      }
+      return(Lsr)
     }
   } else {
     return(sr)

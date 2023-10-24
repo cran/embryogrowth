@@ -30,7 +30,7 @@ shinyUI(fluidPage(
           , target="_blank"))
     , p(paste0("Embryogrowth package ", packageVersion("embryogrowth"), " is developped by ")
         , a("Marc Girondot"
-            , href="https://max2.ese.u-psud.fr/epc/conservation/index.html"
+            , href="https://hebergement.universite-paris-saclay.fr/marcgirondot/"
             , target="_blank"))
     , p(paste0("Database version ", as.character(DatabaseTSD$Version[1])))
   )

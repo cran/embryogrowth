@@ -1,11 +1,11 @@
-#' Generate_hatchling_metric Generate a data.frame that can be used as test value for searchR()
-#' @title Generate a data.frame that can be used as test value for searchR()
+#' Generate_hatchling_metric Generate a data.frame that can be used as hatchling.metric value for searchR()
+#' @title Generate a data.frame that can be used as hatchling.metric value for searchR()
 #' @author Marc Girondot \email{marc.girondot@@gmail.com}
 #' @return A data.frame with size or mass at hatching for each nest
 #' @param series Name of series or object from searchR()
 #' @param hatchling.metric Size or mass at hatching. Will be recycled if necessary
-#' @param previous Previous formated test data
-#' @description Generate a data.frame that can be used as test value for searchR()
+#' @param previous Previous formated hatchling.metric data
+#' @description Generate a data.frame that can be used as hatchling.metric value for searchR()
 #' @examples
 #' \dontrun{
 #' library(embryogrowth)

@@ -73,6 +73,7 @@
 #'   \item \code{Emys orbicularis.SCL}
 #'   \item \code{Emys orbicularis.mass}
 #'   \item \code{Podocnemis expansa.SCL}
+#'   \item \code{Lepidochelys olivacea.SCL}
 #'   \item \code{Generic.ProportionDevelopment}
 #'   }
 #' @examples
@@ -261,6 +262,9 @@ plot.NestsResult <- function(x                                                  
   if (!is.null(SE[1])) if (all(is.na(SE[])))  {
     SE <- NULL
   }
+  
+  if (is.null(replicate.CI)) replicate.CI <- 0
+  
   if (!is.null(GTRN.CI)) {
     if (GTRN.CI == "mcmc" & is.null(resultmcmc)) GTRN.CI <- NULL
     if (GTRN.CI == "se" & is.null(SE)) GTRN.CI <- NULL
@@ -339,7 +343,8 @@ plot.NestsResult <- function(x                                                  
                                  fixed.parameters=fixed.parameters                 , 
                                  resultmcmc = resultmcmc                           , 
                                  hessian=hessian                                   ,
-                                 SE=SE, temperatures=temperatures                  , 
+                                 SE=SE                                             , 
+                                 temperatures=temperatures                         , 
                                  integral=integral                                 , 
                                  derivate=derivate                                 , 
                                  hatchling.metric=hatchling.metric                 , 
@@ -368,7 +373,8 @@ plot.NestsResult <- function(x                                                  
                                  tsd=NULL                                          , 
                                  tsd.CI=NULL                                       , 
                                  tsd.mcmc=NULL                                     , 
-                                 zero = 1E-9                                       )
+                                 zero = 1E-9                                       , 
+                                 verbose = FALSE                                   )
     par(mar=mar)  
     
     troispoints <- tryCatch(list(...), error=function(e) list())

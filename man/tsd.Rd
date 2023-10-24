@@ -311,6 +311,14 @@ plot(result_mcmc_tsd_gj, parameters="P_low", scale.prior=TRUE, xlim=c(20, 30), l
 plot(result_mcmc_tsd_gj, parameters="P_high", scale.prior=TRUE, xlim=c(25, 35), las=1)
 plot(model_TSDII_gj, resultmcmc = result_mcmc_tsd_gj)
 
+# Trachemys scripta elegans
+# Take care, the pattern reflects large population variation
+
+Tse <- subset(DatabaseTSD, Species=="Trachemys scripta" & Subspecies == "elegans" & !is.na(Sexed))
+Tse_logistic <- tsd(Tse)
+plot(Tse_flexit)
+compare_AICc(logistic=Tse_logistic, flexit=Tse_flexit)
+plot(Tse_flexit)
 }
 }
 \references{

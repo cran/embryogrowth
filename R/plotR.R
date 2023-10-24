@@ -31,6 +31,7 @@
 #' @param lwdCI The type of lines
 #' @param ylim Range of values for y-axis
 #' @param xlim Range of values for x-axis
+#' @param xlimR description to show the curve
 #' @param yaxt The yaxt parameter of y-axis
 #' @param by.temperature Step to built the temperatures
 #' @param scaleY Scaling factor for y axis or "auto"
@@ -110,6 +111,7 @@ plotR <-
            set.par=1                                                                       , 
            ylim=c(0, 5)                                                                    , 
            xlim=c(20,35)                                                                   , 
+           xlimR=NULL                                                                      , 
            hessian = NULL                                                                  , 
            replicate.CI = 1000                                                             , 
            cex.lab = par("cex")                                                            , 
@@ -148,6 +150,7 @@ plotR <-
     # result = resultNest_4p_SSM
     
     return_Out <- NULL
+    if (is.null(xlimR)) xlimR <- xlim
     
     curve <- tolower(curve)
     curve <- match.arg(curve, choices = c("mcmc quantiles", "mcmc mean-sd", "ml", "ml quantiles", "ml mean-se", "none"))
@@ -192,7 +195,7 @@ plotR <-
       if (all(!is.na(mar))) par(mar=mar)
     }
     
-    temp <- seq(from=xlim[1], to=xlim[2], by=by.temperature)
+    temp <- seq(from=xlimR[1], to=xlimR[2], by=by.temperature)
     RandomMatrixRforTempsAndReplicates <- NULL
     
     if (((curve=="ml quantiles") | (curve == "ml mean-se")) & is.null(hessian)) {
@@ -292,19 +295,23 @@ plotR <-
     if (show.density & !is.null(MatrixRforSmooth)) {
       if (new) {
         par(new=FALSE)
-        smoothScatter(x=MatrixRforSmooth[, 1], y=MatrixRforSmooth[, 2], las=las, bty = bty,  pch=pch, 
+        smoothScatter(x=MatrixRforSmooth[, 1], 
+                      y=MatrixRforSmooth[, 2], las=las, bty = bty,  pch=pch, 
                       bandwidth = bandwidth, 
                       xlab=xlab, 
                       main=main,
                       colramp=colramp, 
                       ylab=ylab, 
-                      ylim=ylim, xlim = xlim, nbin = 128, postPlotHook=NULL, 
+                      ylim=ylim, 
+                      xlim = xlim, 
+                      nbin = 128, postPlotHook=NULL, 
                       cex.axis=cex.axis, 
                       cex.lab=cex.lab, 
                       yaxt=yaxt)
       } else {
         par(new=TRUE)
-        smoothScatter(x=MatrixRforSmooth[, 1], y=MatrixRforSmooth[, 2], bty = "n",  pch=pch, 
+        smoothScatter(x=MatrixRforSmooth[, 1], 
+                      y=MatrixRforSmooth[, 2], bty = "n",  pch=pch, 
                       bandwidth = bandwidth, 
                       xlab="", 
                       main="",

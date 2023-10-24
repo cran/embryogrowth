@@ -117,7 +117,7 @@ HatchingSuccess.fit <- function(par=NULL, data=stop("data must be provided"),
                              'MaxHS' = 0.99)
   
   lw <- c('S.low' = 0, 'S.high' = 0, 'P.low' = 10, 'P.high' = 20, 'MaxHS' = 0, K1.low=-10, K1.high=-10, K2.low=-10, K2.high=-10)[names(par)]
-  hg <- c('S.low' = 5, 'S.high' = 5, 'P.low' = 50, 'P.high' = 100, 'MaxHS' = 1, K1.low=+10, K1.high=+10, K2.low=+10, K2.high=+10)[names(par)]
+  hg <- c('S.low' = 20, 'S.high' = 20, 'P.low' = 50, 'P.high' = 100, 'MaxHS' = 1, K1.low=+10, K1.high=+10, K2.low=+10, K2.high=+10)[names(par)]
   
   g <- suppressWarnings(optim(par=par, fn=HatchingSuccess.lnL, 
                               fixed.parameters=fixed.parameters, 

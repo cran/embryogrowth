@@ -117,6 +117,21 @@ new_result <- ChangeSSM(resultmcmc = resultNest_mcmc_4p_SSM, result = resultNest
  
 plotR(new_result, ylim=c(0, 3), curve="ML")
 plotR(new_result, ylim=c(0, 3), curve="ML quantiles")
+
+# A little trick
+# to convert SSM4 to SSM6, you can use:
+
+x4 <- c('DHA' = 69.718935117894063, 
+         'DHH' = 497.81709040501079, 
+         'T12H' = 308.95543713889509, 
+         'Rho25' = 255.24186073771696)
+
+x6 <- c(x4["DHA"], 
+.        x4["DHH"], 
+.        'DHL' = x4[["DHH"]], 
+.        'DT' = 0.5, 
+.        'T12L' = x4[["T12H"]], 
+.        x4['Rho25'])
 }
 }
 \author{

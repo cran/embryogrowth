@@ -38,9 +38,11 @@
 
 
 FormatNests <-
-  function(data=stop("A dataset must be provided !"), previous=NULL, 
-           usemiddletime=FALSE, 
-           simplify=TRUE, weight=NULL) {
+  function(data=stop("A dataset must be provided !"), 
+           previous=NULL                            , 
+           usemiddletime=FALSE                      , 
+           simplify=TRUE                            , 
+           weight=NULL                              ) {
     
     # Je cree une une fonction qui prepare un fichier pour etre utilise
     # Les differents nids seront des matrices dans une liste
@@ -94,7 +96,7 @@ FormatNests <-
         ess2 <- c(ess2, newess2[length(newess2)])
         essT <- c(essT, newessT[length(newess2)])
         
-        ess<-matrix(c(essT, ess2, ess2+273.15, rep(NA, 3*length(ess2))), ncol=6)
+        ess <- matrix(c(essT, ess2, ess2+273.15, rep(NA, 3*length(ess2))), ncol=6)
         
         colnames(ess)<-c("Time", "Temperatures C", "Temperatures K", "r", "Mass", "IndiceK")
         
@@ -106,11 +108,18 @@ FormatNests <-
           for (i in 2:(dim(ess)[1]-1)) {
             if (ess[i,2]==ess[i-1,2]) ess[i,1]=NA
           }
+          
+          if (!is.na(ess[nrow(ess)-1,1]))
+            if (ess[nrow(ess), 1] == ess[nrow(ess)-1,1]) {
+              ess[nrow(ess),1]=NA
+            }
         }
+        
+        
         
         # nidsEC[[names(data[j])]]<-subset(ess, !is.na(ess[,1]))
         # 23/4/2015
-        nidsEC[[colnames(data)[j]]]<-subset(ess, !is.na(ess[,1]))
+        nidsEC[[colnames(data)[j]]] <- subset(ess, !is.na(ess[,1]))
       }
       
     }

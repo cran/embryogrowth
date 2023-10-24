@@ -2,7 +2,7 @@
 % Please edit documentation in R/Generate_hatchling_metric.R
 \name{Generate_hatchling_metric}
 \alias{Generate_hatchling_metric}
-\title{Generate a data.frame that can be used as test value for searchR()}
+\title{Generate a data.frame that can be used as hatchling.metric value for searchR()}
 \usage{
 Generate_hatchling_metric(
   series = stop("A result object or names of series must be provided"),
@@ -15,16 +15,16 @@ Generate_hatchling_metric(
 
 \item{hatchling.metric}{Size or mass at hatching. Will be recycled if necessary}
 
-\item{previous}{Previous formated test data}
+\item{previous}{Previous formated hatchling.metric data}
 }
 \value{
 A data.frame with size or mass at hatching for each nest
 }
 \description{
-Generate a data.frame that can be used as test value for searchR()
+Generate a data.frame that can be used as hatchling.metric value for searchR()
 }
 \details{
-Generate_hatchling_metric Generate a data.frame that can be used as test value for searchR()
+Generate_hatchling_metric Generate a data.frame that can be used as hatchling.metric value for searchR()
 }
 \examples{
 \dontrun{

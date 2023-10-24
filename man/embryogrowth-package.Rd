@@ -8,7 +8,7 @@
 Tools to analyze the embryo growth and the sexualisation thermal reaction norms.\cr
 The latest version of this package can always been installed using:\cr
 install.packages("https://hebergement.universite-paris-saclay.fr/marcgirondot/CRAN/HelpersMG.tar.gz", repos=NULL, type="source")\cr
-install.packages("https://hebergement.universite-paris-saclay.fr/marcgirondot/CRAN/embryogrowth.tar.gz", repos=NULL, type="source")
+install.packages("https://hebergement.universite-paris-saclay.fr/marcgirondot/CRAN/embryogrowth.tar.gz", repos=NULL, type="source")\cr
 \if{html}{\figure{E.png}{options: alt="embryogrowth logo"}}
 \if{latex}{\figure{E.png}}
 }
@@ -18,8 +18,8 @@ Fit a parametric function that describes dependency of embryo growth to temperat
 \tabular{ll}{
  Package: \tab embryogrowth\cr
  Type: \tab Package\cr
- Version: \tab 8.7 build 1566\cr
- Date: \tab 2022-09-06\cr
+ Version: \tab 9.1 build 1630\cr
+ Date: \tab 2023-10-24\cr
  License: \tab GPL (>= 2)\cr
  LazyLoad: \tab yes\cr
  }

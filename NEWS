@@ -1,8 +1,23 @@
 THIS IS THE CHANGELOG OF THE "embryogrowth" PACKAGE
 
-            CHANGES IN VERSION 8.7 (2022-09-06)
+            CHANGES IN VERSION 9.1 (2023-10-24)
+
+* New CRAN version - 9.1 (2023-04-03)
+
+            CHANGES IN VERSION 9.0.2 (2023-10-24)
+
+* New CRAN version - 9.0 (2023-04-03)
+* New stages for Lepidochelys olivacea - 9.0.1 (2023-09-12)
+* Correction of priors for TSD when durations are used - 9.0.2 (2023-10-02)
+* New data for Trachemys in databaseTSD - 9.1 (2023-10-24)
+
+            CHANGES IN VERSION 8.7.3 (2023-03-16)
 
 * New CRAN version - 8.7 (2022-09-06)
+* Solve a rare problem in FormatNests() - 8.7.1 (2023-02-17)
+* New parameter xlimR in plotR() - 8.7.2 (2023-02-22)
+* Change the limits for L-BFGS-B parameters in HatchingSuccess.fit() - 8.7.3 (2023-03-16)
+* SexualisationTRN can use the polynom format 9.0 (2023-04-07)
 
             CHANGES IN VERSION 8.6-7 (2022-08-22)
 

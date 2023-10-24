@@ -5,9 +5,9 @@
 \title{Estimate the parameters that best describe the sexualisation thermal reaction norm within the TSP}
 \usage{
 STRN(
+  EmbryoGrowthTRN = stop("Embryo Growth Thermal Reaction Norm must be provided"),
   Initial_STRN = NULL,
   fixed.parameters = NULL,
-  EmbryoGrowthTRN = stop("Embryo Growth Thermal Reaction Norm must be provided"),
   TSP.borders = NULL,
   embryo.stages = NULL,
   TSP.begin = 0,
@@ -29,11 +29,11 @@ STRN(
 )
 }
 \arguments{
+\item{EmbryoGrowthTRN}{The Embryo Growth Thermal Reaction Norm obtained with searchR()}
+
 \item{Initial_STRN}{Values for initial model of Sexualisation Thermal Reaction Norm or tsd model}
 
 \item{fixed.parameters}{Value for Sexualisation Thermal Reaction Norm or tsd model that will not be changed}
-
-\item{EmbryoGrowthTRN}{The Embryo Growth Thermal Reaction Norm obtained with searchR()}
 
 \item{TSP.borders}{The limits of TSP in stages. See embryo.stages parameter.}
 
@@ -105,6 +105,7 @@ Note: four species have predefined embryo stages. embryo.stages parameter can ta
   \item \code{Emys orbicularis.SCL}
   \item \code{Emys orbicularis.mass}
   \item \code{Podocnemis expansa.SCL}
+  \item \code{Lepidochelys olivacea.SCL}
   \item \code{Generic.ProportionDevelopment}
 }
 A fifth name \code{fitted} must be used when limits of TSP are fitted using \code{BeginTSP} and \code{EndTSP} parameters.\cr

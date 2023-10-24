@@ -41,7 +41,8 @@ info.nests(
   tsd = NULL,
   tsd.CI = NULL,
   tsd.mcmc = NULL,
-  zero = 1e-09
+  zero = 1e-09,
+  verbose = FALSE
 )
 }
 \arguments{
@@ -118,6 +119,8 @@ info.nests(
 \item{tsd.mcmc}{A object from tsd_MHmcmc() .}
 
 \item{zero}{Value to replace 0 or 1.}
+
+\item{verbose}{If TRUE, show more information.}
 }
 \value{
 Return or the total likelihood or a list with $metric and $summary depending on out parameter
@@ -207,6 +210,7 @@ Note: four species have predefined embryo stages. embryo.stages parameter can ta
   \item \code{Emys orbicularis.SCL}
   \item \code{Emys orbicularis.mass}
   \item \code{Podocnemis expansa.SCL}
+  \item \code{Lepidochelys olivacea.SCL}
   \item \code{Generic.ProportionDevelopment}
   }
 But remember that mass is not the best proxy to describe the growth of an embryo because it can decrease if the substrate becomes dry.\cr

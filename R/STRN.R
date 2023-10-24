@@ -53,6 +53,7 @@
 #'   \item \code{Emys orbicularis.SCL}
 #'   \item \code{Emys orbicularis.mass}
 #'   \item \code{Podocnemis expansa.SCL}
+#'   \item \code{Lepidochelys olivacea.SCL}
 #'   \item \code{Generic.ProportionDevelopment}
 #' }
 #' A fifth name \code{fitted} must be used when limits of TSP are fitted using \code{BeginTSP} and \code{EndTSP} parameters.\cr
@@ -213,9 +214,9 @@
 #' }
 #' @export
 
-STRN <- function(Initial_STRN=NULL                                                           , 
+STRN <- function(EmbryoGrowthTRN=stop("Embryo Growth Thermal Reaction Norm must be provided"),
+                 Initial_STRN=NULL                                                           , 
                  fixed.parameters = NULL                                                     , 
-                 EmbryoGrowthTRN=stop("Embryo Growth Thermal Reaction Norm must be provided"), 
                  TSP.borders=NULL                                                            , 
                  embryo.stages=NULL                                                          , 
                  TSP.begin=0                                                                 , 
@@ -279,6 +280,7 @@ STRN <- function(Initial_STRN=NULL                                              
                                                               TSP.begin=TSP.begin                , 
                                                               TSP.end=TSP.end                    , 
                                                               fill=fill                          ,
+                                                              out="likelihood"                   ,
                                                               verbose=verbose                    )
     result <- list(value=value)
     result$par <- pSTRN
@@ -308,12 +310,14 @@ STRN <- function(Initial_STRN=NULL                                              
                 itnmax=itnmax                                                              , 
                 control=modifyList(list(dowarn=FALSE, follow.on=TRUE, kkt=FALSE), control) )
       
-
+      
       result <- do.call(getFromNamespace(x="optimx", ns="optimx"), L)
       
-      x <- result[minL, nm]
-      x <- as.numeric(x)
-      names(x) <- nm
+      colnames(result) <- c(nm, colnames(result)[(length(nm)+1): ncol(result)])
+      
+      x <- unlist(result[minL, nm, drop=TRUE])
+      # x <- as.numeric(x)
+      # names(x) <- nm
       conv <- result[minL, "convcode"]
       value <- result[minL, "value"]
       

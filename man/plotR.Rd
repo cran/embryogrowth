@@ -15,6 +15,7 @@ plotR(
   set.par = 1,
   ylim = c(0, 5),
   xlim = c(20, 35),
+  xlimR = NULL,
   hessian = NULL,
   replicate.CI = 1000,
   cex.lab = par("cex"),
@@ -69,6 +70,8 @@ plotR(
 \item{ylim}{Range of values for y-axis}
 
 \item{xlim}{Range of values for x-axis}
+
+\item{xlimR}{description to show the curve}
 
 \item{hessian}{An hessian matrix}
 

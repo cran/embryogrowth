@@ -39,6 +39,7 @@
 #' @param tsd.mcmc A object from tsd_MHmcmc() .
 #' @param tsd.CI How to estimate CI for sex ratio thermal reaction norm; Can be NULL, "SE", "MCMC", or "Hessian".
 #' @param zero Value to replace 0 or 1.
+#' @param verbose If TRUE, show more information.
 #' @description This function calculates many statistics about nests.\cr
 #' The embryo.stages is a named vector with relative size as compared to final size at the beginning of the stage. Names are the stages.\cr
 #' For example for SCL in Caretta caretta:\cr
@@ -123,6 +124,7 @@
 #'   \item \code{Emys orbicularis.SCL}
 #'   \item \code{Emys orbicularis.mass}
 #'   \item \code{Podocnemis expansa.SCL}
+#'   \item \code{Lepidochelys olivacea.SCL}
 #'   \item \code{Generic.ProportionDevelopment}
 #'   }
 #' But remember that mass is not the best proxy to describe the growth of an embryo because it can decrease if the substrate becomes dry.\cr
@@ -261,7 +263,8 @@ info.nests <- function(x=NULL                                                  ,
                        tsd=NULL                                                , 
                        tsd.CI=NULL                                             , 
                        tsd.mcmc=NULL                                           , 
-                       zero = 1E-9                                             ) {
+                       zero = 1E-9                                             , 
+                       verbose = FALSE                                         ) {
   
   # parameters=NULL; temperatures=NULL; fixed.parameters=NULL
   # integral=NULL; hatchling.metric=NULL; derivate=NULL 
@@ -279,6 +282,7 @@ info.nests <- function(x=NULL                                                  ,
   # metric.end.incubation="observed"
   # progressbar=FALSE;warnings=TRUE; parallel=TRUE
   # tsd=NULL; tsd.CI=NULL; tsd.mcmc=NULL
+  # verbose = FALSE
   
   # NestsResult=resultNest_Florida
   # series=1:156
@@ -819,7 +823,7 @@ info.nests <- function(x=NULL                                                  ,
                                              timesunique <- c(tmin[i], tmin[i+1])
                                              df[i, "TempK"] <- df[i, "TempK"]+metabolic.heating*(ypre/meanSCL)
                                              CTE_inst <- df[i, "TempK"]
-                                             a_inst <- SSM(CTE_inst, setpar)[[1]]
+                                             a_inst <- SSM(CTE_inst, setpar, verbose=verbose)[[1]]
                                              param <- c(alpha=unname(a_inst), K=Kval)
                                              if (!is.null(integral)) {
                                                ypre <- integral(t=timesunique[2]-timesunique[1], size=ypre, parms=param)[1, "metric"]
@@ -838,7 +842,7 @@ info.nests <- function(x=NULL                                                  ,
                                              df[i, "TempK"] <- df[i, "TempK"]+metabolic.heating*(ypre/meanSCL)
                                              CTE_inst <- df[i, "TempK"]
                                              transition <- 1/(1+exp(transition_S*(ypre-transition_P)))
-                                             rT_inst < SSM(CTE_inst, setpar)
+                                             rT_inst < SSM(CTE_inst, setpar, verbose=verbose)
                                              a_inst <- rT_inst[[1]]*transition+rT_inst[[2]]*(1-transition)
                                              param <- c(alpha=unname(a_inst), K=Kval)
                                              if (!is.null(integral)) {
@@ -861,7 +865,7 @@ info.nests <- function(x=NULL                                                  ,
                                              timesunique <- c(tmin[i], tmin[i+1])
                                              df[i, "TempK"] <- df[i, "TempK"]+metabolic.heating*(ypre/meanSCL)
                                              CTE_inst <- df[i, "TempK"]
-                                             a_inst <- SSM(CTE_inst, setpar)[[1]]
+                                             a_inst <- SSM(CTE_inst, setpar, verbose=verbose)[[1]]
                                              param <- c(alpha=unname(a_inst), K=Kval)
                                              
                                              if (!is.null(integral)) {
@@ -884,7 +888,7 @@ info.nests <- function(x=NULL                                                  ,
                                              df[i, "TempK"] <- df[i, "TempK"]+metabolic.heating*(ypre/meanSCL)
                                              CTE_inst <- df[i, "TempK"]
                                              transition <- 1/(1+exp(transition_S*(ypre-transition_P)))
-                                             rT_inst <- SSM(CTE_inst, setpar)
+                                             rT_inst <- SSM(CTE_inst, setpar, verbose=verbose)
                                              a_inst <- rT_inst[[1]]*transition+rT_inst[[2]]*(1-transition)
                                              param <- c(alpha=unname(a_inst), K=Kval)
                                              if (!is.null(integral)) {
@@ -926,7 +930,7 @@ info.nests <- function(x=NULL                                                  ,
                                            if (!is.na(setpar_STRN["EndTSP"])) {
                                              xxbt <- invlogit(setpar_STRN["EndTSP"]) 
                                              if (xxbt == 0) xxbt <- zero
-                                             if (xxbt == 0.99) xxbt <- 0.99
+                                             if (xxbt >= 0.99) xxbt <- 0.99
                                              embryo.stages[as.character(TSP.borders[2])] <- xxbt
                                              embryo.stages[as.character(TSP.borders[2]+1)] <- xxbt
                                            }
@@ -959,18 +963,18 @@ info.nests <- function(x=NULL                                                  ,
                                          }
                                          
                                          if (out == "likelihood") {
-                                         if (!is.na(sdSCL)) {
-                                           likelihood <- (-dnorm(ypre, mean=meanSCL, sd=sdSCL, log=TRUE))
-                                         } else {
-                                           if (is.na(parameters["SD"])) {
-                                           likelihood <- ((ypre - meanSCL)^2)
+                                           if (!is.na(sdSCL)) {
+                                             likelihood <- (-dnorm(ypre, mean=meanSCL, sd=sdSCL, log=TRUE))
                                            } else {
-                                             # 28/3/2022
-                                             likelihood <- (-dnorm(ypre, mean=meanSCL, sd=parameters["SD"], log=TRUE))
+                                             if (is.na(parameters["SD"])) {
+                                               likelihood <- ((ypre - meanSCL)^2)
+                                             } else {
+                                               # 28/3/2022
+                                               likelihood <- (-dnorm(ypre, mean=meanSCL, sd=parameters["SD"], log=TRUE))
+                                             }
                                            }
-                                         }
-                                         
-                                         return(list(likelihood=likelihood))
+                                           
+                                           return(list(likelihood=likelihood))
                                          }
                                          
                                          df_ec <- df
@@ -1025,7 +1029,7 @@ info.nests <- function(x=NULL                                                  ,
                                              transition <- 1/(1+exp(transition_S*(df_ec[indice.begin.tsp, "SCL"] - transition_P)))
                                            }
                                            # rT <- SSM(CTE[indice.begin.tsp], setpar)
-                                           rT_inst <- SSM(CTE_inst, setpar)
+                                           rT_inst <- SSM(CTE_inst, setpar, verbose=verbose)
                                            
                                            # a <- rT[[1]]*transition+rT[[2]]*(1-transition)
                                            a_inst <- rT_inst[[1]]*transition+rT_inst[[2]]*(1-transition)
@@ -1048,7 +1052,7 @@ info.nests <- function(x=NULL                                                  ,
                                            
                                            CTE_inst <- df_ec[indice.begin.tsp+1, "TempK"]
                                            # rT <- SSM(CTE[indice.begin.tsp+1], setpar)
-                                           rT_inst <- SSM(CTE_inst, setpar)
+                                           rT_inst <- SSM(CTE_inst, setpar, verbose=verbose)
                                            # a <- rT[[1]]*transition+rT[[2]]*(1-transition)
                                            a_inst <- rT_inst[[1]]*transition+rT_inst[[2]]*(1-transition)
                                            param <- c(alpha=unname(a_inst), K=Kval)
@@ -1105,7 +1109,7 @@ info.nests <- function(x=NULL                                                  ,
                                            }
                                            # rT <- SSM(CTE[indice.begin.tsp], setpar)
                                            CTE_inst <- df_ec[indice.begin.tsp, "TempK"]
-                                           rT_inst <- SSM(CTE_inst, setpar)
+                                           rT_inst <- SSM(CTE_inst, setpar, verbose=verbose)
                                            # a <- rT[[1]]*transition+rT[[2]]*(1-transition)
                                            a_inst <- rT_inst[[1]]*transition+rT_inst[[2]]*(1-transition)
                                            param <- c(alpha=unname(a_inst), K=Kval)
@@ -1148,6 +1152,14 @@ info.nests <- function(x=NULL                                                  ,
                                            
                                            indice.end.tsp <- which(df_ec[,"SCL"]>(size.end.TSP_ec))[1]-1
                                            
+                                           if (is.na(indice.end.tsp)) indice.end.tsp <- nrow(df_ec)
+                                           
+                                           # if (is.na(indice.end.tsp)) {
+                                           #   print("AAAA 1154")
+                                           #   print(paste0("size.end.TSP_ec", as.character(size.end.TSP_ec)))
+                                           #   save(df_ec, file="df_ec.Rdata")
+                                           #   stop()
+                                           # }
                                            df_ec <- rbind(df_ec[1:indice.end.tsp, ], 
                                                           data.frame(Time=c(df_ec[indice.end.tsp,"Time"]+df_ec[indice.end.tsp,"DeltaT"]/3, 
                                                                             df_ec[indice.end.tsp,"Time"]+df_ec[indice.end.tsp,"DeltaT"]*2/3), 
@@ -1183,7 +1195,7 @@ info.nests <- function(x=NULL                                                  ,
                                            # rT <- SSM(CTE[indice.end.tsp], setpar)
                                            # a <- rT[[1]]*transition+rT[[2]]*(1-transition)
                                            CTE_inst <- df_ec[indice.end.tsp, "TempK"]
-                                           rT_inst <- SSM(CTE_inst, setpar)
+                                           rT_inst <- SSM(CTE_inst, setpar, verbose=verbose)
                                            a_inst <- rT_inst[[1]]*transition+rT_inst[[2]]*(1-transition)
                                            param <- c(alpha=unname(a_inst), K=Kval)
                                            if (!is.null(integral)) {
@@ -1205,7 +1217,7 @@ info.nests <- function(x=NULL                                                  ,
                                            # rT <- SSM(CTE[indice.end.tsp+1], setpar)
                                            # a <- rT[[1]]*transition+rT[[2]]*(1-transition)
                                            CTE_inst <- df_ec[indice.end.tsp+1, "TempK"]
-                                           rT_inst <- SSM(CTE_inst, setpar)
+                                           rT_inst <- SSM(CTE_inst, setpar, verbose=verbose)
                                            a_inst <- rT_inst[[1]]*transition+rT_inst[[2]]*(1-transition)
                                            param <- c(alpha=unname(a_inst), K=Kval)
                                            if (!is.null(integral)) {
@@ -1228,7 +1240,12 @@ info.nests <- function(x=NULL                                                  ,
                                            # plot(t, SCL); points(time.begin.tsp, size.begin.TSP_ec, col="red"); segments(x0=0, y0=size.begin.TSP_ec, x1=100000, y1=size.begin.TSP_ec, col="green")
                                            
                                            indice.end.tsp <- which(df_ec[,"Time"]>(time.end.tsp))[1]-1
-                                           
+                                           # if (is.na(indice.end.tsp)) {
+                                           #   indice.end.tsp <- nrow(df_ec)
+                                           #   
+                                           #   df_ec <- rbind(df_ec, df_ec[nrow(df_ec), ])
+                                           # } else {
+                                           # 
                                            df_ec <- rbind(df_ec[1:indice.end.tsp, ], 
                                                           data.frame(Time=time.end.tsp, 
                                                                      TempC=df_ec[indice.end.tsp,"TempC"], 
@@ -1238,27 +1255,22 @@ info.nests <- function(x=NULL                                                  ,
                                                                      IndiceK=0, 
                                                                      DeltaT=NA), 
                                                           df_ec[(indice.end.tsp+1):nrow(df_ec), ])
-                                           
-                                           # df_ec[, "DeltaT"] <- c(diff(df_ec[, "Time"]), 0)
-                                           # 
-                                           # dt <- df_ec[, "DeltaT"]
-                                           # TK <- df_ec[, "TempK"]
-                                           # CTE <- cumsum(dt*TK)/cumsum(dt)
-                                           
                                            df_ec[indice.end.tsp, "DeltaT"] <- df_ec[indice.end.tsp+1, "Time"]-df_ec[indice.end.tsp, "Time"]
                                            df_ec[indice.end.tsp+1, "DeltaT"] <- df_ec[indice.end.tsp+2, "Time"]-df_ec[indice.end.tsp+1, "Time"]
+
                                            
                                            
+                                           # }
                                            timesunique <- c(df_ec[indice.end.tsp, "Time"], df_ec[indice.end.tsp+1, "Time"])
+                                           
                                            if (!logicTransition) {
                                              transition <- 1
                                            } else {
                                              transition <- 1/(1+exp(transition_S*(df_ec[indice.end.tsp, "SCL"] - transition_P)))
                                            }
-                                           # rT <- SSM(CTE[indice.end.tsp], setpar)
-                                           # a <- rT[[1]]*transition+rT[[2]]*(1-transition)
+                                        
                                            CTE_inst <- df_ec[indice.end.tsp, "TempK"]
-                                           rT_inst <- SSM(CTE_inst, setpar)
+                                           rT_inst <- SSM(CTE_inst, setpar, verbose=verbose)
                                            a_inst <- rT_inst[[1]]*transition+rT_inst[[2]]*(1-transition)
                                            
                                            param <- c(alpha=unname(a_inst), K=Kval)
@@ -1269,10 +1281,12 @@ info.nests <- function(x=NULL                                                  ,
                                              out1 <- lsoda(df_ec[indice.end.tsp, "SCL"], timesunique, derivate, param)
                                              ypre <- as.numeric(tail(out1[,2], n=1))
                                            }
-                                           df_ec[indice.end.tsp+1, "R"] <- a_inst
-                                           df_ec[indice.end.tsp+1, "SCL"] <- ypre
-                                           
                                            indice.end.tsp <- indice.end.tsp+1
+                                           
+                                           df_ec[indice.end.tsp, "R"] <- a_inst
+                                           df_ec[indice.end.tsp, "SCL"] <- ypre
+                                           
+                                           
                                            
                                            rownames(df_ec)[indice.end.tsp] <- "End TSP"
                                            time.end.TSP <- df_ec[indice.end.tsp,"Time"]
@@ -1326,7 +1340,7 @@ info.nests <- function(x=NULL                                                  ,
                                              # a <- rT[[1]]*transition+rT[[2]]*(1-transition)
                                              
                                              CTE_inst <- df_ec[indice.fin.incubation, "TempK"]
-                                             rT_inst <- SSM(CTE_inst, setpar)
+                                             rT_inst <- SSM(CTE_inst, setpar, verbose=verbose)
                                              a_inst <- rT_inst[[1]]*transition+rT_inst[[2]]*(1-transition)
                                              
                                              
@@ -1351,7 +1365,7 @@ info.nests <- function(x=NULL                                                  ,
                                              # a <- rT[[1]]*transition+rT[[2]]*(1-transition)
                                              
                                              CTE_inst <- df_ec[indice.fin.incubation+1, "TempK"]
-                                             rT_inst <- SSM(CTE_inst, setpar)
+                                             rT_inst <- SSM(CTE_inst, setpar, verbose=verbose)
                                              a_inst <- rT_inst[[1]]*transition+rT_inst[[2]]*(1-transition)
                                              
                                              param <- c(alpha=unname(a_inst), K=Kval)
@@ -1405,7 +1419,7 @@ info.nests <- function(x=NULL                                                  ,
                                              # a <- rT[[1]]*transition+rT[[2]]*(1-transition)
                                              
                                              CTE_inst <- df_ec[indice.fin.incubation, "TempK"]
-                                             rT_inst <- SSM(CTE_inst, setpar)
+                                             rT_inst <- SSM(CTE_inst, setpar, verbose=verbose)
                                              a_inst <- rT_inst[[1]]*transition+rT_inst[[2]]*(1-transition)
                                              
                                              param <- c(alpha=unname(a_inst), K=Kval)
@@ -1479,7 +1493,7 @@ info.nests <- function(x=NULL                                                  ,
                                              transition <- 1/(1+exp(transition_S*(df_ec[indice.begin.middlethird, "SCL"] - transition_P)))
                                            }
                                            # rT <- SSM(CTE, setpar)
-                                           rT_inst <- SSM(CTE_inst, setpar)
+                                           rT_inst <- SSM(CTE_inst, setpar, verbose=verbose)
                                            # a <- rT[[1]]*transition+rT[[2]]*(1-transition)
                                            a_inst <- rT_inst[[1]]*transition+rT_inst[[2]]*(1-transition)
                                            param <- c(alpha=unname(a_inst), K=Kval)
@@ -1534,7 +1548,7 @@ info.nests <- function(x=NULL                                                  ,
                                              transition <- 1/(1+exp(transition_S*(df_ec[indice.end.middlethird, "SCL"] - transition_P)))
                                            }
                                            # rT <- SSM(CTE, setpar)
-                                           rT_inst <- SSM(CTE_inst, setpar)
+                                           rT_inst <- SSM(CTE_inst, setpar, verbose=verbose)
                                            # a <- rT[[1]]*transition+rT[[2]]*(1-transition)
                                            a_inst <- rT_inst[[1]]*transition+rT_inst[[2]]*(1-transition)
                                            param <- c(alpha=unname(a_inst), K=Kval)
@@ -1617,11 +1631,30 @@ info.nests <- function(x=NULL                                                  ,
                                                dt <- df[indice.begin.tsp:(indice.end.tsp_ec-1), "DeltaT"]
                                                dSCL <- diff(df[indice.begin.tsp:(indice.end.tsp_ec), "SCL"])
                                                rT <- df[indice.begin.tsp:(indice.end.tsp_ec-1), "R"]
+                                               # print("setpar_STRN")
+                                               # print(setpar_STRN)
                                                
-                                               if (all(names(setpar_STRN) != "Rho25")) {
-                                                 STRN_model <- rep(1, length(TK))
+                                               if (any(is.finite(suppressWarnings(as.numeric(names(setpar_STRN)))))) {
+                                                 
+                                                 sparSTRN <- setpar_STRN[!is.na(suppressWarnings(as.numeric(names(setpar_STRN))))]
+                                                 # print("sparSTRN")
+                                                 # print(sparSTRN)
+                                                 STRN_model <- SSM(TK, sparSTRN, verbose=verbose)[[1]]
+                                                 STRN_model <- ifelse(STRN_model <= 0, 0.001, STRN_model)
+                                                 
+                                                 # print("SSM")
+                                                 # print(STRN_model)
                                                } else {
-                                                 STRN_model <- getFromNamespace(".SSM", ns="embryogrowth")(TK, setpar_STRN)[[1]]
+                                                 if (any(names(setpar_STRN) == "Rho25") | any(names(setpar_STRN) == "Peak")) {
+                                                   STRN_model <- SSM(TK, setpar_STRN, verbose=verbose)[[1]]
+                        
+                                                 } else {
+                                                   #print("setpar_STRN")
+                                                   # print(setpar_STRN)
+                                                   STRN_model <- rep(1, length(TK))
+                                                   # print("SSM")
+                                                   # print(STRN_model)
+                                                 }
                                                }
                                                SCL <- df[indice.begin.tsp:(indice.end.tsp_ec-1), "SCL"]
                                                SCL <- (SCL-SCL[1])/(SCL[length(SCL)]-SCL[1])
@@ -1641,7 +1674,7 @@ info.nests <- function(x=NULL                                                  ,
                                                  shape2 <- abs(setpar_STRN["dbeta_shape2"])
                                                  model_beta <- dbeta(SCL, shape1=shape1, shape2=shape2) 
                                                }
-                                          
+                                               
                                                
                                                TSP.TimeWeighted.STRNWeighted.temperature <- sum(TC * dt * STRN_model * model_beta)/sum(dt * STRN_model * model_beta)
                                                TSP.GrowthWeighted.STRNWeighted.temperature <- sum(TC * dSCL * STRN_model * model_beta)/sum(dSCL * STRN_model * model_beta)
@@ -1819,7 +1852,7 @@ info.nests <- function(x=NULL                                                  ,
                                        } else {
                                          # Je suis en stop.at.hatchling size mais trop court
                                          indices.df <- NULL
-                                     
+                                         
                                          
                                          
                                          summary <- data.frame(series=serie_en_cours, 
@@ -1862,10 +1895,10 @@ info.nests <- function(x=NULL                                                  ,
                                          
                                        }
                                        
-                                        if (out == "summary") {
-                                          df <- NULL
-                                          indices.df <- NULL
-                                        }
+                                       if (out == "summary") {
+                                         df <- NULL
+                                         indices.df <- NULL
+                                       }
                                        
                                        if (out != "summary") {
                                          summary <- NULL
@@ -1892,7 +1925,7 @@ info.nests <- function(x=NULL                                                  ,
                                                                   "integral", 
                                                                   "derivate", 
                                                                   "out", 
-                                                                  "metric.end.incubation", "tsd"), 
+                                                                  "metric.end.incubation", "tsd", "SSM"), 
                                                         envir=environment())
   )
   
@@ -1915,31 +1948,31 @@ info.nests <- function(x=NULL                                                  ,
   # Je crée le summary
   
   if (out == "summary") {
-  
-  summary_df <- as.data.frame(t(sapply(AnalyseTraces, FUN = function(x) x[[1]]$summary)))
-  summary.mean <- aggregate(summary_df[, -1], by=list(unlist(summary_df$series)), FUN=function(x) ifelse(all(is.na(unlist(x))), NA, mean(unlist(x), na.rm=TRUE)))
-  colnames(summary.mean) <- c("Series", paste0(colnames(summary.mean)[-1], ".mean"))
-  summary.se <- aggregate(summary_df[, -1], by=list(unlist(summary_df$series)), FUN=function(x) ifelse(all(is.na(unlist(x))), NA, sd(unlist(x), na.rm=TRUE)))
-  colnames(summary.se) <- c("Series", paste0(colnames(summary.se)[-1], ".se"))
-  
-  summary <- merge(x=summary.mean, y=summary.se, by.x="Series", by.y = "Series")
-  
-  if (!is.null(probs)) {
-    for (pr in probs) {
-      summary.quantile <- aggregate(summary_df[, -1], by=list(unlist(summary_df$series)), FUN=function(x) ifelse(all(is.na(unlist(x))), NA, quantile(unlist(x), probs = pr, na.rm=TRUE)))
-      colnames(summary.quantile) <- c("Series", paste0(colnames(summary.quantile)[-1], paste0(".quantile_", as.character(pr))))
-      summary <- merge(x=summary, y=summary.quantile, by.x="Series", by.y = "Series")
+    
+    summary_df <- as.data.frame(t(sapply(AnalyseTraces, FUN = function(x) x[[1]]$summary)))
+    summary.mean <- aggregate(summary_df[, -1], by=list(unlist(summary_df$series)), FUN=function(x) ifelse(all(is.na(unlist(x))), NA, mean(unlist(x), na.rm=TRUE)))
+    colnames(summary.mean) <- c("Series", paste0(colnames(summary.mean)[-1], ".mean"))
+    summary.se <- aggregate(summary_df[, -1], by=list(unlist(summary_df$series)), FUN=function(x) ifelse(all(is.na(unlist(x))), NA, sd(unlist(x), na.rm=TRUE)))
+    colnames(summary.se) <- c("Series", paste0(colnames(summary.se)[-1], ".se"))
+    
+    summary <- merge(x=summary.mean, y=summary.se, by.x="Series", by.y = "Series")
+    
+    if (!is.null(probs)) {
+      for (pr in probs) {
+        summary.quantile <- aggregate(summary_df[, -1], by=list(unlist(summary_df$series)), FUN=function(x) ifelse(all(is.na(unlist(x))), NA, quantile(unlist(x), probs = pr, na.rm=TRUE)))
+        colnames(summary.quantile) <- c("Series", paste0(colnames(summary.quantile)[-1], paste0(".quantile_", as.character(pr))))
+        summary <- merge(x=summary, y=summary.quantile, by.x="Series", by.y = "Series")
+      }
     }
+    
+    rownames(summary) <- summary$Series
+    summary <- summary[name, ]
+    
+    return(list(summary=summary))
+    
   }
   
-  rownames(summary) <- summary$Series
-  summary <- summary[name, ]
-  
-  return(list(summary=summary))
-  
-  }
-  
-  # Là je suis en dynamic metric
+  # Là je suis en dynamic metric ou dynamic seul
   
   # Je crée le dynamic.metric
   if (!stop.at.hatchling.metric) {
@@ -1953,43 +1986,44 @@ info.nests <- function(x=NULL                                                  ,
     for (serie_en_cours in unique(series_list)) {
       
       df_list_ec <- df_list[series_list == serie_en_cours]
-      common_time <- table(round(unlist(lapply(df_list, FUN=function(x) x$Time)), 2))
-      common_time <- round(as.numeric(names(which(common_time == length(df_list_ec)))), 2)
       
-      SCL_ec <- sapply(df_list_ec, FUN = function(x) {
-        dfl <- round(x$Time, 2)
-        x[dfl %in% common_time, "SCL"]
-      })
+      # J'ai la série en cours dans df_list_ec
+      # Quel est l'intérêt de prendre df_list ici ? Il y a toutes les séries !
+      # Si j'ai plusieurs réplicats, ça me fait prendre toutes les séries
       
-      # Donc ça n'est pas matrix
-      if (!inherits(SCL_ec, "matrix")) { 
-        # Je ne sais pas ce que c'est ça
-        max_t <- sapply(SCL_ec, FUN=length)
-        wmax_t <- which.max(max_t)
-        t_ec <- df_list_ec[[wmax_t]]$Time
-        max_t <- max(max_t)
-        SCL_ec <- lapply(SCL_ec, FUN=function(x) c(x, rep(tail(x, n=1), max_t-length(x))))
-      } else {
-        t_ec <- common_time
+      t_ec_count <- cbind(df_list_ec[[1]][, "Time", drop=FALSE], count=0)
+      for (s in seq_along(df_list_ec)) {
+        common_time <- t_ec_count$Time %in% df_list_ec[[s]][, "Time"]
+        t_ec_count[common_time, "count"] <- t_ec_count[common_time, "count"] + 1
       }
       
+      t_ec <- unique(t_ec_count[t_ec_count[, "count"] == length(df_list_ec), 1])
       
-      if  (!inherits(SCL_ec, "data.frame")) 
-        SCL_ec <- as.data.frame(SCL_ec)
+      SCL_ec <- sapply(df_list_ec, FUN = function(x) {
+        x[(x$Time %in% t_ec) & ((x$DeltaT != 0) | (is.na(x$R))), "SCL"]
+      })
+      
+      SCL_ec <- as.data.frame(SCL_ec)
+      
+      # Dans metric_ec j'ai les quantiles de tailles aux temps communs pour tous les réplicats
       metric_ec <- t(apply(SCL_ec, MARGIN = 1, FUN = function(x) quantile(x, probs = probs)))
       colnames(metric_ec) <- paste0("Metric_", colnames(metric_ec))
       
-      R_ec <- sapply(df_list_ec, FUN = function(x) x[round(x$Time, 2) %in% t_ec, "R"])
-      # R_ec <- lapply(R_ec, FUN=function(x) c(x, rep(tail(x, n=1), max_t-length(x))))
-      if (!inherits(R_ec, "data.frame")) 
-        R_ec <- as.data.frame(R_ec)
+      # Je sors les R pour tous les temps communs
+      R_ec <- sapply(df_list_ec, FUN = function(x) {
+        x[(x$Time %in% t_ec) & ((x$DeltaT != 0) | (is.na(x$R))), "R"]
+      })
+      
+      R_ec <- as.data.frame(R_ec)
+      
       Rx_ec <- t(apply(R_ec, MARGIN = 1, FUN = function(x) quantile(x, probs = probs, na.rm = TRUE)))
       colnames(Rx_ec) <- paste0("R_", colnames(Rx_ec))
       
       # if (length(t_ec) != nrow(metric_ec)) print(serie_en_cours)
       df_TC <- df_list_ec[[1]]
-
-      metric_ec <- list(cbind(Time=t_ec, DeltaT=c(0, diff(t_ec)), TempC=df_TC[round(df_TC$Time, 2) %in% t_ec, "TempC"], metric_ec, Rx_ec))
+      df_TC <- df_TC[(df_TC$Time %in% t_ec) & ((df_TC$DeltaT != 0) | (is.na(df_TC$R))), ]
+      
+      metric_ec <- list(cbind(Time=t_ec, DeltaT=c(0, diff(t_ec)), TempC=df_TC[, "TempC"], metric_ec, Rx_ec))
       names(metric_ec) <- serie_en_cours
       dynamic.metric <- c(dynamic.metric, metric_ec)
     }
@@ -2014,7 +2048,7 @@ info.nests <- function(x=NULL                                                  ,
     dynamic.metric <- NULL
   }
   
-
+  
   
   dynamic.metric <- dynamic.metric[name]
   

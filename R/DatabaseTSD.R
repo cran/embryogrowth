@@ -11,8 +11,12 @@
 #'   \item \code{Subspecies}: Name of the subspecies
 #'   \item \code{Country}: From which country the eggs come from
 #'   \item \code{Area}: Name of the beach or region the eggs come from
-#'   \item \code{RMU}: For marine turtles, name of the RMU for this population; see Wallace, B.P., DiMatteo, A.D., Hurley, B.J., Finkbeiner, E.M., Bolten, A.B., Chaloupka, M.Y., Hutchinson, B.J., Abreu-Grobois, F.A., Amorocho, D., Bjorndal, K.A., Bourjea, J., Bowen, B.W., Duenas, R.B., Casale, P., Choudhury, B.C., Costa, A., Dutton, P.H., Fallabrino, A., Girard, A., Girondot, M., Godfrey, M.H., Hamann, M., Lopez-Mendilaharsu, M., Marcovaldi, M.A., Mortimer, J.A., Musick, J.A., Nel, R., Seminoff, J.A., Troeng, S., Witherington, B., Mast, R.B., 2010. Regional management units for marine turtles: a novel framework for prioritizing conservation and research across multiple scales. Plos One 5, e15465.
-#'   \item \code{Incubation.temperature}: Nominal incubation temperature
+#'   \item \code{RMU.2010}: For marine turtles, name of the RMU for this population; see Wallace, B.P., DiMatteo, A.D., Hurley, B.J., Finkbeiner, E.M., Bolten, A.B., Chaloupka, M.Y., Hutchinson, B.J., Abreu-Grobois, F.A., Amorocho, D., Bjorndal, K.A., Bourjea, J., Bowen, B.W., Duenas, R.B., Casale, P., Choudhury, B.C., Costa, A., Dutton, P.H., Fallabrino, A., Girard, A., Girondot, M., Godfrey, M.H., Hamann, M., Lopez-Mendilaharsu, M., Marcovaldi, M.A., Mortimer, J.A., Musick, J.A., Nel, R., Seminoff, J.A., Troeng, S., Witherington, B., Mast, R.B., 2010. Regional management units for marine turtles: a novel framework for prioritizing conservation and research across multiple scales. Plos One 5, e15465.
+#'   \item \code{RMU.2023}: For marine turtles, name of the RMU for this population; see Wallace BP, Posnik ZA, Hurley BJ, DiMatteo AD, Bandimere A, Rodriguez I, Maxwell SM, Meyer L, Brenner H, Jensen MP, LaCasella E, Shamblin BM, Abreu Abreu-Grobois FA, Stewart KR, Dutton PH, Barrios-Garrido H, Dalleau M, Dell’amico F, Eckert KL, FitzSimmons NN, Garcia-Cruz M, Hays GC, Kelez S, Lagueux CJ, Madden Hof CA, Marco A, Martins SLT, Mobaraki A, Mortimer JA, Nel R, Phillott AD, Pilcher NJ, Putman NF, Rees AF, Rguez-Baron JM, Seminoff JA, Swaminathan A, Turkozan O, Vargas SM, Vernet PD, Vilaça S, Whiting SD, Hutchinson BJ, Casale P, Mast RB (2023) Marine turtle regional management units 2.0: an updated framework for conservation and research of wide-ranging megafauna species. Endangered Species Research 52:209-223.
+#'   \item \code{Incubation.temperature.set}: Nominal incubation temperature
+#'   \item \code{Incubation.temperature.recorded}: Nominal or real (if available) incubation temperature
+#'   \item \code{Duplicated.data}: TRUE if these data are duplicated in database
+#'   \item \code{Duplicate}: Unique code for the duplicate
 #'   \item \code{Incubation.temperature.Constant}: Does the incubation temperature was set as constant or CTE was reported
 #'   \item \code{Incubation.temperature.Accuracy}: What is the accuracy of the measure of temperature
 #'   \item \code{Incubation.temperature.SD}: Experimental SD of incubation temperatures
@@ -30,11 +34,16 @@
 #'   \item \code{Males}: Number of individuals indentified as males
 #'   \item \code{Females}: Number of individuals indentified as females
 #'   \item \code{Sexed}: Number of sexed individuals
+#'   \item \code{Box}: Identity of the condition incubation
 #'   \item \code{Clutch}: Identity or number of clutches
 #'   \item \code{Reference}: Bibliographic reference
 #'   \item \code{Note}: Diverse information for this incubation
+#'   \item \code{Digital_Identifier}: A unique digital identifier
 #'   \item \code{Version}: Date of the last modification for each record
 #' }
+#' The Incubation.temperature records are the incubation temperature of the incubator. If a correction factor 
+#' was substracted in the publication to represent the temperature of the egg itself, it has been 
+#' added here.
 #' @keywords datasets
 #' @family Functions for temperature-dependent sex determination
 #' @usage DatabaseTSD

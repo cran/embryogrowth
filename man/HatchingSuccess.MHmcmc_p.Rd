@@ -54,7 +54,6 @@ Other Hatching success:
 \code{\link{HatchingSuccess.model}()},
 \code{\link{logLik.HatchingSuccess}()},
 \code{\link{nobs.HatchingSuccess}()},
-\code{\link{plot.HatchingSuccess}()},
 \code{\link{predict.HatchingSuccess}()}
 }
 \author{

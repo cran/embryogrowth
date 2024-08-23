@@ -11,6 +11,8 @@
 #' @param k Factor to multiply SD to prevent false positive detection
 #' @param Windowsize Number of records used for moving average
 #' @description This function is used to evaluate significant movement within a nest.
+#' @references
+#' \insertRef{11893}{embryogrowth}\cr
 #' @family Data loggers utilities
 #' @examples
 #' \dontrun{
@@ -27,7 +29,7 @@ movement <- function(x=stop("data.frame must be provided"),
                      col.x="x", col.y="y", col.z="z", 
                      NumberRecordBeforeEmergence = 1900, 
                      k=4, Windowsize=15) {
-  data_mvt <- x
+  data_mvtsb <- x
   
   xp <- data_mvtsb[, col.x]
   yp <- data_mvtsb[, col.y]
@@ -57,9 +59,9 @@ movement <- function(x=stop("data.frame must be provided"),
   mvtrunning <- data_mvtsb[data_mvtsb[, "mvt"] > mean(data_mvtsb$mvt[1:NumberRecordBeforeEmergence])+
                              k*sd(data_mvtsb$mvt[1:NumberRecordBeforeEmergence]), ]
   
-  return(index.peak=which.max(mvtrunning$mvt), 
+  return(list(index.peak=which.max(mvtrunning$mvt), 
          time.peak=peakmvt[, col.time], 
-         movements=mvtrunning)
+         movements=mvtrunning))
   
 }
 

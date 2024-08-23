@@ -16,7 +16,9 @@ None
 }
 \description{
 Summarize the information from a Nests object:\cr
-- Name of the nests, total incubation length and average temperature
+\itemize{
+\item Name of the nests, total incubation length and average temperature
+}
 }
 \details{
 summary.Nests Summarize the information from a Nests object

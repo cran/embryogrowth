@@ -24,7 +24,7 @@ shinyUI(fluidPage(
     , p(strong("The embryogrowth R package is a set of tools used 
                to model embryo growth and sexual phenotype linked to 
                temperature."))
-    , p("This web server version v. 4.01 is a simplified version of the complete tools available ", 
+    , p("This web server version v. 4.1 is a simplified version of the complete tools available ", 
         a("here."
           , href="https://cran.r-project.org/package=embryogrowth"
           , target="_blank"))
@@ -57,7 +57,14 @@ shinyUI(fluidPage(
       greater risk? Oecologia 160, 493-506.", 
       href="https://www.researchgate.net/publication/24192820_Temperature-dependent_sex_determination_and_global_change_are_some_species_at_greater_risk",
       target="_blank"))
-    , helpText(strong("These methods must not be used for incubation data at non-constant temperatures, both 
+    , p(a(
+      img(src="PDF.png", height=35, width=35), 
+      "Abreu-Grobois FA, Morales-Mérida BA, Hart CE, Guillon J-M, Godfrey MH, 
+      Navarro E, Girondot M: Recent advances on the estimation of the thermal reaction norm 
+      for sex ratios. PeerJ 2020, 8:e8451.", 
+      href="https://www.researchgate.net/publication/339687789_Distributed_under_Creative_Commons_CC-BY_40_OPEN_ACCESS_Recent_advances_on_the_estimation_of_the_thermal_reaction_norm_for_sex_ratios",
+      target="_blank"))
+    , helpText(strong("These methods MUST not be used for incubation data at non-constant temperatures, both 
                for temperature versus sex ratio and incubation duration versus sex ratio."))
     )
   
@@ -76,10 +83,10 @@ shinyUI(fluidPage(
         #               selectize = TRUE, width = NULL, size = NULL)
         , uiOutput("RMUControls")
         , helpText("RMU are the Regional Managment Units defined for marine turles in ", 
-                   a("Wallace B.P., et al. (2010) Regional management units for marine turtles: 
-                     a novel framework for prioritizing conservation and research across multiple 
-                     scales. PLoS One, 5(12), e15465.", 
-                     href="https://www.researchgate.net/publication/49772535_Wallace_BP_DiMatteo_AD_Hurley_BJ_Finkbeiner_EM_Bolten_AB_et_al_Regional_management_units_for_marine_turtles_a_novel_framework_for_prioritizing_conservation_and_research_across_multiple_scales_PLoS_ONE",
+                   a("Wallace B.P., et al. (2023) Marine turtle regional management units 2.0: 
+                     an updated framework for conservation and research of wide-ranging megafauna 
+                     species. Endangered Species Research, 52, 209-223.", 
+                     href="https://www.int-res.com/articles/esr2023/52/n052p209.pdf",
                      target="_blank"))
         , actionButton("goButton", "Go!")
       )

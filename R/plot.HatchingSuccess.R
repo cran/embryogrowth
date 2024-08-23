@@ -7,23 +7,23 @@
 #' @param ylim Hatching success range for y-axis 
 #' @param xlab x label
 #' @param ylab y label
-#' @param bty bty graphival parameter
+#' @param bty bty graphical parameter
 #' @param las las graphical parameter
 #' @param replicates Number of replicates to estimate confidence interval
 #' @param resultmcmc Results obtained using HatchingSuccess.MHmcmc()
 #' @param col.observations Color of observations
 #' @param pch.observations Character used for observation (no observations if NULL)
 #' @param cex.observations Size of characters for observations
-#' @param show.CI.observations Should the confidence interval of the observations be shown ?
+#' @param show.CI.observations Should the confidence interval of the observations be shown?
 #' @param col.ML Color of the maximum likelihood model
 #' @param lty.ML Line type of the maximum likelihood model (no line if NULL)
 #' @param lwd.ML Line width of the maximum likelihood model
 #' @param col.median Color of the median model
 #' @param lty.median Line type of the median model (no line if NULL)
 #' @param lwd.median Line width of the mean model
-#' @param col.CI Color of the 95\% confidence interval lines
-#' @param lty.CI Line type of the 95\% confidence interval lines (no line if NULL)
-#' @param lwd.CI Line width of the 95\% confidence interval lines
+#' @param col.CI Color of the 95% confidence interval lines
+#' @param lty.CI Line type of the 95% confidence interval lines (no line if NULL)
+#' @param lwd.CI Line width of the 95% confidence interval lines
 #' @param polygon If TRUE, confidence interval is shown as a polygon
 #' @param color.polygon The color used for polygon
 #' @param what Indicate what to plot: "observations", "ML", "CI"
@@ -58,7 +58,6 @@
 #' plot(g, resultmcmc=mcmc)
 #' plot(g, resultmcmc=mcmc, pch.observations=NULL, lty.mean=NULL)
 #' }
-#' @family Hatching success
 #' @method plot HatchingSuccess
 #' @export
 

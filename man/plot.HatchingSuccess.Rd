@@ -44,7 +44,7 @@
 
 \item{ylab}{y label}
 
-\item{bty}{bty graphival parameter}
+\item{bty}{bty graphical parameter}
 
 \item{las}{las graphical parameter}
 
@@ -54,7 +54,7 @@
 
 \item{cex.observations}{Size of characters for observations}
 
-\item{show.CI.observations}{Should the confidence interval of the observations be shown ?}
+\item{show.CI.observations}{Should the confidence interval of the observations be shown?}
 
 \item{col.ML}{Color of the maximum likelihood model}
 
@@ -125,18 +125,6 @@ plot(g, resultmcmc=mcmc)
 plot(g, resultmcmc=mcmc, pch.observations=NULL, lty.mean=NULL)
 }
 }
-\seealso{
-Other Hatching success: 
-\code{\link{HatchingSuccess.MHmcmc_p}()},
-\code{\link{HatchingSuccess.MHmcmc}()},
-\code{\link{HatchingSuccess.fit}()},
-\code{\link{HatchingSuccess.lnL}()},
-\code{\link{HatchingSuccess.model}()},
-\code{\link{logLik.HatchingSuccess}()},
-\code{\link{nobs.HatchingSuccess}()},
-\code{\link{predict.HatchingSuccess}()}
-}
 \author{
 Marc Girondot
 }
-\concept{Hatching success}

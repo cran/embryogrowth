@@ -44,9 +44,9 @@ A data.frame with informations about sex-ratio
 \description{
 Estimate sex ratio according to constant incubation temperature\cr
 The data.frame has the temperatures or durations in columns and the quantiles in rows.\cr
-Note that incubation duration is a very bad proxy for sex ratio. See Georges, 
-A., Limpus, C. J. & Stoutjesdijk, R. 1994. Hatchling sex in the marine turtle 
-_Caretta caretta_ is determined by proportion of development at a temperature, 
+Note that incubation duration is a very bad proxy for sex ratio. See Georges,
+A., Limpus, C. J. & Stoutjesdijk, R. 1994. Hatchling sex in the marine turtle
+\emph{Caretta caretta} is determined by proportion of development at a temperature,
 not daily duration of exposure. J. Exp. Zool., 270, 432-444.\cr
 If replicate.CI is 0 or NULL, point estimate for maximum likelihood is returned.
 }
@@ -70,15 +70,17 @@ predict(result, durations=c(67, 68), replicate.CI = 10000)
 }
 \seealso{
 Other Functions for temperature-dependent sex determination: 
-\code{\link{DatabaseTSD.version}()},
 \code{\link{DatabaseTSD}},
+\code{\link{DatabaseTSD.version}()},
 \code{\link{P_TRT}()},
+\code{\link{ROSIE}},
+\code{\link{ROSIE.version}()},
 \code{\link{TSP.list}},
 \code{\link{plot.tsd}()},
 \code{\link{stages}},
-\code{\link{tsd_MHmcmc_p}()},
+\code{\link{tsd}()},
 \code{\link{tsd_MHmcmc}()},
-\code{\link{tsd}()}
+\code{\link{tsd_MHmcmc_p}()}
 }
 \author{
 Marc Girondot

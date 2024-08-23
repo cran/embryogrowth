@@ -88,7 +88,7 @@ info.nests(
 
 \item{weight}{Weights of the different nests to estimate likelihood. It will replace the ones in NestsResult.}
 
-\item{out}{Can take the values of "likelihood", "summary", "metric" or "dynamic".}
+\item{out}{Can take the values of "likelihood", "summary", "details", "metric" or "dynamic".}
 
 \item{fill}{Number of minutes between two records. Create new one if they do not exist. NULL does not change the time of temperature recordings.}
 
@@ -137,82 +137,86 @@ The likelihood object is just the total likelihood of the data in the model.\cr
 If one parameter is named "pipping_emergence" it is used as the number of days between pipping and emergence to calculate the 1/3 and 2/3 of incubation.\cr
 The summary object is a data.frame composed of these elements with the suffix .mean, .se or .quantile_x with x from the parameter probs.
 \itemize{
-  \item \code{Temperature.max} Maximum temperature recorded during incubation
-  \item \code{TimeWeighted.temperature} Average temperature during all incubation
-  \item \code{GrowthWeighted.temperature} Average temperature weighted by the actual growth during all incubation
-  \item \code{TimeWeighted.GrowthRateWeighted.temperature} Average temperature weighted by the growth rate during all incubation
-  \item \code{TSP.TimeWeighted.temperature} Average temperature during the TSP
-  \item \code{TSP.GrowthWeighted.temperature} Average temperature weighted by the actual growth during the TSP
-  \item \code{TSP.TimeWeighted.GrowthRateWeighted.temperature} Average temperature weighted by the growth rate during the TSP
-  \item \code{TSP.TimeWeighted.STRNWeighted.temperature} Average temperature weighted by the thermal reaction norm of sexualization during the TSP
-  \item \code{TSP.GrowthWeighted.STRNWeighted.temperature} Average temperature weighted by actual growth and the thermal reaction norm of sexualization during the TSP
-  \item \code{TSP.TimeWeighted.GrowthRateWeighted.STRNWeighted.temperature} Average temperature weighted by growth rate and the thermal reaction norm of sexualization during the TSP
-  \item \code{TSP.length} TSP duration
-  \item \code{TSP.begin} Beginning of the TSP
-  \item \code{TSP.end} End of the TSP
-  \item \code{TSP.PM.GrowthWeighted} Average of male probability for each temperature weighted by actual growth during the TSP
-  \item \code{TSP.PM.TimeWeighted.GrowthRateWeighted} Average of male probability for each temperature weighted by growth rate during the TSP
-  \item \code{TSP.PM.TimeWeighted} Average of male probability for each temperature during the TSP
-  \item \code{Incubation.length} Incubation length duration
-  \item \code{MiddleThird.length} Middle third incubation duration
-  \item \code{MiddleThird.begin} Beginning of the middle third incubation duration
-  \item \code{MiddleThird.end} End of the middle third incubation duration
-  \item \code{MiddleThird.TimeWeighted.temperature} Average temperature during the middle third incubation
-  \item \code{MiddleThird.GrowthWeighted.temperature} Average temperature weighted by the actual growth during the middle third incubation
-  \item \code{MiddleThird.TimeWeighted.GrowthRateWeighted.temperature} Average temperature weighted by the growth rate during the middle third incubation
-  \item \code{TSP.TimeWeighted.sexratio} Sex ratio based on average temperature during the TSP
-  \item \code{TSP.GrowthWeighted.sexratio} Sex ratio based on average temperature weighted by the actual growth during the TSP
-  \item \code{TSP.TimeWeighted.GrowthRateWeighted.sexratio} Sex ratio based on average temperature weighted by the growth rate during the TSP
-  \item \code{TSP.TimeWeighted.STRNWeighted.sexratio} Sex ratio based on average temperature weighted by the thermal reaction norm of sexualization during the TSP
-  \item \code{TSP.GrowthWeighted.STRNWeighted.sexratio} Sex ratio based on average temperature weighted by the actual growth and thermal reaction norm of sexualization during the TSP
-  \item \code{TSP.TimeWeighted.GrowthRateWeighted.STRNWeighted.sexratio} Sex ratio based on average temperature weighted by the growth rate and the thermal reaction norm of sexualization during the TSP
-  \item \code{MiddleThird.TimeWeighted.sexratio} Sex ratio based on average temperature during the middle third incubation
-  \item \code{MiddleThird.GrowthWeighted.sexratio} Sex ratio based on average temperature weighted by actual growth during the middle third incubation
-  \item \code{MiddleThird.TimeWeighted.GrowthRateWeighted.sexratio} Sex ratio based on average temperature weighted by growth rate during the middle third incubation
-  \item \code{TimeWeighted.sexratio} Sex ratio based on average temperature during all incubation
-  \item \code{GrowthWeighted.sexratio} Sex ratio based on average temperature weighted by actual growth during all incubation
-  \item \code{TimeWeighted.GrowthRateWeighted.sexratio} Sex ratio based on average temperature weighted by growth rate during all incubation
+\item \code{Temperature.max} Maximum temperature recorded during incubation
+\item \code{TimeWeighted.temperature} Average temperature during all incubation
+\item \code{GrowthWeighted.temperature} Average temperature weighted by the actual growth during all incubation
+\item \code{TimeWeighted.GrowthRateWeighted.temperature} Average temperature weighted by the growth rate during all incubation
+\item \code{TSP.TimeWeighted.temperature} Average temperature during the TSP
+\item \code{TSP.GrowthWeighted.temperature} Average temperature weighted by the actual growth during the TSP
+\item \code{TSP.TimeWeighted.GrowthRateWeighted.temperature} Average temperature weighted by the growth rate during the TSP
+\item \code{TSP.TimeWeighted.STRNWeighted.temperature} Average temperature weighted by the thermal reaction norm of sexualization during the TSP
+\item \code{TSP.GrowthWeighted.STRNWeighted.temperature} Average temperature weighted by actual growth and the thermal reaction norm of sexualization during the TSP
+\item \code{TSP.TimeWeighted.GrowthRateWeighted.STRNWeighted.temperature} Average temperature weighted by growth rate and the thermal reaction norm of sexualization during the TSP
+\item \code{TSP.length} TSP duration
+\item \code{TSP.begin} Beginning of the TSP
+\item \code{TSP.end} End of the TSP
+\item \code{TSP.PM.GrowthWeighted} Average of male probability for each temperature weighted by actual growth during the TSP
+\item \code{TSP.PM.TimeWeighted.GrowthRateWeighted} Average of male probability for each temperature weighted by growth rate during the TSP
+\item \code{TSP.PM.TimeWeighted} Average of male probability for each temperature during the TSP
+\item \code{Incubation.length} Incubation length duration
+\item \code{MiddleThird.length} Middle third incubation duration
+\item \code{MiddleThird.begin} Beginning of the middle third incubation duration
+\item \code{MiddleThird.end} End of the middle third incubation duration
+\item \code{MiddleThird.TimeWeighted.temperature} Average temperature during the middle third incubation
+\item \code{MiddleThird.GrowthWeighted.temperature} Average temperature weighted by the actual growth during the middle third incubation
+\item \code{MiddleThird.TimeWeighted.GrowthRateWeighted.temperature} Average temperature weighted by the growth rate during the middle third incubation
+\item \code{TSP.TimeWeighted.sexratio} Sex ratio based on average temperature during the TSP
+\item \code{TSP.GrowthWeighted.sexratio} Sex ratio based on average temperature weighted by the actual growth during the TSP
+\item \code{TSP.TimeWeighted.GrowthRateWeighted.sexratio} Sex ratio based on average temperature weighted by the growth rate during the TSP
+\item \code{TSP.TimeWeighted.STRNWeighted.sexratio} Sex ratio based on average temperature weighted by the thermal reaction norm of sexualization during the TSP
+\item \code{TSP.GrowthWeighted.STRNWeighted.sexratio} Sex ratio based on average temperature weighted by the actual growth and thermal reaction norm of sexualization during the TSP
+\item \code{TSP.TimeWeighted.GrowthRateWeighted.STRNWeighted.sexratio} Sex ratio based on average temperature weighted by the growth rate and the thermal reaction norm of sexualization during the TSP
+\item \code{MiddleThird.TimeWeighted.sexratio} Sex ratio based on average temperature during the middle third incubation
+\item \code{MiddleThird.GrowthWeighted.sexratio} Sex ratio based on average temperature weighted by actual growth during the middle third incubation
+\item \code{MiddleThird.TimeWeighted.GrowthRateWeighted.sexratio} Sex ratio based on average temperature weighted by growth rate during the middle third incubation
+\item \code{TimeWeighted.sexratio} Sex ratio based on average temperature during all incubation
+\item \code{GrowthWeighted.sexratio} Sex ratio based on average temperature weighted by actual growth during all incubation
+\item \code{TimeWeighted.GrowthRateWeighted.sexratio} Sex ratio based on average temperature weighted by growth rate during all incubation
 }
 If \code{out} is equal to \code{summary}, the return is a list with:
 \itemize{
-  \item \code{summary} is a data.frame with statistics for each nest.
-  \item \code{dynamic.metric} object is a list composed of data.frames with the dynamics of growth for each nest. It showed only temperatures from original dataset.
-  \item \code{summary.dynamic.metric} is a data.frame with the following columns with the suffix .mean, .se or .quantile_x with x from the parameter probs.
+\item \code{summary} is a data.frame with statistics for each nest.
+\item \code{dynamic.metric} object is a list composed of data.frames with the dynamics of growth for each nest. It showed only temperatures from original dataset.
+\item \code{summary.dynamic.metric} is a data.frame with the following columns with the suffix .mean, .se or .quantile_x with x from the parameter probs.
+}
+If \code{out} is equal to \code{details}, the return is a list with:
+\itemize{
+\item The statistics for each replicate for each nest (one per element of the list)
 }
 If \code{out} is equal to \code{metric}, the return is a list with:
 \itemize{
-  \item \code{dynamic.metric} object is a list composed of data.frames with the dynamics of growth for each nest
-  \item \code{indices.dynamic.metric} is a data.frame with the following columns.
+\item \code{dynamic.metric} object is a list composed of data.frames with the dynamics of growth for each nest
+\item \code{indices.dynamic.metric} is a data.frame with the following columns.
 }
 The object \code{summary.dynamic.metric} or \code{indices.dynamic.metric} is a data.frame with the following columns:
 \itemize{
-  \item \code{series} Name of the series
-  \item \code{metric.begin.tsp} Metric at the beginning of TSP
-  \item \code{metric.end.tsp} Metric at the end of TSP
-  \item \code{hatchling.metric.mean} Average expected size of hatchlings
-  \item \code{hatchling.metric.sd} standard deviation of expected size of hatchlings
-  \item \code{time.begin.tsp} Time at the beginning of TSP
-  \item \code{time.end.tsp} Time at the end of TSP
-  \item \code{time.begin.middlethird} Time at the beginning of the middle third incubation
-  \item \code{time.end.middlethird} Time at the end of the middle third incubation
-  \item \code{stop.at.hatchling.metric} Take the value of NA if stop.at.hatchling.metric was FALSE. TRUE if at least one incubation series was longer than hatchling size and FALSE at contrary
-  \item \code{stop.at.hatchling.metric} Take the value of NA if stop.at.hatchling.metric was FALSE. TRUE if at least one incubation series was longer than hatchling size and FALSE at contrary
-  \item \code{stop.at.hatchling.metric} Take the value of NA if stop.at.hatchling.metric was FALSE. TRUE if at least one incubation series was longer than hatchling size and FALSE at contrary
-  \item \code{stop.at.hatchling.metric} Take the value of NA if stop.at.hatchling.metric was FALSE. TRUE if at least one incubation series was longer than hatchling size and FALSE at contrary
-  \item \code{stop.at.hatchling.metric} Take the value of NA if stop.at.hatchling.metric was FALSE. TRUE if at least one incubation series was longer than hatchling size and FALSE at contrary
-  \item \code{stop.at.hatchling.metric} Take the value of NA if stop.at.hatchling.metric was FALSE. TRUE if at least one incubation series was longer than hatchling size and FALSE at contrary
+\item \code{series} Name of the series
+\item \code{metric.begin.tsp} Metric at the beginning of TSP
+\item \code{metric.end.tsp} Metric at the end of TSP
+\item \code{hatchling.metric.mean} Average expected size of hatchlings
+\item \code{hatchling.metric.sd} standard deviation of expected size of hatchlings
+\item \code{time.begin.tsp} Time at the beginning of TSP
+\item \code{time.end.tsp} Time at the end of TSP
+\item \code{time.begin.middlethird} Time at the beginning of the middle third incubation
+\item \code{time.end.middlethird} Time at the end of the middle third incubation
+\item \code{stop.at.hatchling.metric} Take the value of NA if stop.at.hatchling.metric was FALSE. TRUE if at least one incubation series was longer than hatchling size and FALSE at contrary
+\item \code{stop.at.hatchling.metric} Take the value of NA if stop.at.hatchling.metric was FALSE. TRUE if at least one incubation series was longer than hatchling size and FALSE at contrary
+\item \code{stop.at.hatchling.metric} Take the value of NA if stop.at.hatchling.metric was FALSE. TRUE if at least one incubation series was longer than hatchling size and FALSE at contrary
+\item \code{stop.at.hatchling.metric} Take the value of NA if stop.at.hatchling.metric was FALSE. TRUE if at least one incubation series was longer than hatchling size and FALSE at contrary
+\item \code{stop.at.hatchling.metric} Take the value of NA if stop.at.hatchling.metric was FALSE. TRUE if at least one incubation series was longer than hatchling size and FALSE at contrary
+\item \code{stop.at.hatchling.metric} Take the value of NA if stop.at.hatchling.metric was FALSE. TRUE if at least one incubation series was longer than hatchling size and FALSE at contrary
 }
 If you indicate new set of temperatures, you must probably also indicate new hatchling.metric values.\cr
 Note: four species have predefined embryo stages. embryo.stages parameter can take the values:\cr
 \itemize{
-  \item \code{Caretta caretta.SCL}
-  \item \code{Chelonia mydas.SCL}
-  \item \code{Emys orbicularis.SCL}
-  \item \code{Emys orbicularis.mass}
-  \item \code{Podocnemis expansa.SCL}
-  \item \code{Lepidochelys olivacea.SCL}
-  \item \code{Generic.ProportionDevelopment}
-  }
+\item \code{Caretta caretta.SCL}
+\item \code{Chelonia mydas.SCL}
+\item \code{Emys orbicularis.SCL}
+\item \code{Emys orbicularis.mass}
+\item \code{Podocnemis expansa.SCL}
+\item \code{Lepidochelys olivacea.SCL}
+\item \code{Generic.ProportionDevelopment}
+}
 But remember that mass is not the best proxy to describe the growth of an embryo because it can decrease if the substrate becomes dry.\cr
 The progress bar is based on both replicates and timeseries progress. It necessitates the pbapply package.\cr
 If replicate.CI is null or 0, only maximum likelihood is used and no confidence interval is calculated.\cr
@@ -314,6 +318,12 @@ lines(x=infoall.df$dynamic.metric[[1]][, "Time"],
 lines(x=infoall.df$dynamic.metric[[1]][, "Time"], 
      y=infoall.df$dynamic.metric[[1]][, "Metric_97.5\%"], lty=2)
 }
+}
+\references{
+\insertRef{9039}{embryogrowth}\cr
+\insertRef{10871}{embryogrowth}\cr
+\insertRef{8566}{embryogrowth}\cr
+\insertRef{10620}{embryogrowth}\cr
 }
 \author{
 Marc Girondot \email{marc.girondot@gmail.com}

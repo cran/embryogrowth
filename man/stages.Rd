@@ -12,7 +12,7 @@ A list with dataframes including attributes
 stages
 }
 \description{
-Database of embryonic development and thermosensitive period of development for sex 
+Database of embryonic development and thermosensitive period of development for sex
 determination.
 }
 \details{
@@ -199,36 +199,38 @@ title("Multivariate normal distribution")
 }
 }
 \references{
-Pieau, C., Dorizzi, M., 1981. Determination of temperature sensitive 
-stages for sexual differentiation of the gonads in embryos of the turtle, 
+Pieau, C., Dorizzi, M., 1981. Determination of temperature sensitive
+stages for sexual differentiation of the gonads in embryos of the turtle,
 Emys orbicularis. Journal of Morphology 170, 373-382.
 
-Yntema, C.L., Mrosovsky, N., 1982. Critical periods and pivotal temperatures for 
-sexual differentiation in loggerhead sea turtles. Canadian Journal of 
+Yntema, C.L., Mrosovsky, N., 1982. Critical periods and pivotal temperatures for
+sexual differentiation in loggerhead sea turtles. Canadian Journal of
 Zoology-Revue Canadienne de Zoologie 60, 1012-1016.
 
-Kaska, Y., Downie, R., 1999. Embryological development of sea turtles (Chelonia mydas, 
+Kaska, Y., Downie, R., 1999. Embryological development of sea turtles (Chelonia mydas,
 Caretta caretta) in the Mediterranean. Zoology in the Middle East 19, 55-69.
 
-Greenbaum, E., 2002. A standardized series of embryonic stages for the emydid 
-turtle Trachemys scripta. Canadian Journal of Zoology-Revue Canadienne de 
+Greenbaum, E., 2002. A standardized series of embryonic stages for the emydid
+turtle Trachemys scripta. Canadian Journal of Zoology-Revue Canadienne de
 Zoologie 80, 1350-1370.
 
-Magalhães, M.S., Vogt, R.C., Sebben, A., Dias, L.C., de Oliveira, M.F., 
-de Moura, C.E.B., 2017. Embryonic development of the Giant South American River Turtle, 
+Magalhães, M.S., Vogt, R.C., Sebben, A., Dias, L.C., de Oliveira, M.F.,
+de Moura, C.E.B., 2017. Embryonic development of the Giant South American River Turtle,
 Podocnemis expansa (Testudines: Podocnemididae). Zoomorphology.
 }
 \seealso{
 Other Functions for temperature-dependent sex determination: 
-\code{\link{DatabaseTSD.version}()},
 \code{\link{DatabaseTSD}},
+\code{\link{DatabaseTSD.version}()},
 \code{\link{P_TRT}()},
+\code{\link{ROSIE}},
+\code{\link{ROSIE.version}()},
 \code{\link{TSP.list}},
 \code{\link{plot.tsd}()},
 \code{\link{predict.tsd}()},
-\code{\link{tsd_MHmcmc_p}()},
+\code{\link{tsd}()},
 \code{\link{tsd_MHmcmc}()},
-\code{\link{tsd}()}
+\code{\link{tsd_MHmcmc_p}()}
 }
 \author{
 Marc Girondot \email{marc.girondot@universite-paris-saclay.fr}

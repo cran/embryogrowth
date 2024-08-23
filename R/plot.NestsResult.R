@@ -46,8 +46,8 @@
 #' @param PT Value for pivotal temperature, mean and SE
 #' @param show.hatchling.metric TRUE or FALSE, does the hatchling size should be displayed
 #' @param lab.third Label for 2nd third of incubation
-#' @param at.lab.third Position of Label for 2nd third of incubation [default=10]; y-lim is scaled by at.lab.third
-#' @param at.lab.TSP Position of Label for TSP [default=8]; y-lim is scaled by at.lab.third
+#' @param at.lab.third Position of Label for 2nd third of incubation \[default=10\]; y-lim is scaled by at.lab.third
+#' @param at.lab.TSP Position of Label for TSP \[default=8\]; y-lim is scaled by at.lab.third
 #' @param lab.TSP Label for the TSP
 #' @param lab.PT Label for Pivotal Temperature
 #' @param lab.stages Label for Stages

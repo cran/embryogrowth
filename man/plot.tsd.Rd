@@ -24,10 +24,11 @@
   durations.plot = seq(from = 40, to = 70, by = 0.1),
   lab.TRT = paste0("Transitional range of ", x$type, "s l=", x$l * 100, "\%"),
   col.TRT = "gray",
-  col.TRT.CI = rgb(0.8, 0.8, 0.8, 0.5),
-  col.PT.CI = rgb(0.8, 0.8, 0.8, 0.5),
+  col.TRT.CI = rgb(0.8, 0.8, 0.8, 0.8),
+  col.PT.CI = rgb(0.8, 0.8, 0.8, 0.8),
   show.CI = TRUE,
-  warn = TRUE
+  warn = TRUE,
+  use.ggplot = TRUE
 )
 }
 \arguments{
@@ -39,7 +40,7 @@
 
 \item{show.model}{Should the model be shown}
 
-\item{males.freq}{Should the graph uses males relative frequency [TRUE] or females [FALSE]}
+\item{males.freq}{Should the graph uses males relative frequency \link{TRUE} or females \link{FALSE}}
 
 \item{show.PTRT}{Should the P and TRT information be shown}
 
@@ -76,46 +77,58 @@
 \item{show.CI}{Do the CI for the curve should be shown}
 
 \item{warn}{Do the warnings must be shown ? TRUE or FALSE}
+
+\item{use.ggplot}{Use ggplot graphics (experimental). TRUE or FALSE}
 }
 \value{
 Nothing
 }
 \description{
-Plot the estimates that best describe temperature-dependent sex determination.
+Plot the estimates that best describe temperature-dependent sex determination.\cr
+\insertRef{1515}{embryogrowth}\cr
+\insertRef{3534}{embryogrowth}\cr
+\insertRef{11754}{embryogrowth}\cr
+\insertRef{5790}{embryogrowth}\cr
 }
 \details{
 plot.tsd plot result of tsd() that best describe temperature-dependent sex determination
 }
 \examples{
 \dontrun{
-CC_AtlanticSW <- subset(DatabaseTSD, RMU=="Atlantic, SW" & 
+library(embryogrowth)
+CC_AtlanticSW <- subset(DatabaseTSD, RMU.2010=="Atlantic, SW" & 
                           Species=="Caretta caretta" & (!is.na(Sexed) & Sexed!=0))
 tsdL <- with (CC_AtlanticSW, tsd(males=Males, females=Females, 
-                                 temperatures=Incubation.temperature-Correction.factor, 
+                                 temperatures=Incubation.temperature.set, 
                                  equation="logistic"))
-plot(tsdL)
+# By default, it will return a ggplot object
+# Here I show the advantage of using a ggplot object
+g <- plot(tsdL)
+# You can remove named layers. For example:
+names(g$layers)
+g$layers["Observations"] <- NULL; plot(g)
+# And add some
+# Due to a bug in ggplot, it is necessary to remove all names to obtain correct legends
+names(g$layers) <- NULL
+g + geom_point(data=CC_AtlanticSW, aes(x=Incubation.temperature.set, y=Males/Sexed, 
+               size = Sexed), inherit.aes = FALSE, show.legend = TRUE, shape=19)
+# Force to use the original plot
+plot(tsdL, use.ggplot = FALSE)
 }
-}
-\references{
-Girondot, M. 1999. Statistical description of temperature-dependent sex determination using maximum likelihood. Evolutionary Ecology Research, 1, 479-486.
-
-Godfrey, M.H., Delmas, V., Girondot, M., 2003. Assessment of patterns of temperature-dependent sex determination using maximum likelihood model selection. Ecoscience 10, 265-272.
-
-Hulin, V., Delmas, V., Girondot, M., Godfrey, M.H., Guillon, J.-M., 2009. Temperature-dependent sex determination and global change: are some species at greater risk? Oecologia 160, 493-506.
-
-Girondot M., Submited. On the concept of embryological thermosensitive period for sex determination in reptiles.
 }
 \seealso{
 Other Functions for temperature-dependent sex determination: 
-\code{\link{DatabaseTSD.version}()},
 \code{\link{DatabaseTSD}},
+\code{\link{DatabaseTSD.version}()},
 \code{\link{P_TRT}()},
+\code{\link{ROSIE}},
+\code{\link{ROSIE.version}()},
 \code{\link{TSP.list}},
 \code{\link{predict.tsd}()},
 \code{\link{stages}},
-\code{\link{tsd_MHmcmc_p}()},
+\code{\link{tsd}()},
 \code{\link{tsd_MHmcmc}()},
-\code{\link{tsd}()}
+\code{\link{tsd_MHmcmc_p}()}
 }
 \author{
 Marc Girondot

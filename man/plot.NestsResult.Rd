@@ -184,19 +184,19 @@ The embryo.stages is a named vector with relative size as compared to final size
 For example for SCL in Caretta caretta:\cr
 embryo.stages=structure(c(8.4, 9.4, 13.6, 13.8, 18.9, 23.5, 32.2, 35.2, 35.5, 38.5)/39.33), \cr
 .Names = c("21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31"))\cr
- indicates that the stages 21 begins at the relative size of 8.4/39.33.\cr
+indicates that the stages 21 begins at the relative size of 8.4/39.33.\cr
 Series can be indicated as the name of the series, its number or succesion of TRUE or FALSE. "all" indicates that all series must be printed.\cr
 show.fioritures parameter does not affect show.hatchling.metric option.\cr
 Note: Four species have predefined embryo stages. embryo.stages parameter can take the values:\cr
 \itemize{
-  \item \code{Caretta caretta.SCL}
-  \item \code{Chelonia mydas.SCL}
-  \item \code{Emys orbicularis.SCL}
-  \item \code{Emys orbicularis.mass}
-  \item \code{Podocnemis expansa.SCL}
-  \item \code{Lepidochelys olivacea.SCL}
-  \item \code{Generic.ProportionDevelopment}
-  }
+\item \code{Caretta caretta.SCL}
+\item \code{Chelonia mydas.SCL}
+\item \code{Emys orbicularis.SCL}
+\item \code{Emys orbicularis.mass}
+\item \code{Podocnemis expansa.SCL}
+\item \code{Lepidochelys olivacea.SCL}
+\item \code{Generic.ProportionDevelopment}
+}
 }
 \details{
 plot.NestsResult Plot the embryo growth

@@ -1,8 +1,30 @@
 THIS IS THE CHANGELOG OF THE "embryogrowth" PACKAGE
 
-            CHANGES IN VERSION 9.1 (2023-10-24)
+            CHANGES IN VERSION 9.5 (2024-08-23)
+
+* New CRAN version - 9.5 (2024-08-23)
+
+            CHANGES IN VERSION 9.4.2 (2024-07-26)
 
 * New CRAN version - 9.1 (2023-04-03)
+* Solve a problem in tsd() when the vcov matrix is not positive - 9.1.1 (2023-11-05)
+* Solve problems in movement() function - 9.1.2 (2023-11-07)
+* Experimental: Add a new possibility to estimate likelihood is tsd() for sex ratio when n is not known - 9.1.3 (2023-11-08)
+* New out possibility for info.nests() to be able to use Bayesian Model Averaging - 9.1.4 (2023-11-10)
+* Experimental: Add a new possibility to estimate likelihood is tsd() for sex ratio when n is not known - 9.1.5 (2023-11-08)
+* RMU.2010 and RMU.2023 are included in databaseTSD - 9.1.6 (2023-12-01)
+* New equation flexit* - 9.2 (2023-12-29)
+* New references- 9.2 (2024-02-05)
+* Minor change for initial parameters in tsd - 9.2.1 (2024-03-20)
+* Solve a problem in STRN when sex ratio was missing for some timeseries - 9.2.2 (2024-03-30)
+* STRN can use a flexit* model - 9.2.2 (2024-03-30)
+* 2 new columns in databaseTSD: incubation.temperature.set and incubation.temperature.corrected - 9.2.3 (2024-04-07)
+* Dermochelys coriacea information in databaseTSD were corrected - 9.2.4 (2024-04-30)
+* New option to use ggplot2 to produce tsd graph - 9.3.0 (2024-05-16)
+* New examples for tsd graph - 9.3.1 (2024-05-18)
+* Dermochelys coriacea information in databaseTSD were corrected - 9.3.3 (2024-05-22)
+* Dermochelys coriacea information in databaseTSD and listTSP were corrected - 9.4 (2024-05-26)
+* logit model is implemented in tsd - 9.4.1 (2024-06-24)
 
             CHANGES IN VERSION 9.0.2 (2023-10-24)
 

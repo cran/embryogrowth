@@ -34,7 +34,7 @@
 #' CC_AtlanticSW <- subset(DatabaseTSD, RMU=="Atlantic, SW" & 
 #'                           Species=="Caretta caretta" & Sexed!=0)
 #' tsdL <- with (CC_AtlanticSW, tsd(males=Males, females=Females, 
-#'                                  temperatures=Incubation.temperature-Correction.factor, 
+#'                                  temperatures=Incubation.temperature, 
 #'                                  equation="logistic"))
 #' P_TRT(tsdL)
 #' P_TRT(tsdL, replicate.CI=1000)
@@ -132,188 +132,191 @@ P_TRT <- function(x=NULL, resultmcmc=NULL, fixed.parameters=NULL,
       fixed.parameters <- x$fixed.parameters
       if (!is.null(replicate.CI) & (!is.null(x$hessian))) {
         # if (suppressPackageStartupMessages(requireNamespace("lmf"))) {
-          partot <- matrix(x$par, nrow=1)
-          colnames(partot) <- names.par
-          partot <- partot[-1, , drop=FALSE]
+        partot <- matrix(x$par, nrow=1)
+        colnames(partot) <- names.par
+        partot <- partot[-1, , drop=FALSE]
+        
+        errorsignS <- 0
+        errorsignS_low <- 0
+        errorsignS_high <- 0
+        errorsignK1 <- 0
+        errorsignK1_low <- 0
+        errorsignK1_high <- 0
+        errorsignK2 <- 0
+        errorsignK2_low <- 0
+        errorsignK2_high <- 0
+        errorsignK <- 0
+        errorsigncpt <- 0
+        
+        vcov <- solve(x$hessian)
+        
+        
+        repeat {
+          lm <- nrow(partot)
+          if (is.null(lm)) lm <- 0
+          # 2019-05-31 : if replicate.CI == 1, renvoie quand même un nombre random
           
-          errorsignS <- 0
-          errorsignS_low <- 0
-          errorsignS_high <- 0
-          errorsignK1 <- 0
-          errorsignK1_low <- 0
-          errorsignK1_high <- 0
-          errorsignK2 <- 0
-          errorsignK2_low <- 0
-          errorsignK2_high <- 0
-          errorsignK <- 0
-          errorsigncpt <- 0
+          par <- rmnorm(n = replicate.CI-lm, mean = x$par, varcov=vcov)
+          # if (any(is.na(par))) par <- matrix(rep(mean, replicate.CI-lm), ncol = length(mean), byrow = TRUE)
           
-          vcov <- solve(x$hessian)
+          # par <- rbind(x$par, par)
+          if (!is.matrix(par)) {
+            par <- matrix(par, nrow = 1)
+          }
+          colnames(par) <- names.par
           
-          repeat {
-            lm <- nrow(partot)
-            if (is.null(lm)) lm <- 0
-            # 2019-05-31 : if replicate.CI == 1, renvoie quand même un nombre random
-            par <- rmnorm(n = replicate.CI-lm, mean = x$par, vcov)
-            
-            # par <- rbind(x$par, par)
-            if (!is.matrix(par)) {
-              par <- matrix(par, nrow = 1)
+          # 19/10/2020, je rajoute les paraètres fixes
+          
+          
+          errorsigncpt <- errorsigncpt + replicate.CI-nrow(partot)
+          
+          if (!is.na(x$par["S"])) {
+            # Je retire quand S change de signe
+            if (any(sign(par[, "S"]) != sign(x$par["S"]))) {
+              errorsignS <- errorsignS + sum(sign(par[, "S"]) != sign(x$par["S"]))
+              par <- par[sign(par[, "S"]) == sign(x$par["S"]), , drop = FALSE]
             }
-            colnames(par) <- names.par
-            
-            # 19/10/2020, je rajoute les paraètres fixes
-            
-            
-            errorsigncpt <- errorsigncpt + replicate.CI-nrow(partot)
-            
-            if (!is.na(x$par["S"])) {
-              # Je retire quand S change de signe
-              if (any(sign(par[, "S"]) != sign(x$par["S"]))) {
-                errorsignS <- errorsignS + sum(sign(par[, "S"]) != sign(x$par["S"]))
-                par <- par[sign(par[, "S"]) == sign(x$par["S"]), , drop = FALSE]
-              }
+          }
+          
+          if (!is.na(x$par["S_low"])) {
+            # Je retire quand S change de signe
+            if (any(sign(par[, "S_low"]) != sign(x$par["S_low"]))) {
+              errorsignS_low <- errorsignS_low + sum(sign(par[, "S_low"]) != sign(x$par["S_low"]))
+              par <- par[sign(par[, "S_low"]) == sign(x$par["S_low"]), , drop = FALSE]
             }
-            
-            if (!is.na(x$par["S_low"])) {
-              # Je retire quand S change de signe
-              if (any(sign(par[, "S_low"]) != sign(x$par["S_low"]))) {
-                errorsignS_low <- errorsignS_low + sum(sign(par[, "S_low"]) != sign(x$par["S_low"]))
-                par <- par[sign(par[, "S_low"]) == sign(x$par["S_low"]), , drop = FALSE]
-              }
+          }
+          
+          if (!is.na(x$par["S_high"])) {
+            # Je retire quand S change de signe
+            if (any(sign(par[, "S_high"]) != sign(x$par["S_high"]))) {
+              errorsignS_high <- errorsignS_high + sum(sign(par[, "S_high"]) != sign(x$par["S_high"]))
+              par <- par[sign(par[, "S_high"]) == sign(x$par["S_high"]), , drop = FALSE]
             }
-            
-            if (!is.na(x$par["S_high"])) {
-              # Je retire quand S change de signe
-              if (any(sign(par[, "S_high"]) != sign(x$par["S_high"]))) {
-                errorsignS_high <- errorsignS_high + sum(sign(par[, "S_high"]) != sign(x$par["S_high"]))
-                par <- par[sign(par[, "S_high"]) == sign(x$par["S_high"]), , drop = FALSE]
-              }
-            }
-            
-            # Le K est forcément A-symmetrical, donc le pivot est 0
-            if (!is.na(x$par["K"])) {
-              if (nrow(par) != 0) {
-                if (any(sign(par[, "K"]) != sign(x$par["K"]))) {
-                  errorsignK <- errorsignK + sum(sign(par[, "K"]) != sign(x$par["K"]))
-                  par <- par[sign(par[, "K"]) == sign(x$par["K"]), , drop = FALSE]
-                }
-              }
-            }
-            
-            # K1 et K2 sont forcément de flexit, donc le pivot est 1
-            if (!is.na(x$par["K1"])) {
-              if (nrow(par) != 0) {
-                if (any(sign(par[, "K1"] - 1) != sign(x$par["K1"] - 1))) {
-                  errorsignK1 <- errorsignK1 + sum(sign(par[, "K1"] - 1) != sign(x$par["K1"] - 1))
-                  par <- par[sign(par[, "K1"] - 1) == sign(x$par["K1"] - 1), , drop = FALSE]
-                }
-              }
-            }
-            
-            # K1 et K2 sont forcément de flexit, donc le pivot est 1
-            if (!is.na(x$par["K1_low"])) {
-              if (nrow(par) != 0) {
-                if (any(sign(par[, "K1_low"] - 1) != sign(x$par["K1_low"] - 1))) {
-                  errorsignK1_low <- errorsignK1_low + sum(sign(par[, "K1_low"] - 1) != sign(x$par["K1_low"] - 1))
-                  par <- par[sign(par[, "K1_low"] - 1) == sign(x$par["K1_low"] - 1), , drop = FALSE]
-                }
-              }
-            }
-            
-            # K1 et K2 sont forcément de flexit, donc le pivot est 1
-            if (!is.na(x$par["K1_high"])) {
-              if (nrow(par) != 0) {
-                if (any(sign(par[, "K1_high"] - 1) != sign(x$par["K1_high"] - 1))) {
-                  errorsignK1_high <- errorsignK1_high + sum(sign(par[, "K1_high"] - 1) != sign(x$par["K1_high"] - 1))
-                  par <- par[sign(par[, "K1_high"] - 1) == sign(x$par["K1_high"] - 1), , drop = FALSE]
-                }
-              }
-            }
-            
-            
-            if (!is.na(x$par["K2"])) {
-              if (nrow(par) != 0) {
-                if (any(sign(par[, "K2"] - 1) != sign(x$par["K2"] - 1))) {
-                  errorsignK2 <- errorsignK2 + sum(sign(par[, "K2"] - 1) != sign(x$par["K2"] - 1))
-                  par <- par[sign(par[, "K2"] - 1) == sign(x$par["K2"] - 1), , drop = FALSE]
-                }
-              }
-            }
-            
-            if (!is.na(x$par["K2_low"])) {
-              if (nrow(par) != 0) {
-                if (any(sign(par[, "K2_low"] - 1) != sign(x$par["K2_low"] - 1))) {
-                  errorsignK2_low <- errorsignK2_low + sum(sign(par[, "K2_low"] - 1) != sign(x$par["K2_low"] - 1))
-                  par <- par[sign(par[, "K2_low"] - 1) == sign(x$par["K2_low"] - 1), , drop = FALSE]
-                }
-              }
-            }
-            
-            if (!is.na(x$par["K2_high"])) {
-              if (nrow(par) != 0) {
-                if (any(sign(par[, "K2_high"] - 1) != sign(x$par["K2_high"] - 1))) {
-                  errorsignK2_high <- errorsignK2_high + sum(sign(par[, "K2_high"] - 1) != sign(x$par["K2_high"] - 1))
-                  par <- par[sign(par[, "K2_high"] - 1) == sign(x$par["K2_high"] - 1), , drop = FALSE]
-                }
-              }
-            }
-            
-            
+          }
+          
+          # Le K est forcément A-symmetrical, donc le pivot est 0
+          if (!is.na(x$par["K"])) {
             if (nrow(par) != 0) {
-              partot <- rbind(partot, par)
+              if (any(sign(par[, "K"]) != sign(x$par["K"]))) {
+                errorsignK <- errorsignK + sum(sign(par[, "K"]) != sign(x$par["K"]))
+                par <- par[sign(par[, "K"]) == sign(x$par["K"]), , drop = FALSE]
+              }
             }
-            if (nrow(partot) == replicate.CI) break
+          }
+          
+          # K1 et K2 sont forcément de flexit, donc le pivot est 1
+          if (!is.na(x$par["K1"])) {
+            if (nrow(par) != 0) {
+              if (any(sign(par[, "K1"] - 1) != sign(x$par["K1"] - 1))) {
+                errorsignK1 <- errorsignK1 + sum(sign(par[, "K1"] - 1) != sign(x$par["K1"] - 1))
+                par <- par[sign(par[, "K1"] - 1) == sign(x$par["K1"] - 1), , drop = FALSE]
+              }
+            }
+          }
+          
+          # K1 et K2 sont forcément de flexit, donc le pivot est 1
+          if (!is.na(x$par["K1_low"])) {
+            if (nrow(par) != 0) {
+              if (any(sign(par[, "K1_low"] - 1) != sign(x$par["K1_low"] - 1))) {
+                errorsignK1_low <- errorsignK1_low + sum(sign(par[, "K1_low"] - 1) != sign(x$par["K1_low"] - 1))
+                par <- par[sign(par[, "K1_low"] - 1) == sign(x$par["K1_low"] - 1), , drop = FALSE]
+              }
+            }
+          }
+          
+          # K1 et K2 sont forcément de flexit, donc le pivot est 1
+          if (!is.na(x$par["K1_high"])) {
+            if (nrow(par) != 0) {
+              if (any(sign(par[, "K1_high"] - 1) != sign(x$par["K1_high"] - 1))) {
+                errorsignK1_high <- errorsignK1_high + sum(sign(par[, "K1_high"] - 1) != sign(x$par["K1_high"] - 1))
+                par <- par[sign(par[, "K1_high"] - 1) == sign(x$par["K1_high"] - 1), , drop = FALSE]
+              }
+            }
           }
           
           
-          if (warn) {
-            if (errorsignK != 0) {
-              message(paste("SE for K too high in", errorsignK, "cases out of", errorsigncpt))
-            }
-            if (errorsignS != 0) {
-              message(paste("SE for S too high in", errorsignS, "cases out of", errorsigncpt))
-            }
-            if (errorsignS_low != 0) {
-              message(paste("SE for S_low too high in", errorsignS_low, "cases out of", errorsigncpt))
-            }
-            if (errorsignS_high != 0) {
-              message(paste("SE for S_high too high in", errorsignS_high, "cases out of", errorsigncpt))
-            }
-            
-            if (errorsignK1 != 0) {
-              message(paste("SE for K1 too high in", errorsignK1, "cases out of", errorsigncpt))
-            }
-            if (errorsignK1_low != 0) {
-              message(paste("SE for K1_low too high in", errorsignK1_low, "cases out of", errorsigncpt))
-            }
-            
-            if (errorsignK1_high != 0) {
-              message(paste("SE for K1 too high in", errorsignK1_high, "cases out of", errorsigncpt))
-            }
-            
-            if (errorsignK2 != 0) {
-              message(paste("SE for K2 too high in", errorsignK2, "cases out of", errorsigncpt))
-            }
-            if (errorsignK2_low != 0) {
-              message(paste("SE for K2_low too high in", errorsignK2_low, "cases out of", errorsigncpt))
-            }
-            if (errorsignK2_high != 0) {
-              message(paste("SE for K2_high too high in", errorsignK2_high, "cases out of", errorsigncpt))
-            }
-            
-            
-            if ((errorsignK + errorsignK2 + errorsignK1 + errorsignS  + errorsignS_low +  + errorsignS_high +
-                 errorsignK2_low + errorsignK1_low + errorsignK2_high + errorsignK2_low) != 0) {
-              warning("Use results with caution; it is probably better to use MCMC")
+          if (!is.na(x$par["K2"])) {
+            if (nrow(par) != 0) {
+              if (any(sign(par[, "K2"] - 1) != sign(x$par["K2"] - 1))) {
+                errorsignK2 <- errorsignK2 + sum(sign(par[, "K2"] - 1) != sign(x$par["K2"] - 1))
+                par <- par[sign(par[, "K2"] - 1) == sign(x$par["K2"] - 1), , drop = FALSE]
+              }
             }
           }
-          par <- partot
           
-          # colK <- which(colnames(par)=="K")
-          # if (!identical(colK, integer(0))) {
-          #   par <- par[sign(x$par[colK])==sign(par[, colK]), ]
-          # }
+          if (!is.na(x$par["K2_low"])) {
+            if (nrow(par) != 0) {
+              if (any(sign(par[, "K2_low"] - 1) != sign(x$par["K2_low"] - 1))) {
+                errorsignK2_low <- errorsignK2_low + sum(sign(par[, "K2_low"] - 1) != sign(x$par["K2_low"] - 1))
+                par <- par[sign(par[, "K2_low"] - 1) == sign(x$par["K2_low"] - 1), , drop = FALSE]
+              }
+            }
+          }
+          
+          if (!is.na(x$par["K2_high"])) {
+            if (nrow(par) != 0) {
+              if (any(sign(par[, "K2_high"] - 1) != sign(x$par["K2_high"] - 1))) {
+                errorsignK2_high <- errorsignK2_high + sum(sign(par[, "K2_high"] - 1) != sign(x$par["K2_high"] - 1))
+                par <- par[sign(par[, "K2_high"] - 1) == sign(x$par["K2_high"] - 1), , drop = FALSE]
+              }
+            }
+          }
+          
+          
+          if (nrow(par) != 0) {
+            partot <- rbind(partot, par)
+          }
+          if (nrow(partot) == replicate.CI) break
+        }
+        
+        
+        if (warn) {
+          if (errorsignK != 0) {
+            message(paste("SE for K too high in", errorsignK, "cases out of", errorsigncpt))
+          }
+          if (errorsignS != 0) {
+            message(paste("SE for S too high in", errorsignS, "cases out of", errorsigncpt))
+          }
+          if (errorsignS_low != 0) {
+            message(paste("SE for S_low too high in", errorsignS_low, "cases out of", errorsigncpt))
+          }
+          if (errorsignS_high != 0) {
+            message(paste("SE for S_high too high in", errorsignS_high, "cases out of", errorsigncpt))
+          }
+          
+          if (errorsignK1 != 0) {
+            message(paste("SE for K1 too high in", errorsignK1, "cases out of", errorsigncpt))
+          }
+          if (errorsignK1_low != 0) {
+            message(paste("SE for K1_low too high in", errorsignK1_low, "cases out of", errorsigncpt))
+          }
+          
+          if (errorsignK1_high != 0) {
+            message(paste("SE for K1 too high in", errorsignK1_high, "cases out of", errorsigncpt))
+          }
+          
+          if (errorsignK2 != 0) {
+            message(paste("SE for K2 too high in", errorsignK2, "cases out of", errorsigncpt))
+          }
+          if (errorsignK2_low != 0) {
+            message(paste("SE for K2_low too high in", errorsignK2_low, "cases out of", errorsigncpt))
+          }
+          if (errorsignK2_high != 0) {
+            message(paste("SE for K2_high too high in", errorsignK2_high, "cases out of", errorsigncpt))
+          }
+          
+          
+          if ((errorsignK + errorsignK2 + errorsignK1 + errorsignS  + errorsignS_low +  + errorsignS_high +
+               errorsignK2_low + errorsignK1_low + errorsignK2_high + errorsignK2_low) != 0) {
+            warning("Use results with caution; it is probably better to use MCMC")
+          }
+        }
+        par <- partot
+        
+        # colK <- which(colnames(par)=="K")
+        # if (!identical(colK, integer(0))) {
+        #   par <- par[sign(x$par[colK])==sign(par[, colK]), ]
+        # }
         # } else {
         #   warning("The package lmf is required to estimate confidence interval.")
         #   par <- matrix(x$par, nrow = 1)
@@ -389,8 +392,8 @@ P_TRT <- function(x=NULL, resultmcmc=NULL, fixed.parameters=NULL,
                   PT=unname(xpar["P"]))
       }
       if (equation=="logistic") {
-        # sr <- 1/(1+exp(1/S)(P-T)) 
-        # (1/l) - 1 <- exp(1/S)(P-T)
+        # sr <- 1/(1+exp((1/S)(P-T)) 
+        # (1/l) - 1 <- exp((1/S)(P-T)
         # log((1/l)-1) <- (1/S)(P-T)
         # log((1/l)-1)*S <- P-T
         if (is.na(xpar["P_low"])) {
@@ -603,9 +606,123 @@ P_TRT <- function(x=NULL, resultmcmc=NULL, fixed.parameters=NULL,
                     PT_high=unname(xpar["P_high"]))
           
         }
-        
-        
       }
+      
+      if (equation=="flexit*") {
+        if (!is.na(xpar["P"])) {
+          P <- xpar["P"]
+          SL <- xpar["SL"]
+          SH <- xpar["SH"]
+          TransitionS <- xpar["TransitionS"]
+          if (is.na(TransitionS)) TransitionS <- 100
+          
+          if (SL > 0) {
+            limit.low.TRT <- P-(log((1-l)/l)/(4*SL))
+            limit.high.TRT <- P-(log(l/(1-l))/(4*SH))
+          } else {
+            limit.high.TRT <- P-(log((1-l)/l)/(4*SH))
+            limit.low.TRT <- P-(log(l/(1-l))/(4*SL))
+          }
+          
+          outr <- c(lower.limit.TRT=unname(limit.low.TRT), 
+                    higher.limit.TRT=unname(limit.high.TRT), 
+                    TRT=unname(limit.high.TRT-limit.low.TRT), 
+                    PT=unname(P))
+        } else {
+          # Modèle TSD II ou FMF
+          P <- xpar["P_low"]
+          SL <- xpar["SL_low"]
+          SH <- xpar["SH_low"]
+          TransitionS <- xpar["TransitionS_low"]
+          if (is.na(TransitionS)) TransitionS <- 100
+          
+          if (SL > 0) {
+            limit.low.TRT <- P-(log((1-l)/l)/(4*SL))
+            limit.high.TRT <- P-(log(l/(1-l))/(4*SH))
+          } else {
+            limit.high.TRT <- P-(log((1-l)/l)/(4*SH))
+            limit.low.TRT <- P-(log(l/(1-l))/(4*SL))
+          }
+          
+          P <- xpar["P_high"]
+          SL <- xpar["SL_high"]
+          SH <- xpar["SH_high"]
+          TransitionS <- xpar["TransitionS_high"]
+          if (is.na(TransitionS)) TransitionS <- 100
+          
+          
+          if (SL > 0) {
+            limit.low.TRT <- P-(log((1-l)/l)/(4*SL))
+            limit.high.TRT <- P-(log(l/(1-l))/(4*SH))
+          } else {
+            limit.high.TRT <- P-(log((1-l)/l)/(4*SH))
+            limit.low.TRT <- P-(log(l/(1-l))/(4*SL))
+          }
+          
+          outr <- c(lower.limit.TRT_low=unname(min(c(limit.low.TRT_low, limit.high.TRT_low))), 
+                    higher.limit.TRT_low=unname(max(c(limit.low.TRT_low, limit.high.TRT_low))), 
+                    TRT_low=unname(abs(limit.high.TRT_low-limit.low.TRT_low)), 
+                    PT_low=unname(xpar["P_low"]), 
+                    lower.limit.TRT_high=unname(min(c(limit.low.TRT_high, limit.high.TRT_high))), 
+                    higher.limit.TRT_high=unname(max(c(limit.low.TRT_high, limit.high.TRT_high))), 
+                    TRT_high=unname(abs(limit.high.TRT_high-limit.low.TRT_high)), 
+                    PT_high=unname(xpar["P_high"]))
+        }
+      }
+      
+      if (equation=="logit") {
+        if (!is.na(xpar["P"])) {
+          P <- xpar["P"]
+          S <- xpar["S"]
+          
+          if (S > 0) {
+            limit.low.TRT <- P-(log((1-l)/l)/(4*S))
+            limit.high.TRT <- P-(log(l/(1-l))/(4*S))
+          } else {
+            limit.high.TRT <- P-(log((1-l)/l)/(4*S))
+            limit.low.TRT <- P-(log(l/(1-l))/(4*S))
+          }
+          
+          outr <- c(lower.limit.TRT=unname(limit.low.TRT), 
+                    higher.limit.TRT=unname(limit.high.TRT), 
+                    TRT=unname(limit.high.TRT-limit.low.TRT), 
+                    PT=unname(P))
+        } else {
+          # Modèle TSD II ou FMF
+          P <- xpar["P_low"]
+          S <- xpar["S_low"]
+          
+          if (S > 0) {
+            limit.low.TRT <- P-(log((1-l)/l)/(4*S))
+            limit.high.TRT <- P-(log(l/(1-l))/(4*S))
+          } else {
+            limit.high.TRT <- P-(log((1-l)/l)/(4*S))
+            limit.low.TRT <- P-(log(l/(1-l))/(4*S))
+          }
+          
+          P <- xpar["P_high"]
+          S <- xpar["S_high"]
+          
+          
+          if (S > 0) {
+            limit.low.TRT <- P-(log((1-l)/l)/(4*S))
+            limit.high.TRT <- P-(log(l/(1-l))/(4*S))
+          } else {
+            limit.high.TRT <- P-(log((1-l)/l)/(4*S))
+            limit.low.TRT <- P-(log(l/(1-l))/(4*S))
+          }
+          
+          outr <- c(lower.limit.TRT_low=unname(min(c(limit.low.TRT_low, limit.high.TRT_low))), 
+                    higher.limit.TRT_low=unname(max(c(limit.low.TRT_low, limit.high.TRT_low))), 
+                    TRT_low=unname(abs(limit.high.TRT_low-limit.low.TRT_low)), 
+                    PT_low=unname(xpar["P_low"]), 
+                    lower.limit.TRT_high=unname(min(c(limit.low.TRT_high, limit.high.TRT_high))), 
+                    higher.limit.TRT_high=unname(max(c(limit.low.TRT_high, limit.high.TRT_high))), 
+                    TRT_high=unname(abs(limit.high.TRT_high-limit.low.TRT_high)), 
+                    PT_high=unname(xpar["P_high"]))
+        }
+      }
+      
       
       if (equation=="a-logistic") {
         P <- xpar["P"]

@@ -40,6 +40,9 @@ calibrate.datalogger(control.temperatures=20:30,
                      read.temperatures=(20:30)+rnorm(11))
 }
 }
+\references{
+\insertRef{11124}{embryogrowth}\cr
+}
 \seealso{
 Other Data loggers utilities: 
 \code{\link{movement}()},

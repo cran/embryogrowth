@@ -78,35 +78,35 @@ The list with object return by optim()
 Estimate the parameters that best describe the sexualisation thermal reaction norm within the TSP.\cr
 The sexratio parameter is a character string which can be:\cr
 \itemize{
-  \item \code{TSP.TimeWeighted.sexratio.mean} Sex ratio based on average temperature during the TSP
-  \item \code{TSP.GrowthWeighted.sexratio.mean} Sex ratio based on average temperature weighted by the actual growth during the TSP
-  \item \code{TSP.TimeWeighted.GrowthRateWeighted.sexratio.mean} Sex ratio based on average temperature weighted by the growth rate during the TSP
-  \item \code{TSP.TimeWeighted.STRNWeighted.sexratio.mean} Sex ratio based on average temperature weighted by the thermal reaction norm of sexualization during the TSP
-  \item \code{TSP.GrowthWeighted.STRNWeighted.sexratio.mean} Sex ratio based on average temperature weighted by the actual growth and thermal reaction norm of sexualization during the TSP
-  \item \code{TSP.TimeWeighted.GrowthRateWeighted.STRNWeighted.sexratio.mean} Sex ratio based on average temperature weighted by the growth rate and the thermal reaction norm of sexualization during the TSP
-  \item \code{MiddleThird.TimeWeighted.sexratio.mean} Sex ratio based on average temperature during the middle third incubation
-  \item \code{MiddleThird.GrowthWeighted.sexratio.mean} Sex ratio based on average temperature weighted by actual growth during the middle third incubation
-  \item \code{MiddleThird.TimeWeighted.GrowthRateWeighted.sexratio.mean} Sex ratio based on average temperature weighted by growth rate during the middle third incubation
-  \item \code{TimeWeighted.sexratio.mean} Sex ratio based on average temperature during all incubation
-  \item \code{GrowthWeighted.sexratio.mean} Sex ratio based on average temperature weighted by actual growth during all incubation
-  \item \code{TimeWeighted.GrowthRateWeighted.sexratio.mean} Sex ratio based on average temperature weighted by growth rate during all incubation
-  \item \code{TSP.PM.TimeWeighted.mean} Average sex ratio based on temperature during the TSP
-  \item \code{TSP.PM.GrowthWeighted.mean} Average sex ratio based on temperature weighted by the actual growth during the TSP
-  \item \code{TSP.PM.TimeWeighted.GrowthRateWeighted.mean} Average sex ratio based on temperature weighted by the growth rate during the TSP
-  }
+\item \code{TSP.TimeWeighted.sexratio.mean} Sex ratio based on average temperature during the TSP
+\item \code{TSP.GrowthWeighted.sexratio.mean} Sex ratio based on average temperature weighted by the actual growth during the TSP
+\item \code{TSP.TimeWeighted.GrowthRateWeighted.sexratio.mean} Sex ratio based on average temperature weighted by the growth rate during the TSP
+\item \code{TSP.TimeWeighted.STRNWeighted.sexratio.mean} Sex ratio based on average temperature weighted by the thermal reaction norm of sexualization during the TSP
+\item \code{TSP.GrowthWeighted.STRNWeighted.sexratio.mean} Sex ratio based on average temperature weighted by the actual growth and thermal reaction norm of sexualization during the TSP
+\item \code{TSP.TimeWeighted.GrowthRateWeighted.STRNWeighted.sexratio.mean} Sex ratio based on average temperature weighted by the growth rate and the thermal reaction norm of sexualization during the TSP
+\item \code{MiddleThird.TimeWeighted.sexratio.mean} Sex ratio based on average temperature during the middle third incubation
+\item \code{MiddleThird.GrowthWeighted.sexratio.mean} Sex ratio based on average temperature weighted by actual growth during the middle third incubation
+\item \code{MiddleThird.TimeWeighted.GrowthRateWeighted.sexratio.mean} Sex ratio based on average temperature weighted by growth rate during the middle third incubation
+\item \code{TimeWeighted.sexratio.mean} Sex ratio based on average temperature during all incubation
+\item \code{GrowthWeighted.sexratio.mean} Sex ratio based on average temperature weighted by actual growth during all incubation
+\item \code{TimeWeighted.GrowthRateWeighted.sexratio.mean} Sex ratio based on average temperature weighted by growth rate during all incubation
+\item \code{TSP.PM.TimeWeighted.mean} Average sex ratio based on temperature during the TSP
+\item \code{TSP.PM.GrowthWeighted.mean} Average sex ratio based on temperature weighted by the actual growth during the TSP
+\item \code{TSP.PM.TimeWeighted.GrowthRateWeighted.mean} Average sex ratio based on temperature weighted by the growth rate during the TSP
+}
 If information for sex is not known for some timeseries, set NA for Sexed.\cr
-Sexed, Males and Females must be vectors with names. The names must be the same as 
+Sexed, Males and Females must be vectors with names. The names must be the same as
 the names of timeseries of temperatures in EmbryoGrowthTRN.\cr
 Only two of these 3 parameters are required: Males, Females and Sexed\cr
 Note: four species have predefined embryo stages. embryo.stages parameter can take the values:\cr
 \itemize{
-  \item \code{Caretta caretta.SCL}
-  \item \code{Chelonia mydas.SCL}
-  \item \code{Emys orbicularis.SCL}
-  \item \code{Emys orbicularis.mass}
-  \item \code{Podocnemis expansa.SCL}
-  \item \code{Lepidochelys olivacea.SCL}
-  \item \code{Generic.ProportionDevelopment}
+\item \code{Caretta caretta.SCL}
+\item \code{Chelonia mydas.SCL}
+\item \code{Emys orbicularis.SCL}
+\item \code{Emys orbicularis.mass}
+\item \code{Podocnemis expansa.SCL}
+\item \code{Lepidochelys olivacea.SCL}
+\item \code{Generic.ProportionDevelopment}
 }
 A fifth name \code{fitted} must be used when limits of TSP are fitted using \code{BeginTSP} and \code{EndTSP} parameters.\cr
 The parameters that can be used in STRN are:\cr

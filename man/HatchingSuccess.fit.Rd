@@ -35,13 +35,13 @@ Return a object of class HatchingSuccess
 \description{
 Set of functions to study the hatching success.\cr
 The first version of the model was published in:\cr
-Laloë, J.-O., Monsinjon, J., Gaspar, C., Touron, M., Genet, Q., Stubbs, J., Girondot, M. 
-& Hays, G.C. (2020) Production of male hatchlings at a remote South Pacific green sea turtle 
+Laloë, J.-O., Monsinjon, J., Gaspar, C., Touron, M., Genet, Q., Stubbs, J., Girondot, M.
+& Hays, G.C. (2020) Production of male hatchlings at a remote South Pacific green sea turtle
 rookery: conservation implications in a female-dominated world. Marine Biology, 167, 70.\cr
-The version available here is enhanced by using a double flexit model rather than a double 
+The version available here is enhanced by using a double flexit model rather than a double
 logistic model. The flexit model is described here:\cr
-Abreu-Grobois, F.A., Morales-Mérida, B.A., Hart, C.E., Guillon, J.-M., Godfrey, M.H., 
-Navarro, E. & Girondot, M. (2020) Recent advances on the estimation of the thermal 
+Abreu-Grobois, F.A., Morales-Mérida, B.A., Hart, C.E., Guillon, J.-M., Godfrey, M.H.,
+Navarro, E. & Girondot, M. (2020) Recent advances on the estimation of the thermal
 reaction norm for sex ratios. PeerJ, 8, e8451.\cr
 }
 \details{
@@ -128,13 +128,12 @@ plot(g.logistic, resultmcmc=mcmc, what = c("observations", "CI"))
 }
 \seealso{
 Other Hatching success: 
-\code{\link{HatchingSuccess.MHmcmc_p}()},
 \code{\link{HatchingSuccess.MHmcmc}()},
+\code{\link{HatchingSuccess.MHmcmc_p}()},
 \code{\link{HatchingSuccess.lnL}()},
 \code{\link{HatchingSuccess.model}()},
 \code{\link{logLik.HatchingSuccess}()},
 \code{\link{nobs.HatchingSuccess}()},
-\code{\link{plot.HatchingSuccess}()},
 \code{\link{predict.HatchingSuccess}()}
 }
 \author{

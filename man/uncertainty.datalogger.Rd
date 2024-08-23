@@ -29,12 +29,12 @@ uncertainty.datalogger(
 \item{method}{The fonction that will be used to return the uncertainty.}
 }
 \value{
-The function will return the uncertainty of the average temperature for the considered period as being the 95% range where the true average temperature should be.
+The function will return the uncertainty of the average temperature for the considered period as being the 95\% range where the true average temperature should be.
 }
 \description{
-Calculate the uncertainty of average temperature dependent on the 
+Calculate the uncertainty of average temperature dependent on the
 characteristics of a data logger and sampling rate.\cr
-The temperature is supposed to be uniformaly distributed with min and max 
+The temperature is supposed to be uniformaly distributed with min and max
 being -accuracy and +accuracy.
 }
 \details{
@@ -74,6 +74,9 @@ legend("topleft", legend=c("Accuracy=0.5, resolution=0.5",
        col=c("yellow", "black", "red", "blue"), 
        cex=0.6)
 }
+}
+\references{
+\insertRef{11124}{embryogrowth}\cr
 }
 \seealso{
 Other Data loggers utilities: 

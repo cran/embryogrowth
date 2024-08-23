@@ -49,6 +49,9 @@ mv <- movement(x=dataf,
                col.x="x", col.y="y", col.z="z")
 }
 }
+\references{
+\insertRef{11893}{embryogrowth}\cr
+}
 \seealso{
 Other Data loggers utilities: 
 \code{\link{calibrate.datalogger}()},

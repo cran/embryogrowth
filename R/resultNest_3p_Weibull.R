@@ -6,8 +6,8 @@
 #' @encoding UTF-8
 #' @description Fit using the nest database using Weibull function.
 #' The model is:\cr
-#'     rT <- dweibull(T, shape=abs(parms["k"]), \cr
-#'                    scale=abs(parms["lambda"]))*parms["scale"]*1E-5\cr
+#'     rT <- dweibull(T, shape=abs(parms\["k"\]), \cr
+#'                    scale=abs(parms\["lambda"\]))*parms\["scale"\]*1E-5\cr
 #' @references Girondot, M., & Kaska, Y. (2014). A model to predict 
 #'             the thermal reaction norm for the embryo growth rate 
 #'             from field data. Journal of Thermal Biology, 45, 96-102. 

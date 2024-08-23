@@ -25,7 +25,7 @@ A vector with parameters
 }
 \description{
 Generate a set of anchored parameters.\cr
-It is important that the anchors (i.e. the temperatures used as anchors) encompass 
+It is important that the anchors (i.e. the temperatures used as anchors) encompass
 the highest and lowest temperatures that are present in nests.\cr
 The value for each anchor is R * 1E5. The 1E5 factor allows to value to be close to unity.
 }

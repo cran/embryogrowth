@@ -37,10 +37,10 @@ compare_AIC(SSM=resultNest_4p_SSM, Asymmetric.normal=resultNest_4p_normal)
 }
 }
 \references{
-Girondot, M., & Kaska, Y. (2014). A model to predict 
-            the thermal reaction norm for the embryo growth rate 
-            from field data. Journal of Thermal Biology, 45, 96-102. 
-            doi: 10.1016/j.jtherbio.2014.08.005
+Girondot, M., & Kaska, Y. (2014). A model to predict
+the thermal reaction norm for the embryo growth rate
+from field data. Journal of Thermal Biology, 45, 96-102.
+doi: 10.1016/j.jtherbio.2014.08.005
 }
 \author{
 Marc Girondot \email{marc.girondot@universite-paris-saclay.fr}

@@ -42,6 +42,15 @@
     )
   }
   
+  if (equation=="logit")	{
+    if (any(names(par)=="P_low")) {
+      p <- 1/(1+exp(4*par["S_low"]*(par["P_low"]-temperatures))) * 1/(1+exp(4*par["S_high"]*(par["P_high"]-temperatures)))
+    } else {
+      p <- 1/(1+exp(4*par["S"]*(par["P"]-temperatures)))
+    }
+  }
+  
+  
   if (equation=="flexit") {
     if (any(names(par)=="P_low")) {
       par_low <- unname(par[c("P_low", "S_low", "K1_low", "K2_low")])
@@ -51,6 +60,32 @@
       p <- flexit(x=temperatures, par=par_low)*flexit(x=temperatures, par=par_high)
     } else {
     p <- flexit(x=temperatures, par=par)
+    }
+  }
+  
+  if (equation=="flexit*") {
+    if (any(names(par)=="P_low")) {
+      P_low <- par["P_low"]
+      SL_low <- par["SL_low"]
+      SH_low <- par["SH_low"]
+      TransitionS_low <- par["TransitionS_low"]
+      if (is.na(TransitionS_low)) TransitionS_low <- 100
+      
+      P_high <- par["P_high"]
+      SL_high <- par["SL_high"]
+      SH_high <- par["SH_high"]
+      TransitionS_high <- par["TransitionS_high"]
+      if (is.na(TransitionS_high)) TransitionS_high <- 100
+
+      p <- 1/(1+exp(4*(SL_low /(1+exp(TransitionS_low*(temperatures - P_low))) + SH_low /(1+exp(TransitionS_low*(P_low - temperatures))))*(P_low-temperatures)))
+      p <- p * 1/(1+exp(4*(SL_high /(1+exp(TransitionS_high*(temperatures - P_high))) + SH_high /(1+exp(TransitionS_high*(P_high - temperatures))))*(P_high-temperatures)))
+    } else {
+      P <- par["P"]
+      SL <- par["SL"]
+      SH <- par["SH"]
+      TransitionS <- par["TransitionS"]
+      if (is.na(TransitionS)) TransitionS <- 100
+      p <- 1/(1+exp(4*(SL / (1+exp(TransitionS*(temperatures - P))) + SH / (1+exp(TransitionS*(P - temperatures))))*(P-temperatures)))
     }
   }
 

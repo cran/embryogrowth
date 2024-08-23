@@ -6,11 +6,14 @@
 \usage{
 tsd_MHmcmc_p(
   result = stop("An output from tsd() must be provided"),
+  default = "dnorm",
   accept = FALSE
 )
 }
 \arguments{
 \item{result}{An object obtained after a tsd fit}
+
+\item{default}{The default distribution for priors; can be dnorm only at that time}
 
 \item{accept}{If TRUE, the script does not wait user information}
 }
@@ -18,7 +21,7 @@ tsd_MHmcmc_p(
 A matrix with the parameters
 }
 \description{
-Interactive script used to generate set of parameters to be 
+Interactive script used to generate set of parameters to be
 used with tsd_MHmcmc().
 }
 \details{
@@ -59,19 +62,22 @@ plot(result_mcmc_tsd, parameters="K1", scale.prior=TRUE, xlim=c(-10, 10), las=1)
 plot(result_mcmc_tsd, parameters="K2", scale.prior=TRUE, xlim=c(-10, 10), las=1)
 
 plot(eo_flexit, resultmcmc = result_mcmc_tsd)
+
 }
 }
 \seealso{
 Other Functions for temperature-dependent sex determination: 
-\code{\link{DatabaseTSD.version}()},
 \code{\link{DatabaseTSD}},
+\code{\link{DatabaseTSD.version}()},
 \code{\link{P_TRT}()},
+\code{\link{ROSIE}},
+\code{\link{ROSIE.version}()},
 \code{\link{TSP.list}},
 \code{\link{plot.tsd}()},
 \code{\link{predict.tsd}()},
 \code{\link{stages}},
-\code{\link{tsd_MHmcmc}()},
-\code{\link{tsd}()}
+\code{\link{tsd}()},
+\code{\link{tsd_MHmcmc}()}
 }
 \author{
 Marc Girondot

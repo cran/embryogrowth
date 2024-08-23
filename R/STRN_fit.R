@@ -52,16 +52,19 @@
   }
   
   if (!is.null(Sexed)) {
-    serafaire <- names(Sexed[(!is.na(Sexed)) & !is.na(Males)])
+    ns <- names(NestsResult$data[1:NestsResult$data[["IndiceT"]]["NbTS"]])
+    serafaire <- ns[ns %in% names(Sexed[(!is.na(Sexed)) & !is.na(Males)])]
   } else {
     serafaire <- names(NestsResult$data[1:NestsResult$data[["IndiceT"]]["NbTS"]])
   }
   
+  
+  
   par_fit <- c(par, fixed.parameters)
   
-  parSTRN <- par_fit[! (names(par_fit) %in% c("K1", "K2", "K", "P", "S"))]
+  parSTRN <- par_fit[! (names(par_fit) %in% c("K1", "K2", "K", "P", "S", "SL", "SH"))]
   
-  parTSD <- par_fit[(names(par_fit) %in% c("K1", "K2", "K", "P", "S"))]
+  parTSD <- par_fit[(names(par_fit) %in% c("K1", "K2", "K", "P", "S", "SL", "SH"))]
   
   if (identical(parTSD, structure(numeric(0), .Names = character(0)))) {
     parTSD <- NULL

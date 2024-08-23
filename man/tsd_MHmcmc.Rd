@@ -129,15 +129,17 @@ lines(x=seq(from=25, to=35, by=0.1), y=q[2, ])
 }
 \seealso{
 Other Functions for temperature-dependent sex determination: 
-\code{\link{DatabaseTSD.version}()},
 \code{\link{DatabaseTSD}},
+\code{\link{DatabaseTSD.version}()},
 \code{\link{P_TRT}()},
+\code{\link{ROSIE}},
+\code{\link{ROSIE.version}()},
 \code{\link{TSP.list}},
 \code{\link{plot.tsd}()},
 \code{\link{predict.tsd}()},
 \code{\link{stages}},
-\code{\link{tsd_MHmcmc_p}()},
-\code{\link{tsd}()}
+\code{\link{tsd}()},
+\code{\link{tsd_MHmcmc_p}()}
 }
 \author{
 Marc Girondot \email{marc.girondot@gmail.com}

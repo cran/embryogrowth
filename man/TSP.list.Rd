@@ -13,10 +13,10 @@ TSP.list
 \description{
 Database of thermosensitive period of development for sex determination.\cr
 This database can be used with the functions plot() or info.nests().\cr
-The attributes TSP.begin.stages and TSP.end.stages for each dataframe give 
-respectively the first and the last stages for TSP. Then the metrics for the limits of TSP 
+The attributes TSP.begin.stages and TSP.end.stages for each dataframe give
+respectively the first and the last stages for TSP. Then the metrics for the limits of TSP
 are the average sizes before and after the TSP (see example, below).\cr
-If the metric for the stages before the TSP or after the TSP is not known, it will use the 
+If the metric for the stages before the TSP or after the TSP is not known, it will use the
 available information.
 }
 \details{
@@ -42,21 +42,23 @@ del <- ifelse(all(metric$stages == TSP.begin + 1)==FALSE, 0, 1)
 }
 }
 \references{
-Mrosovsky, N., Pieau, C., 1991. Transitional range of temperature, pivotal 
-temperatures and thermosensitive stages for sex determination in reptiles. 
-Amphibia-Reptilia 12, 169-179.
+\insertRef{1056}{embryogrowth}\cr
+\insertRef{10870}{embryogrowth}\cr
+\insertRef{10620}{embryogrowth}\cr
 }
 \seealso{
 Other Functions for temperature-dependent sex determination: 
-\code{\link{DatabaseTSD.version}()},
 \code{\link{DatabaseTSD}},
+\code{\link{DatabaseTSD.version}()},
 \code{\link{P_TRT}()},
+\code{\link{ROSIE}},
+\code{\link{ROSIE.version}()},
 \code{\link{plot.tsd}()},
 \code{\link{predict.tsd}()},
 \code{\link{stages}},
-\code{\link{tsd_MHmcmc_p}()},
+\code{\link{tsd}()},
 \code{\link{tsd_MHmcmc}()},
-\code{\link{tsd}()}
+\code{\link{tsd_MHmcmc_p}()}
 }
 \author{
 Marc Girondot \email{marc.girondot@universite-paris-saclay.fr}

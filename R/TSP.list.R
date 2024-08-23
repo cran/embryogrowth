@@ -10,9 +10,10 @@
 #' are the average sizes before and after the TSP (see example, below).\cr
 #' If the metric for the stages before the TSP or after the TSP is not known, it will use the 
 #' available information.
-#' @references Mrosovsky, N., Pieau, C., 1991. Transitional range of temperature, pivotal 
-#' temperatures and thermosensitive stages for sex determination in reptiles. 
-#' Amphibia-Reptilia 12, 169-179.
+#' @references
+#' \insertRef{1056}{embryogrowth}\cr
+#' \insertRef{10870}{embryogrowth}\cr
+#' \insertRef{10620}{embryogrowth}\cr
 #' @keywords datasets
 #' @family Functions for temperature-dependent sex determination
 #' @usage TSP.list

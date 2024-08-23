@@ -14,8 +14,8 @@ resultNest_3p_Weibull
 \description{
 Fit using the nest database using Weibull function.
 The model is:\cr
-    rT <- dweibull(T, shape=abs(parms["k"]), \cr
-                   scale=abs(parms["lambda"]))*parms["scale"]*1E-5\cr
+rT <- dweibull(T, shape=abs(parms["k"]), \cr
+scale=abs(parms["lambda"]))*parms["scale"]*1E-5\cr
 }
 \details{
 Result of the fit using the nest database using Weibull function
@@ -42,10 +42,10 @@ compare_AIC(SSM=resultNest_4p_SSM, Weibull=resultNest_3p_Weibull)
 }
 }
 \references{
-Girondot, M., & Kaska, Y. (2014). A model to predict 
-            the thermal reaction norm for the embryo growth rate 
-            from field data. Journal of Thermal Biology, 45, 96-102. 
-            doi: 10.1016/j.jtherbio.2014.08.005
+Girondot, M., & Kaska, Y. (2014). A model to predict
+the thermal reaction norm for the embryo growth rate
+from field data. Journal of Thermal Biology, 45, 96-102.
+doi: 10.1016/j.jtherbio.2014.08.005
 }
 \author{
 Marc Girondot \email{marc.girondot@universite-paris-saclay.fr}

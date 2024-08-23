@@ -54,11 +54,11 @@ A list with a P_TRT object containing a matrix with lower and higher bounds for 
 Estimate the parameters that best describe the thermal reaction norm for sex ratio when temperature-dependent sex determination occurs.\cr
 It can be used also to evaluate the relationship between incubation duration and sex ratio.\cr
 The parameter l was defined in Girondot (1999). The TRT is defined from the difference between the two boundary temperatures giving sex ratios of l and 1 - l.\cr
-In Girondot (1999), l was 0.05 and then the TRT was defined as being the range of temperatures producing from 5% to 95% of each sex.\cr
+In Girondot (1999), l was 0.05 and then the TRT was defined as being the range of temperatures producing from 5\% to 95\% of each sex.\cr
 If l is null, TRT is not estimated and only sex ratio is estimated.\cr
 if replicate.CI is null or 0, no replicate is used and only point estimate is done.\cr
-Standard error is calculated using resampling based on the Hessian matrix with Cholesky decomposition 
-or using MCMC chain if resultmcmc is provided. In the former case, a replicate.CI random sample of the 
+Standard error is calculated using resampling based on the Hessian matrix with Cholesky decomposition
+or using MCMC chain if resultmcmc is provided. In the former case, a replicate.CI random sample of the
 MCMC results will be used.\cr
 }
 \details{
@@ -70,7 +70,7 @@ library("embryogrowth")
 CC_AtlanticSW <- subset(DatabaseTSD, RMU=="Atlantic, SW" & 
                           Species=="Caretta caretta" & Sexed!=0)
 tsdL <- with (CC_AtlanticSW, tsd(males=Males, females=Females, 
-                                 temperatures=Incubation.temperature-Correction.factor, 
+                                 temperatures=Incubation.temperature, 
                                  equation="logistic"))
 P_TRT(tsdL)
 P_TRT(tsdL, replicate.CI=1000)
@@ -95,15 +95,17 @@ Hulin, V., Delmas, V., Girondot, M., Godfrey, M.H., Guillon, J.-M., 2009. Temper
 }
 \seealso{
 Other Functions for temperature-dependent sex determination: 
-\code{\link{DatabaseTSD.version}()},
 \code{\link{DatabaseTSD}},
+\code{\link{DatabaseTSD.version}()},
+\code{\link{ROSIE}},
+\code{\link{ROSIE.version}()},
 \code{\link{TSP.list}},
 \code{\link{plot.tsd}()},
 \code{\link{predict.tsd}()},
 \code{\link{stages}},
-\code{\link{tsd_MHmcmc_p}()},
+\code{\link{tsd}()},
 \code{\link{tsd_MHmcmc}()},
-\code{\link{tsd}()}
+\code{\link{tsd_MHmcmc_p}()}
 }
 \author{
 Marc Girondot \email{marc.girondot@gmail.com}

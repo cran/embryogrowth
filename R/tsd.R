@@ -12,57 +12,67 @@
 #' @param parameters.initial Initial values for P, S or K search as a vector, ex. c(P=29, S=-0.3)
 #' @param fixed.parameters Parameters that will not be changed
 #' @param males.freq If TRUE data are shown as males frequency
-#' @param equation Can be "logistic", "Hill", "A-logistic", "Hulin", "Double-A-logistic", "flexit", "GSD", "logit", "probit"
+#' @param equation Can be "logistic", "Hill", "A-logistic", "Hulin", "Double-A-logistic", "flexit", "flexit*", "GSD", "logit", "probit"
 #' @param replicate.CI Number of replicates to estimate confidence intervals
 #' @param replicate.NullDeviance Number of replicates to estimate null distribution of deviance
 #' @param SE If FALSE, does not estimate SE of parameters. Can be use when something wrong happens.
 #' @param range.CI The range of confidence interval for estimation, default=0.95
 #' @param print Should the results be printed at screen? TRUE (default) or FALSE
 #' @param control List of parameters used in optim.
+#' @param method method used for optim. Can be "BFGS", the most rapid or "Nelder-Mead" for special cases using n parameter.
 #' @description Estimate the parameters that best describe the thermal reaction norm for sex ratio when temperature-dependent sex determination occurs.\cr
 #' It can be used also to evaluate the relationship between incubation duration and sex ratio.\cr
 #' The parameter l was defined in Girondot (1999). The TRT is defined from the difference between the two boundary temperatures giving sex ratios of \eqn{l} and \eqn{1 - l}, respectively:\cr
 #' For logistic model (Girondot, 1999), it follows \deqn{TRT_{l}=abs\left ( S\: K_{l} \right )}{TRTl = abs( S.Kl )}
 #' where \eqn{K_{l}}{Kl} is a constant equal to \eqn{2\: log\left ( \frac{l}{1-l} \right )}{2 log(l / ( 1 - l))}.\cr
 #' In Girondot (1999), l was 0.05 and then the TRT was defined as being the range of temperatures producing from 5\% to 95\% of each sex.\cr
-#' For other models, TRT is calculated numerically.\cr
-#' The basic model is logistic one. This model has the particularity to have a symmetric shape around P.\cr
+#' The default model is named logistic. This model (as well as the logit one) has the particularity to have a symmetric shape around P.\cr
+#' The \emph{logistic} model is:
+#' \deqn{SR(T) = 1 / (1 + exp((1 / S) * (P - T))))}{SR(T) = 1 / (1 + exp((1 / S) * (P - T))))}
+#' The \emph{logit} model is:
+#' \deqn{SR(T) = 1 / (1 + exp(4 * S * (P - T))))}{SR(T) = 1 / (1 + exp(4 * S * (P - T))))}
 #' The other models have been built to alleviate this constraint. Hill and A-logistic models can be asymmetric, but it is impossible to control independently the low and high transitions.\cr
 #' Hulin model is assymmetric but the control of asymmetry is difficult to manage.\cr
-#' If asymmetric model is selected, it is always better to use flexit model.
-#' \deqn{if dose < P then (1 + (2^K1 - 1) *  exp(4 * S1 * (P - x)))^(-1/K1)}{if dose < P then (1 + (2^K1 - 1) *  exp(4 * S1 * (P - x)))^(-1/K1)}
-#' \deqn{if dose > P then 1-((1 + (2^K2 - 1) * exp(4 * S2 * (x - P)))^(-1/K2)}{if dose > P then 1-((1 + (2^K2 - 1) * exp(4 * S2 * (x - P)))^(-1/K2)}
+#' If asymmetric model is selected, it is always better to use \emph{flexit} model.
+#' \deqn{if\ \ T < P\ \ then\ \ (1 + (2^{K_1} - 1) *  exp(4 * S_1 * (P - T)))^{(-1/K_1)}}{if\ \ T < P\ \ then\ \ (1 + (2^{K_1} - 1) *  exp(4 * S_1 * (P - T)))^{(-1/K_1)}}
+#' \deqn{if\ \ T > P\ \ then\ \ 1-((1 + (2^{K_2} - 1) * exp(4 * S_2 * (T - P)))^{(-1/K_2)}}{if\ \ T > P\ \ then\ \ 1-((1 + (2^{K_2} - 1) * exp(4 * S_2 * (T - P)))^{(-1/K_2)}}
 #' with:\cr
-#'      \deqn{S1 = S/((4/K1)*(2^(-K1))^(1/K1+1)*(2^K1-1))}{S1 = S/((4/K1)*(2^(-K1))^(1/K1+1)*(2^K1-1))}
-#'      \deqn{S2 = S/((4/K2)*(2^(-K2))^(1/K2+1)*(2^K2-1))}{S2 = S/((4/K2)*(2^(-K2))^(1/K2+1)*(2^K2-1))}
-#' @references Girondot, M. 1999. Statistical description of temperature-dependent sex determination using maximum likelihood. Evolutionary Ecology Research, 1, 479-486.
-#' @references Godfrey, M.H., Delmas, V., Girondot, M., 2003. Assessment of patterns of temperature-dependent sex determination using maximum likelihood model selection. Ecoscience 10, 265-272.
-#' @references Hulin, V., Delmas, V., Girondot, M., Godfrey, M.H., Guillon, J.-M., 2009. Temperature-dependent sex determination and global change: are some species at greater risk? Oecologia 160, 493-506.
-#' @references Abreu-Grobois, F.A., Morales-Mérida, B.A., Hart, C.E., Guillon, J.-M., Godfrey, M.H., Navarro, E., Girondot, M., 2020. Recent advances on the estimation of the thermal reaction norm for sex ratios. PeerJ 8, e8451.
+#'      \deqn{S_1 = S/((4/K_1)*(2^{(-K_1)})^{(1/K_1+1)}*(2^{K_1}-1))}{S_1 = S/((4/K_1)*(2^{(-K_1)})^(1/K_1+1)*(2^{K_1}-1))}
+#'      \deqn{S_2 = S/((4/K_2)*(2^{(-K_2)})^{(1/K_2+1)}*(2^{K_2}-1))}{S_2 = S/((4/K_2)*(2^{(-K_2)})^(1/K_2+1)*(2^{K_2}-1))}
+#' The \emph{flexit*} model is defined as (QBT is the Quasi-Binary Threshold):
+#' \deqn{QBT = 1/ (1 + exp(100 * (P - T)))}{QBT = 1 / (1 + exp(100 * (P - T)))}
+#' \deqn{SR(T) = 1 / (1 + exp(4 * (SL * QBT + SH * (1 - QBT)) * (P - T))))}{SR(T) = 1 / (1 + exp(4 * (SL * QBT + SH * (1 - QBT)) * (P - T))))}
+#' @references
+#' \insertRef{1515}{embryogrowth}\cr
+#' \insertRef{3534}{embryogrowth}\cr
+#' \insertRef{11754}{embryogrowth}\cr
+#' \insertRef{5790}{embryogrowth}\cr
 #' @family Functions for temperature-dependent sex determination
 #' @examples
 #' \dontrun{
 #' library(embryogrowth)
-#' CC_AtlanticSW <- subset(DatabaseTSD, RMU=="Atlantic, SW" & 
-#'                           Species=="Caretta caretta" & (!is.na(Sexed) & Sexed!=0) &
-#'                           !is.na(Correction.factor))
+#' CC_AtlanticSW <- subset(DatabaseTSD, RMU.2010=="Atlantic, SW" & 
+#'                           Species=="Caretta caretta" & (!is.na(Sexed) & Sexed!=0))
 #' tsdL <- with (CC_AtlanticSW, tsd(males=Males, females=Females, 
-#'                                  temperatures=Incubation.temperature-Correction.factor, 
+#'                                  temperatures=Incubation.temperature.set, 
 #'                                  equation="logistic", replicate.CI=NULL))
 #' tsdH <- with (CC_AtlanticSW, tsd(males=Males, females=Females, 
-#'                                  temperatures=Incubation.temperature-Correction.factor, 
+#'                                  temperatures=Incubation.temperature.set, 
 #'                                  equation="Hill", replicate.CI=NULL))
 #' tsdR <- with (CC_AtlanticSW, tsd(males=Males, females=Females, 
-#'                                  temperatures=Incubation.temperature-Correction.factor, 
+#'                                  temperatures=Incubation.temperature.set, 
 #'                                  equation="A-logistic", replicate.CI=NULL))
 #' tsdF <- with (CC_AtlanticSW, tsd(males=Males, females=Females, 
-#'                                  temperatures=Incubation.temperature-Correction.factor, 
+#'                                  temperatures=Incubation.temperature.set, 
 #'                                  equation="Flexit", replicate.CI=NULL))
+#' tsdF1 <- with (CC_AtlanticSW, tsd(males=Males, females=Females, 
+#'                                  temperatures=Incubation.temperature.set, 
+#'                                  equation="Flexit*", replicate.CI=NULL))
 #' tsdDR <- with (CC_AtlanticSW, tsd(males=Males, females=Females, 
-#'                                  temperatures=Incubation.temperature-Correction.factor, 
+#'                                  temperatures=Incubation.temperature.set, 
 #'                                  equation="Double-A-logistic", replicate.CI=NULL))
 #' gsd <- with (CC_AtlanticSW, tsd(males=Males, females=Females, 
-#'                                  temperatures=Incubation.temperature-Correction.factor, 
+#'                                  temperatures=Incubation.temperature.set, 
 #'                                  equation="GSD", replicate.CI=NULL))
 #' compare_AIC(Logistic_Model=tsdL, Hill_model=tsdH, Alogistic_model=tsdR, 
 #'                flexit=tsdF, 
@@ -76,12 +86,12 @@
 #'                                        "Incubation.temperature"))
 #'                                        
 #' eo_Hill <- with(eo, tsd(males=Males, females=Females, 
-#'                                        temperatures=Incubation.temperature,
+#'                                        temperatures=Incubation.temperature.set,
 #'                                        equation="Hill"))
 #' eo_Hill <- tsd(df=eo, equation="Hill", replicate.CI=NULL)
 #' eo_logistic <- tsd(eo, replicate.CI=NULL)
 #' eo_Alogistic <- with(eo, tsd(males=Males, females=Females, 
-#'                                  temperatures=Incubation.temperature, 
+#'                                  temperatures=Incubation.temperature.set, 
 #'                                  equation="a-logistic", replicate.CI=NULL))
 #' ### The Hulin model is a modification of A-logistic (See Hulin et al. 2009)
 #' 
@@ -92,7 +102,7 @@
 #' par <- c(par, K1=0)
 #' eo_Hulin <- with(eo, tsd(males=Males, females=Females, 
 #'                                  parameters.initial=par, 
-#'                                  temperatures=Incubation.temperature, 
+#'                                  temperatures=Incubation.temperature.set, 
 #'                                  equation="Hulin", replicate.CI=NULL))
 #'                                  
 #' ### The Double-A-logistic model is a A-logistic model with K1 and K2 using respectively
@@ -107,7 +117,7 @@
 #' par["K2"] <- par["K2"]*0.8
 #' eo_Double_Alogistic <- with(eo, tsd(males=Males, females=Females,
 #'                                  parameters.initial=par,
-#'                                  temperatures=Incubation.temperature,
+#'                                  temperatures=Incubation.temperature.set,
 #'                                  equation="Double-a-logistic", replicate.CI=NULL))
 #'                                  
 #' ### The flexit model is modeled with K1 and K2 using respectively
@@ -116,7 +126,7 @@
 #' par <- c(eo_logistic$par["P"], 1/4*eo_logistic$par["S"], K1=1, K2=1)
 #' eo_flexit <- with(eo, tsd(males=Males, females=Females,
 #'                                  parameters.initial=par,
-#'                                  temperatures=Incubation.temperature,
+#'                                  temperatures=Incubation.temperature.set,
 #'                                  equation="flexit", replicate.CI=NULL))
 #'                                  
 #' compare_AIC(Logistic=eo_logistic, Hill=eo_Hill, Alogistic=eo_Alogistic, 
@@ -137,7 +147,7 @@
 #' predict(eo_flexit)
 #' 
 #' ### It can be used also for incubation duration
-#' CC_AtlanticSW <- subset(DatabaseTSD, RMU=="Atlantic, SW" & 
+#' CC_AtlanticSW <- subset(DatabaseTSD, RMU.2010=="Atlantic, SW" & 
 #'                           Species=="Caretta caretta" & Sexed!=0)
 #' tsdL_IP <- with (CC_AtlanticSW, tsd(males=Males, females=Females, 
 #'                                  durations=IP.mean, 
@@ -145,17 +155,17 @@
 #' plot(tsdL_IP, xlab="Incubation durations in days")
 #' # Example with Chelonia mydas
 #' cm <- subset(DatabaseTSD, Species=="Chelonia mydas" & !is.na(Sexed), c("Males", "Females", 
-#'                                        "Incubation.temperature", "RMU"))
-#' tsd(subset(cm, subset=RMU=="Pacific, SW"))
-#' tsd(subset(cm, subset=RMU=="Pacific, Northwest"))
-#' tsd(subset(cm, subset=RMU=="Atlantic, S Caribbean"))
+#'                                        "Incubation.temperature", "RMU.2010"))
+#' tsd(subset(cm, subset=RMU.2010=="Pacific, SW"))
+#' tsd(subset(cm, subset=RMU.2010=="Pacific, Northwest"))
+#' tsd(subset(cm, subset=RMU.2010=="Atlantic, S Caribbean"))
 #' 
 #' ### Eretmochelys imbricata
-#' Ei_PacificSW <- subset(DatabaseTSD, RMU=="Pacific, SW" & 
+#' Ei_PacificSW <- subset(DatabaseTSD, RMU.2010=="Pacific, SW" & 
 #'                        Species=="Eretmochelys imbricata")
-#' Ei_AtlanticW <- subset(DatabaseTSD, RMU=="Atlantic, W (Caribbean and E USA)" & 
+#' Ei_AtlanticW <- subset(DatabaseTSD, RMU.2010=="Atlantic, W (Caribbean and E USA)" & 
 #'                        Species=="Eretmochelys imbricata")
-#' Ei_AtlanticSW <- subset(DatabaseTSD, RMU=="Atlantic, SW" & 
+#' Ei_AtlanticSW <- subset(DatabaseTSD, RMU.2010=="Atlantic, SW" & 
 #'                        Species=="Eretmochelys imbricata")
 #' Ei_PacSW <- tsd(Ei_PacificSW)
 #' Ei_AtlW <- tsd(Ei_AtlanticW)
@@ -172,13 +182,13 @@
 #' col=c("black", "red", "blue"))
 #' 
 #' ### Chelonia mydas
-#' Cm_PacificSW <- subset(DatabaseTSD, RMU=="Pacific, SW" & !is.na(Sexed) & 
+#' Cm_PacificSW <- subset(DatabaseTSD, RMU.2010=="Pacific, SW" & !is.na(Sexed) & 
 #'                        Species=="Chelonia mydas")
-#' Cm_PacificNW <- subset(DatabaseTSD, RMU=="Pacific, NW" &  !is.na(Sexed) & 
+#' Cm_PacificNW <- subset(DatabaseTSD, RMU.2010=="Pacific, NW" &  !is.na(Sexed) & 
 #'                        Species=="Chelonia mydas")
-#' Cm_AtlanticSC <- subset(DatabaseTSD, RMU=="Atlantic, S Caribbean" &  !is.na(Sexed) & 
+#' Cm_AtlanticSC <- subset(DatabaseTSD, RMU.2010=="Atlantic, S Caribbean" &  !is.na(Sexed) & 
 #'                        Species=="Chelonia mydas")
-#' Cm_IndianSE <- subset(DatabaseTSD, RMU=="Indian, SE" &  !is.na(Sexed) & 
+#' Cm_IndianSE <- subset(DatabaseTSD, RMU.2010=="Indian, SE" &  !is.na(Sexed) & 
 #'                        Species=="Chelonia mydas")
 #' Cm_PacSW <- tsd(Cm_PacificSW)
 #' Cm_PacNW <- tsd(Cm_PacificNW)
@@ -276,31 +286,52 @@
 #' plot(Tse_flexit)
 #' compare_AICc(logistic=Tse_logistic, flexit=Tse_flexit)
 #' plot(Tse_flexit)
+#' 
+#' # Exemple when only proportion is known; experimental
+#' Ei_PacificSW <- subset(DatabaseTSD, RMU.2010=="Pacific, SW" & 
+#'                        Species=="Eretmochelys imbricata")
+#' males <- Ei_PacificSW$Males/(Ei_PacificSW$Males+Ei_PacificSW$Females)*100
+#' females <- 100-(Ei_PacificSW$Males/(Ei_PacificSW$Males+Ei_PacificSW$Females)*100)
+#' temperatures <- Ei_PacificSW$Incubation.temperature
+#' Ei_PacSW <- tsd(Ei_PacificSW)
+#' par <- c(Ei_PacSW$par, n=10)
+#' embryogrowth:::.tsd_fit(par=par, males=males, N=males+females, temperatures=temperatures, 
+#'                         equation="logistic")
+#' Ei_PacSW_NormalApproximation <- tsd(males=males, females=females, 
+#'                                     temperatures=temperatures, 
+#'                                     parameters.initial=par)
+#' Ei_PacSW_NormalApproximation$par
+#' Ei_PacSW$par
+#' # The data looks like only n=0.01 observations were done
+#' # This is the reason of the large observed heterogeneity
+#' plot(Ei_PacSW_NormalApproximation) 
 #' }
 #' @export
 
 
-tsd <- function(df=NULL                                            , 
-                males=NULL                                         , 
-                females=NULL                                       , 
-                N=NULL                                             , 
-                temperatures=NULL                                  , 
-                durations=NULL                                     ,
-                l=0.05                                             , 
-                parameters.initial=c(P=NA, S=-2, K=0, K1=1, K2=0)  , 
-                males.freq=TRUE                                    , 
-                fixed.parameters=NULL                              , 
-                equation="logistic"                                , 
-                replicate.CI=10000                                 , 
-                range.CI=0.95                                      , 
-                SE=TRUE                                            , 
-                replicate.NullDeviance=1000                        , 
-                control=list(maxit=1000)                           ,
-                print=TRUE                                         ) {
+tsd <- function(df=NULL                                                         , 
+                males=NULL                                                      , 
+                females=NULL                                                    , 
+                N=NULL                                                          , 
+                temperatures=NULL                                               , 
+                durations=NULL                                                  ,
+                l=0.05                                                          , 
+                parameters.initial=c(P=30, S=-2, K=0, K1=1, K2=0, 
+                                     SL = -1, SH = -1)                          , 
+                males.freq=TRUE                                                 , 
+                fixed.parameters=NULL                                           , 
+                equation="logistic"                                             , 
+                replicate.CI=10000                                              , 
+                range.CI=0.95                                                   , 
+                SE=TRUE                                                         , 
+                replicate.NullDeviance=1000                                     , 
+                control=list(maxit=1000)                                        ,
+                print=TRUE                                                      , 
+                method="BFGS"                                                   ) {
   
-  # df=NULL; males=NULL; females=NULL; N=NULL; temperatures=NULL; durations=NULL; l=0.05; parameters.initial=c(P=NA, S=-0.5, K=0, K1=1, K2=0); males.freq=TRUE; fixed.parameters=NULL; equation="logistic"; replicate.CI=10000; range.CI=0.95; SE=TRUE;print=TRUE; control=list(maxit=1000); replicate.NullDeviance=1000
-  # CC_AtlanticSW <- subset(DatabaseTSD, RMU=="Atlantic, SW" & Species=="Caretta caretta" & Sexed!=0)
-  # males=CC_AtlanticSW$Males; females=CC_AtlanticSW$Females; temperatures=CC_AtlanticSW$Incubation.temperature-CC_AtlanticSW$Correction.factor; equation="logistic"
+  # df=NULL; males=NULL; females=NULL; N=NULL; temperatures=NULL; durations=NULL; l=0.05; parameters.initial=c(P=NA, S=-0.5, K=0, K1=1, K2=0, SL = -1, SH = -1); males.freq=TRUE; fixed.parameters=NULL; equation="logistic"; replicate.CI=10000; range.CI=0.95; SE=TRUE;print=TRUE; control=list(maxit=1000); replicate.NullDeviance=1000; method="BFGS"
+  # CC_AtlanticSW <- subset(DatabaseTSD, RMU.2010=="Atlantic, SW" & Species=="Caretta caretta" & Sexed!=0)
+  # males=CC_AtlanticSW$Males; females=CC_AtlanticSW$Females; temperatures=CC_AtlanticSW$Incubation.temperature; equation="logistic"
   # parameters.initial = c(P=29.19); fixed.parameters = c(S=-0.21)
   equation <- tolower(equation)
   
@@ -308,9 +339,13 @@ tsd <- function(df=NULL                                            ,
   
   equation <- match.arg(equation, 
                         choices = c("logistic", "hill", "a-logistic", "hulin", 
-                                    "double-a-logistic", "flexit", "gsd", 
+                                    "double-a-logistic", "flexit", "flexit*", "gsd", 
                                     "probit", "logit"), 
                         several.ok = FALSE)
+  
+  # method <- tolower(method)
+  method <- match.arg(method, choices=c("BFGS", "Nelder-Mead"), 
+                      several.ok = FALSE)
   
   if (!is.null(df)) {
     if ((!inherits(df, "data.frame")) & (!inherits(df, "matrix"))) {
@@ -330,7 +365,7 @@ tsd <- function(df=NULL                                            ,
     if (any(namesdf=="sexed")) N <- df[, which(namesdf=="sexed")]
     if (any(namesdf=="temperatures")) temperatures <- df[, which(namesdf=="temperatures")]
     if (any(namesdf=="temperature")) temperatures <- df[, which(namesdf=="temperature")]
-    if (any(namesdf=="incubation.temperature")) temperatures <- df[, which(namesdf=="incubation.temperature")]
+    if (any(namesdf=="incubation.temperature.set")) temperatures <- df[, which(namesdf=="incubation.temperature.set")]
     if (any(namesdf=="durations")) durations <- df[, which(namesdf=="durations")]
     if (any(namesdf=="duration")) durations <- df[, which(namesdf=="duration")]
     if (any(namesdf=="IP.mean")) durations <- df[, which(namesdf=="IP.mean")]
@@ -365,7 +400,7 @@ tsd <- function(df=NULL                                            ,
   if (is.null(females)) females <- N-males
   if (is.null(N)) N <- males+females
   
-  if (length(temperatures)!=length(N)) {
+  if (length(temperatures) != length(N)) {
     stop("A temperature or duration must be provided for each experiment")
   }
   
@@ -374,7 +409,7 @@ tsd <- function(df=NULL                                            ,
   }
   
   
-  if (equation=="gsd") {
+  if (equation == "gsd") {
     value <- -sum(dbinom(x=males, size=males+females, prob=0.5, log=TRUE))
     result <- list(par = NULL, SE=NULL, hessian=NULL, 
                    TRT=NULL,
@@ -392,10 +427,9 @@ tsd <- function(df=NULL                                            ,
     #    limit.low.TRT <- min(temperatures)
     #    limit.high.TRT <- max(temperatures)	
   } else {
-    ppi <- parameters.initial
-    par <- c(parameters.initial, fixed.parameters)
-    if (is.na(par["P_low"])) {
-      if (is.na(par["P"])) {
+    ppi <- c(parameters.initial, fixed.parameters)
+    if (is.na(ppi["P_low"])) {
+      if (is.na(ppi["P"])) {
         if ((equation!="probit") & (equation!="logit")) {
           ppi["P"] <- temperatures[which.min(abs((males/(males+females))-0.5))]
         } else {
@@ -403,51 +437,75 @@ tsd <- function(df=NULL                                            ,
         }
       }
       
-      if (is.na(par["S"])) {
+      if (is.na(ppi["S"])) {
         if ((equation!="probit")) {
           pente <- lm(males/(males+females) ~ temperatures)
           ppi["S"] <- pente$coefficients["temperatures"]
-          if (equation!="flexit") ppi["S"] <- 1/(4*par["S"])
+          if ((equation != "flexit") & (equation != "flexit*")) ppi["S"] <- 1/(4*ppi["S"])
         } else {
           ppi["S"] <- 0
         }
       }
-      
     }
     
-    if (IP) ppi["S"] <- abs(ppi["S"])
+    # if (IP) ppi["S"] <- abs(ppi["S"])
     
-    if (equation != "a-logistic") ppi <- ppi[which(names(ppi)!="K")]
-    if (equation != "hulin" & equation != "double-a-logistic" & equation != "flexit") {
-      ppi <- ppi[which(names(ppi)!="K1")]
-      ppi <- ppi[which(names(ppi)!="K2")]
+    if (equation != "a-logistic") ppi <- ppi[which(names(ppi) != "K")]
+    if ((equation != "hulin") & (equation != "double-a-logistic") & (equation != "flexit")) {
+      ppi <- ppi[which(names(ppi) != "K1")]
+      ppi <- ppi[which(names(ppi) != "K2")]
+    }
+    if (equation != "flexit*") {
+      ppi <- ppi[which(names(ppi) != "SL")]
+      ppi <- ppi[which(names(ppi) != "SH")]
+    } else {
+      ppi <- ppi[which(names(ppi) != "S")]
     }
     
-    par <-  ppi
+    if (!is.null(fixed.parameters))
+      ppi[names(fixed.parameters)] <- unname(fixed.parameters)
     
     repeat {
       # result  <- optim(par, embryogrowth:::.tsd_fit, fixed.parameters=fixed.parameters, males=males, N=N, temperatures=temperatures, equation=equation, method="BFGS", hessian=TRUE, control = list(maxit=1000))
-      result  <- optim(par, getFromNamespace(".tsd_fit", ns="embryogrowth"), 
-                       fixed.parameters=fixed.parameters, males=males, N=N, temperatures=temperatures, 
-                       equation=equation, method="BFGS", hessian=TRUE, control = control)
+      result  <- try(optim(ppi, getFromNamespace(".tsd_fit", ns="embryogrowth"), 
+                           fixed.parameters=fixed.parameters, males=males, N=N, temperatures=temperatures, 
+                           equation=equation, method=method, hessian=FALSE, control = control),  silent=TRUE)
+      if (inherits(result, "try-error")) {
+        stop("Try using method='Nelder-Mead' or use MCMC but it will be complicated ! Contact me.")
+      }
+      
       
       if (result$convergence != 1) break
-      par <- result$par
+      ppi <- result$par
       if (print) print("Convergence is not acheived. Optimization continues !")
     }
     
-    par <- c(result$par, fixed.parameters)
+    result_hessian  <- try(optim(result$par, getFromNamespace(".tsd_fit", ns="embryogrowth"), 
+                                 fixed.parameters=fixed.parameters, males=males, N=N, temperatures=temperatures, 
+                                 equation=equation, method=method, hessian=TRUE, control = control), silent=TRUE)
     
-    if (SE) {
-      rh <- SEfromHessian(result$hessian, hessian=TRUE)
-      result$SE <- rh$SE
+    ppi <- c(result$par, fixed.parameters)
+    
+    if (inherits(result_hessian, "try-error")) {
+      warning("Likelihood is flat close to ML point and Hessian cannot be estimated")
+      result$hessian <- NULL
+      result$SE <- NULL
+      replicate.CI = 0
+    } else {
+      result$hessian <- result_hessian$hessian
+      if (SE) {
+        rh <- SEfromHessian(result$hessian, hessian=TRUE)
+        result$SE <- rh$SE
+      }
     }
-    result$hessian <- result$hessian
-    result$AIC <- 2*result$value+2*length(par)
+    
+    
+    # result$hessian <- result$hessian
+    result$AIC <- 2*result$value+2*length(result$par)
     # Correction le 21/10/2020
-    result$AICc <- result$AIC +(2*length(par)*(length(par)+1))/(sum(N)-length(par)-1)
+    result$AICc <- result$AIC +(2*length(result$par)*(length(result$par)+1))/(sum(N)-length(result$par)-1)
     # Correction le 21/10/2020
-    result$BIC <- 2*result$value+ length(par)*log(sum(N))
+    result$BIC <- 2*result$value+ length(result$par)*log(sum(N))
   }
   
   
@@ -463,9 +521,18 @@ tsd <- function(df=NULL                                            ,
   result$type <- ifelse(IP, "duration", "temperature")
   
   
-  
-  result$deviance <- -2*(-result$value - sum(dbinom(x = males, size=N, 
-                                                    prob = males/N, log = TRUE)))
+  if (all(names(ppi) != "n")) {
+    result$deviance <- -2*(-result$value - sum(dbinom(x = males, size=N, 
+                                                      prob = males/N, log = TRUE)))
+  } else {
+    pt <- males/N
+    pt <- ifelse(pt<=1E-9, 1E-9, pt)
+    pt <- ifelse(pt>=1-1E-9, 1-1E-9, pt)
+    sd <- sqrt((pt)*(1-(pt))/ppi["n"])
+    pr <- dnorm(males/N, mean=pt, sd=sd, log=TRUE)
+    
+    result$deviance <- -2*(-result$value - sum(pr))
+  }
   # degrees of freedom calculated from the difference of the number of parameters in the saturated and the fitted model. 
   result$df <- length(males) - length(result$par)
   result$pvalue <- pchisq(q=result$deviance, df=result$df, lower.tail = FALSE)
@@ -474,11 +541,23 @@ tsd <- function(df=NULL                                            ,
     
     result <- addS3Class(result, "tsd")
     # result <<- result
+    if (!is.null(result$hessian)) {
+      vcov <- solve(result$hessian)
+      if (any(eigen(vcov)$values < 0)) {
+        warning("Non-positive definite variance-covariance matrix; use MCMC to get credible interval.")
+        result$hessian <- NULL
+        result$SE <- NULL
+        replicate.CI = 0
+      }
+    }
+    
     o <- P_TRT(x=result, l=l, 
                replicate.CI = replicate.CI, 
                probs = c((1-range.CI)/2, 0.5, 1-(1-range.CI)/2))
     
+    
     result$P_TRT <- o$P_TRT_quantiles
+    
   }
   
   probtheor <- getFromNamespace(x=".modelTSD", ns="embryogrowth")(c(result$par, result$fixed.parameters), 
@@ -494,7 +573,7 @@ tsd <- function(df=NULL                                            ,
       result_dev  <- optim(par=result$par, fn=getFromNamespace(".tsd_fit", ns="embryogrowth"), 
                            fixed.parameters=result$fixed.parameters, males=m, N=result$N, 
                            temperatures=result$temperatures, 
-                           equation=result$equation, method="BFGS", 
+                           equation=result$equation, method=method, 
                            hessian=FALSE, control = control)
       deviance_dev <- -2*(-result$value - sum(dbinom(x = m, size=N, 
                                                      prob = m/N, log = TRUE)))
@@ -508,8 +587,9 @@ tsd <- function(df=NULL                                            ,
   }
   
   if (equation!="gsd" & print) {
+    # SI je n'ai qu'un PT c'est que c'est un profile TSDIA ou IB
     if (any(colnames(o$P_TRT_quantiles)=="PT")) {
-      if (!is.null(replicate.CI) | (replicate.CI == 0)) {
+      if (!is.null(replicate.CI) & (replicate.CI != 0)) {
         print(paste0("The pivotal ", result$type, " is ", sprintf("%.3f",o$P_TRT_quantiles[2, "PT"]), " CI", as.character(range.CI*100), "% ", sprintf("%.3f", min(o$P_TRT_quantiles[1, "PT"], o$P_TRT_quantiles[3, "PT"])), ";", sprintf("%.3f",max(o$P_TRT_quantiles[1, "PT"], o$P_TRT_quantiles[3, "PT"]))))
         print(paste0("The transitional range of ", result$type, "s is ", sprintf("%.3f",o$P_TRT_quantiles[2, "TRT"]), " CI", as.character(range.CI*100), "% ", sprintf("%.3f",min(o$P_TRT_quantiles[1, "TRT"], o$P_TRT_quantiles[3, "TRT"])), ";", sprintf("%.3f",max(o$P_TRT_quantiles[1, "TRT"], o$P_TRT_quantiles[3, "TRT"]))))
         print(paste0("The lower limit of transitional range of ", result$type, "s is ", sprintf("%.3f",o$P_TRT_quantiles[2, "lower.limit.TRT"]), " CI", as.character(range.CI*100), "% ", sprintf("%.3f",min(o$P_TRT_quantiles[1, "lower.limit.TRT"], o$P_TRT_quantiles[3, "lower.limit.TRT"])), ";", sprintf("%.3f", max(o$P_TRT_quantiles[1, "lower.limit.TRT"], o$P_TRT_quantiles[3, "lower.limit.TRT"]))))
@@ -523,7 +603,7 @@ tsd <- function(df=NULL                                            ,
         if (!is.na(result$par["S"])) print(paste0("The S parameter value is ", sprintf("%.3f",result$par["S"])))
       }
     } else {
-      if (!is.null(replicate.CI)) {
+      if (!is.null(replicate.CI) & (replicate.CI != 0)) {
         print(paste0("The lower pivotal ", result$type, " is ", sprintf("%.3f",o$P_TRT_quantiles[2, "PT_low"]), " CI", as.character(range.CI*100), "% ", sprintf("%.3f", min(o$P_TRT_quantiles[1, "PT_low"], o$P_TRT_quantiles[3, "PT_low"])), ";", sprintf("%.3f",max(o$P_TRT_quantiles[1, "PT_low"], o$P_TRT_quantiles[3, "PT_low"]))))
         print(paste0("The lower transitional range of ", result$type, "s is ", sprintf("%.3f",o$P_TRT_quantiles[2, "TRT_low"]), " CI", as.character(range.CI*100), "% ", sprintf("%.3f",min(o$P_TRT_quantiles[1, "TRT_low"], o$P_TRT_quantiles[3, "TRT_low"])), ";", sprintf("%.3f",max(o$P_TRT_quantiles[1, "TRT_low"], o$P_TRT_quantiles[3, "TRT_low"]))))
         print(paste0("The lower limit of lower transitional range of ", result$type, "s is ", sprintf("%.3f",o$P_TRT_quantiles[2, "lower.limit.TRT_low"]), " CI", as.character(range.CI*100), "% ", sprintf("%.3f",min(o$P_TRT_quantiles[1, "lower.limit.TRT_low"], o$P_TRT_quantiles[3, "lower.limit.TRT_low"])), ";", sprintf("%.3f", max(o$P_TRT_quantiles[1, "lower.limit.TRT_low"], o$P_TRT_quantiles[3, "lower.limit.TRT_low"]))))

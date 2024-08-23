@@ -76,6 +76,7 @@ for (j in 1:NbTS) {
 		tl1 <- c((0:(nidsx[,1][length(nidsx[,1])]%/%60-1))*60, nidsx[,1][length(nidsx[,1])])
 # je prends les vraies donnees
 		tl2 <- nidsx[,1]
+		
 
 		it <- findInterval(tl1, tl2)
 

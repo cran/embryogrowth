@@ -42,13 +42,12 @@ plot(g)
 }
 \seealso{
 Other Hatching success: 
-\code{\link{HatchingSuccess.MHmcmc_p}()},
 \code{\link{HatchingSuccess.MHmcmc}()},
+\code{\link{HatchingSuccess.MHmcmc_p}()},
 \code{\link{HatchingSuccess.fit}()},
 \code{\link{HatchingSuccess.lnL}()},
 \code{\link{logLik.HatchingSuccess}()},
 \code{\link{nobs.HatchingSuccess}()},
-\code{\link{plot.HatchingSuccess}()},
 \code{\link{predict.HatchingSuccess}()}
 }
 \author{

@@ -12,6 +12,8 @@
 #' characteristics of a data logger and sampling rate.\cr
 #' The temperature is supposed to be uniformaly distributed with min and max 
 #' being -accuracy and +accuracy.
+#' @references
+#' \insertRef{11124}{embryogrowth}\cr
 #' @family Data loggers utilities
 #' @examples
 #' \dontrun{

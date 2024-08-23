@@ -30,7 +30,7 @@
 #' @param temperature.heterogeneity SD of heterogeneity of temperatures. Can be 2 values, sd_low and sd_high and then HelpersMG::r2norm() is used.
 #' @param fill Number of minutes between two records. Create new one if they do not exist. NULL does not change the time of temperature recordings.
 #' @param probs Probabilities for metric quantiles.
-#' @param out Can take the values of "likelihood", "summary", "metric" or "dynamic".
+#' @param out Can take the values of "likelihood", "summary", "details", "metric" or "dynamic".
 #' @param metric.end.incubation The metric at the end of incubation used to calibrate TSP size. Can be "hatchling.metric", or "observed".
 #' @param progressbar If FALSE, the progress bar is not shown (useful for using with sweave or knitr)
 #' @param warnings If FALSE, does not show warnings
@@ -93,6 +93,10 @@
 #'   \item \code{dynamic.metric} object is a list composed of data.frames with the dynamics of growth for each nest. It showed only temperatures from original dataset.
 #'   \item \code{summary.dynamic.metric} is a data.frame with the following columns with the suffix .mean, .se or .quantile_x with x from the parameter probs.
 #' }
+#' If \code{out} is equal to \code{details}, the return is a list with:
+#' \itemize{
+#'   \item The statistics for each replicate for each nest (one per element of the list)
+#' }
 #' If \code{out} is equal to \code{metric}, the return is a list with:
 #' \itemize{
 #'   \item \code{dynamic.metric} object is a list composed of data.frames with the dynamics of growth for each nest
@@ -132,6 +136,11 @@
 #' If replicate.CI is null or 0, only maximum likelihood is used and no confidence interval is calculated.\cr
 #' If replicate.CI is 1, one random value for the parameters is used but no confidence interval is calculated.\cr
 #' In other cases, replicate.CI random samples are used to estimate confidence interval.
+#' @references
+#' \insertRef{9039}{embryogrowth}\cr
+#' \insertRef{10871}{embryogrowth}\cr
+#' \insertRef{8566}{embryogrowth}\cr
+#' \insertRef{10620}{embryogrowth}\cr
 #' @examples
 #' \dontrun{
 #' library(embryogrowth)
@@ -319,7 +328,7 @@ info.nests <- function(x=NULL                                                  ,
     parameters <- x
   
   out <- tolower(out)
-  out <- match.arg(out, choices = c("likelihood", "metric", "summary", "dynamic"), several.ok = FALSE)
+  out <- match.arg(out, choices = c("likelihood", "metric", "summary", "dynamic", "details"), several.ok = FALSE)
   TSP.list <- embryogrowth::TSP.list
   
   
@@ -1589,7 +1598,7 @@ info.nests <- function(x=NULL                                                  ,
                                          
                                          ## Je viens de calculer la croissance de l'embryon
                                          
-                                         if (out == "summary") {
+                                         if ((out == "summary") | (out == "details")) {
                                            
                                            # Maintenant je calcule les summary
                                            
@@ -1895,12 +1904,12 @@ info.nests <- function(x=NULL                                                  ,
                                          
                                        }
                                        
-                                       if (out == "summary") {
+                                       if ((out == "summary") | (out == "details")) {
                                          df <- NULL
                                          indices.df <- NULL
                                        }
                                        
-                                       if (out != "summary") {
+                                       if ((out != "summary") & (out != "details")) {
                                          summary <- NULL
                                        }
                                        
@@ -1969,6 +1978,20 @@ info.nests <- function(x=NULL                                                  ,
     summary <- summary[name, ]
     
     return(list(summary=summary))
+    
+  }
+  
+  if (out == "details") {
+    
+    dt <- t(sapply(AnalyseTraces, FUN = function(x) x[[1]]$summary))
+    details <- NULL
+    for (ser in unique(dt[, "series"])) {
+      int_dt <- list(subset(dt, subset=(unlist(dt[, "series"])==ser)))
+      names(int_dt) <- ser
+      details <- c(details, int_dt)
+    }
+    
+    return(details)
     
   }
   

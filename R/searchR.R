@@ -34,11 +34,14 @@
 #'   \item It is possible also to add the parameter \code{epsilon_L} and then the model becomes \code{X_L + epsilon_L} with \code{X_L} being any of the above model with suffix \code{_L};
 #'   \item If the name of the parameter is a number, then the model is a polynom anchored with the rate being the parameter value at this temperature (the name). see \code{ChangeSSM()} function.
 #' }
-#' @references Angilletta, M.J., 2006. Estimating and comparing thermal performance curves. Journal of Thermal Biology 31, 541-545.
-#' @references Dallwitz, M.J., Higgins, J.P., 1992. User’s guide to DEVAR. A computer program for estimating development rate as a function of temperature. CSIRO Aust Div Entomol Rep 2, 1-23.
-#' @references Georges, A., Beggs, K., Young, J.E., Doody, J.S., 2005. Modelling development of reptile embryos under fluctuating temperature regimes. Physiological and Biochemical Zoology 78, 18-30.
-#' @references Girondot, M., Kaska, Y., 2014. A model to predict the thermal reaction norm for the embryo growth rate from field data. Journal of Thermal Biology 45, 96-102.
-#' @references Schoolfield, R.M., Sharpe, P.J., Magnuson, C.E., 1981. Non-linear regression of biological temperature-dependent rate models based on absolute reaction-rate theory. Journal of Theoretical Biology 88, 719-731.
+#' @references
+#' \insertRef{9039}{embryogrowth}\cr
+#' \insertRef{10871}{embryogrowth}\cr
+#' \insertRef{8566}{embryogrowth}\cr
+#' \insertRef{10620}{embryogrowth}\cr
+#' \insertRef{10039}{embryogrowth}\cr
+#' \insertRef{3326}{embryogrowth}\cr
+#' \insertRef{5322}{embryogrowth}\cr
 #' @examples
 #' \dontrun{
 #' library(embryogrowth)

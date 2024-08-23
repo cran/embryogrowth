@@ -12,7 +12,7 @@ tsd(
   temperatures = NULL,
   durations = NULL,
   l = 0.05,
-  parameters.initial = c(P = NA, S = -2, K = 0, K1 = 1, K2 = 0),
+  parameters.initial = c(P = 30, S = -2, K = 0, K1 = 1, K2 = 0, SL = -1, SH = -1),
   males.freq = TRUE,
   fixed.parameters = NULL,
   equation = "logistic",
@@ -21,7 +21,8 @@ tsd(
   SE = TRUE,
   replicate.NullDeviance = 1000,
   control = list(maxit = 1000),
-  print = TRUE
+  print = TRUE,
+  method = "BFGS"
 )
 }
 \arguments{
@@ -45,7 +46,7 @@ tsd(
 
 \item{fixed.parameters}{Parameters that will not be changed}
 
-\item{equation}{Can be "logistic", "Hill", "A-logistic", "Hulin", "Double-A-logistic", "flexit", "GSD", "logit", "probit"}
+\item{equation}{Can be "logistic", "Hill", "A-logistic", "Hulin", "Double-A-logistic", "flexit", "flexit*", "GSD", "logit", "probit"}
 
 \item{replicate.CI}{Number of replicates to estimate confidence intervals}
 
@@ -58,6 +59,8 @@ tsd(
 \item{control}{List of parameters used in optim.}
 
 \item{print}{Should the results be printed at screen? TRUE (default) or FALSE}
+
+\item{method}{method used for optim. Can be "BFGS", the most rapid or "Nelder-Mead" for special cases using n parameter.}
 }
 \value{
 A list the pivotal temperature, transitional range of temperatures and their SE
@@ -68,17 +71,23 @@ It can be used also to evaluate the relationship between incubation duration and
 The parameter l was defined in Girondot (1999). The TRT is defined from the difference between the two boundary temperatures giving sex ratios of \eqn{l} and \eqn{1 - l}, respectively:\cr
 For logistic model (Girondot, 1999), it follows \deqn{TRT_{l}=abs\left ( S\: K_{l} \right )}{TRTl = abs( S.Kl )}
 where \eqn{K_{l}}{Kl} is a constant equal to \eqn{2\: log\left ( \frac{l}{1-l} \right )}{2 log(l / ( 1 - l))}.\cr
-In Girondot (1999), l was 0.05 and then the TRT was defined as being the range of temperatures producing from 5\% to 95\% of each sex.\cr
-For other models, TRT is calculated numerically.\cr
-The basic model is logistic one. This model has the particularity to have a symmetric shape around P.\cr
+In Girondot (1999), l was 0.05 and then the TRT was defined as being the range of temperatures producing from 5\\% to 95\\% of each sex.\cr
+The default model is named logistic. This model (as well as the logit one) has the particularity to have a symmetric shape around P.\cr
+The \emph{logistic} model is:
+\deqn{SR(T) = 1 / (1 + exp((1 / S) * (P - T))))}{SR(T) = 1 / (1 + exp((1 / S) * (P - T))))}
+The \emph{logit} model is:
+\deqn{SR(T) = 1 / (1 + exp(4 * S * (P - T))))}{SR(T) = 1 / (1 + exp(4 * S * (P - T))))}
 The other models have been built to alleviate this constraint. Hill and A-logistic models can be asymmetric, but it is impossible to control independently the low and high transitions.\cr
 Hulin model is assymmetric but the control of asymmetry is difficult to manage.\cr
-If asymmetric model is selected, it is always better to use flexit model.
-\deqn{if dose < P then (1 + (2^K1 - 1) *  exp(4 * S1 * (P - x)))^(-1/K1)}{if dose < P then (1 + (2^K1 - 1) *  exp(4 * S1 * (P - x)))^(-1/K1)}
-\deqn{if dose > P then 1-((1 + (2^K2 - 1) * exp(4 * S2 * (x - P)))^(-1/K2)}{if dose > P then 1-((1 + (2^K2 - 1) * exp(4 * S2 * (x - P)))^(-1/K2)}
+If asymmetric model is selected, it is always better to use \emph{flexit} model.
+\deqn{if\ \ T < P\ \ then\ \ (1 + (2^{K_1} - 1) *  exp(4 * S_1 * (P - T)))^{(-1/K_1)}}{if\ \ T < P\ \ then\ \ (1 + (2^{K_1} - 1) *  exp(4 * S_1 * (P - T)))^{(-1/K_1)}}
+\deqn{if\ \ T > P\ \ then\ \ 1-((1 + (2^{K_2} - 1) * exp(4 * S_2 * (T - P)))^{(-1/K_2)}}{if\ \ T > P\ \ then\ \ 1-((1 + (2^{K_2} - 1) * exp(4 * S_2 * (T - P)))^{(-1/K_2)}}
 with:\cr
-     \deqn{S1 = S/((4/K1)*(2^(-K1))^(1/K1+1)*(2^K1-1))}{S1 = S/((4/K1)*(2^(-K1))^(1/K1+1)*(2^K1-1))}
-     \deqn{S2 = S/((4/K2)*(2^(-K2))^(1/K2+1)*(2^K2-1))}{S2 = S/((4/K2)*(2^(-K2))^(1/K2+1)*(2^K2-1))}
+\deqn{S_1 = S/((4/K_1)*(2^{(-K_1)})^{(1/K_1+1)}*(2^{K_1}-1))}{S_1 = S/((4/K_1)*(2^{(-K_1)})^(1/K_1+1)*(2^{K_1}-1))}
+\deqn{S_2 = S/((4/K_2)*(2^{(-K_2)})^{(1/K_2+1)}*(2^{K_2}-1))}{S_2 = S/((4/K_2)*(2^{(-K_2)})^(1/K_2+1)*(2^{K_2}-1))}
+The \emph{flexit*} model is defined as (QBT is the Quasi-Binary Threshold):
+\deqn{QBT = 1/ (1 + exp(100 * (P - T)))}{QBT = 1 / (1 + exp(100 * (P - T)))}
+\deqn{SR(T) = 1 / (1 + exp(4 * (SL * QBT + SH * (1 - QBT)) * (P - T))))}{SR(T) = 1 / (1 + exp(4 * (SL * QBT + SH * (1 - QBT)) * (P - T))))}
 }
 \details{
 tsd estimates the parameters that best describe temperature-dependent sex determination
@@ -86,26 +95,28 @@ tsd estimates the parameters that best describe temperature-dependent sex determ
 \examples{
 \dontrun{
 library(embryogrowth)
-CC_AtlanticSW <- subset(DatabaseTSD, RMU=="Atlantic, SW" & 
-                          Species=="Caretta caretta" & (!is.na(Sexed) & Sexed!=0) &
-                          !is.na(Correction.factor))
+CC_AtlanticSW <- subset(DatabaseTSD, RMU.2010=="Atlantic, SW" & 
+                          Species=="Caretta caretta" & (!is.na(Sexed) & Sexed!=0))
 tsdL <- with (CC_AtlanticSW, tsd(males=Males, females=Females, 
-                                 temperatures=Incubation.temperature-Correction.factor, 
+                                 temperatures=Incubation.temperature.set, 
                                  equation="logistic", replicate.CI=NULL))
 tsdH <- with (CC_AtlanticSW, tsd(males=Males, females=Females, 
-                                 temperatures=Incubation.temperature-Correction.factor, 
+                                 temperatures=Incubation.temperature.set, 
                                  equation="Hill", replicate.CI=NULL))
 tsdR <- with (CC_AtlanticSW, tsd(males=Males, females=Females, 
-                                 temperatures=Incubation.temperature-Correction.factor, 
+                                 temperatures=Incubation.temperature.set, 
                                  equation="A-logistic", replicate.CI=NULL))
 tsdF <- with (CC_AtlanticSW, tsd(males=Males, females=Females, 
-                                 temperatures=Incubation.temperature-Correction.factor, 
+                                 temperatures=Incubation.temperature.set, 
                                  equation="Flexit", replicate.CI=NULL))
+tsdF1 <- with (CC_AtlanticSW, tsd(males=Males, females=Females, 
+                                 temperatures=Incubation.temperature.set, 
+                                 equation="Flexit*", replicate.CI=NULL))
 tsdDR <- with (CC_AtlanticSW, tsd(males=Males, females=Females, 
-                                 temperatures=Incubation.temperature-Correction.factor, 
+                                 temperatures=Incubation.temperature.set, 
                                  equation="Double-A-logistic", replicate.CI=NULL))
 gsd <- with (CC_AtlanticSW, tsd(males=Males, females=Females, 
-                                 temperatures=Incubation.temperature-Correction.factor, 
+                                 temperatures=Incubation.temperature.set, 
                                  equation="GSD", replicate.CI=NULL))
 compare_AIC(Logistic_Model=tsdL, Hill_model=tsdH, Alogistic_model=tsdR, 
                flexit=tsdF, 
@@ -119,12 +130,12 @@ eo <- subset(DatabaseTSD, Species=="Emys orbicularis", c("Males", "Females",
                                        "Incubation.temperature"))
                                        
 eo_Hill <- with(eo, tsd(males=Males, females=Females, 
-                                       temperatures=Incubation.temperature,
+                                       temperatures=Incubation.temperature.set,
                                        equation="Hill"))
 eo_Hill <- tsd(df=eo, equation="Hill", replicate.CI=NULL)
 eo_logistic <- tsd(eo, replicate.CI=NULL)
 eo_Alogistic <- with(eo, tsd(males=Males, females=Females, 
-                                 temperatures=Incubation.temperature, 
+                                 temperatures=Incubation.temperature.set, 
                                  equation="a-logistic", replicate.CI=NULL))
 ### The Hulin model is a modification of A-logistic (See Hulin et al. 2009)
 
@@ -135,7 +146,7 @@ names(par)[which(names(par)=="K")] <- "K2"
 par <- c(par, K1=0)
 eo_Hulin <- with(eo, tsd(males=Males, females=Females, 
                                  parameters.initial=par, 
-                                 temperatures=Incubation.temperature, 
+                                 temperatures=Incubation.temperature.set, 
                                  equation="Hulin", replicate.CI=NULL))
                                  
 ### The Double-A-logistic model is a A-logistic model with K1 and K2 using respectively
@@ -150,7 +161,7 @@ par <- c(par, K1=as.numeric(par["K2"])*0.8)
 par["K2"] <- par["K2"]*0.8
 eo_Double_Alogistic <- with(eo, tsd(males=Males, females=Females,
                                  parameters.initial=par,
-                                 temperatures=Incubation.temperature,
+                                 temperatures=Incubation.temperature.set,
                                  equation="Double-a-logistic", replicate.CI=NULL))
                                  
 ### The flexit model is modeled with K1 and K2 using respectively
@@ -159,7 +170,7 @@ eo_Double_Alogistic <- with(eo, tsd(males=Males, females=Females,
 par <- c(eo_logistic$par["P"], 1/4*eo_logistic$par["S"], K1=1, K2=1)
 eo_flexit <- with(eo, tsd(males=Males, females=Females,
                                  parameters.initial=par,
-                                 temperatures=Incubation.temperature,
+                                 temperatures=Incubation.temperature.set,
                                  equation="flexit", replicate.CI=NULL))
                                  
 compare_AIC(Logistic=eo_logistic, Hill=eo_Hill, Alogistic=eo_Alogistic, 
@@ -180,7 +191,7 @@ p["50\%", 1]-0.5; 0.5-p["50\%", 2]
 predict(eo_flexit)
 
 ### It can be used also for incubation duration
-CC_AtlanticSW <- subset(DatabaseTSD, RMU=="Atlantic, SW" & 
+CC_AtlanticSW <- subset(DatabaseTSD, RMU.2010=="Atlantic, SW" & 
                           Species=="Caretta caretta" & Sexed!=0)
 tsdL_IP <- with (CC_AtlanticSW, tsd(males=Males, females=Females, 
                                  durations=IP.mean, 
@@ -188,17 +199,17 @@ tsdL_IP <- with (CC_AtlanticSW, tsd(males=Males, females=Females,
 plot(tsdL_IP, xlab="Incubation durations in days")
 # Example with Chelonia mydas
 cm <- subset(DatabaseTSD, Species=="Chelonia mydas" & !is.na(Sexed), c("Males", "Females", 
-                                       "Incubation.temperature", "RMU"))
-tsd(subset(cm, subset=RMU=="Pacific, SW"))
-tsd(subset(cm, subset=RMU=="Pacific, Northwest"))
-tsd(subset(cm, subset=RMU=="Atlantic, S Caribbean"))
+                                       "Incubation.temperature", "RMU.2010"))
+tsd(subset(cm, subset=RMU.2010=="Pacific, SW"))
+tsd(subset(cm, subset=RMU.2010=="Pacific, Northwest"))
+tsd(subset(cm, subset=RMU.2010=="Atlantic, S Caribbean"))
 
 ### Eretmochelys imbricata
-Ei_PacificSW <- subset(DatabaseTSD, RMU=="Pacific, SW" & 
+Ei_PacificSW <- subset(DatabaseTSD, RMU.2010=="Pacific, SW" & 
                        Species=="Eretmochelys imbricata")
-Ei_AtlanticW <- subset(DatabaseTSD, RMU=="Atlantic, W (Caribbean and E USA)" & 
+Ei_AtlanticW <- subset(DatabaseTSD, RMU.2010=="Atlantic, W (Caribbean and E USA)" & 
                        Species=="Eretmochelys imbricata")
-Ei_AtlanticSW <- subset(DatabaseTSD, RMU=="Atlantic, SW" & 
+Ei_AtlanticSW <- subset(DatabaseTSD, RMU.2010=="Atlantic, SW" & 
                        Species=="Eretmochelys imbricata")
 Ei_PacSW <- tsd(Ei_PacificSW)
 Ei_AtlW <- tsd(Ei_AtlanticW)
@@ -215,13 +226,13 @@ legend("topright", legend=c("Pacific, SW", "Atlantic, W", "Atlantic, SW"), lty=1
 col=c("black", "red", "blue"))
 
 ### Chelonia mydas
-Cm_PacificSW <- subset(DatabaseTSD, RMU=="Pacific, SW" & !is.na(Sexed) & 
+Cm_PacificSW <- subset(DatabaseTSD, RMU.2010=="Pacific, SW" & !is.na(Sexed) & 
                        Species=="Chelonia mydas")
-Cm_PacificNW <- subset(DatabaseTSD, RMU=="Pacific, NW" &  !is.na(Sexed) & 
+Cm_PacificNW <- subset(DatabaseTSD, RMU.2010=="Pacific, NW" &  !is.na(Sexed) & 
                        Species=="Chelonia mydas")
-Cm_AtlanticSC <- subset(DatabaseTSD, RMU=="Atlantic, S Caribbean" &  !is.na(Sexed) & 
+Cm_AtlanticSC <- subset(DatabaseTSD, RMU.2010=="Atlantic, S Caribbean" &  !is.na(Sexed) & 
                        Species=="Chelonia mydas")
-Cm_IndianSE <- subset(DatabaseTSD, RMU=="Indian, SE" &  !is.na(Sexed) & 
+Cm_IndianSE <- subset(DatabaseTSD, RMU.2010=="Indian, SE" &  !is.na(Sexed) & 
                        Species=="Chelonia mydas")
 Cm_PacSW <- tsd(Cm_PacificSW)
 Cm_PacNW <- tsd(Cm_PacificNW)
@@ -319,28 +330,46 @@ Tse_logistic <- tsd(Tse)
 plot(Tse_flexit)
 compare_AICc(logistic=Tse_logistic, flexit=Tse_flexit)
 plot(Tse_flexit)
+
+# Exemple when only proportion is known; experimental
+Ei_PacificSW <- subset(DatabaseTSD, RMU.2010=="Pacific, SW" & 
+                       Species=="Eretmochelys imbricata")
+males <- Ei_PacificSW$Males/(Ei_PacificSW$Males+Ei_PacificSW$Females)*100
+females <- 100-(Ei_PacificSW$Males/(Ei_PacificSW$Males+Ei_PacificSW$Females)*100)
+temperatures <- Ei_PacificSW$Incubation.temperature
+Ei_PacSW <- tsd(Ei_PacificSW)
+par <- c(Ei_PacSW$par, n=10)
+embryogrowth:::.tsd_fit(par=par, males=males, N=males+females, temperatures=temperatures, 
+                        equation="logistic")
+Ei_PacSW_NormalApproximation <- tsd(males=males, females=females, 
+                                    temperatures=temperatures, 
+                                    parameters.initial=par)
+Ei_PacSW_NormalApproximation$par
+Ei_PacSW$par
+# The data looks like only n=0.01 observations were done
+# This is the reason of the large observed heterogeneity
+plot(Ei_PacSW_NormalApproximation) 
 }
 }
 \references{
-Girondot, M. 1999. Statistical description of temperature-dependent sex determination using maximum likelihood. Evolutionary Ecology Research, 1, 479-486.
-
-Godfrey, M.H., Delmas, V., Girondot, M., 2003. Assessment of patterns of temperature-dependent sex determination using maximum likelihood model selection. Ecoscience 10, 265-272.
-
-Hulin, V., Delmas, V., Girondot, M., Godfrey, M.H., Guillon, J.-M., 2009. Temperature-dependent sex determination and global change: are some species at greater risk? Oecologia 160, 493-506.
-
-Abreu-Grobois, F.A., Morales-Mérida, B.A., Hart, C.E., Guillon, J.-M., Godfrey, M.H., Navarro, E., Girondot, M., 2020. Recent advances on the estimation of the thermal reaction norm for sex ratios. PeerJ 8, e8451.
+\insertRef{1515}{embryogrowth}\cr
+\insertRef{3534}{embryogrowth}\cr
+\insertRef{11754}{embryogrowth}\cr
+\insertRef{5790}{embryogrowth}\cr
 }
 \seealso{
 Other Functions for temperature-dependent sex determination: 
-\code{\link{DatabaseTSD.version}()},
 \code{\link{DatabaseTSD}},
+\code{\link{DatabaseTSD.version}()},
 \code{\link{P_TRT}()},
+\code{\link{ROSIE}},
+\code{\link{ROSIE.version}()},
 \code{\link{TSP.list}},
 \code{\link{plot.tsd}()},
 \code{\link{predict.tsd}()},
 \code{\link{stages}},
-\code{\link{tsd_MHmcmc_p}()},
-\code{\link{tsd_MHmcmc}()}
+\code{\link{tsd_MHmcmc}()},
+\code{\link{tsd_MHmcmc_p}()}
 }
 \author{
 Marc Girondot \email{marc.girondot@gmail.com}

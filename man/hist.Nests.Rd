@@ -14,7 +14,7 @@
 \item{...}{Parameters used by hist function}
 }
 \value{
-A list with an histogram object with information on histogram or 
+A list with an histogram object with information on histogram or
 NULL if no series was selected and the complete set of temperatures used.
 }
 \description{

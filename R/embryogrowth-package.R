@@ -3,14 +3,13 @@
 #' \tabular{ll}{
 #'  Package: \tab embryogrowth\cr
 #'  Type: \tab Package\cr
-#'  Version: \tab 9.1 build 1630\cr
-#'  Date: \tab 2023-10-24\cr
+#'  Version: \tab 9.5 build 1827\cr
+#'  Date: \tab 2024-08-23\cr
 #'  License: \tab GPL (>= 2)\cr
 #'  LazyLoad: \tab yes\cr
 #'  }
 #' @title The package embryogrowth
 #' @author Marc Girondot \email{marc.girondot@@gmail.com}
-#' @docType package
 #' @name embryogrowth-package
 #' @description Tools to analyze the embryo growth and the sexualisation thermal reaction norms.\cr
 #' The latest version of this package can always been installed using:\cr
@@ -18,36 +17,23 @@
 #' install.packages("https://hebergement.universite-paris-saclay.fr/marcgirondot/CRAN/embryogrowth.tar.gz", repos=NULL, type="source")\cr
 #' \if{html}{\figure{E.png}{options: alt="embryogrowth logo"}}
 #' \if{latex}{\figure{E.png}}
-#' @references Girondot, M. & Kaska, Y. 2014. A model to predict the thermal 
-#'          reaction norm for the embryo growth rate from field data. Journal of
-#'          Thermal Biology. 45, 96-102.
-#' @seealso Delmas, V., Prevot-Julliard, A.-C., Pieau, C. & Girondot, M. 2008. 
-#'          A mechanistic model of temperature-dependent sex determination 
-#'          in a Chelonian, the European pond turtle. Functional 
-#'          Ecology, 22, 84-93.
-#' @seealso Girondot, M., Ben Hassine, S., Sellos, C., Godfrey, M. & Guillon, 
-#'          J.-M. 2010. Modeling thermal influence on animal growth and sex 
-#'          determination in Reptiles: being closer of the target gives new 
-#'          views. Sexual Development, 4, 29-38.
-#' @seealso Girondot, M. 1999. Statistical description of temperature-dependent 
-#'          sex determination using maximum likelihood. Evolutionary Ecology 
-#'          Research, 1, 479-486.
-#' @seealso Girondot, M., & Kaska, Y. (2014). Nest temperatures in a loggerhead-
-#'          nesting beach in Turkey is more determined by sea surface temperature 
-#'          than air temperature. Journal of Thermal Biology, 47, 13-18.
-#' @references Fuentes, M.M.P.B., Monsinjon, J., Lopez, M., Lara, P., Santos, A., 
-#'             dei Marcovaldi, M.A.G., Girondot, M., 2017. Sex ratio estimates for 
-#'             species with temperature-dependent sex determination differ according 
-#'             to the proxy used. Ecological Modelling 365, 55-67.
-#' @references Girondot, M., Monsinjon, J., Guillon, J.-M., 2018. Delimitation of 
-#'             the embryonic thermosensitive period for sex determination using an 
-#'             embryo growth model reveals a potential bias for sex ratio prediction 
-#'             in turtles. Journal of Thermal Biology 73, 32-40.
-#' @references Monsinjon, J., Jribi, I., Hamza, A., Ouerghi, A., Kaska, Y., 
-#'             Girondot, M., 2017. Embryonic growth rate thermal reaction norm of 
-#'             Mediterranean Caretta caretta embryos from two different thermal 
-#'             habitats, Turkey and Libya. Chelonian Conservation and 
-#'             Biology 16, 172-179.
+#' @references
+#' \insertRef{1515}{embryogrowth}\cr
+#' \insertRef{3534}{embryogrowth}\cr
+#' \insertRef{9039}{embryogrowth}\cr
+#' \insertRef{8589}{embryogrowth}\cr
+#' \insertRef{10871}{embryogrowth}\cr
+#' \insertRef{8566}{embryogrowth}\cr
+#' \insertRef{11124}{embryogrowth}\cr
+#' \insertRef{10620}{embryogrowth}\cr
+#' \insertRef{11754}{embryogrowth}\cr
+#' \insertRef{12168}{embryogrowth}\cr
+#' \insertRef{10870}{embryogrowth}\cr
+#' \insertRef{13669}{embryogrowth}\cr
+#' \insertRef{5790}{embryogrowth}\cr
+#' \insertRef{13271}{embryogrowth}\cr
+#' \insertRef{11893}{embryogrowth}\cr
+#' @importFrom Rdpack reprompt
 #' @keywords Temperature Embryo Ecology Growth Gompertz Sex-determination
 #' @examples
 #' \dontrun{

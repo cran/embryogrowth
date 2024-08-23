@@ -33,9 +33,9 @@ plotR(result=resultNest_4p_SSM, show.hist = TRUE,
 }
 }
 \references{
-Girondot M, Monsinjon J, Guillon J-M (2018) Delimitation of the 
-embryonic thermosensitive period for sex determination using an embryo 
-growth model reveals a potential bias for sex ratio prediction in turtles. 
+Girondot M, Monsinjon J, Guillon J-M (2018) Delimitation of the
+embryonic thermosensitive period for sex determination using an embryo
+growth model reveals a potential bias for sex ratio prediction in turtles.
 Journal of Thermal Biology 73: 32-40
 }
 \author{

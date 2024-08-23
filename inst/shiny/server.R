@@ -14,7 +14,7 @@ shinyServer(function(input, output) {
   # output$resultsInfo <- renderPrint({print(input$MonthRef)})
   
   output$RMUControls <- renderUI({
-    df <- subset(embryogrowth::DatabaseTSD, Species==input$Species)$RMU
+    df <- subset(embryogrowth::DatabaseTSD, Species==input$Species)$RMU.2023
     df <- c("All", levels(as.factor(as.character(df[df != ""]))))
     selectInput("RMU", "RMU, region or subspecies"
                 , choices=as.list(df)
@@ -45,12 +45,18 @@ shinyServer(function(input, output) {
         if (is.null(zRMU)) zRMU <- "All"
         
         if (all(zRMU != "All")) {
-          zdf <- subset(DatabaseTSD, (RMU %in% zRMU) & 
+          zdf <- subset(DatabaseTSD, (RMU.2023 %in% zRMU) & 
+                          (Incubation.temperature.Constant) & 
+                          (!Duplicated.data) & 
                           (Species==input$Species) & (Sexed!=0) & 
-                          (!is.na(Sexed)) & ((Note != "Sinusoidal pattern")  | (is.na(Note))))
+                          (!is.na(Sexed)) & 
+                          ((Note != "Sinusoidal pattern") & (Note != "DDE"))  | (is.na(Note)))
         } else {
-          zdf <- subset(DatabaseTSD, (Species==input$Species) & (Sexed!=0) & (!is.na(Sexed)) 
-                        & ((Note != "Sinusoidal pattern") | (is.na(Note))))
+          zdf <- subset(DatabaseTSD, (Incubation.temperature.Constant) & 
+                          (!Duplicated.data) & 
+                          (Species==input$Species) & (Sexed!=0) & 
+                          (!is.na(Sexed)) & 
+                          ((Note != "Sinusoidal pattern") & (Note != "DDE"))  | (is.na(Note)))
         }
         
         zmale <- ifelse(input$Male=="1", TRUE, FALSE)
@@ -60,7 +66,13 @@ shinyServer(function(input, output) {
         
         if (input$Temperature == "1") {
           Pinit <- c(P = ifelse(is.na(iP), 29, iP), S = ifelse(is.na(iS), -2, iS), K = 0, K1 = 1, K2 = 0)
-          zdf <- subset(zdf, select=c("Incubation.temperature", "Males", "Females", "Intersexes", "Reference"))
+          zdf <- subset(zdf, select=c("Incubation.temperature.set", "Incubation.temperature.recorded", 
+                                      "Males", "Females", "Intersexes", "Reference"))
+          zdf[, "Incubation.temperature.set"] <- ifelse(is.na(zdf[, "Incubation.temperature.set"]), 
+                                                        zdf[, "Incubation.temperature.recorded"], 
+                                                        zdf[, "Incubation.temperature.set"])
+          zdf <- zdf[!is.na(zdf[, "Incubation.temperature.set"]), c("Incubation.temperature.set", 
+                                                                    "Males", "Females", "Intersexes", "Reference")]
           zdf$Intersexes <- as.integer(ifelse(is.na(zdf$Intersexes), rep(0, length(zdf$Intersexes)), zdf$Intersexes))
           zdf <- na.omit(zdf)
           output$Data <- renderTable({zdf})
@@ -107,20 +119,20 @@ shinyServer(function(input, output) {
         if (!is.null(ztsd)) {
           
           refT <- paste0(levels(as.factor(as.character(zdf$Reference))), "\n", collapse = "")
-        
-        output$references <- renderText({refT})
-        
-        plot(ztsd, males.freq = zmale)
-        
-        ztsd.out <- gsub("\\[1\\] \\\"", "", ztsd.out)
-        ztsd.out <- gsub("\\\"", "", ztsd.out)
-        
-        output$resultsInfo <- renderText({paste0(ztsd.out, "\n", collapse = "")})
-        # output$resultsInfo <- renderText({paste0(ztsd.out[-1], "\n", collapse = "")})
+          
+          output$references <- renderText({refT})
+          
+          plot(ztsd, males.freq = zmale, use.ggplot = FALSE)
+          
+          ztsd.out <- gsub("\\[1\\] \\\"", "", ztsd.out)
+          ztsd.out <- gsub("\\\"", "", ztsd.out)
+          
+          output$resultsInfo <- renderText({paste0(ztsd.out, "\n", collapse = "")})
+          # output$resultsInfo <- renderText({paste0(ztsd.out[-1], "\n", collapse = "")})
         } else {
           if (nrow(zdf) == 0) {
-          output$references <- renderText({"No available data"})
-          output$resultsInfo <- renderText({"No available data"})
+            output$references <- renderText({"No available data"})
+            output$resultsInfo <- renderText({"No available data"})
           } else {
             output$references <- renderText({"At least one datum with mixed sex ratio must be available"})
             output$resultsInfo <- renderText({"At least one datum with mixed sex ratio must be available"})

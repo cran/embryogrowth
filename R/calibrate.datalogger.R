@@ -9,6 +9,8 @@
 #' @param se.fit Do standard errors are to be returned
 #' @description Calibrate a time series of temperatures. Use or gam or glm. If
 #' no temperatures.series is given, it will use the read.temperatures.
+#' @references
+#' \insertRef{11124}{embryogrowth}\cr
 #' @family Data loggers utilities
 #' @examples
 #' \dontrun{

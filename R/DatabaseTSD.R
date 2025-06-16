@@ -54,7 +54,7 @@
 #' DatabaseTSD.version()
 #' totalIncubation_Lo <- subset(DatabaseTSD, 
 #'          Species=="Lepidochelys olivacea" & (!is.na(Sexed) & Sexed!=0), 
-#'          select=c("Males", "Females", "Incubation.temperature"))
+#'          select=c("Males", "Females", "Incubation.temperature.set"))
 #' tot_Lo <- with(totalIncubation_Lo, tsd(males=Males, females=Females, 
 #'  temperatures=Incubation.temperature), parameters.initial = c(P=30.5, S=-0.4))
 #'  predict(tot_Lo)

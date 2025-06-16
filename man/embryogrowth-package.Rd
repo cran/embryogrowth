@@ -6,8 +6,8 @@
 \description{
 Tools to analyze the embryo growth and the sexualisation thermal reaction norms.\cr
 The latest version of this package can always been installed using:\cr
-install.packages("https://hebergement.universite-paris-saclay.fr/marcgirondot/CRAN/HelpersMG.tar.gz", repos=NULL, type="source")\cr
-install.packages("https://hebergement.universite-paris-saclay.fr/marcgirondot/CRAN/embryogrowth.tar.gz", repos=NULL, type="source")\cr
+install.packages("http://marc.girondot.free.fr/CRAN/HelpersMG.tar.gz", repos=NULL, type="source")\cr
+install.packages("http://marc.girondot.free.fr/CRAN/embryogrowth.tar.gz", repos=NULL, type="source")\cr
 \if{html}{\figure{E.png}{options: alt="embryogrowth logo"}}
 \if{latex}{\figure{E.png}}
 }
@@ -17,8 +17,8 @@ Fit a parametric function that describes dependency of embryo growth to temperat
 \tabular{ll}{
 Package: \tab embryogrowth\cr
 Type: \tab Package\cr
-Version: \tab 9.5 build 1827\cr
-Date: \tab 2024-08-23\cr
+Version: \tab 10.2 build 2094\cr
+Date: \tab 2025-06-16\cr
 License: \tab GPL (>= 2)\cr
 LazyLoad: \tab yes\cr
 }
@@ -65,14 +65,10 @@ resultNest_4p_SSM <- searchR(parameters=x, fixed.parameters=pfixed,
 	hatchling.metric=c(Mean=39.33, SD=1.92))
 data(resultNest_4p_SSM)
 par(mar=c(4, 4, 1, 1))
-plot(resultNest_4p_SSM$data[[1]][, 1]/60/24,resultNest_4p_SSM$data[[1]][, 2], bty="n", las=1, 
+plot(resultNest_4p_SSM$data, bty="n", las=1, 
      xlab="Days of incubation", ylab="Temperatures in °C", 
+     series="all", 
      type="l", xlim=c(0,70),ylim=c(20, 35))
-for (i in 2:resultNest_4p_SSM$data$IndiceT[["NbTS"]]) {
-  par(new=TRUE)
-  plot(resultNest_4p_SSM$data[[i]][, 1]/60/24,resultNest_4p_SSM$data[[i]][, 2], 
-  bty="n", las=1, xlab="", ylab="", type="l", xlim=c(0,70),ylim=c(20, 35), axes = FALSE)
-}
 par(mar=c(4, 4, 1, 1))
 pMCMC <- TRN_MHmcmc_p(resultNest_4p_SSM, accept=TRUE)
 # Take care, it can be very long, sometimes several days
@@ -100,10 +96,11 @@ plotR(result = resultNest_4p_SSM, parameters = new_result$par,
 
 plotR(result = resultNest_4p_SSM, 
              resultmcmc=resultNest_mcmc_4p_SSM, 
+             ylim=c(0, 8), 
              curve = "MCMC quantiles", show.density=TRUE)
 
 plotR(resultNest_6p_SSM, resultmcmc=resultNest_mcmc_6p_SSM, 
-            ylim=c(0, 4), show.density=TRUE, show.hist=TRUE, 
+            ylim=c(0, 8), show.density=TRUE, show.hist=TRUE, 
             curve = "MCMC quantiles", 
             ylimH=c(0,0.5), atH=c(0, 0.1, 0.2))
 

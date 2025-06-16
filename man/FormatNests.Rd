@@ -6,22 +6,58 @@
 \usage{
 FormatNests(
   data = stop("A dataset must be provided !"),
+  Time.Format = NULL,
+  Time.Zone = NULL,
   previous = NULL,
+  LayingTime = NULL,
+  UnitTime = "minutes",
+  Longitude = NULL,
+  Latitude = NULL,
+  Informations = NULL,
+  Males = NULL,
+  Females = NULL,
   usemiddletime = FALSE,
   simplify = TRUE,
-  weight = NULL
+  weight = NULL,
+  hatchling.metric.mean = NULL,
+  hatchling.metric.sd = NULL,
+  col.Time = "Time"
 )
 }
 \arguments{
-\item{data}{Data to be newly formated}
+\item{data}{Data to be newly formated.}
 
-\item{previous}{Data already formated}
+\item{Time.Format}{Format of time. See description. If NULL, no time conversion is done.}
 
-\item{usemiddletime}{If TRUE, suppose that recorded temperatures are those at middle segment}
+\item{Time.Zone}{The format of time zone as obtained by OlsonNames(). See description.}
 
-\item{simplify}{If TRUE, simply the time series by removing identical time series of temperatures}
+\item{previous}{Data already formated.}
 
-\item{weight}{Named vector with weight for likelihhod}
+\item{LayingTime}{Named POSIXct or POSIXlt time for each nest in data.}
+
+\item{UnitTime}{The units for time as a named list or vector}
+
+\item{Longitude}{The longitude of the nests as a named list or vector}
+
+\item{Latitude}{The latitude of the nests as a named list or vector}
+
+\item{Informations}{Some textual information about the nests as a named list or vector}
+
+\item{Males}{Number of sexed eggs being males}
+
+\item{Females}{Number of sexed eggs being females}
+
+\item{usemiddletime}{If TRUE, suppose that recorded temperatures are those at middle segment.}
+
+\item{simplify}{If TRUE, simply the time series by removing identical time series of temperatures.}
+
+\item{weight}{Named vector with weight used to estimate likelihood.}
+
+\item{hatchling.metric.mean}{The average size of hatchlings}
+
+\item{hatchling.metric.sd}{The standard deviation of size of hatchlings}
+
+\item{col.Time}{Name of the column with time.}
 }
 \value{
 A list with all the nests formated to be used with searchR.
@@ -45,8 +81,11 @@ Time   Nest1    Nest2\cr
 \cr
 The Nest1 ends incubation at 65800 minutes whereas Nest2 ends incubation at 65950 (last row\cr
 with temperature for each).\cr
-The parameter Weight is a vector: weight=c(Nest1=1, Nest2=1.2)\cr
-It can be used to format database already formated with old format; in this case, just use data=xxx with xxx being the old format database.\cr
+The parameter Weight is a vector: weight=c(Nest1=1, Nest2=1.2).\cr
+The parameter LayingTime is also a vector of POSIXct time or POSIXlt time.\cr
+It can be used to format database already formated with old format; in this case,
+just use data=xxx with xxx being the old format database.\cr
+The UnitTime should be "seconds", "minutes", "hours", or "days" to be understood by plot function.\cr
 }
 \details{
 FormatNests creates a dataset of class "Nests" to be used with searchR
@@ -55,8 +94,61 @@ FormatNests creates a dataset of class "Nests" to be used with searchR
 \dontrun{
 library(embryogrowth)
 data(nest)
-formated <- FormatNests(nest, previous=NULL)
-formated <- FormatNests(nest)
+formated <- FormatNests(data=nest, previous=NULL, col.Time="Time")
+# If I try to add the same nest, I have an error
+formated <- FormatNests(data=nest, previous=formated, col.Time="Time")
+# I duplicate the database and change the names
+nest_duplicate <- nest
+colnames(nest_duplicate) <- paste0(colnames(nest_duplicate), "_essai")
+formated <- FormatNests(data=nest_duplicate, previous=formated, col.Time="Time_essai")
+# It is possible to add information about these nests
+formated <- FormatNests(data=nest, previous=NULL, col.Time="Time")
+formated <- UpdateNests(data=formated, Males=c(DY.1=10), Females=c(DY.1=2))
+####################
+Laying.Time <- matrix(c("DY.1", "15/05/2010", 
+                 "DY.17", "24/05/2010", 
+                 "DY.16", "24/05/2010", 
+                 "DY.18", "25/05/2010", 
+                 "DY.20", "25/05/2010", 
+                 "DY.21", "26/05/2010", 
+                 "DY.22", "26/05/2010", 
+                 "DY.23", "26/05/2010", 
+                 "DY.24", "27/05/2010", 
+                 "DY.25", "27/05/2010", 
+                 "DY.28", "28/05/2010", 
+                 "DY.26", "28/05/2010", 
+                 "DY.27", "28/05/2010", 
+                 "DY.146", "20/06/2010", 
+                 "DY.147", "20/06/2010", 
+                 "DY.172", "24/06/2010", 
+                 "DY.175", "24/06/2010", 
+                 "DY.170", "24/06/2010", 
+                 "DY.260", "06/07/2010", 
+                 "DY.282", "12/07/2010", 
+                 "DY.310", "18/07/2010", 
+                 "DY.309", "18/07/2010", 
+                 "DY.328", "25/07/2010", 
+                 "DY.331", "26/07/2010"), byrow=TRUE, ncol=2)
+tz <- OlsonNames()[grepl("Asia/Istanbul", OlsonNames())]
+Laying.Time_f <- setNames(as.POSIXlt.character(Laying.Time[, 2], format = "\%d/\%m/\%Y", tz=tz), 
+                           Laying.Time[, 1])
+formated <- FormatNests(data=nest, previous=NULL, col.Time="Time", LayingTime=Laying.Time_f)
+####################
+# Now when the data are with absolute dates that are already formatted
+nest_ec <- data.frame(Time=as.POSIXlt("24/05/2010", format="\%d/\%m/\%Y")+ nest[, 1]*60, 
+                      DY.1.x=nest[, 2])
+formated <- FormatNests(data=nest_ec, previous=NULL, col.Time="Time")
+####################
+# Now when the data are with absolute date that are in text format for example after 
+#   reading a csv format
+nest_ec <- data.frame(Time=format(as.POSIXlt("24/05/2010", format="\%d/\%m/\%Y")+ nest[, 1]*60, 
+                                  format = "\%d/\%m/\%Y \%H:\%M:\%S"), 
+                      DY.1.x=nest[, 2])
+formated <- FormatNests(data=nest_ec, previous=NULL, col.Time="Time", 
+                        Time.Format="\%d/\%m/\%Y \%H:\%M:\%S", 
+                        Time.Zone=OlsonNames()[grepl("Asia/Istanbul", OlsonNames())], 
+                        hatchling.metric.mean=39.33, hatchling.metric.sd=1.92)
+
 }
 }
 \author{

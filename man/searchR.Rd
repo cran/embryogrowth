@@ -6,8 +6,8 @@
 \usage{
 searchR(
   parameters = stop("Initial set of parameters must be provided"),
+  temperatures = stop("Formated temperature must be provided"),
   fixed.parameters = c(rK = 1.208968),
-  temperatures = stop("Formated temperature must be provided !"),
   integral = integral.Gompertz,
   derivate = NULL,
   hatchling.metric = c(Mean = 39.33, SD = 1.92),
@@ -21,9 +21,9 @@ searchR(
 \arguments{
 \item{parameters}{A set of parameters used as initial point for searching}
 
-\item{fixed.parameters}{A set of parameters that will not be changed}
-
 \item{temperatures}{Timeseries of temperatures after formated using FormatNests()}
+
+\item{fixed.parameters}{A set of parameters that will not be changed}
 
 \item{integral}{Function used to fit embryo growth: integral.Gompertz, integral.exponential or integral.linear}
 
@@ -74,7 +74,38 @@ searchR fits the parameters that best represent nest incubation data.
 \dontrun{
 library(embryogrowth)
 data(nest)
-formated <- FormatNests(nest)
+Laying.Time <- matrix(c("DY.1", "15/05/2010", 
+                 "DY.17", "24/05/2010", 
+                 "DY.16", "24/05/2010", 
+                 "DY.18", "25/05/2010", 
+                 "DY.20", "25/05/2010", 
+                 "DY.21", "26/05/2010", 
+                 "DY.22", "26/05/2010", 
+                 "DY.23", "26/05/2010", 
+                 "DY.24", "27/05/2010", 
+                 "DY.25", "27/05/2010", 
+                 "DY.28", "28/05/2010", 
+                 "DY.26", "28/05/2010", 
+                 "DY.27", "28/05/2010", 
+                 "DY.146", "20/06/2010", 
+                 "DY.147", "20/06/2010", 
+                 "DY.172", "24/06/2010", 
+                 "DY.175", "24/06/2010", 
+                 "DY.170", "24/06/2010", 
+                 "DY.260", "06/07/2010", 
+                 "DY.282", "12/07/2010", 
+                 "DY.310", "18/07/2010", 
+                 "DY.309", "18/07/2010", 
+                 "DY.328", "25/07/2010", 
+                 "DY.331", "26/07/2010"), byrow=TRUE, ncol=2)
+tz <- OlsonNames()[grepl("Asia/Istanbul", OlsonNames())]
+Laying.Time_f <- setNames(as.POSIXlt.character(Laying.Time[, 2], format = "\%d/\%m/\%Y", tz=tz), 
+                           Laying.Time[, 1])
+formated <- FormatNests(data=nest, previous=NULL, col.Time="Time", 
+                        LayingTime=Laying.Time_f, 
+                        hatchling.metric.mean=39.33, 
+                        hatchling.metric.sd=1.92)
+plot(formated, series=c(1, 2), lwd=3)
 # The initial parameters value can be:
 # "T12H", "DHA",  "DHH", "Rho25"
 # Or
@@ -94,40 +125,39 @@ M0 = 0.3470893
 ############################################################################
 # 4 parameters SSM
 ############################################################################
-x <- c('DHA' = 109.31113503282113, 'DHH' = 617.80695919563857, 
+x4 <- c('DHA' = 109.31113503282113, 'DHH' = 617.80695919563857, 
     'T12H' = 306.38890489505093, 'Rho25' = 229.37265815800225)
     
-resultNest_4p_SSM <- searchR(parameters=x, fixed.parameters=pfixed, 
-	temperatures=formated, integral=integral.Gompertz, M0=M0, 
-	hatchling.metric=c(Mean=39.33, SD=1.92))
+resultNest_4p_SSM <- searchR(parameters=x4, fixed.parameters=pfixed, 
+	                            temperatures=formated, 
+	                            integral=integral.Gompertz, M0=M0)
 	
 data(resultNest_4p_SSM)
-plot(resultNest_4p_SSM, xlim=c(0,70), ylimT=c(22, 32), ylimS=c(0,45), series=1, 
-embryo.stages="Caretta caretta.SCL")
+plot(resultNest_4p_SSM, xlim=c(0,70), ylimT=c(22, 32), 
+     ylimS=c(0,45), series=1, 
+     embryo.stages="Caretta caretta.SCL")
+plotR(resultNest_4p_SSM, ylim=c(0,6))
 
 ############################################################################
 # 6 parameters SSM
 ############################################################################
-x <- structure(c(106.567809092008, 527.359011254683, 614.208632495199, 
+x6 <- structure(c(106.567809092008, 527.359011254683, 614.208632495199, 
 2720.94506457237, 306.268259715624, 120.336791245212), .Names = c("DHA", 
 "DHH", "DHL", "DT", "T12L", "Rho25"))
 
 ############################################################################
 # example of data.frame for hatchling.metric
 ############################################################################
-thatchling.metric <- data.frame(Mean=rep(39.33, formated$IndiceT["NbTS"]), 
-                     SD=rep(1.92, formated$IndiceT["NbTS"]), 
-                     row.names=names(formated)[1:formated$IndiceT["NbTS"]])
+thatchling.metric <- data.frame(Mean = rep(39.33, formated$IndiceT["NbTS"]), 
+                     SD = rep(1.92, formated$IndiceT["NbTS"]), 
+                     row.names = formated$Names)
 # It is sometimes difficult to find a good starting point for 
 # SSM 6 parameters model. This function helps to find it based on a previoulsy 
 # fitted model.
 
  x <- ChangeSSM(temperatures = (200:350)/10,
                 parameters = resultNest_4p_SSM$par,
-                initial.parameters = structure(c(106.567809092008, 
-                527.359011254683, 614.208632495199, 
-                4.94506457237, 306.268259715624, 120.336791245212), 
-                .Names = c("DHA", "DHH", "DHL", "DT", "T12L", "Rho25")), 
+                initial.parameters = x6, 
                 control=list(maxit=1000))
                      
 resultNest_6p_SSM <- searchR(parameters=x$par, fixed.parameters=pfixed, 
@@ -135,7 +165,7 @@ resultNest_6p_SSM <- searchR(parameters=x$par, fixed.parameters=pfixed,
 	                        M0=M0, 
 	                        hatchling.metric=thatchling.metric)
 	                        
-plotR(resultNest_6p_SSM, ylim=c(0, 1))
+plotR(resultNest_6p_SSM, curve = "ML", ylim=c(0, 8))
 	                        
 data(resultNest_6p_SSM)
 pMCMC <- TRN_MHmcmc_p(resultNest_6p_SSM, accept=TRUE)
@@ -164,19 +194,23 @@ M0 = 0
 ############################################################################
 # 4 parameters SSM
 ############################################################################
-x <- c('DHA' = 64.868697530424186, 'DHH' = 673.18292743646771, 
+x4 <- c('DHA' = 64.868697530424186, 'DHH' = 673.18292743646771, 
        'T12H' = 400.90952554047749, 'Rho25' = 82.217237723502123)
-resultNest_4p_SSM_Linear <- searchR(parameters=x, fixed.parameters=pfixed, 
+resultNest_4p_SSM_Linear <- searchR(parameters=x4, fixed.parameters=pfixed, 
 	temperatures=formated, integral=integral.linear, M0=M0, 
 	hatchling.metric=c(Mean=39.33, SD=1.92)/39.33)
-plotR(resultNest_4p_SSM_Linear, ylim=c(0, 2), scaleY= 100000)
+plotR(resultNest_4p_SSM_Linear, ylim=c(0, 2), scaleY= 100000, curve = "ML")
 plot(resultNest_4p_SSM_Linear, xlim=c(0,70), ylimT=c(22, 32), ylimS=c(0,1.1), 
 series=1, embryo.stages="Generic.ProportionDevelopment")
 
-tc <- GenerateConstInc(duration=300*24*60, temperatures = 28)
+tc <- GenerateConstInc(duration=600*24*60, temperatures = 28)
 tc_f <- FormatNests(tc)
-plot(resultNest_4p_SSM_Linear, xlim=c(0,70), ylimT=c(22, 32), ylimS=c(0,1.1), 
-series=1, embryo.stages="Generic.ProportionDevelopment", temperatures=tc_f)
+
+plot(x=resultNest_4p_SSM_Linear, xlim=c(0,70), ylimT=c(22, 32), ylimS=c(0,1.1), 
+     series=1, embryo.stages="Generic.ProportionDevelopment", 
+     stop.at.hatchling.metric=TRUE, metric.end.incubation="hatchling.metric", 
+     temperatures=tc_f, hatchling.metric=c(Mean=39.33, SD=1.92)/39.33, 
+     show.TSP=FALSE)
 
 ############################################################################
 ############ with new parametrization based on anchor
@@ -256,7 +290,7 @@ resultNest_4p_trigo <- searchR(parameters=x$par, fixed.parameters=pfixed,
                          hatchling.metric=c(Mean=39.33, SD=1.92))
                          
 ###############################################################
-# example with thermal reaction norm fitted from Dallwitz model
+# Example with thermal reaction norm fitted from Dallwitz model
 ###############################################################
 # See: Dallwitz, M.J., Higgins, J.P., 1992. User’s guide to DEVAR. A computer 
 # program for estimating development rate as a function of temperature. CSIRO Aust 

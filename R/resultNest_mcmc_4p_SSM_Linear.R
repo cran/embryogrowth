@@ -35,8 +35,13 @@
 #' layout(mat=matrix(1:4, nrow = 2))
 #' plot(resultNest_mcmc_4p_SSM_Linear, parameters = "all", scale.prior = TRUE, las = 1)
 #' layout(mat=1)
-#' plotR(resultNest_4p_SSM_Linear, resultmcmc=resultNest_mcmc_4p_SSM_Linear, ylim=c(0,4), 
-#'          main="Schoolfield, Sharpe & Magnuson 4-parameters", show.density=TRUE)
+#' plotR(resultNest_4p_SSM_Linear, resultmcmc=resultNest_mcmc_4p_SSM_Linear, ylim=c(0,2), 
+#'       curve = "MCMC quantiles", show.hist = TRUE, atH = c(0, 0.1, 0.2), ylimH = c(0, 1),
+#'          main="Schoolfield, Sharpe & Magnuson 4-parameters", show.density=FALSE)
+#' plot(resultNest_4p_SSM_Linear, resultmcmc=resultNest_mcmc_4p_SSM_Linear, series=1, 
+#'      GTRN.CI = "MCMC", replicate.CI=100, 
+#'      embryo.stages="Caretta caretta.SCL", show.stages=FALSE, show.TSP=FALSE, 
+#'      show.third = FALSE, xlim=c(0, 70), las=1, ylimT = c(20, 35), ylab="SCL in mm")
 #' }
 #' @format A list of class mcmcComposite with mcmc result for data(nest) with 4 parameters and linear model of growth
 NULL

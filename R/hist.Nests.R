@@ -1,4 +1,4 @@
-#' hist.Nests shows the histogram of temperatures with set of nests
+#' hist.Nests2 shows the histogram of temperatures with set of nests
 #' @title Show the histogram of temperatures with set of nests
 #' @author Marc Girondot \email{marc.girondot@@universite-paris-saclay.fr}
 #' @return A list with an histogram object with information on histogram or 
@@ -13,97 +13,72 @@
 #' library(embryogrowth)
 #' data(nest)
 #' formated <- FormatNests(nest)
-#' h <- hist(formated, series="all")
+#' h <- hist(x=formated, series="all")
 #' }
-#' @method hist Nests
+#' @method hist Nests2
 #' @export
 
-hist.Nests <- function(x, series="all", ...) {
-
-nids <- x
-
-p3p <- list(...)
-
-# Plus possible car fonction speciale
-# if (inherits(nids, "NestsResult")) {
-# j'ai un objet de resultat
-# je prends les donnees
-#	nids <- nids$data
-# }
-
-
-# if (!inherits(nids, "Nests")) {
-#Je n'ai ni un objet result ni un objet formate. Je quitte
-#	stop("'Nests' object obtained after FormatNests() or 'NestsResult' obtained after searchR() must be provided.")
-# }
-
-
-NbTS <- nids[["IndiceT"]]["NbTS"]
-if (series[[1]]=="all") {
-	series<-rep(TRUE, NbTS)
-} else {
-	if (any(!is.logical(series))) {
-		if (is.numeric(series)) {
-			seriesx <- rep(FALSE, NbTS)
-			seriesx[series] <- TRUE
-		} else {
-			seriesx <- (names(nids[1:NbTS])==series)
-		}
-		series <- seriesx
-	} else {
-# c'est des valeurs logiques, je verifie si le bon nombre
-		if (length(series)!=NbTS) {
-			series <- rep(series, NbTS)
-			series <- series[1:NbTS]
-		}
-	}
-}
-
-temptotal=NULL
-
-for (j in 1:NbTS) {
+hist.Nests2 <- function(x           , 
+                        series="all" , 
+                        ...          ) {
   
-	if (series[j]) {
-
-		nidsx <- nids[[j]][, 1:2]
-		colnames(nidsx) <- c("Time", "Temperature")
-
-# Je dois recalculer toutes les informations heure par heure pour avoir la TSP en heure
-# la duree d'incubation est= (0:(nids[,1][length(nids[,1])]%/%60)-1)*60
-# et ensuite j'intercale les temperatures
-
-# Je cree un tableau avec les donnees heures par heure et je rajoute la derniere donnee
-		tl1 <- c((0:(nidsx[,1][length(nidsx[,1])]%/%60-1))*60, nidsx[,1][length(nidsx[,1])])
-# je prends les vraies donnees
-		tl2 <- nidsx[,1]
-		
-
-		it <- findInterval(tl1, tl2)
-
-		temptotal <- append(temptotal, nidsx[it,"Temperature"])
-
-	}
-}
-
-
-if (is.null(temptotal)) {
-	stop("No nest is selected !")
-#	a <- NULL
-} else {
-	x <- temptotal
-
-	L <- modifyList(list(ylab="Temperature density", xlab=expression("Temperature in " * degree * "C"), main="", freq=FALSE, las=1), modifyList(list(x=x), p3p)) 
+  p3p <- tryCatch(list(...), error=function(e) list()) # p3p <- list() 
+  # p3p <<- p3p
+  # Plus possible car fonction speciale
+  # if (inherits(nids, "NestsResult")) {
+  # j'ai un objet de resultat
+  # je prends les donnees
+  #	nids <- nids$data
+  # }
   
-	# C'est quoi ca ?
-	if (any(names(L)=="plot")) {
-    if (!L$plot)
-      L <- modifyList(list(x=x), p3p) 
-	}
   
-	a <- do.call(hist, L) 
-
-}
-
-return(invisible(list(histogram=a, temperatures=x)))
-
+  # if (!inherits(nids, "Nests")) {
+  #Je n'ai ni un objet result ni un objet formate. Je quitte
+  #	stop("'Nests' object obtained after FormatNests() or 'NestsResult' obtained after searchR() must be provided.")
+  # }
+  
+  names_nests <- x$Names
+  
+  if (series[[1]]=="all") {
+    series <- names_nests
+  } else {
+    if (!is.character(series)) series <- names_nests[series]
+  }
+  
+  temptotal=NULL
+  nids <- x$Nests
+  
+  for (j in series) {
+    # j <- series[1]
+    nidsx <- nids[[j]]$data[, c("Time", "Temperatures C")]
+    # colnames(nidsx) <- c("Time", "Temperature")
+    
+    # Je dois recalculer toutes les informations heure par heure pour avoir la TSP en heure
+    # la duree d'incubation est= (0:(nids[,1][length(nids[,1])]%/%60)-1)*60
+    # et ensuite j'intercale les temperatures
+    
+    # Je cree un tableau avec les donnees heures par heure et je rajoute la derniere donnee
+    tl1 <- c((0:(nidsx[,1][length(nidsx[,1])]%/%60-1))*60, nidsx[,1][length(nidsx[,1])])
+    # je prends les vraies donnees
+    tl2 <- nidsx[,1]
+    
+    
+    it <- findInterval(tl1, tl2)
+    
+    temptotal <- append(temptotal, nidsx[it,"Temperatures C"])
+  }
+  
+  
+  if (is.null(temptotal)) {
+    stop("No nest is selected !")
+    #	a <- NULL
+  }
+  L <- modifyList(list(ylab="Temperature density", 
+                       xlab=expression("Temperature in " * degree * "C"), main="", 
+                       freq=FALSE, las=1), modifyList(list(x=temptotal), p3p)) 
+  
+  a <- suppressWarnings(do.call(hist, L))
+  
+  return(invisible(list(histogram=a, temperatures=temptotal)))
+  
 }

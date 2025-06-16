@@ -252,9 +252,16 @@ STRN <- function(EmbryoGrowthTRN=stop("Embryo Growth Thermal Reaction Norm must 
   
   pSTRN <- Initial_STRN
   
-  if (is.null(Sexed)) {Sexed <- Males+Females}
-  if (is.null(Males)) {Males <- Sexed-Females}
-  if (is.null(Females)) {Females <- Sexed-Males}
+  if (is.null(Males)) {
+    Males <- unlist(lapply(EmbryoGrowthTRN$data$Nests, FUN = function(x) x$Males))
+  }
+  if (is.null(Females)) {
+    Females <- unlist(lapply(EmbryoGrowthTRN$data$Nests, FUN = function(x) x$Females))
+  }
+  
+  if (is.null(Sexed)) {Sexed <- Males + Females}
+  if (is.null(Males)) {Males <- Sexed - Females}
+  if (is.null(Females)) {Females <- Sexed - Males}
   
   if (identical(numeric(0), Sexed+Males+Females)) {
     stop("Error in Males, Females or Sexed data")
@@ -281,7 +288,8 @@ STRN <- function(EmbryoGrowthTRN=stop("Embryo Growth Thermal Reaction Norm must 
                                                               TSP.end=TSP.end                    , 
                                                               fill=fill                          ,
                                                               out="likelihood"                   ,
-                                                              verbose=verbose                    )
+                                                              verbose=verbose                    , 
+                                                              WAIC=FALSE                         )
     result <- list(value=value)
     result$par <- pSTRN
   } else {
@@ -308,7 +316,8 @@ STRN <- function(EmbryoGrowthTRN=stop("Embryo Growth Thermal Reaction Norm must 
                 TSP.end=TSP.end                                                            ,
                 fill=fill                                                                  ,
                 itnmax=itnmax                                                              , 
-                control=modifyList(list(dowarn=FALSE, follow.on=TRUE, kkt=FALSE), control) )
+                control=modifyList(list(dowarn=FALSE, follow.on=TRUE, kkt=FALSE), control) , 
+                WAIC=FALSE                                                                 )
       
       
       result <- do.call(getFromNamespace(x="optimx", ns="optimx"), L)

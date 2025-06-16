@@ -12,7 +12,7 @@
 #' @param parameters.initial Initial values for P, S or K search as a vector, ex. c(P=29, S=-0.3)
 #' @param fixed.parameters Parameters that will not be changed
 #' @param males.freq If TRUE data are shown as males frequency
-#' @param equation Can be "logistic", "Hill", "A-logistic", "Hulin", "Double-A-logistic", "flexit", "flexit*", "GSD", "logit", "probit"
+#' @param equation Can be "logistic", "Hill", "A-logistic", "Hulin", "Double-A-logistic", "flexit", "flexit*", "flexit**", "GSD", "logit", "probit"
 #' @param replicate.CI Number of replicates to estimate confidence intervals
 #' @param replicate.NullDeviance Number of replicates to estimate null distribution of deviance
 #' @param SE If FALSE, does not estimate SE of parameters. Can be use when something wrong happens.
@@ -26,7 +26,7 @@
 #' For logistic model (Girondot, 1999), it follows \deqn{TRT_{l}=abs\left ( S\: K_{l} \right )}{TRTl = abs( S.Kl )}
 #' where \eqn{K_{l}}{Kl} is a constant equal to \eqn{2\: log\left ( \frac{l}{1-l} \right )}{2 log(l / ( 1 - l))}.\cr
 #' In Girondot (1999), l was 0.05 and then the TRT was defined as being the range of temperatures producing from 5\% to 95\% of each sex.\cr
-#' The default model is named logistic. This model (as well as the logit one) has the particularity to have a symmetric shape around P.\cr
+#' The default model is named logistic. This model, as well as the logit one, have the particularity to have a symmetric shape around P.\cr
 #' The \emph{logistic} model is:
 #' \deqn{SR(T) = 1 / (1 + exp((1 / S) * (P - T))))}{SR(T) = 1 / (1 + exp((1 / S) * (P - T))))}
 #' The \emph{logit} model is:
@@ -42,6 +42,10 @@
 #' The \emph{flexit*} model is defined as (QBT is the Quasi-Binary Threshold):
 #' \deqn{QBT = 1/ (1 + exp(100 * (P - T)))}{QBT = 1 / (1 + exp(100 * (P - T)))}
 #' \deqn{SR(T) = 1 / (1 + exp(4 * (SL * QBT + SH * (1 - QBT)) * (P - T))))}{SR(T) = 1 / (1 + exp(4 * (SL * QBT + SH * (1 - QBT)) * (P - T))))}
+#' The flexit** model has special interest because the parameter \deqn{SL + SH} are directly the TRT and  then the unit of \deqn{SL + SH} are the same as unit of \deqn{P}.\cr
+#' \deqn{SR(T) = 1 / (1 + exp((log((1 - l) / l)) / (SL * QBT + SH * (1 - QBT)) * (P - T))))}{SR(T) = 1 / (1 + exp((log((1 - l) / l)) / (SL * QBT + SH * (1 - QBT)) * (P - T))))}
+#' The \emph{Stairs} model uses \emph{TRTL}, \emph{TRTH}, and \emph{SRTRT}. The sex ratio is 1 for temperatures below \emph{TRTL} and 
+#' 0 for temperatures above \emph{TRTH}. It is \emph{logit(SRTRT)} between \emph{TRTL} and \emph{TRTH}.
 #' @references
 #' \insertRef{1515}{embryogrowth}\cr
 #' \insertRef{3534}{embryogrowth}\cr
@@ -68,6 +72,9 @@
 #' tsdF1 <- with (CC_AtlanticSW, tsd(males=Males, females=Females, 
 #'                                  temperatures=Incubation.temperature.set, 
 #'                                  equation="Flexit*", replicate.CI=NULL))
+#' tsdF2 <- with (CC_AtlanticSW, tsd(males=Males, females=Females, 
+#'                                  temperatures=Incubation.temperature.set, 
+#'                                  equation="Flexit**", replicate.CI=NULL))
 #' tsdDR <- with (CC_AtlanticSW, tsd(males=Males, females=Females, 
 #'                                  temperatures=Incubation.temperature.set, 
 #'                                  equation="Double-A-logistic", replicate.CI=NULL))
@@ -81,6 +88,39 @@
 #'                DoubleAlogistic_model=tsdDR, GSD_model=gsd, factor.value = -1)
 #' compare_BIC(Logistic_Model=tsdL, Hill_model=tsdH, Alogistic_model=tsdR, 
 #'                DoubleAlogistic_model=tsdDR, GSD_model=gsd, factor.value = -1)
+#'                
+#' ##############
+#' 
+#' tsdF2 <- with (CC_AtlanticSW, tsd(males=Males, females=Females, 
+#'                                  temperatures=Incubation.temperature.set, 
+#'                                  parameters.initial=c(P=30, SL=-2, SH=-2), 
+#'                                  equation="Flexit**", replicate.CI=NULL))
+#' plot(tsdF2)
+#' 
+#' priors <- tsd_MHmcmc_p(
+#' result = tsdF2,
+#' default = "dunif",
+#' accept = TRUE
+#' )
+#' priors["SL", "Prior2"] <- priors["SL", "Max"] <- -0.1
+#' priors["SH", "Prior2"] <- priors["SH", "Max"] <- -0.1
+#' 
+#' out_mcmc <- tsd_MHmcmc(result=tsdF2, n.iter = 10000, parametersMCMC = priors)
+#' plot(out_mcmc, parameters="SL")
+#' plot(out_mcmc, parameters="SH")
+#' plot(out_mcmc, parameters="P")
+#' 
+#' plot(tsdF2, resultmcmc=out_mcmc, use.ggplot = FALSE)        
+#' 
+#' tsdF2p <- with (CC_AtlanticSW, tsd(males=Males, females=Females, 
+#'                                  temperatures=Incubation.temperature.set, 
+#'                                  parameters.initial=c(P=30, S=-2), 
+#'                                  equation="Flexit**", replicate.CI=NULL))
+#' tsdL <- with (CC_AtlanticSW, tsd(males=Males, females=Females, 
+#'                                  temperatures=Incubation.temperature.set, 
+#'                                  equation="logistic", replicate.CI=NULL))
+#'                              
+#'                
 #' ##############
 #' eo <- subset(DatabaseTSD, Species=="Emys orbicularis", c("Males", "Females", 
 #'                                        "Incubation.temperature"))
@@ -304,7 +344,31 @@
 #' Ei_PacSW$par
 #' # The data looks like only n=0.01 observations were done
 #' # This is the reason of the large observed heterogeneity
-#' plot(Ei_PacSW_NormalApproximation) 
+#' plot(Ei_PacSW_NormalApproximation)
+#' 
+#' # Example of Flexit** model
+#' temperatures <- seq(from=20, to=35, by=0.1)
+#' l <- 0.05
+#' SL <- 1
+#' SH <- 2
+#' P <- 29
+#' # QBT is a threshold function
+#' # It can be a piecewise function
+#' QBT <- ifelse(temperatures < P, 1, 0)
+#' # Or threshold using sign
+#' QBT <- (sign( P - temperatures) + 1) / 2
+#' # Or a logistic function
+#' QBT <- (1+ exp(100*(temperatures - P)))^-1
+#' # The advantage of logistic threshold is that the resulting function can be derivated
+#' SR <- 1/(
+#'         1+exp(
+#'            ((-log((1-l)/l))/(SL*QBT+SH*(1-QBT)))*((P-temperatures))
+#'              )
+#'          )
+#' # The pivotal temperature: P
+#' temperatures[which.min(abs(SR - 0.5))]
+#' # The TRT: SH + SL
+#' temperatures[which.min(abs(SR - l))] - temperatures[which.min(abs(SR - (1 -l)))]
 #' }
 #' @export
 
@@ -340,7 +404,7 @@ tsd <- function(df=NULL                                                         
   equation <- match.arg(equation, 
                         choices = c("logistic", "hill", "a-logistic", "hulin", 
                                     "double-a-logistic", "flexit", "flexit*", "gsd", 
-                                    "probit", "logit"), 
+                                    "probit", "logit", "flexit**", "stairs"), 
                         several.ok = FALSE)
   
   # method <- tolower(method)
@@ -427,26 +491,38 @@ tsd <- function(df=NULL                                                         
     #    limit.low.TRT <- min(temperatures)
     #    limit.high.TRT <- max(temperatures)	
   } else {
+    if (equation == "flexit**") {
+      if (is.null(fixed.parameters)) {
+        fixed.parameters <- c(l=l)
+      }  else {
+        if (is.na(fixed.parameters["l"])) fixed.parameters <-  c(fixed.parameters, l=l)
+      }
+    }
     ppi <- c(parameters.initial, fixed.parameters)
+    
+    if (equation != "stairs") {
     if (is.na(ppi["P_low"])) {
       if (is.na(ppi["P"])) {
         if ((equation!="probit") & (equation!="logit")) {
-          ppi["P"] <- temperatures[which.min(abs((males/(males+females))-0.5))]
+          ppi["P"] <- unname(temperatures[which.min(abs((males/(males+females))-0.5))][1])
         } else {
           ppi["P"] <- 0
         }
       }
-      
-      if (is.na(ppi["S"])) {
-        if ((equation!="probit")) {
-          pente <- lm(males/(males+females) ~ temperatures)
-          ppi["S"] <- pente$coefficients["temperatures"]
-          if ((equation != "flexit") & (equation != "flexit*")) ppi["S"] <- 1/(4*ppi["S"])
-        } else {
-          ppi["S"] <- 0
-        }
+    }
+    }
+    
+    if (equation != "stairs") {
+    if ((is.na(ppi["S"])) & (is.na(ppi["SL"])) & (is.na(ppi["SH"]))) {
+      if ((equation!="probit")) {
+        pente <- lm(males/(males+females) ~ temperatures, weights=males+females)
+        ppi["S"] <- pente$coefficients["temperatures"]
+        if ((equation != "flexit") & (equation != "flexit*") & (equation != "flexit**")) ppi["S"] <- 1/(4*ppi["S"])
+      } else {
+        ppi["S"] <- 0
       }
     }
+    } 
     
     # if (IP) ppi["S"] <- abs(ppi["S"])
     
@@ -455,36 +531,82 @@ tsd <- function(df=NULL                                                         
       ppi <- ppi[which(names(ppi) != "K1")]
       ppi <- ppi[which(names(ppi) != "K2")]
     }
-    if (equation != "flexit*") {
+    if ((equation != "flexit*") & (equation != "flexit**")) {
       ppi <- ppi[which(names(ppi) != "SL")]
       ppi <- ppi[which(names(ppi) != "SH")]
-    } else {
-      ppi <- ppi[which(names(ppi) != "S")]
     }
     
-    if (!is.null(fixed.parameters))
-      ppi[names(fixed.parameters)] <- unname(fixed.parameters)
+    if (equation != "flexit**") {
+      ppi <- ppi[which(names(ppi) != "l")]
+    } else {
+      if (!is.na(ppi["S"])) {
+        if ((!is.na(ppi["SL"])) & (!is.na(ppi["SH"]))) {
+          ppi <- ppi[which(names(ppi) != "S")]
+        } else {
+          
+          if ((is.na(ppi["SL"])) | (is.na(ppi["SH"]))) {
+            ppi <- ppi[which(names(ppi) != "SL")]
+            ppi <- ppi[which(names(ppi) != "SH")]
+          }
+        }
+        ppi[which(names(ppi) == "SL")] <- abs(ppi[which(names(ppi) == "SL")])
+        ppi[which(names(ppi) == "SH")] <- abs(ppi[which(names(ppi) == "SH")])
+      }
+    }
+    
+    if (equation == "stairs") {
+      ppi <- ppi[which(names(ppi) != "S")]
+      ppi <- ppi[which(names(ppi) != "P")]
+      ppi <- ppi[which(names(ppi) != "K")]
+      
+      if (is.na(ppi["TRTL"]))  {
+        TRTL <- min(temperatures[females != 0])
+        TRTL <- (max(temperatures[temperatures < TRTL]) + TRTL) / 2
+        ppi["TRTL"] <- TRTL
+      }
+      if (is.na(ppi["TRTH"])) {
+        TRTH <- max(temperatures[males != 0])
+        TRTH <- (min(temperatures[temperatures > TRTH]) + TRTH) / 2
+        ppi["TRTH"] <- TRTH
+      }
+      if (is.na(ppi["SRTRT"])) {
+        SRTRT <- which((temperatures > TRTL) & (temperatures < TRTH))
+        ppi["SRTRT"] <- logit(sum(((males[SRTRT]/N[SRTRT])*N[SRTRT]))/sum(N[SRTRT]))
+      }
+    }
+    
+    if (!is.null(fixed.parameters)) {
+      fixed.parameters <- ppi[names(fixed.parameters)]
+      ppi <- ppi[!(names(ppi) %in% names(fixed.parameters))]
+      
+    }
     
     repeat {
       # result  <- optim(par, embryogrowth:::.tsd_fit, fixed.parameters=fixed.parameters, males=males, N=N, temperatures=temperatures, equation=equation, method="BFGS", hessian=TRUE, control = list(maxit=1000))
+      # getFromNamespace(".tsd_fit", ns="embryogrowth")(par=ppi, fixed.parameters = fixed.parameters, males=males, N=N, temperatures=temperatures, equation=equation)
+      # getFromNamespace(".modelTSD", ns="embryogrowth")(par=c(ppi, fixed.parameters), temperatures=temperatures, equation=equation)
       result  <- try(optim(ppi, getFromNamespace(".tsd_fit", ns="embryogrowth"), 
                            fixed.parameters=fixed.parameters, males=males, N=N, temperatures=temperatures, 
                            equation=equation, method=method, hessian=FALSE, control = control),  silent=TRUE)
       if (inherits(result, "try-error")) {
-        stop("Try using method='Nelder-Mead' or use MCMC but it will be complicated ! Contact me.")
+        stop("Try using method='Nelder-Mead' or use MCMC ! Contact Marc Girondot if you need some advices.")
       }
-      
+      # getFromNamespace(".tsd_fit", ns="embryogrowth")(par=ppi, fixed.parameters=fixed.parameters, males=males, N=N, temperatures=temperatures, equation=equation)
+      # getFromNamespace(".tsd_fit", ns="embryogrowth")(par=result$par, fixed.parameters=fixed.parameters, males=males, N=N, temperatures=temperatures, equation=equation)
+      # getFromNamespace(".modelTSD", ns="embryogrowth")(par=c(ppi, fixed.parameters), temperatures=temperatures, equation=equation)
+      # getFromNamespace(".modelTSD", ns="embryogrowth")(par=c(result$par, fixed.parameters), temperatures=temperatures, equation=equation)
       
       if (result$convergence != 1) break
       ppi <- result$par
       if (print) print("Convergence is not acheived. Optimization continues !")
     }
     
+    
     result_hessian  <- try(optim(result$par, getFromNamespace(".tsd_fit", ns="embryogrowth"), 
                                  fixed.parameters=fixed.parameters, males=males, N=N, temperatures=temperatures, 
                                  equation=equation, method=method, hessian=TRUE, control = control), silent=TRUE)
     
-    ppi <- c(result$par, fixed.parameters)
+    
     
     if (inherits(result_hessian, "try-error")) {
       warning("Likelihood is flat close to ML point and Hessian cannot be estimated")
@@ -492,10 +614,22 @@ tsd <- function(df=NULL                                                         
       result$SE <- NULL
       replicate.CI = 0
     } else {
+      ppi <- c(result$par, fixed.parameters)
       result$hessian <- result_hessian$hessian
+      
+      
+      
       if (SE) {
-        rh <- SEfromHessian(result$hessian, hessian=TRUE)
-        result$SE <- rh$SE
+        rh <- try(solve(result$hessian), silent=TRUE) 
+        if (!inherits(rh, "try-error")) {
+          rh <- try(suppressWarnings(SEfromHessian(result$hessian, hessian=TRUE)), silent=TRUE)
+        }
+        if (inherits(rh, "try-error")) {
+          warning("Error in matrix inversion")
+          result$SE <- NULL
+        } else {
+          result$SE <- rh$SE
+        }
       }
     }
     
@@ -540,23 +674,31 @@ tsd <- function(df=NULL                                                         
   if (equation != "gsd") {
     
     result <- addS3Class(result, "tsd")
-    # result <<- result
-    if (!is.null(result$hessian)) {
-      vcov <- solve(result$hessian)
-      if (any(eigen(vcov)$values < 0)) {
-        warning("Non-positive definite variance-covariance matrix; use MCMC to get credible interval.")
-        result$hessian <- NULL
-        result$SE <- NULL
-        replicate.CI = 0
+    erreorhessian <- FALSE
+    if  (is.null(result$hessian)) {
+      erreorhessian <- TRUE
+    } else {
+      vcov <- try(solve(result$hessian), silent=TRUE)
+      if (inherits(vcov, "try-error")) {
+        erreorhessian <- TRUE
+      } else {
+        if (any(eigen(vcov)$values < 0)) {
+          erreorhessian <- TRUE
+        }
       }
     }
-    
-    o <- P_TRT(x=result, l=l, 
-               replicate.CI = replicate.CI, 
-               probs = c((1-range.CI)/2, 0.5, 1-(1-range.CI)/2))
-    
-    
-    result$P_TRT <- o$P_TRT_quantiles
+    if (erreorhessian) {
+      warning("Non-positive definite variance-covariance matrix; use MCMC to get credible interval.")
+      result$hessian <- NULL
+      result$SE <- NULL
+      replicate.CI = 0
+    }
+      o <- P_TRT(x=result, l=l, 
+                 replicate.CI = replicate.CI, 
+                 probs = c((1-range.CI)/2, 0.5, 1-(1-range.CI)/2))
+      
+      
+      result$P_TRT <- o$P_TRT_quantiles
     
   }
   
@@ -587,6 +729,18 @@ tsd <- function(df=NULL                                                         
   }
   
   if (equation!="gsd" & print) {
+    if (equation == "stairs") {
+      if (!is.null(replicate.CI) & (replicate.CI != 0)) {
+        print(paste0("The transitional range of ", result$type, "s is ", sprintf("%.3f",o$P_TRT_quantiles[2, "TRT"]), " CI", as.character(range.CI*100), "% ", sprintf("%.3f",min(o$P_TRT_quantiles[1, "TRT"], o$P_TRT_quantiles[3, "TRT"])), ";", sprintf("%.3f",max(o$P_TRT_quantiles[1, "TRT"], o$P_TRT_quantiles[3, "TRT"]))))
+        print(paste0("The lower limit of transitional range of ", result$type, "s is ", sprintf("%.3f",o$P_TRT_quantiles[2, "lower.limit.TRT"]), " CI", as.character(range.CI*100), "% ", sprintf("%.3f",min(o$P_TRT_quantiles[1, "lower.limit.TRT"], o$P_TRT_quantiles[3, "lower.limit.TRT"])), ";", sprintf("%.3f", max(o$P_TRT_quantiles[1, "lower.limit.TRT"], o$P_TRT_quantiles[3, "lower.limit.TRT"]))))
+        print(paste0("The upper limit of transitional range of ", result$type, "s is ", sprintf("%.3f",o$P_TRT_quantiles[2, "higher.limit.TRT"]), " CI", as.character(range.CI*100), "% ", sprintf("%.3f",min(o$P_TRT_quantiles[1, "higher.limit.TRT"], o$P_TRT_quantiles[3, "higher.limit.TRT"])), ";", sprintf("%.3f",max(o$P_TRT_quantiles[1, "higher.limit.TRT"], o$P_TRT_quantiles[3, "higher.limit.TRT"]))))
+      } else {
+        print(paste0("The transitional range of ", result$type, "s is ", sprintf("%.3f",o$P_TRT_quantiles[2, "TRT"])))
+        print(paste0("The lower limit of transitional range of ", result$type, "s is ", sprintf("%.3f",o$P_TRT_quantiles[2, "lower.limit.TRT"])))
+        print(paste0("The upper limit of transitional range of ", result$type, "s is ", sprintf("%.3f",o$P_TRT_quantiles[2, "higher.limit.TRT"])))
+      }
+      
+    } else {
     # SI je n'ai qu'un PT c'est que c'est un profile TSDIA ou IB
     if (any(colnames(o$P_TRT_quantiles)=="PT")) {
       if (!is.null(replicate.CI) & (replicate.CI != 0)) {
@@ -624,6 +778,7 @@ tsd <- function(df=NULL                                                         
         print(paste0("The upper limit of upper transitional range of ", result$type, "s is ", sprintf("%.3f",o$P_TRT_quantiles[2, "higher.limit.TRT_high"])))
         if (!is.na(result$par["S"])) print(paste0("The S parameter value is ", sprintf("%.3f",result$par["S"])))
       }
+    }
     }
   }
   

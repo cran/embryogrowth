@@ -10,6 +10,7 @@
 #' @param thin Number of iterations between each stored output
 #' @param trace TRUE or FALSE or period, shows progress
 #' @param traceML TRUE or FALSE to show ML
+#' @param WAIC Should WAIC data been recorded?
 #' @param parallel If true, try to use several cores using parallel computing
 #' @param filename If intermediate is not NULL, save intermediate result in this file
 #' @param intermediate Period for saving intermediate result, NULL for no save
@@ -54,10 +55,15 @@
 #' ############################################################################
 #' pMCMC <- TRN_MHmcmc_p(resultNest_4p_SSM, accept=TRUE)
 #' # Take care, it can be very long; several days
-#' resultNest_mcmc_4p_SSM <- GRTRN_MHmcmc(result=resultNest_4p_SSM, 
-#'    adaptive = TRUE,
-#' 		parametersMCMC=pMCMC, n.iter=10000, n.chains = 1,  
-#' 		n.adapt = 0, thin=1, trace=TRUE)
+#' resultNest_mcmc_4p_SSM <- GRTRN_MHmcmc(result=resultNest_4p_SSM , 
+#'                                        adaptive = TRUE          , 
+#'                                        WAIC=TRUE                , 
+#' 		                                    parametersMCMC=pMCMC     , 
+#' 		                                    n.iter=10000            , 
+#' 		                                    n.chains = 1             ,  
+#' 		                                    n.adapt = 0              , 
+#' 		                                    thin=1                   , 
+#' 		                                    trace=TRUE               )
 #' # The SDProp in pMCMC at the beginning of the Markov chain can 
 #' # be considered as non-optimal. However, the values at the end 
 #' # of the Markoc chain are better due to the use of the option
@@ -69,9 +75,13 @@
 #' pMCMC[, "Init"] <- as.parameters(resultNest_mcmc_4p_SSM)
 #' # Then I run again the MCMC; it will ensure to get the optimal distribution
 #' resultNest_mcmc_4p_SSM <- GRTRN_MHmcmc(result=resultNest_4p_SSM, 
-#'    adaptive = TRUE,
-#' 		parametersMCMC=pMCMC, n.iter=10000, n.chains = 1,  
-#' 		n.adapt = 0, thin=1, trace=TRUE)
+#'                                        adaptive = TRUE         ,
+#' 		                                    parametersMCMC=pMCMC    , 
+#' 		                                    n.iter=10               , 
+#' 		                                    n.chains = 1            ,  
+#' 		                                    n.adapt = 0             , 
+#' 		                                    thin=1                  , 
+#' 		                                    trace=TRUE              )
 #' 		
 #' data(resultNest_mcmc_4p_SSM)
 #' out <- as.mcmc(resultNest_mcmc_4p_SSM)
@@ -113,12 +123,22 @@
 #' }
 #' @export
 
-GRTRN_MHmcmc <- function(result=NULL, n.iter=10000, 
-                         parametersMCMC=NULL, n.chains = 1, n.adapt = 0, 
-                         thin=1, trace=NULL, traceML=FALSE, parallel=TRUE, 
-                         adaptive=FALSE, adaptive.lag=500, adaptive.fun=function(x) {ifelse(x>0.234, 1.3, 0.7)},
-                         intermediate=NULL, filename="intermediate.Rdata", previous=NULL)
-{
+GRTRN_MHmcmc <- function(result=NULL                                           , 
+                         n.iter=10000                                          , 
+                         parametersMCMC=NULL                                   , 
+                         n.chains = 1                                          , 
+                         n.adapt = 0                                           , 
+                         thin=1                                                , 
+                         trace=NULL                                            , 
+                         traceML=FALSE                                         , 
+                         WAIC=TRUE                                             , 
+                         parallel=TRUE                                         , 
+                         adaptive=FALSE                                        , 
+                         adaptive.lag=500                                      , 
+                         adaptive.fun=function(x) {ifelse(x>0.234, 1.3, 0.7)}  ,
+                         intermediate=NULL                                     , 
+                         filename="intermediate.Rdata"                         , 
+                         previous=NULL                                         ) {
   
   # result=NULL; n.iter=10000; parametersMCMC=NULL; n.chains = 1; n.adapt = 0; thin=1; trace=FALSE; batchSize=sqrt(n.iter); parallel=TRUE; intermediate=NULL; filename="intermediate.Rdata"; previous=NULL
   # previous <- "/Users/marc/Dropbox/DropBoxPerso/_Package_HelpersMG/previous_result_mcmc_AtlMed_simplify_2.RData"
@@ -132,6 +152,10 @@ GRTRN_MHmcmc <- function(result=NULL, n.iter=10000,
     previous <- itr
     rm(itr)
   }
+  
+  mc.cores <- getOption("mc.cores", detectCores())
+  message(paste0("I will use ", as.character(mc.cores)," cores."))
+  
   
   if (is.list(previous)) {
     
@@ -149,18 +173,33 @@ GRTRN_MHmcmc <- function(result=NULL, n.iter=10000,
     # 3/12/2015 j'avais un data=list(data=result$data, integral=result$integral, 
     # hatchling.metric=result$hatchling.metric, M0=result$M0, fixed.parameters=result$fixed.parameters, 
     # weight=result$weight)
-    out <- MHalgoGen(n.iter=n.iter, parameters=parametersMCMC, 
-                     n.chains = n.chains, n.adapt = n.adapt, thin=thin, trace=trace, 
-                     traceML=traceML, 
-                     intermediate=intermediate, filename=filename, previous=previous, 
-                     parallel=parallel, 
-                     adaptive=adaptive, adaptive.lag=adaptive.lag, adaptive.fun=adaptive.fun,
-                     temperatures=result$data, integral=result$integral, 
-                     hatchling.metric=result$hatchling.metric, M0=result$M0, 
-                     fixed.parameters=result$fixed.parameters, 
-                     weight=result$weight, out="Likelihood", 
-                     progressbar=FALSE, warnings=FALSE, 
-                     likelihood=getFromNamespace("info.nests", ns = "embryogrowth"))
+    out <- MHalgoGen(n.iter=n.iter                                                  , 
+                     parameters=parametersMCMC                                      , 
+                     n.chains = n.chains                                            , 
+                     n.adapt = n.adapt                                              , 
+                     thin=thin                                                      , 
+                     trace=trace                                                    , 
+                     traceML=traceML                                                , 
+                     intermediate=intermediate                                      , 
+                     filename=filename                                              , 
+                     previous=previous                                              , 
+                     parallel=parallel                                              , 
+                     adaptive=adaptive                                              , 
+                     adaptive.lag=adaptive.lag                                      , 
+                     adaptive.fun=adaptive.fun                                      ,
+                     temperatures=result$data                                       , 
+                     integral=result$integral                                       , 
+                     hatchling.metric=result$hatchling.metric                       , 
+                     M0=result$M0                                                   , 
+                     fixed.parameters=result$fixed.parameters                       , 
+                     WAIC=WAIC                                                      ,
+                     WAIC.out=WAIC                                                      ,
+                     n.datapoints = unname(result$data$IndiceT["NbTS"])  ,
+                     weight=result$weight                                           , 
+                     out="Likelihood"                                               , 
+                     progressbar=FALSE                                              , 
+                     warnings=FALSE                                                 , 
+                     likelihood=getFromNamespace("info.nests", ns = "embryogrowth") )
     
   }
   

@@ -13,6 +13,7 @@ GRTRN_MHmcmc(
   thin = 1,
   trace = NULL,
   traceML = FALSE,
+  WAIC = TRUE,
   parallel = TRUE,
   adaptive = FALSE,
   adaptive.lag = 500,
@@ -40,6 +41,8 @@ GRTRN_MHmcmc(
 \item{trace}{TRUE or FALSE or period, shows progress}
 
 \item{traceML}{TRUE or FALSE to show ML}
+
+\item{WAIC}{Should WAIC data been recorded?}
 
 \item{parallel}{If true, try to use several cores using parallel computing}
 
@@ -100,10 +103,15 @@ embryo.stages="Caretta caretta.SCL")
 ############################################################################
 pMCMC <- TRN_MHmcmc_p(resultNest_4p_SSM, accept=TRUE)
 # Take care, it can be very long; several days
-resultNest_mcmc_4p_SSM <- GRTRN_MHmcmc(result=resultNest_4p_SSM, 
-   adaptive = TRUE,
-		parametersMCMC=pMCMC, n.iter=10000, n.chains = 1,  
-		n.adapt = 0, thin=1, trace=TRUE)
+resultNest_mcmc_4p_SSM <- GRTRN_MHmcmc(result=resultNest_4p_SSM , 
+                                       adaptive = TRUE          , 
+                                       WAIC=TRUE                , 
+		                                    parametersMCMC=pMCMC     , 
+		                                    n.iter=10000            , 
+		                                    n.chains = 1             ,  
+		                                    n.adapt = 0              , 
+		                                    thin=1                   , 
+		                                    trace=TRUE               )
 # The SDProp in pMCMC at the beginning of the Markov chain can 
 # be considered as non-optimal. However, the values at the end 
 # of the Markoc chain are better due to the use of the option
@@ -115,9 +123,13 @@ pMCMC[, "SDProp"] <- resultNest_mcmc_4p_SSM$parametersMCMC$SDProp.end
 pMCMC[, "Init"] <- as.parameters(resultNest_mcmc_4p_SSM)
 # Then I run again the MCMC; it will ensure to get the optimal distribution
 resultNest_mcmc_4p_SSM <- GRTRN_MHmcmc(result=resultNest_4p_SSM, 
-   adaptive = TRUE,
-		parametersMCMC=pMCMC, n.iter=10000, n.chains = 1,  
-		n.adapt = 0, thin=1, trace=TRUE)
+                                       adaptive = TRUE         ,
+		                                    parametersMCMC=pMCMC    , 
+		                                    n.iter=10               , 
+		                                    n.chains = 1            ,  
+		                                    n.adapt = 0             , 
+		                                    thin=1                  , 
+		                                    trace=TRUE              )
 		
 data(resultNest_mcmc_4p_SSM)
 out <- as.mcmc(resultNest_mcmc_4p_SSM)

@@ -46,7 +46,7 @@ tsd(
 
 \item{fixed.parameters}{Parameters that will not be changed}
 
-\item{equation}{Can be "logistic", "Hill", "A-logistic", "Hulin", "Double-A-logistic", "flexit", "flexit*", "GSD", "logit", "probit"}
+\item{equation}{Can be "logistic", "Hill", "A-logistic", "Hulin", "Double-A-logistic", "flexit", "flexit*", "flexit**", "GSD", "logit", "probit"}
 
 \item{replicate.CI}{Number of replicates to estimate confidence intervals}
 
@@ -72,7 +72,7 @@ The parameter l was defined in Girondot (1999). The TRT is defined from the diff
 For logistic model (Girondot, 1999), it follows \deqn{TRT_{l}=abs\left ( S\: K_{l} \right )}{TRTl = abs( S.Kl )}
 where \eqn{K_{l}}{Kl} is a constant equal to \eqn{2\: log\left ( \frac{l}{1-l} \right )}{2 log(l / ( 1 - l))}.\cr
 In Girondot (1999), l was 0.05 and then the TRT was defined as being the range of temperatures producing from 5\\% to 95\\% of each sex.\cr
-The default model is named logistic. This model (as well as the logit one) has the particularity to have a symmetric shape around P.\cr
+The default model is named logistic. This model, as well as the logit one, have the particularity to have a symmetric shape around P.\cr
 The \emph{logistic} model is:
 \deqn{SR(T) = 1 / (1 + exp((1 / S) * (P - T))))}{SR(T) = 1 / (1 + exp((1 / S) * (P - T))))}
 The \emph{logit} model is:
@@ -88,6 +88,10 @@ with:\cr
 The \emph{flexit*} model is defined as (QBT is the Quasi-Binary Threshold):
 \deqn{QBT = 1/ (1 + exp(100 * (P - T)))}{QBT = 1 / (1 + exp(100 * (P - T)))}
 \deqn{SR(T) = 1 / (1 + exp(4 * (SL * QBT + SH * (1 - QBT)) * (P - T))))}{SR(T) = 1 / (1 + exp(4 * (SL * QBT + SH * (1 - QBT)) * (P - T))))}
+The flexit** model has special interest because the parameter \deqn{SL + SH} are directly the TRT and  then the unit of \deqn{SL + SH} are the same as unit of \deqn{P}.\cr
+\deqn{SR(T) = 1 / (1 + exp((log((1 - l) / l)) / (SL * QBT + SH * (1 - QBT)) * (P - T))))}{SR(T) = 1 / (1 + exp((log((1 - l) / l)) / (SL * QBT + SH * (1 - QBT)) * (P - T))))}
+The \emph{Stairs} model uses \emph{TRTL}, \emph{TRTH}, and \emph{SRTRT}. The sex ratio is 1 for temperatures below \emph{TRTL} and
+0 for temperatures above \emph{TRTH}. It is \emph{logit(SRTRT)} between \emph{TRTL} and \emph{TRTH}.
 }
 \details{
 tsd estimates the parameters that best describe temperature-dependent sex determination
@@ -112,6 +116,9 @@ tsdF <- with (CC_AtlanticSW, tsd(males=Males, females=Females,
 tsdF1 <- with (CC_AtlanticSW, tsd(males=Males, females=Females, 
                                  temperatures=Incubation.temperature.set, 
                                  equation="Flexit*", replicate.CI=NULL))
+tsdF2 <- with (CC_AtlanticSW, tsd(males=Males, females=Females, 
+                                 temperatures=Incubation.temperature.set, 
+                                 equation="Flexit**", replicate.CI=NULL))
 tsdDR <- with (CC_AtlanticSW, tsd(males=Males, females=Females, 
                                  temperatures=Incubation.temperature.set, 
                                  equation="Double-A-logistic", replicate.CI=NULL))
@@ -125,6 +132,39 @@ compare_AICc(Logistic_Model=tsdL, Hill_model=tsdH, Alogistic_model=tsdR,
                DoubleAlogistic_model=tsdDR, GSD_model=gsd, factor.value = -1)
 compare_BIC(Logistic_Model=tsdL, Hill_model=tsdH, Alogistic_model=tsdR, 
                DoubleAlogistic_model=tsdDR, GSD_model=gsd, factor.value = -1)
+               
+##############
+
+tsdF2 <- with (CC_AtlanticSW, tsd(males=Males, females=Females, 
+                                 temperatures=Incubation.temperature.set, 
+                                 parameters.initial=c(P=30, SL=-2, SH=-2), 
+                                 equation="Flexit**", replicate.CI=NULL))
+plot(tsdF2)
+
+priors <- tsd_MHmcmc_p(
+result = tsdF2,
+default = "dunif",
+accept = TRUE
+)
+priors["SL", "Prior2"] <- priors["SL", "Max"] <- -0.1
+priors["SH", "Prior2"] <- priors["SH", "Max"] <- -0.1
+
+out_mcmc <- tsd_MHmcmc(result=tsdF2, n.iter = 10000, parametersMCMC = priors)
+plot(out_mcmc, parameters="SL")
+plot(out_mcmc, parameters="SH")
+plot(out_mcmc, parameters="P")
+
+plot(tsdF2, resultmcmc=out_mcmc, use.ggplot = FALSE)        
+
+tsdF2p <- with (CC_AtlanticSW, tsd(males=Males, females=Females, 
+                                 temperatures=Incubation.temperature.set, 
+                                 parameters.initial=c(P=30, S=-2), 
+                                 equation="Flexit**", replicate.CI=NULL))
+tsdL <- with (CC_AtlanticSW, tsd(males=Males, females=Females, 
+                                 temperatures=Incubation.temperature.set, 
+                                 equation="logistic", replicate.CI=NULL))
+                             
+               
 ##############
 eo <- subset(DatabaseTSD, Species=="Emys orbicularis", c("Males", "Females", 
                                        "Incubation.temperature"))
@@ -348,7 +388,31 @@ Ei_PacSW_NormalApproximation$par
 Ei_PacSW$par
 # The data looks like only n=0.01 observations were done
 # This is the reason of the large observed heterogeneity
-plot(Ei_PacSW_NormalApproximation) 
+plot(Ei_PacSW_NormalApproximation)
+
+# Example of Flexit** model
+temperatures <- seq(from=20, to=35, by=0.1)
+l <- 0.05
+SL <- 1
+SH <- 2
+P <- 29
+# QBT is a threshold function
+# It can be a piecewise function
+QBT <- ifelse(temperatures < P, 1, 0)
+# Or threshold using sign
+QBT <- (sign( P - temperatures) + 1) / 2
+# Or a logistic function
+QBT <- (1+ exp(100*(temperatures - P)))^-1
+# The advantage of logistic threshold is that the resulting function can be derivated
+SR <- 1/(
+        1+exp(
+           ((-log((1-l)/l))/(SL*QBT+SH*(1-QBT)))*((P-temperatures))
+             )
+         )
+# The pivotal temperature: P
+temperatures[which.min(abs(SR - 0.5))]
+# The TRT: SH + SL
+temperatures[which.min(abs(SR - l))] - temperatures[which.min(abs(SR - (1 -l)))]
 }
 }
 \references{

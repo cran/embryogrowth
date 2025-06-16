@@ -14,7 +14,8 @@
   # library("embryogrowth"); T <- c(25, 26, 30) ; parms <- resultNest_newp$par
   # getFromNamespace(".SSM", ns="embryogrowth")(c(25, 30), resultNest_newp$par)
   # plotR(resultNest_newp, ylim=c(0, 0.5))
-  
+  # getFromNamespace(".SSM", ns="embryogrowth")(T=c(25, 30), parms=c(Peak=33, Scale=290, sd=5))
+  # getFromNamespace(".SSM", ns="embryogrowth")(T=c(25:30), parms=c(LengthB=8, Peak=30, Max=5, LengthE=2, Min=0))
   
   # Si je travaille en degree celsius, je convertis en Kelvin
   if (T[1] < 100) T <- T + 273.15
@@ -67,9 +68,14 @@
     T_ec <- T - 273.15
     if (is.na(parms["Flat"])) parms["Flat"] <- 0
     
-    if (!is.na(parms["Length"])) parms["LengthB"] <- parms["LengthE"] <- abs(parms["Length"])
+    if (!is.na(parms["Length"])) parms["LengthB"] <- parms["LengthE"] <- parms["Length"]
+    if (parms["LengthE"] < 0) parms["LengthE"] <- 1E-6
+    if (parms["LengthB"] < 0) parms["LengthB"] <- 1E-6
     
-    if (!is.na(parms["Min"]))      parms["MinB"] <- parms["MinE"] <- abs(parms["Min"])
+    
+    if (!is.na(parms["Min"])) parms["MinB"] <- parms["MinE"] <- parms["Min"]
+    if (parms["MinE"] < 0) parms["MinE"] <- 1E-6
+    if (parms["MinB"] < 0) parms["MinB"] <- 1E-6
     
     parms["LengthB"] <- abs(parms["LengthB"])
     parms["LengthE"] <- abs(parms["LengthE"])
@@ -102,11 +108,15 @@
   }
   
   if (any(nm == "Peak") & all(nm != "LengthB")) {
+    T_ec <- T - 273.15
     Tlogique <- ((T_ec-parms["Peak"]) < 0)
     
     if (!is.na(parms["sd"])) parms["sdL"] <- parms["sdH"] <- parms["sd"]
     
-    rT <- 1E-5*parms["Scale"]*(dnorm(T-parms["Peak"], mean=0, sd=ifelse(Tlogique, parms["sdL"], parms["sdH"]))*ifelse(Tlogique, 1, parms["sdH"]/parms["sdL"]))/dnorm(0, mean=0, sd=parms["sdL"])
+    if (parms["sdH"] < 0) parms["sdH"] <- 1E-6
+    if (parms["sdL"] < 0) parms["sdL"] <- 1E-6
+    
+    rT <- 1E-5*parms["Scale"]*(dnorm(T_ec-parms["Peak"], mean=0, sd=ifelse(Tlogique, parms["sdL"], parms["sdH"]))*ifelse(Tlogique, 1, parms["sdH"]/parms["sdL"]))/dnorm(0, mean=0, sd=parms["sdL"])
     rT_L <- rT
   }
   

@@ -49,7 +49,7 @@ Search for the weights of the nests which maximize the entropy of nest temperatu
 library(embryogrowth)
 data(nest)
 formated <- FormatNests(nest)
-w <- weightmaxentropy(formated, control_plot=list(xlim=c(20,36)))
+w <- weightmaxentropy(temperatures=formated, control_plot=list(xlim=c(20,36)))
 x <- structure(c(120.940334922916, 467.467455887442,  
 	306.176613681557, 117.857995419495),  
 	.Names = c("DHA", "DHH", "T12H", "Rho25"))

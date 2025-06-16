@@ -1,8 +1,42 @@
 THIS IS THE CHANGELOG OF THE "embryogrowth" PACKAGE
 
-            CHANGES IN VERSION 9.5 (2024-08-23)
+            CHANGES IN VERSION 10.2 (2025-06-16)
+
+* New CRAN version - 10.2 (2025-06-16)
+
+            CHANGES IN VERSION 10.1.6 (2025-06-12)
+
+* New CRAN version - 10.1 (2025-05-06)
+* New parameter for plot.tsd: show.observations.sd - 10.1.1 (2025-05-25)
+* New parameter for plot.Nest2 to change the labels - 10.1.2 (2025-05-29)
+* Add xaxt parameter for plotR - 10.1.3 (2025-06-03)
+* Update ROSIE database - 10.1.4 (2025-06-03)
+* Bug correction for absolute plot in plot.Nest2 - 10.1.5 (2025-06-09)
+* can show only full or half heterogeneity - 10.1.6 (2025-06-09)
+
+            CHANGES IN VERSION 10.0 (2025-05-06)
+
+* New internal format for Nests objects - 10.0 (2025-02-10)
+* Bug for HeterogeneityNests() - 10.0.1 (2025-02-28)
+* WAIC for GRTRN_MHmcmc() - 10.0.4 (2025-03-06)
+* WAIC for STRN_MHmcmc() - 10.0.5 (2025-03-08)
+* WAIC for tsd() - 10.0.6 (2025-03-08)
+* New experimental stairs model for tsd() - 10.0.7 (2025-03-28)
+* Priors default in tsd_MHmcmc_p() can use different densities - 10.0.8 (2025-03-30)
+* Bug corrected to show the uncertainty in prediction of growth of embryo - 10.0.9 (2025-03-31)
+* flexit** model of tsd() is updated - 10.0.10 (2025-04-02)
+* Take into account replicate.CI in info.nest() when stop.at.hatchling.metric = TRUE - 10.0.11 (2025-04-04)
+* New stages version for TSP - 10.0.12 (2025-04-04)
+* Show the number of cores that will be used in searchR() - 10.0.13 (2025-04-09)
+* New information in movments() function - 10.0.14 (2025-04-30)
+* New options for x-scale in plot() - 10.0.14 (2025-04-30)
+* Correct a warning in hist() - 10.0.15 (2025-05-05)
+
+            CHANGES IN VERSION 9.5.4 (2025-02-10)
 
 * New CRAN version - 9.5 (2024-08-23)
+* formatNests() accept a new information: the laying time for each nest - 9.5.3 (2025-02-04)
+* formatNests() can store information (UnitTime, Longitude, Latitude, Informations) for each nest - 9.5.4 (2025-02-06)
 
             CHANGES IN VERSION 9.4.2 (2024-07-26)
 
@@ -11,7 +45,7 @@ THIS IS THE CHANGELOG OF THE "embryogrowth" PACKAGE
 * Solve problems in movement() function - 9.1.2 (2023-11-07)
 * Experimental: Add a new possibility to estimate likelihood is tsd() for sex ratio when n is not known - 9.1.3 (2023-11-08)
 * New out possibility for info.nests() to be able to use Bayesian Model Averaging - 9.1.4 (2023-11-10)
-* Experimental: Add a new possibility to estimate likelihood is tsd() for sex ratio when n is not known - 9.1.5 (2023-11-08)
+* Experimental: Add a new possibility to estimate likelihood in tsd() for sex ratio when n is not known - 9.1.5 (2023-11-08)
 * RMU.2010 and RMU.2023 are included in databaseTSD - 9.1.6 (2023-12-01)
 * New equation flexit* - 9.2 (2023-12-29)
 * New references- 9.2 (2024-02-05)

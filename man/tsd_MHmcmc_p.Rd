@@ -7,7 +7,7 @@
 tsd_MHmcmc_p(
   result = stop("An output from tsd() must be provided"),
   default = "dnorm",
-  accept = FALSE
+  accept = TRUE
 )
 }
 \arguments{

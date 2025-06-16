@@ -7,7 +7,7 @@
 ROSIE.version()
 }
 \value{
-The date of the lastest updated version
+The date of the latest updated version
 }
 \description{
 Return the date of the most recent update of the ROSIE database.

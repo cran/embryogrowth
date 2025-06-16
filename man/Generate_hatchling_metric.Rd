@@ -30,9 +30,9 @@ Generate_hatchling_metric Generate a data.frame that can be used as hatchling.me
 \dontrun{
 library(embryogrowth)
 data(resultNest_4p_SSM)
-testsize1 <- Generate_hatchling_metric(resultNest_4p_SSM)
+testsize1 <- Generate_hatchling_metric(series = resultNest_4p_SSM)
 testsize2 <- Generate_hatchling_metric(series=resultNest_4p_SSM,  
-	hatchling.metric=c(Mean=39.3, SD=1.92))
+	                                      hatchling.metric=c(Mean=39.3, SD=1.92))
 }
 }
 \author{

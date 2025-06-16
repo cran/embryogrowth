@@ -38,6 +38,7 @@ plotR(
   yaxt = "s",
   bty = "n",
   las = 1,
+  xaxt = "s",
   by.temperature = 0.1,
   show.density = FALSE,
   new = TRUE,
@@ -116,6 +117,8 @@ plotR(
 \item{bty}{Box around the pot}
 
 \item{las}{Orientation for labels in y axis}
+
+\item{xaxt}{The xaxt parameter of x-axis}
 
 \item{by.temperature}{Step to built the temperatures}
 

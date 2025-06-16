@@ -101,21 +101,9 @@
 #' 	    embryo.stages="Caretta caretta.SCL")
 #' 	    
 #' # to plot all the temperature profiles
-#' 
-#' par(mar=c(4, 4, 1, 1))
-#' plot(resultNest_4p_SSM$data[[1]][, 1]/60/24,
-#'      resultNest_4p_SSM$data[[1]][, 2], bty="n", 
-#'      las=1, xlab="Days of incubation", 
-#'      ylab=expression("Temperatures in "*degree*"C"), 
-#'      type="l", xlim=c(0,70),ylim=c(20, 35))
-#'      
-#'      for (i in 2:21) {
-#'           par(new=TRUE)
-#'           plot(resultNest_4p_SSM$data[[i]][, 1]/60/24,
-#'           resultNest_4p_SSM$data[[i]][, 2], bty="n", 
-#'           las=1, xlab="", ylab="", type="l", xlim=c(0,70),
-#'           ylim=c(20, 35), axes = FALSE)
-#'      }
+#' nests <- resultNest_4p_SSM$data
+#' plot(nests, series="all", col=rainbow(21))
+#' plot(nests, series="all", col=rainbow(21), time="Absolute", ylim=c(20, 35))
 #' }
 #' @method plot NestsResult
 #' @export
@@ -180,6 +168,11 @@ plot.NestsResult <- function(x                                                  
   #  parameters=NULL; fixed.parameters=NULL; resultmcmc = NULL; SE=NULL; temperatures=NULL; integral=NULL; derivate=NULL; hatchling.metric=NULL; stop.at.hatchling.metric=FALSE; M0=NULL; weight=NULL; series="all"; TSP.borders=NULL; embryo.stages="Caretta caretta.SCL"; TSP.begin=0; TSP.end=0.5; replicate.CI=100; metric.end.incubation="observed"; col.stages="blue"; col.PT="red"; col.TSP="gray"; col.temperatures="green"; col.S="black"; lty.temperatures=1; lwd.temperatures=2; ylimT=NULL; ylimS=NULL; xlim=NULL; show.stages=TRUE; show.TSP=TRUE; show.third=TRUE; CI=NULL;  show.metric=TRUE; show.fioritures=TRUE; show.temperatures=TRUE; show.PT=TRUE; PT=c(mean=NA, SE=NA); show.hatchling.metric=TRUE; add=FALSE; lab.third="2nd third of incubation"; at.lab.third=4; lab.PT="PT"; lab.stages="Stages"; mar = c(4, 5, 4, 5) + 0.3; xlab="Days of incubation"; ylabT=expression("Temperatures in " * degree * "C"); ylabS= "Embryo metric"; progress=TRUE;parallel=TRUE
   # lab.third="2nd third of incubation"; at.lab.third=10; lab.PT="PT"; lab.stages="Stages"; at.lab.TSP=8; lab.TSP="TSP"
   #  x <- resultNest_4p_SSM; xlim=c(0,70); ylimT=c(22, 32); ylimS=c(0,45); series=1; resultmcmc = resultNest_mcmc_4p_SSM; embryo.stages="Caretta caretta.SCL"; replicate.CI = 100
+  
+  
+  if (inherits(x$data, "Nests")) {
+    x$data <- UpdateNests(x$data)
+  }
   
   TSP.list <- embryogrowth::TSP.list
   if (!is.null(GTRN.CI)) GTRN.CI <- tolower(GTRN.CI)
@@ -247,7 +240,13 @@ plot.NestsResult <- function(x                                                  
   
   NestsResult <- x
   
-  if (is.null(temperatures)) temperatures <- NestsResult$data
+  if (is.null(temperatures)) {
+    temperatures <- NestsResult$data
+  }
+  
+  NbTS <- temperatures[["IndiceT"]]["NbTS"]
+  names_nests <- temperatures$Names
+  
   if (is.null(integral)) integral <- NestsResult$integral
   if (is.null(derivate)) derivate <- NestsResult$derivate
   if (is.null(weight)) weight <- NestsResult$weight
@@ -293,28 +292,22 @@ plot.NestsResult <- function(x                                                  
   ###############################
   
   
-  NbTS <- temperatures[["IndiceT"]]["NbTS"]
+  
   if (series[[1]]=="all") {
-    series<-rep(TRUE, NbTS)
+    series <- names_nests
   } else {
-    if (any(!is.logical(series))) {
-      if (is.numeric(series)) {
-        seriesx <- rep(FALSE, NbTS)
-        seriesx[series] <- TRUE
-      } else {
-        seriesx <- (names(temperatures[1:NbTS])==series)
-      }
-      series <- seriesx
+    
+    if (is.numeric(series)) {
+      series <- names_nests[series]
     } else {
-      # c'est des valeurs logiques, je verifie si le bon nombre, sinon je complete
-      if (length(series)!=NbTS) {
-        series <- rep(series, NbTS)
-        series <- series[1:NbTS]
+      
+      if (is.logical(series)) {
+        series <- names_nests[series]
       }
     }
   }
   
-  nbseries <- sum(series)
+  nbseries <- length(series)
   
   if (nbseries==0) {
     stop("No series has been selected")
@@ -327,10 +320,10 @@ plot.NestsResult <- function(x                                                  
   ########################
   #### Je tes_te les series
   ########################
-  if (progress) pb <- txtProgressBar(min=0, max=length(which(series)), style=3)
+  if (progress) pb <- txtProgressBar(min=0, max=nbseries, style=3)
   
   
-  for(seriesx in which(series)) {
+  for(seriesx in series) {
     
     # seriesx <- 1
     
@@ -489,7 +482,7 @@ plot.NestsResult <- function(x                                                  
         segments(0, mean.ts-1.96*sd.ts,  xlim[2]+0.05*xlim[2], mean.ts-1.96*sd.ts, lwd=1, lty=2, xpd=TRUE)
         segments(0, mean.ts+1.96*sd.ts,  xlim[2]+0.05*xlim[2], mean.ts+1.96*sd.ts, lwd=1, lty=2, xpd=TRUE)
       }
-      if (!is.na(parameters["SD"])) {
+      if (!is.na(parameters["sd"])) {
         segments(0, mean.ts-1.96*parameters["SD"],  xlim[2]+0.05*xlim[2], mean.ts-1.96*parameters["SD"], lwd=1, lty=2, xpd=TRUE)
         segments(0, mean.ts+1.96*parameters["SD"],  xlim[2]+0.05*xlim[2], mean.ts+1.96*parameters["SD"], lwd=1, lty=2, xpd=TRUE)
       }

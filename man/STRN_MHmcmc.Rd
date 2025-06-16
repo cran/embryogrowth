@@ -20,6 +20,7 @@ STRN_MHmcmc(
      ifelse(x > 0.234, 1.3, 0.7)
  },
   parallel = TRUE,
+  WAIC = TRUE,
   intermediate = NULL,
   filename = "intermediate.Rdata",
   previous = NULL,
@@ -52,6 +53,8 @@ STRN_MHmcmc(
 \item{adaptive.fun}{Function used to change the SDProp}
 
 \item{parallel}{Should parallel computing for info.nests() be used}
+
+\item{WAIC}{Prepare the output for loo() and waic().}
 
 \item{intermediate}{Period for saving intermediate result, NULL for no save}
 

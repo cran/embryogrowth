@@ -7,6 +7,7 @@
 #' @param durations A vector of durations
 #' @param SD.temperatures SD of temperatures
 #' @param SD.durations SD of durations
+#' @param l Limit for TRT in sex ratio
 #' @param resultmcmc A result of tsd_MHmcmc()
 #' @param chain What chain to be used is resultmcmc is provided
 #' @param probs The quantiles to be returned, default=c(0.025, 0.5, 0.975)
@@ -42,6 +43,7 @@ predict.tsd <- function(object, temperatures=NULL, durations=NULL,
                           SD.temperatures= NULL, SD.durations=NULL,
                         resultmcmc=NULL, chain=1, 
                         replicate.CI=10000, 
+                        l=0.05, 
                           probs=c(0.025, 0.5, 0.975), ...) {
   
   # object <- NULL; resultmcmc=NULL; chain=1;replicate.CI=10000; temperatures=NULL; durations=NULL;SD.temperatures= NULL; SD.durations=NULL;probs=c(0.025, 0.5, 0.975)
@@ -54,7 +56,7 @@ predict.tsd <- function(object, temperatures=NULL, durations=NULL,
     durations <- object$durations
   }
 
-  o <- P_TRT(x=object, resultmcmc=resultmcmc, chain=chain, l=NULL, 
+  o <- P_TRT(x=object, resultmcmc=resultmcmc, chain=chain, l=l, 
                 replicate.CI=replicate.CI, temperatures=temperatures, durations=durations,
                 SD.temperatures= SD.temperatures, SD.durations=SD.durations,
                 probs=probs)

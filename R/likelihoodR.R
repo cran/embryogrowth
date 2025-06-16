@@ -41,164 +41,183 @@
 
 
 likelihoodR <-
-function(result=NULL, parameters=NULL, fixed.parameters=NULL, temperatures=NULL, 
-         integral=NULL, derivate=NULL, hatchling.metric=NULL, M0=NULL, hessian=FALSE, weight= NULL, parallel=TRUE,
-	echo=TRUE) {
-
-  # result=NULL; parameters=NULLfixed.parameters=NULL; temperatures=NULL; echo=TRUE;integral=NULL; derivate=NULL; hatchling.metric=NULL; M0=NULL; hessian=FALSE; weight= NULL; parallel=TRUE
-  # result=resultNest_4p
-  # parameters=structure(c(0.840429263837085, 1.15929190273597, 1.57697305167496, 2.06657337881587, 2.43555105967532, 2.24337041114994, 1.44633577322632), .Names = c("296", "298", "300", "302", "304", "306", "308"))
-
-if (!is.null(result)) {
-	if (is.null(temperatures)) temperatures <- result[["data"]]
-	if (is.null(integral)) integral <- result[["integral"]]
-	if (is.null(derivate)) derivate <- result[["derivate"]]
-	if (is.null(hatchling.metric)) hatchling.metric <- result[["hatchling.metric"]]
-	if (is.null(M0)) M0 <- result[["M0"]]
-	if (is.null(fixed.parameters)) fixed.parameters <- result[["fixed.parameters"]]
-	if (is.null(parameters)) parameters <- result[["par"]]
-	# correction le 29/1/2014
-	if (is.null(weight)) weight <- result[["weight"]]
-	hatchling.metricuse <- hatchling.metric
-} else {
-
-	if (is.numeric(hatchling.metric)) {
-		hatchling.metricuse<-data.frame(Mean=rep(hatchling.metric["Mean"], temperatures[["IndiceT"]][3]), SD=rep(hatchling.metric["SD"], temperatures[["IndiceT"]][3]), row.names=names(temperatures[1:temperatures$IndiceT["NbTS"]]))
-	} else {
-		hatchling.metricuse<-hatchling.metric
-	}
-
-}
-
-NbTS <- temperatures$IndiceT[3]
-
-if (is.null(weight)) {
-	par <- rep(1, NbTS)
-	names(par) <- names(temperatures)[1:NbTS]
-} else {
-
-	if (any(is.na(weight))) {
-		par <- rep(1, NbTS)
-		names(par) <- names(temperatures)[1:NbTS]
-	} else {
-
-	if (is.list(weight)) weight <- weight$weight
-
-	if (length(setdiff(names(weight), names(temperatures)[1:NbTS]))==0) {
-		par <- weight
-	} else {
-		warning("Check the weights")
-		return(invisible())
-	}
-	}
-}
-
-weight <- par
-
-# te_st si tous sont l
-if (length(setdiff(names(temperatures)[1:temperatures$IndiceT[3]], names(weight)))!=0) {
-	warning("The weight parameter must define weight for each nest.")
-	warning(paste("check", setdiff(names(temperatures)[1:temperatures$IndiceT[3]], names(weight)), "nests"))
-	return(invisible())	
-}	
-
-
-# Un paramtre ne peut pas tre indique en fixe et en fite - 22/7/2012	
-
-	if (length(intersect(names(parameters), names(fixed.parameters)))!=0) {
-		warning("A parameter cannot be fixed and fitted at the same time !")
-		return(invisible())
-	}
-
-
-for (j in 1:NbTS) temperatures[[j]][1, "Mass"] <- M0
-
-resultnest <- list(par=parameters)
-
-resultnest$value <- info.nests(parameters=parameters, temperatures=temperatures, integral=integral, derivate=derivate, 
-                                 hatchling.metric=hatchling.metricuse, M0=M0, fixed.parameters=fixed.parameters, weight=weight)
-
-if(echo) {
-
-print(paste("-Ln L=",resultnest$value))
-
-}
-
-if (hessian) {
-
-	print("Estimate the SE for parameters at that point")
-
-	mathessian <- try(hessian(info.nests, parameters=result$par, method="Richardson", temperatures=temperatures, integral=integral, derivate=derivate, 
-	                          hatchling.metric=hatchling.metricuse, M0=M0, fixed.parameters=fixed.parameters, weight=weight), silent=TRUE)
-
-	if (inherits(mathessian, "try-error")) {
-			res<-rep(NA, length(parameters))
-			resultnest$hessian <- NA
-			print("SE of parameters cannot be estimated.")
-			print("Probably the model is badly fitted. Try using searchR() before.")
-
-	} else {
-	
-
-	resultnest$hessian <- mathessian
-
-	inversemathessian <- try(solve(mathessian), silent=TRUE)
-
-	if (inherits(inversemathessian, "try-error")) {
-		res <- -1
-	} else {
-		res <- diag(inversemathessian)
-	}
-	
-
-	# Je gre plus correctement les erreurs - 17/7/2012
-
-	neg=any(res<0)
-	if (!neg) {
-		res=sqrt(res)
-	} else {
-		res<-rep(NA, length(parameters))
-		print("SE of parameters cannot be estimated.")
-		if (inherits(inversemathessian, "try-error")) {
-			print("Probably the model is badly fitted. Try using searchR() before.")
-		} else {
-			print("Probably flat likelihood is observed around some parameters.")
-			print("Try using MHmcmc() function to get the SE of parameters.")
-		}
-	}
-# fin du te_st sur la premire erreur
-}
-
-} else {
-# pas de hessian donc pas de SE
-	res<-rep(NA, length(parameters))
-}
-
-
-names(res)=names(parameters)
-
-resultnest$SE <- res 
-
-resultnest$data <- temperatures
-
-# Avant *5. Correction du 17/7/2012
-resultnest$AIC <- 2*result$value+2*length(parameters)
-
-resultnest$hatchling.metric <- hatchling.metricuse
-
-resultnest$integral <- integral
-resultnest$derivate <- derivate
-
-resultnest$M0 <- M0
-
-# 29/1/2014
-resultnest$weight <- weight
-
-# Je stocke aussi les paramtres fixe-16/7/2012
-resultnest$fixed.parameters <- fixed.parameters
-
-resultnest <- addS3Class(resultnest, "NestsResult")
-
-return(resultnest)
-
-}
+  function(result=NULL               , 
+           parameters=NULL           , 
+           fixed.parameters=NULL     , 
+           temperatures=NULL         , 
+           integral=NULL             , 
+           derivate=NULL             , 
+           hatchling.metric=NULL     , 
+           M0=NULL                   , 
+           hessian=FALSE             , 
+           weight= NULL              , 
+           parallel=TRUE             ,
+           echo=TRUE                 ) {
+    
+    # result=NULL; parameters=NULLfixed.parameters=NULL; temperatures=NULL; echo=TRUE;integral=NULL; derivate=NULL; hatchling.metric=NULL; M0=NULL; hessian=FALSE; weight= NULL; parallel=TRUE
+    # result=resultNest_4p
+    # parameters=structure(c(0.840429263837085, 1.15929190273597, 1.57697305167496, 2.06657337881587, 2.43555105967532, 2.24337041114994, 1.44633577322632), .Names = c("296", "298", "300", "302", "304", "306", "308"))
+    
+    
+    
+    if (!is.null(result)) {
+      if (is.null(temperatures)) {
+        temperatures <- result[["data"]]
+        if (inherits(temperatures, "Nests")) {
+          temperatures <- FormatNests(temperatures)
+        }
+      }
+      if (is.null(integral)) integral <- result[["integral"]]
+      if (is.null(derivate)) derivate <- result[["derivate"]]
+      if (is.null(hatchling.metric)) hatchling.metric <- result[["hatchling.metric"]]
+      if (is.null(M0)) M0 <- result[["M0"]]
+      if (is.null(fixed.parameters)) fixed.parameters <- result[["fixed.parameters"]]
+      if (is.null(parameters)) parameters <- result[["par"]]
+      # correction le 29/1/2014
+      if (is.null(weight)) weight <- result[["weight"]]
+      if (is.null(hatchling.metric)) hatchling.metric <- result$hatchling.metric
+    } 
+    if (is.numeric(hatchling.metric)) {
+      hatchling.metric <- data.frame(Mean=rep(hatchling.metric["Mean"], temperatures[["IndiceT"]]["NbTS"]), SD=rep(hatchling.metric["SD"], temperatures[["IndiceT"]]["NbTS"]), row.names=temperatures$Names)
+    }
+    
+    NbTS <- temperatures$IndiceT["NbTS"]
+    
+    if (is.null(weight)) {
+      par <- setNames(rep(1, NbTS), temperatures$Names)
+    } else {
+      
+      if (any(is.na(weight))) {
+        par <- setNames(rep(1, NbTS), temperatures$Names)
+      } else {
+        
+        if (is.list(weight)) weight <- weight$weight
+        
+        if (length(setdiff(names(weight), temperatures$Names))==0) {
+          par <- weight
+        } else {
+          warning("Check the weights")
+          return(invisible())
+        }
+      }
+    }
+    
+    weight <- par
+    
+    # te_st si tous sont l
+    if (length(setdiff(temperatures$Names, names(weight)))!=0) {
+      warning("The weight parameter must define weight for each nest.")
+      warning(paste("check", setdiff(temperatures$Names, names(weight)), "nests"))
+      return(invisible())	
+    }	
+    
+    
+    # Un paramtre ne peut pas tre indique en fixe et en fite - 22/7/2012	
+    
+    if (length(intersect(names(parameters), names(fixed.parameters)))!=0) {
+      warning("A parameter cannot be fixed and fitted at the same time !")
+      return(invisible())
+    }
+    
+    
+    for (j in temperatures$Names) temperatures$Nests[[j]]$data[1, "Mass"] <- M0
+    
+    resultnest <- list(par=parameters)
+    
+    resultnest$value <- info.nests(parameters=parameters, temperatures=temperatures, integral=integral, derivate=derivate, 
+                                   hatchling.metric=hatchling.metric, M0=M0, fixed.parameters=fixed.parameters, weight=weight)
+    
+    if(echo) {
+      
+      print(paste("-Ln L=",resultnest$value))
+      
+    }
+    
+    if (hessian) {
+      
+      print("Estimate the SE for parameters at that point")
+      
+      mathessian <- try(hessian(info.nests, parameters=result$par, method="Richardson", temperatures=temperatures, integral=integral, derivate=derivate, 
+                                hatchling.metric=hatchling.metric, M0=M0, fixed.parameters=fixed.parameters, weight=weight), silent=TRUE)
+      
+      if (inherits(mathessian, "try-error")) {
+        res<-rep(NA, length(parameters))
+        resultnest$hessian <- NA
+        print("SE of parameters cannot be estimated.")
+        print("Probably the model is badly fitted. Try using searchR() before.")
+        
+      } else {
+        
+        
+        resultnest$hessian <- mathessian
+        
+        inversemathessian <- try(solve(mathessian), silent=TRUE)
+        
+        if (inherits(inversemathessian, "try-error")) {
+          res <- -1
+        } else {
+          res <- diag(inversemathessian)
+        }
+        
+        
+        # Je gre plus correctement les erreurs - 17/7/2012
+        
+        neg=any(res<0)
+        if (!neg) {
+          res=sqrt(res)
+        } else {
+          res<-rep(NA, length(parameters))
+          print("SE of parameters cannot be estimated.")
+          if (inherits(inversemathessian, "try-error")) {
+            print("Probably the model is badly fitted. Try using searchR() before.")
+          } else {
+            print("Probably flat likelihood is observed around some parameters.")
+            print("Try using MHmcmc() function to get the SE of parameters.")
+          }
+        }
+        # fin du te_st sur la premire erreur
+      }
+      
+    } else {
+      # pas de hessian donc pas de SE
+      res<-rep(NA, length(parameters))
+    }
+    
+    
+    names(res) <- names(parameters)
+    
+    resultnest$SE <- res 
+    
+    resultnest$data <- temperatures
+    k <- length(parameters)
+    n <- unname(resultnest$data$IndiceT["NbTS"])
+    # Avant *5. Correction du 17/7/2012
+    if ((all(!is.na(hatchling.metric[, "SD"]))) | (!is.na(resultnest$par["SD"]))) {
+    resultnest$AIC <- 2*resultnest$value+k
+    resultnest$AICc <- result$AIC + (2*k*(k+1))/(n-k-1)
+    resultnest$BIC <- 2*result$value + k * log(n)
+    } else {
+      resultnest$AIC <- n*log(resultnest$value/n)+2*k
+      resultnest$AICc <- resultnest$AIC + (2*k*(k+1))/(n-k-1)
+      resultnest$BIC <- n*log(resultnest$value/n) + k * log(n)
+    }
+    
+    
+    resultnest$hatchling.metric <- hatchling.metric
+    
+    resultnest$integral <- integral
+    resultnest$derivate <- derivate
+    
+    resultnest$M0 <- M0
+    
+    # 29/1/2014
+    resultnest$weight <- weight
+    
+    # Je stocke aussi les paramtres fixe-16/7/2012
+    resultnest$fixed.parameters <- fixed.parameters
+    
+    resultnest <- addS3Class(resultnest, "NestsResult")
+    
+    return(resultnest)
+    
+  }

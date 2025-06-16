@@ -14,7 +14,8 @@
                       TSP.end=NULL                                                               , 
                       out="likelihood"                                                           , 
                       fill=60                                                                    ,
-                      verbose = FALSE                                                            ) {
+                      verbose = FALSE                                                            , 
+                      WAIC = TRUE                                                                ) {
   
   # par=NULL; fixed.parameters=NULL; equation=NULL; TSP.borders=NULL 
   # embryo.stages="Generic.ProportionDevelopment"; TSP.begin=0; TSP.end=0.5
@@ -52,10 +53,10 @@
   }
   
   if (!is.null(Sexed)) {
-    ns <- names(NestsResult$data[1:NestsResult$data[["IndiceT"]]["NbTS"]])
+    ns <- NestsResult$data$Names
     serafaire <- ns[ns %in% names(Sexed[(!is.na(Sexed)) & !is.na(Males)])]
   } else {
-    serafaire <- names(NestsResult$data[1:NestsResult$data[["IndiceT"]]["NbTS"]])
+    serafaire <- NestsResult$data$Names
   }
   
   
@@ -99,9 +100,10 @@
                    fill=fill                                                    ,
                    progressbar = FALSE                                          ,
                    warnings = FALSE                                             ,
-                   zero=zero                                                    , 
-                   verbose = verbose
-  )
+                   zero=zero                                                    ,
+                   WAIC = FALSE                                                 ,
+                   verbose = verbose                                            )
+  
   sr <- rr$summary[serafaire, sexratio]
   
   if (out=="likelihood") {
@@ -113,8 +115,13 @@
       Males <- Males[serafaire]
       sr <- ifelse(sr == 0, zero, sr)
       sr <- ifelse(sr == 1, 1-zero, sr)
-      Lsr <- -sum(dbinom(prob=sr, 
-                         size=Sexed, x=Males, log=TRUE))
+      Lsr <- dbinom(prob=sr, 
+                         size=Sexed, x=Males, log=TRUE)
+      atLsr <- Lsr
+      Lsr <- -sum(Lsr)
+      
+      if (WAIC) attributes(Lsr) <- list(WAIC=atLsr)
+      
       if (is.na(Lsr)) {
         message(paste0("Likelihood=", as.character(Lsr)))
         message(paste0("Error in sex ratio estimation:\nSexualisationTRN=", d(parSTRN), collapse = " "))

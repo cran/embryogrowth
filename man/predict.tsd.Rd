@@ -13,6 +13,7 @@
   resultmcmc = NULL,
   chain = 1,
   replicate.CI = 10000,
+  l = 0.05,
   probs = c(0.025, 0.5, 0.975),
   ...
 )
@@ -33,6 +34,8 @@
 \item{chain}{What chain to be used is resultmcmc is provided}
 
 \item{replicate.CI}{Number of replicates to estimate CI}
+
+\item{l}{Limit for TRT in sex ratio}
 
 \item{probs}{The quantiles to be returned, default=c(0.025, 0.5, 0.975)}
 

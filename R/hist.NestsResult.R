@@ -17,22 +17,25 @@
 #' @method hist NestsResult
 #' @export
 
-hist.NestsResult <- function(x, series="all", ...) {
+hist.NestsResult <- function(x            , 
+                             series="all" , 
+                             ...          ) {
 
 # Je prends seulement les donnees de temperature et j'envoie a hist.Nests
 # Ce sera plus simple pour faire les mises a jour - 30/7/2012
 
-p3p <- list(...)
+  p3p <- tryCatch(list(...), error=function(e) list())
+  
   
 # j'ai un objet de resultat
 # je prends les donnees
-nids <- x$data
-nids <- addS3Class(nids, "Nests")
+nests <- x$data
+nests <- UpdateNests(nests)
 
-L <- modifyList(list(x=nids), p3p)
+L <- modifyList(list(x=nests), p3p)
 L <- modifyList(L, list(series=series))
 
-a <- do.call(hist, L)
+a <- do.call("hist", L)
 
 return(invisible(a))
 

@@ -83,11 +83,21 @@
 #' }
 #' @export
 
-tsd_MHmcmc <- function(result=stop("A result of tsd() fit must be provided"), n.iter=10000, 
-                       parametersMCMC=NULL, n.chains = 1, n.adapt = 0, 
-                       thin=1, trace=FALSE, traceML=FALSE, batchSize=sqrt(n.iter), 
-                       adaptive=FALSE, adaptive.lag=500, adaptive.fun=function(x) {ifelse(x>0.234, 1.3, 0.7)},
-                       intermediate=NULL, filename="intermediate.Rdata", previous=NULL) {
+tsd_MHmcmc <- function(result=stop("A result of tsd() fit must be provided")    , 
+                       n.iter=10000                                             , 
+                       parametersMCMC=NULL                                      , 
+                       n.chains = 1                                             , 
+                       n.adapt = 0                                              , 
+                       thin=1                                                   , 
+                       trace=FALSE                                              , 
+                       traceML=FALSE                                            , 
+                       batchSize=sqrt(n.iter)                                   , 
+                       adaptive=FALSE                                           , 
+                       adaptive.lag=500                                         , 
+                       adaptive.fun=function(x) {ifelse(x>0.234, 1.3, 0.7)}     ,
+                       intermediate=NULL                                        , 
+                       filename="intermediate.Rdata"                            , 
+                       previous=NULL                                            ) {
   
   # result=eo_logistic; parametersMCMC=NULL; 
   # n.iter=10000; n.chains = 1;  n.adapt = 0; thin=1; trace=TRUE; batchSize=sqrt(n.iter);intermediate=NULL; filename="intermediate.Rdata"; previous=NULL; adaptive=FALSE; adaptive.lag=500; adaptive.fun=function(x) {ifelse(x>0.234, 1.3, 0.7)}
@@ -112,7 +122,8 @@ tsd_MHmcmc <- function(result=stop("A result of tsd() fit must be provided"), n.
                    likelihood=getFromNamespace(".tsd_fit", ns="embryogrowth"), 
                    parameters_name = "par", 
                    adaptive=adaptive, adaptive.lag=adaptive.lag, adaptive.fun=adaptive.fun,
-                   intermediate=intermediate, filename=filename, previous=previous)
+                   intermediate=intermediate, filename=filename, previous=previous, 
+                   WAIC.out=TRUE, n.datapoints=length(result$N))
   
   fin <- try(summary(out), silent=TRUE)
   

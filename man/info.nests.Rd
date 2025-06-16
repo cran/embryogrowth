@@ -27,6 +27,7 @@ info.nests(
   replicate.CI = 0,
   weight = NULL,
   out = "likelihood",
+  WAIC = TRUE,
   fill = NULL,
   probs = c(0.025, 0.5, 0.975),
   SexualisationTRN = NULL,
@@ -62,7 +63,7 @@ info.nests(
 
 \item{SE}{Standard error for each parameter. It will replace the SE in NestsResult. Use SE=NA to remove SE from NestResult}
 
-\item{temperatures}{Timeseries of temperatures formatted using formatNests(). It will replace the one in NestsResult.}
+\item{temperatures}{Timeseries of temperatures formatted using FormatNests(). It will replace the one in NestsResult.}
 
 \item{integral}{Function used to fit embryo growth: integral.Gompertz, integral.exponential or integral.linear. It will replace the one in NestsResult.}
 
@@ -89,6 +90,8 @@ info.nests(
 \item{weight}{Weights of the different nests to estimate likelihood. It will replace the ones in NestsResult.}
 
 \item{out}{Can take the values of "likelihood", "summary", "details", "metric" or "dynamic".}
+
+\item{WAIC}{Should WAIC data be returned?}
 
 \item{fill}{Number of minutes between two records. Create new one if they do not exist. NULL does not change the time of temperature recordings.}
 
@@ -221,7 +224,12 @@ But remember that mass is not the best proxy to describe the growth of an embryo
 The progress bar is based on both replicates and timeseries progress. It necessitates the pbapply package.\cr
 If replicate.CI is null or 0, only maximum likelihood is used and no confidence interval is calculated.\cr
 If replicate.CI is 1, one random value for the parameters is used but no confidence interval is calculated.\cr
-In other cases, replicate.CI random samples are used to estimate confidence interval.
+In other cases, replicate.CI random samples are used to estimate confidence interval.\cr
+About parallel computing:\cr
+Set options mc.cores ato tell what sort of parallel computing\cr
+Example:\cr
+options(mc.cores = detectCores())\cr
+If mc.cores is not defined, it will used detectCores() by default.
 }
 \details{
 Calculate statistics about nests

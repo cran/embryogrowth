@@ -137,6 +137,8 @@ P_TRT <- function(x=NULL, resultmcmc=NULL, fixed.parameters=NULL,
         partot <- partot[-1, , drop=FALSE]
         
         errorsignS <- 0
+        errorsignSL <- 0
+        errorsignSH <- 0
         errorsignS_low <- 0
         errorsignS_high <- 0
         errorsignK1 <- 0
@@ -165,7 +167,7 @@ P_TRT <- function(x=NULL, resultmcmc=NULL, fixed.parameters=NULL,
           }
           colnames(par) <- names.par
           
-          # 19/10/2020, je rajoute les paraètres fixes
+          # 19/10/2020, je rajoute les paramètres fixes
           
           
           errorsigncpt <- errorsigncpt + replicate.CI-nrow(partot)
@@ -177,6 +179,24 @@ P_TRT <- function(x=NULL, resultmcmc=NULL, fixed.parameters=NULL,
               par <- par[sign(par[, "S"]) == sign(x$par["S"]), , drop = FALSE]
             }
           }
+          
+          if (!is.na(x$par["SL"])) {
+            # Je retire quand SL change de signe
+            if (any(sign(par[, "SL"]) != sign(x$par["SL"]))) {
+              errorsignSL <- errorsignSL + sum(sign(par[, "SL"]) != sign(x$par["SL"]))
+              par <- par[sign(par[, "SL"]) == sign(x$par["SL"]), , drop = FALSE]
+            }
+          }
+          
+          
+          if (!is.na(x$par["SH"])) {
+            # Je retire quand SH change de signe
+            if (any(sign(par[, "SH"]) != sign(x$par["SH"]))) {
+              errorsignSH <- errorsignSH + sum(sign(par[, "SH"]) != sign(x$par["SH"]))
+              par <- par[sign(par[, "SH"]) == sign(x$par["SH"]), , drop = FALSE]
+            }
+          }
+          
           
           if (!is.na(x$par["S_low"])) {
             # Je retire quand S change de signe
@@ -276,6 +296,12 @@ P_TRT <- function(x=NULL, resultmcmc=NULL, fixed.parameters=NULL,
           }
           if (errorsignS != 0) {
             message(paste("SE for S too high in", errorsignS, "cases out of", errorsigncpt))
+          }
+          if (errorsignSL != 0) {
+            message(paste("SE for SL too high in", errorsignSL, "cases out of", errorsigncpt))
+          }
+          if (errorsignSH != 0) {
+            message(paste("SE for SH too high in", errorsignSH, "cases out of", errorsigncpt))
           }
           if (errorsignS_low != 0) {
             message(paste("SE for S_low too high in", errorsignS_low, "cases out of", errorsigncpt))
@@ -670,11 +696,102 @@ P_TRT <- function(x=NULL, resultmcmc=NULL, fixed.parameters=NULL,
         }
       }
       
+      
+      if (equation=="flexit**") {
+        if (!is.na(xpar["P"])) {
+          P <- xpar["P"]
+          SL <- xpar["SL"]
+          SH <- xpar["SH"]
+          if ((is.na(SL)) | (is.na(SH))) {
+            SL <- xpar["S"]
+            SH <- xpar["S"]
+          }
+          l <- xpar["l"]
+          TransitionS <- xpar["TransitionS"]
+          if (is.na(TransitionS)) TransitionS <- 100
+          if (is.na(l)) l <- 0.05
+          
+          if (SL > 0) {
+            limit.low.TRT <- P-SL
+            limit.high.TRT <- P+SH
+          } else {
+            limit.high.TRT <- P-SH
+            limit.low.TRT <- P+SL
+          }
+          
+          outr <- c(lower.limit.TRT=unname(limit.low.TRT), 
+                    higher.limit.TRT=unname(limit.high.TRT), 
+                    TRT=unname(limit.high.TRT-limit.low.TRT), 
+                    PT=unname(P))
+        } else {
+          # Modèle TSD II ou FMF
+          P <- xpar["P_low"]
+          SL <- xpar["SL_low"]
+          SH <- xpar["SH_low"]
+          if ((is.na(SL)) | (is.na(SH))) {
+            SL <- xpar["S_low"]
+            SH <- xpar["S_low"]
+          }
+          
+          l <- xpar["l"]
+          TransitionS <- xpar["TransitionS_low"]
+          if (is.na(TransitionS)) TransitionS <- 100
+          if (is.na(l)) l <- 0.05
+          
+          if (SL > 0) {
+            limit.low.TRT <- P-SL
+            limit.high.TRT <- P+SH
+          } else {
+            limit.high.TRT <- P-SH
+            limit.low.TRT <- P+SL
+          }
+          
+          P <- xpar["P_high"]
+          SL <- xpar["SL_high"]
+          SH <- xpar["SH_high"]
+          if ((is.na(SL)) | (is.na(SH))) {
+            SL <- xpar["S_high"]
+            SH <- xpar["S_high"]
+          }
+          
+          TransitionS <- xpar["TransitionS_high"]
+          if (is.na(TransitionS)) TransitionS <- 100
+          
+          
+          if (SL > 0) {
+            limit.low.TRT <- P-SL
+            limit.high.TRT <- P+SH
+          } else {
+            limit.high.TRT <- P-SH
+            limit.low.TRT <- P+SL
+          }
+          
+          outr <- c(lower.limit.TRT_low=unname(min(c(limit.low.TRT_low, limit.high.TRT_low))), 
+                    higher.limit.TRT_low=unname(max(c(limit.low.TRT_low, limit.high.TRT_low))), 
+                    TRT_low=unname(abs(limit.high.TRT_low-limit.low.TRT_low)), 
+                    PT_low=unname(xpar["P_low"]), 
+                    lower.limit.TRT_high=unname(min(c(limit.low.TRT_high, limit.high.TRT_high))), 
+                    higher.limit.TRT_high=unname(max(c(limit.low.TRT_high, limit.high.TRT_high))), 
+                    TRT_high=unname(abs(limit.high.TRT_high-limit.low.TRT_high)), 
+                    PT_high=unname(xpar["P_high"]))
+        }
+      }
+      
+      if (equation=="stairs") {
+        limit.low.TRT <- xpar["TRTL"]
+        limit.high.TRT <- xpar["TRTH"]
+        
+        outr <- c(lower.limit.TRT=unname(limit.low.TRT), 
+                  higher.limit.TRT=unname(limit.high.TRT), 
+                  TRT=unname(limit.high.TRT-limit.low.TRT))
+      }
+      
       if (equation=="logit") {
         if (!is.na(xpar["P"])) {
           P <- xpar["P"]
-          S <- xpar["S"]
           
+          S <- xpar["S"]
+
           if (S > 0) {
             limit.low.TRT <- P-(log((1-l)/l)/(4*S))
             limit.high.TRT <- P-(log(l/(1-l))/(4*S))
@@ -691,7 +808,7 @@ P_TRT <- function(x=NULL, resultmcmc=NULL, fixed.parameters=NULL,
           # Modèle TSD II ou FMF
           P <- xpar["P_low"]
           S <- xpar["S_low"]
-          
+ 
           if (S > 0) {
             limit.low.TRT <- P-(log((1-l)/l)/(4*S))
             limit.high.TRT <- P-(log(l/(1-l))/(4*S))
@@ -702,7 +819,6 @@ P_TRT <- function(x=NULL, resultmcmc=NULL, fixed.parameters=NULL,
           
           P <- xpar["P_high"]
           S <- xpar["S_high"]
-          
           
           if (S > 0) {
             limit.low.TRT <- P-(log((1-l)/l)/(4*S))

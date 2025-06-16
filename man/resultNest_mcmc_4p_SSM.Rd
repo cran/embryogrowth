@@ -46,8 +46,13 @@ as.parameters(resultNest_mcmc_4p_SSM)
 layout(mat=matrix(1:4, nrow = 2))
 plot(resultNest_mcmc_4p_SSM, parameters = "all", scale.prior = TRUE, las = 1)
 layout(mat=1)
-plotR(resultNest_4p_SSM, resultmcmc=resultNest_mcmc_4p_SSM, ylim=c(0,4), 
-         main="Schoolfield, Sharpe & Magnuson 4-parameters", show.density=TRUE)
+plotR(resultNest_4p_SSM, resultmcmc=resultNest_mcmc_4p_SSM, ylim=c(0,8), 
+      curve = "MCMC quantiles", show.hist = TRUE, atH = c(0, 0.1, 0.2), ylimH = c(0, 1),
+         main="Schoolfield, Sharpe & Magnuson 4-parameters", show.density=FALSE)
+plot(resultNest_4p_SSM, resultmcmc=resultNest_mcmc_4p_SSM, series=1, GTRN.CI = "MCMC", 
+     replicate.CI=1000, 
+     embryo.stages="Caretta caretta.SCL", show.stages=TRUE, show.TSP=FALSE, 
+     show.third = FALSE, xlim=c(0, 70), las=1, ylimT = c(20, 35), ylab="SCL in mm")
 }
 }
 \references{

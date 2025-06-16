@@ -50,118 +50,91 @@
 
 tsd_MHmcmc_p<-function(result=stop("An output from tsd() must be provided"), 
                        default="dnorm"                                     , 
-                       accept=FALSE                                        ) {
-  
-  default <- tolower(default)
-  
-  default <- match.arg(default, 
-                       choices = c("dnorm", "dunif"), 
-                       several.ok = FALSE)
-  
+                       accept=TRUE                                        ) {
   # d'abord je sors les paramtres  utiliser
   par <- result$par
   
-  if (default == "dnorm") {
-    
-    # "P"
-    # C'est seulement vrai en temperatures
-    if (result$type == "temperature") {
-      P <- list("dnorm", par["P"], 2, 2, 25, 35, ifelse(is.na(par["P"]), 29.5, par["P"]))
-    } else {
-      P <- list("dnorm", par["P"], 10, 5, 40, 100, ifelse(is.na(par["P"]), 55, par["P"]))
-    }
-    S <- list("dnorm", par["S"], 1, 0.5, -2, 2, ifelse(is.na(par["S"]), 0.01, par["S"]))
-    K <- list("dnorm", par["K"], 3, 0.5, -20, 20, ifelse(is.na(par["K"]), 0, par["K"]))
-    K1 <- list("dnorm", par["K1"], 20, 0.5, min(-100, par["K1"]-100), max(100, par["K1"]+100), ifelse(is.na(par["K1"]), 1, par["K1"]))
-    K2 <- list("dnorm", par["K2"], 20, 0.5, min(-100, par["K2"]-100), max(100, par["K2"]+100), ifelse(is.na(par["K2"]), 1, par["K2"]))
-    if (result$type == "temperature") {
-      P_low <- list("dnorm", par["P_low"], 2, 2, 25, 35, ifelse(is.na(par["P_low"]), 29.5, par["P_low"]))
-    } else {
-      P_low <- list("dnorm", par["P_low"], 10, 5, 40, 100, ifelse(is.na(par["P_low"]), 55, par["P_low"]))
-    }
-    S_low <- list("dnorm", par["S_low"], 1, 0.5, -2, 2, ifelse(is.na(par["S_low"]), 0.01, par["S_low"]))
-    K1_low <- list("dnorm", par["K1_low"], 20, 0.5, min(-100, par["K1_low"]-100), max(100, par["K1_low"]+100), ifelse(is.na(par["K1_low"]), 1, par["K1_low"]))
-    K2_low <- list("dnorm", par["K2_low"], 20, 0.5, min(-100, par["K2_low"]-100), max(100, par["K2_low"]+100), ifelse(is.na(par["K2_low"]), 1, par["K2_low"]))
-    if (result$type == "temperature") {
-      P_high <- list("dnorm", par["P_high"], 2, 2, 25, 35, ifelse(is.na(par["P_high"]), 29.5, par["P_high"]))
-    } else {
-      P_high <- list("dnorm", par["P_high"], 10, 5, 40, 100, ifelse(is.na(par["P_high"]), 55, par["P_high"]))
-    }
-    S_high <- list("dnorm", par["S_high"], 1, 0.5, -2, 2, ifelse(is.na(par["S_high"]), 0.01, par["S_high"]))
-    K1_high <- list("dnorm", par["K1_high"], 20, 0.5, min(-100, par["K1_high"]-100), max(100, par["K1_high"]+100), ifelse(is.na(par["K1_high"]), 1, par["K1_high"]))
-    K2_high <- list("dnorm", par["K2_high"], 20, 0.5, min(-100, par["K2_high"]-100), max(100, par["K2_high"]+100), ifelse(is.na(par["K2_high"]), 1, par["K2_high"]))
-    
-    SL <- list("dnorm", par["SL"], 1, 0.2, min(-5, par["SL"] - 5), max(5, par["SL"] + 5), ifelse(is.na(par["SL"]), -1, par["SL"]))
-    SH <- list("dnorm", par["SH"], 1, 0.2, min(-5, par["SH"] - 5), max(5, par["SH"] + 5), ifelse(is.na(par["SH"]), -1, par["SH"]))
-    TransitionS <- list("dnorm", par["TransitionS"], 0, 0.4, -5, 5, ifelse(is.na(par["TransitionS"]), 0, par["TransitionS"]))
-    
-    SL_low <- list("dnorm", par["SL_low"], 1, 0.2, min(-5, par["SL_low"] - 5), max(5, par["SL_low"] + 5), ifelse(is.na(par["SL_low"]), -1, par["SL_low"]))
-    SH_low <- list("dnorm", par["SH_low"], 1, 0.2, min(-5, par["SH_low"] - 5), max(5, par["SH_low"] + 5), ifelse(is.na(par["SH_low"]), -1, par["SH_low"]))
-    TransitionS_low <- list("dnorm", par["TransitionS_low"], 0, 0.4, -5, 5, ifelse(is.na(par["TransitionS_low"]), 0, par["TransitionS_low"]))
-    SL_high <- list("dnorm", par["SL_high"], 1, 0.2, min(-5, par["SL_high"] - 5), max(5, par["SL_high"] + 5), ifelse(is.na(par["SL_high"]), -1, par["SL_high"]))
-    SH_high <- list("dnorm", par["SH_high"], 1, 0.2, min(-5, par["SH_high"] - 5), max(5, par["SH_high"] + 5), ifelse(is.na(par["SH_high"]), -1, par["SH_high"]))
-    TransitionS_high <- list("dnorm", par["TransitionS_high"], 0, 0.4, -5, 5, ifelse(is.na(par["TransitionS_high"]), 0, par["TransitionS_high"]))
-  } else {
-    if (result$type == "temperature") {
-      P <- list("dunif", 25, 35, 2, 25, 35, ifelse(is.na(par["P"]), 29.5, par["P"]))
-    } else {
-      P <- list("dunif", 40, 100, 2, 40, 100, ifelse(is.na(par["P"]), 55, par["P"]))
-    }
-    S <- list("dunif", -2, 2, 0.2, -2, 2, ifelse(is.na(par["S"]), 0.01, par["S"]))
-    K <- list("dunif", -20, 20, 0.2, -20, 20, ifelse(is.na(par["K"]), 0, par["K"]))
-    K1 <- list("dunif", min(-100, par["K1"]-100), max(100, par["K1"]+100), 0.2, min(-100, par["K1"]-100), max(100, par["K1"]+100), ifelse(is.na(par["K1"]), 1, par["K1"]))
-    K2 <- list("dunif", min(-100, par["K2"]-100), max(100, par["K2"]+100), 0.2, min(-100, par["K2"]-100), max(100, par["K2"]+100), ifelse(is.na(par["K2"]), 1, par["K2"]))
-    if (result$type == "temperature") {
-      P_low <- list("dunif", 25, 35, 2, 25, 35, ifelse(is.na(par["P_low"]), 29.5, par["P_low"]))
-    } else {
-      P_low <- list("dunif", 40, 100, 2, 40, 100, ifelse(is.na(par["P_low"]), 55, par["P_low"]))
-    }
-    S_low <- list("dunif", -2, 2, 0.2, -2, 2, ifelse(is.na(par["S_low"]), 0.01, par["S_low"]))
-    K1_low <- list("dunif", min(-100, par["K1_low"]-100), max(100, par["K1_low"]+100), 0.2, min(-100, par["K1_low"]-100), max(100, par["K1_low"]+100), ifelse(is.na(par["K1_low"]), 1, par["K1_low"]))
-    K2_low <- list("dunif", min(-100, par["K2_low"]-100), max(100, par["K2_low"]+100), 0.2, min(-100, par["K2_low"]-100), max(100, par["K2_low"]+100), ifelse(is.na(par["K2_low"]), 1, par["K2_low"]))
-    if (result$type == "temperature") {
-      P_high <- list("dunif", 25, 35, 2, 25, 35, ifelse(is.na(par["P_high"]), 29.5, par["P_high"]))
-    } else {
-      P_high <- list("dunif", 40, 100, 2, 40, 100, ifelse(is.na(par["P_high"]), 55, par["P_high"]))
-    }
-    S_high <- list("dunif", -2, 2, 0.2, -2, 2, ifelse(is.na(par["S_high"]), 0.01, par["S_high"]))
-    K1_high <- list("dunif", min(-100, par["K1_high"]-100), max(100, par["K1_high"]+100), 0.2, min(-100, par["K1_high"]-100), max(100, par["K1_high"]+100), ifelse(is.na(par["K1_high"]), 1, par["K1_high"]))
-    K2_high <- list("dunif", min(-100, par["K2_high"]-100), max(100, par["K2_high"]+100), 0.2, min(-100, par["K2_high"]-100), max(100, par["K2_high"]+100), ifelse(is.na(par["K2_high"]), 1, par["K2_high"]))
-    
-    SL <- list("dunif", min(-5, par["SL"] - 5), max(5, par["SL"] + 5), 0.2, min(-5, par["SL"] - 5), max(5, par["SL"] + 5), ifelse(is.na(par["SL"]), -1, par["SL"]))
-    SH <- list("dunif", min(-5, par["SH"] - 5), max(5, par["SH"] + 5), 0.2, min(-5, par["SH"] - 5), max(5, par["SH"] + 5), ifelse(is.na(par["SH"]), -1, par["SH"]))
-    TransitionS <- list("dunif", -5, 5, 0.2, -5, 5, ifelse(is.na(par["TransitionS"]), 0, par["TransitionS"]))
-    
-    SL_low <- list("dunif", min(-5, par["SL_low"] - 5), max(5, par["SL_low"] + 5), 0.2, min(-5, par["SL_low"] - 5), max(5, par["SL_low"] + 5), ifelse(is.na(par["SL_low"]), -1, par["SL_low"]))
-    SH_low <- list("dunif", min(-5, par["SH_low"] - 5), max(5, par["SH_low"] + 5), 0.2, min(-5, par["SH_low"] - 5), max(5, par["SH_low"] + 5), ifelse(is.na(par["SH_low"]), -1, par["SH_low"]))
-    TransitionS_low <- list("dunif", -5, 5, 0.2, -5, 5, ifelse(is.na(par["TransitionS_low"]), 0, par["TransitionS_low"]))
-    SL_high <- list("dunif", min(-5, par["SL_high"] - 5), max(5, par["SL_high"] + 5), 0.2, min(-5, par["SL_high"] - 5), max(5, par["SL_high"] + 5), ifelse(is.na(par["SL_high"]), -1, par["SL_high"]))
-    SH_high <- list("dunif", min(-5, par["SH_high"] - 5), max(5, par["SH_high"] + 5), 0.2, min(-5, par["SH_high"] - 5), max(5, par["SH_high"] + 5), ifelse(is.na(par["SH_high"]), -1, par["SH_high"]))
-    TransitionS_high <- list("dunif", -5, 5, -0.2, 5, 5, ifelse(is.na(par["TransitionS_high"]), 0, par["TransitionS_high"]))
+  default <- tolower(default)
+  
+  if (length(par) != length(default)) {
+    default <- rep(default, length(par))[seq_along(par)]
   }
-  parameters <- rbind(P=P, S=S, K=K, K1=K1, K2=K2, 
-                 SL=SL, SH=SH, TransitionS=TransitionS, 
-                 SL_low=SL_low, SH_low=SH_low, TransitionS_low=TransitionS_low, 
-                 SL_high= SL_high, SH_high= SH_high, TransitionS_high=TransitionS_high, 
-                 P_low=P_low, S_low=S_low, K1_low=K1_low, K2_low=K2_low, 
-                 P_high=P_high, S_high=S_high, K1_high=K1_high, K2_high=K2_high)
   
-  # prencours <- NULL
-  # 
-  # for (i in 1:length(par)) {
-  #   prencours <- c(prencours, priors[[names(par)[i]]])
-  # }
-  # 
-  # parametersMCMC <- matrix(prencours, ncol=7, byrow=T)
-  colnames(parameters) <- c("Density", "Prior1", "Prior2", "SDProp", "Min", "Max", "Init")
-  # rownames(parametersMCMC)<-names(par)
+  default <- match.arg(default, 
+                       choices = c("dnorm", "dunif"), 
+                       several.ok = TRUE)
   
-  # parametersMCMC <- as.data.frame(parametersMCMC, stringsAsFactors = FALSE)
-  # 
-  # for (i in c("Prior1", "Prior2", "SDProp", "Min", "Max", "Init"))
-  #   parametersMCMC[,i] <- as.numeric(parametersMCMC[,i])
-  # 
-  # parameters <- parametersMCMC
+  minx <- ifelse(result$type == "temperature", 25, 30)
+  maxx <- ifelse(result$type == "temperature", 35, 80)
+  sdpx <- ifelse(result$type == "temperature", 2, 10)
+  
+  equation <- result$equation
+  
+  dpriors_norm <- NULL
+  dpriors_norm <- rbind(dpriors_norm, 
+                        data.frame(Density="dnorm", Prior1=par["P"], Prior2=sdpx, SDProp=sdpx, Min=min(c(minx, par["P"]-5)), Max=max(c(maxx, par["P"]+5)), Init=par["P"], row.names ="P"))
+  dpriors_norm <- rbind(dpriors_norm, 
+                        data.frame(Density="dnorm", Prior1=unname(ifelse(is.na(par["S"]), 0, par["S"])), Prior2=0.5, SDProp=0.5, Min=min(c(-2, ifelse(is.na(par["S"]), 0,par["S"])-2)), Max=max(c(2, ifelse(is.na(par["S"]), 0,par["S"])+2)), Init=unname(ifelse(is.na(par["S"]), 0,par["S"])), row.names = "S"))
+  dpriors_norm <- rbind(dpriors_norm, 
+                        data.frame(Density="dnorm", Prior1=unname(ifelse(is.na(par["K"]), 0, par["K"])), Prior2=3, SDProp=0.5, Min=min(c(-20, ifelse(is.na(par["K"]), 0, par["K"])-20)), Max=max(c(20, ifelse(is.na(par["K"]), 0, par["K"])+20)), Init=unname(ifelse(is.na(par["K"]), 0, par["K"])), row.names = "K"))
+  dpriors_norm <- rbind(dpriors_norm, 
+                        data.frame(Density="dnorm", Prior1=unname(ifelse(is.na(par["K1"]), 0, par["K1"])), Prior2=3, SDProp=0.5, Min=min(c(-20, ifelse(is.na(par["K1"]), 0, par["K1"])-20)), Max=max(c(20, ifelse(is.na(par["K1"]), 0, par["K1"])+20)), Init=unname(ifelse(is.na(par["K1"]), 0, par["K1"])), row.names = "K1"))
+  dpriors_norm <- rbind(dpriors_norm, 
+                        data.frame(Density="dnorm", Prior1=unname(ifelse(is.na(par["K2"]), 0, par["K2"])), Prior2=3, SDProp=0.5, Min=min(c(-20, ifelse(is.na(par["K2"]), 0, par["K2"])-20)), Max=max(c(20, ifelse(is.na(par["K2"]), 0, par["K2"])+20)), Init=unname(ifelse(is.na(par["K2"]), 0, par["K2"])), row.names = "K2"))
+  dpriors_norm <- rbind(dpriors_norm, 
+                        data.frame(Density="dnorm", Prior1=par["P_low"], Prior2=sdpx, SDProp=sdpx, Min=min(c(minx, par["P_low"]-5)), Max=max(c(maxx, par["P_low"]+5)), Init=par["P_low"], row.names ="P_low"))
+  dpriors_norm <- rbind(dpriors_norm, 
+                        data.frame(Density="dnorm", Prior1=par["P_high"], Prior2=sdpx, SDProp=sdpx, Min=min(c(minx, par["P_high"]-5)), Max=max(c(maxx, par["P_high"]+5)), Init=par["P_high"], row.names ="P_high"))
+  dpriors_norm <- rbind(dpriors_norm, 
+                        data.frame(Density="dnorm", Prior1=unname(ifelse(is.na(par["S_low"]), 0, par["S_low"])), Prior2=0.5, SDProp=0.5, Min=min(c(-2, ifelse(is.na(par["S_low"]), 0,par["S_low"])-2)), Max=max(c(2, ifelse(is.na(par["S_low"]), 0, par["S_low"])+2)), Init=unname(ifelse(is.na(par["S_low"]), 0, par["S_low"])), row.names = "S_low"))
+  dpriors_norm <- rbind(dpriors_norm, 
+                        data.frame(Density="dnorm", Prior1=unname(ifelse(is.na(par["S_high"]), 0, par["S_high"])), Prior2=0.5, SDProp=0.5, Min=min(c(-2, ifelse(is.na(par["S_high"]), 0,par["S_high"])-2)), Max=max(c(2, ifelse(is.na(par["S_high"]), 0, par["S_high"])+2)), Init=unname(ifelse(is.na(par["S_high"]), 0, par["S_high"])), row.names = "S_high"))
+  dpriors_norm <- rbind(dpriors_norm, 
+                        data.frame(Density="dnorm", Prior1=unname(ifelse(is.na(par["K1_low"]), 0, par["K1_low"])), Prior2=3, SDProp=0.5, Min=min(c(-20, ifelse(is.na(par["K1_low"]), 0, par["K1_low"])-20)), Max=max(c(20, ifelse(is.na(par["K1_low"]), 0, par["K1_low"])+20)), Init=unname(ifelse(is.na(par["K1_low"]), 0, par["K1_low"])), row.names = "K1_low"))
+  dpriors_norm <- rbind(dpriors_norm, 
+                        data.frame(Density="dnorm", Prior1=unname(ifelse(is.na(par["K2_low"]), 0, par["K2_low"])), Prior2=3, SDProp=0.5, Min=min(c(-20, ifelse(is.na(par["K2_low"]), 0, par["K2_low"])-20)), Max=max(c(20, ifelse(is.na(par["K2_low"]), 0, par["K2_low"])+20)), Init=unname(ifelse(is.na(par["K2_low"]), 0, par["K2_low"])), row.names = "K2_low"))
+  dpriors_norm <- rbind(dpriors_norm, 
+                        data.frame(Density="dnorm", Prior1=unname(ifelse(is.na(par["K1_high"]), 0, par["K1_high"])), Prior2=3, SDProp=0.5, Min=min(c(-20, ifelse(is.na(par["K1_high"]), 0, par["K1_high"])-20)), Max=max(c(20, ifelse(is.na(par["K1_high"]), 0, par["K1_high"])+20)), Init=unname(ifelse(is.na(par["K1_high"]), 0, par["K1_high"])), row.names = "K1_high"))
+  dpriors_norm <- rbind(dpriors_norm, 
+                        data.frame(Density="dnorm", Prior1=unname(ifelse(is.na(par["K2_high"]), 0, par["K2_high"])), Prior2=3, SDProp=0.5, Min=min(c(-20, ifelse(is.na(par["K2_high"]), 0, par["K2_high"])-20)), Max=max(c(20, ifelse(is.na(par["K2_high"]), 0, par["K2_high"])+20)), Init=unname(ifelse(is.na(par["K2_high"]), 0, par["K2_high"])), row.names = "K2_high"))
+  dpriors_norm <- rbind(dpriors_norm, 
+                        data.frame(Density="dnorm", Prior1=unname(ifelse(is.na(par["SL"]), 0, par["SL"])), Prior2=0.5, SDProp=0.5, Min=ifelse(equation == "flexit**", 0, min(c(-2, ifelse(is.na(par["SH"]), 0, par["SH"])-2))), Max=max(c(ifelse(equation == "flexit**", 10, 2), ifelse(is.na(par["SL"]), 0, par["SL"])+2)), Init=unname(ifelse(is.na(par["SL"]), 0, par["SL"])), row.names = "SL"))
+  dpriors_norm <- rbind(dpriors_norm, 
+                        data.frame(Density="dnorm", Prior1=unname(ifelse(is.na(par["SH"]), 0, par["SH"])), Prior2=0.5, SDProp=0.5, Min=ifelse(equation == "flexit**", 0, min(c(-2, ifelse(is.na(par["SH"]), 0, par["SH"])-2))), Max=max(c(ifelse(equation == "flexit**", 10, 2), ifelse(is.na(par["SH"]), 0, par["SH"])+2)), Init=unname(ifelse(is.na(par["SH"]), 0, par["SH"])), row.names = "SH"))
+  dpriors_norm <- rbind(dpriors_norm, 
+                        data.frame(Density="dnorm", Prior1=unname(ifelse(is.na(par["TransitionS"]), 0, par["TransitionS"])), Prior2=0.5, SDProp=0.5, Min=min(c(-5, ifelse(is.na(par["TransitionS"]), 0, par["TransitionS"])-5)), Max=max(c(5, ifelse(is.na(par["SH"]), 0, par["SH"])+5)), Init=unname(ifelse(is.na(par["TransitionS"]), 0, par["TransitionS"])), row.names = "TransitionS"))
+  dpriors_norm <- rbind(dpriors_norm, 
+                        data.frame(Density="dnorm", Prior1=unname(ifelse(is.na(par["SL_low"]), 0, par["SL_low"])), Prior2=0.5, SDProp=0.5, Min=min(c(ifelse(equation == "flexit**", 0, -2), ifelse(is.na(par["SL_low"]), 0, par["SL_low"])-2)), Max=max(c(ifelse(equation == "flexit**", 10, 2), ifelse(is.na(par["SL_low"]), 0, par["SL_low"])+2)), Init=unname(ifelse(is.na(par["SL_low"]), 0, par["SL_low"])), row.names = "SL_low"))
+  dpriors_norm <- rbind(dpriors_norm, 
+                        data.frame(Density="dnorm", Prior1=unname(ifelse(is.na(par["SH_low"]), 0, par["SH_low"])), Prior2=0.5, SDProp=0.5, Min=min(c(ifelse(equation == "flexit**", 0, -2), ifelse(is.na(par["SH_low"]), 0, par["SH_low"])-2)), Max=max(c(ifelse(equation == "flexit**", 10, 2), ifelse(is.na(par["SH_low"]), 0, par["SH_low"])+2)), Init=unname(ifelse(is.na(par["SH_low"]), 0, par["SH_low"])), row.names = "SH_low"))
+  dpriors_norm <- rbind(dpriors_norm, 
+                        data.frame(Density="dnorm", Prior1=unname(ifelse(is.na(par["TransitionS_low"]), 0, par["TransitionS_low"])), Prior2=0.5, SDProp=0.5, Min=min(c(-5, ifelse(is.na(par["TransitionS_low"]), 0, par["TransitionS_low"])-5)), Max=max(c(5, ifelse(is.na(par["TransitionS_low"]), 0, par["TransitionS_low"])+5)), Init=unname(ifelse(is.na(par["TransitionS_low"]), 0, par["TransitionS_low"])), row.names = "TransitionS_low"))
+  dpriors_norm <- rbind(dpriors_norm, 
+                        data.frame(Density="dnorm", Prior1=unname(ifelse(is.na(par["SL_high"]), 0, par["SL_high"])), Prior2=0.5, SDProp=0.5, Min=min(c(ifelse(equation == "flexit**", 0, -2), ifelse(is.na(par["SL_high"]), 0, par["SL_high"])-2)), Max=max(c(ifelse(equation == "flexit**", 10, 2), ifelse(is.na(par["SL_high"]), 0, par["SL_high"])+2)), Init=unname(ifelse(is.na(par["SL_high"]), 0, par["SL_high"])), row.names = "SL_high"))
+  dpriors_norm <- rbind(dpriors_norm, 
+                        data.frame(Density="dnorm", Prior1=unname(ifelse(is.na(par["SH_high"]), 0, par["SH_high"])), Prior2=0.5, SDProp=0.5, Min=min(c(ifelse(equation == "flexit**", 0, -2), ifelse(is.na(par["SH_high"]), 0, par["SH_high"])-2)), Max=max(c(ifelse(equation == "flexit**", 10, 2), ifelse(is.na(par["SH_high"]), 0, par["SH_high"])+2)), Init=unname(ifelse(is.na(par["SH_high"]), 0, par["SH_high"])), row.names = "SH_high"))
+  dpriors_norm <- rbind(dpriors_norm, 
+                        data.frame(Density="dnorm", Prior1=unname(ifelse(is.na(par["TransitionS_high"]), 0, par["TransitionS_high"])), Prior2=0.5, SDProp=0.5, Min=min(c(-5, ifelse(is.na(par["TransitionS_high"]), 0, par["TransitionS_high"])-5)), Max=max(c(5, ifelse(is.na(par["TransitionS_high"]), 0, par["TransitionS_high"])+5)), Init=unname(ifelse(is.na(par["TransitionS_high"]), 0, par["TransitionS_high"])), row.names = "TransitionS_high"))
+  dpriors_norm <- rbind(dpriors_norm, 
+                        data.frame(Density="dnorm", Prior1=ifelse(is.na(par["TRTL"]), 1, par["TRTL"]), Prior2=sdpx, SDProp=sdpx, Min=min(c(minx-10, par["TRTL"]-5)), Max=max(c(maxx+10, par["TRTL"]+5)), Init=par["TRTL"], row.names ="TRTL"))
+  dpriors_norm <- rbind(dpriors_norm, 
+                        data.frame(Density="dnorm", Prior1=ifelse(is.na(par["TRTH"]), 1, par["TRTH"]), Prior2=sdpx, SDProp=sdpx, Min=min(c(minx-10, par["TRTH"]-5)), Max=max(c(maxx+10, par["TRTH"]+5)), Init=par["TRTH"], row.names ="TRTH"))
+  dpriors_norm <- rbind(dpriors_norm, 
+                        data.frame(Density="dnorm", Prior1=ifelse(is.na(par["SRTRT"]), 0, par["SRTRT"]), Prior2=2, SDProp=1, Min=min(c(-10, par["SRTRT"]-5)), Max=max(c(10, par["SRTRT"]+5)), Init=par["SRTRT"], row.names ="SRTRT"))
+  
+  dpriors_unif <- dpriors_norm
+  dpriors_unif[, "Density"] <- "dunif"
+  dpriors_unif[, "Prior1"] <- dpriors_norm[, "Min"]
+  dpriors_unif[, "Prior2"] <- dpriors_norm[, "Max"]
+  
+  parameters <- NULL
+  for (np in seq_along(par)) {
+    if (default[np] == "dnorm") {
+      parameters <- rbind(parameters, dpriors_norm[names(par[np]), ])
+    } else {
+      parameters <- rbind(parameters, dpriors_unif[names(par[np]), ])
+    }
+  }
   
   if (accept) {
     

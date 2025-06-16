@@ -33,6 +33,7 @@
 #' @param xlim Range of values for x-axis
 #' @param xlimR description to show the curve
 #' @param yaxt The yaxt parameter of y-axis
+#' @param xaxt The xaxt parameter of x-axis
 #' @param by.temperature Step to built the temperatures
 #' @param scaleY Scaling factor for y axis or "auto"
 #' @param show.density TRUE or FALSE for use with Hessian or MCMC
@@ -134,6 +135,7 @@ plotR <-
            yaxt = "s"                                                                       ,
            bty = "n"                                                                       , 
            las = 1                                                                         , 
+           xaxt ="s"                                                                       ,
            by.temperature=0.1                                                              , 
            show.density=FALSE                                                              , 
            new=TRUE                                                                        , 
@@ -307,7 +309,8 @@ plotR <-
                       nbin = 128, postPlotHook=NULL, 
                       cex.axis=cex.axis, 
                       cex.lab=cex.lab, 
-                      yaxt=yaxt)
+                      yaxt=yaxt, 
+                      xaxt=xaxt)
       } else {
         par(new=TRUE)
         smoothScatter(x=MatrixRforSmooth[, 1], 
@@ -324,7 +327,8 @@ plotR <-
                       nbin = 128, postPlotHook=NULL, 
                       axes=FALSE,
                       new=FALSE, 
-                      yaxt=yaxt)
+                      yaxt=yaxt, 
+                      xaxt=xaxt)
       }
     } else {
       if (new) {
@@ -339,7 +343,8 @@ plotR <-
              xlim = xlim, 
              cex.axis=cex.axis, 
              cex.lab=cex.lab, 
-             yaxt=yaxt)
+             yaxt=yaxt, 
+             xaxt=xaxt)
       }
     }
     
@@ -478,7 +483,7 @@ plotR <-
       
       par(new=TRUE)
       # je retablis l'echelle des y et celle de R
-      plot(x = 1, y=1, ylim=ylim, xlim=xlim, xlab="", ylab="", axes=FALSE, bty="n", type="n", yaxt=yaxt)
+      plot(x = 1, y=1, ylim=ylim, xlim=xlim, xlab="", ylab="", axes=FALSE, bty="n", type="n", yaxt=yaxt, xaxt=xaxt)
 
     }
     

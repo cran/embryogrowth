@@ -8,12 +8,13 @@
   x,
   ...,
   show.observations = TRUE,
+  show.observations.sd = TRUE,
   show.model = TRUE,
   males.freq = TRUE,
   show.PTRT = TRUE,
   las.x = 1,
   las.y = 1,
-  lab.PT = paste("Pivotal ", x$type),
+  lab.PT = paste0("Pivotal ", x$type),
   resultmcmc = NULL,
   chain = 1,
   l = 0.05,
@@ -37,6 +38,8 @@
 \item{...}{Parameters for plot()}
 
 \item{show.observations}{Should the observations be shown}
+
+\item{show.observations.sd}{Should the observations SD be shown}
 
 \item{show.model}{Should the model be shown}
 

@@ -10,7 +10,8 @@ movement(
   col.x = "x",
   col.y = "y",
   col.z = "z",
-  NumberRecordBeforeEmergence = 1900,
+  DaysQuiet = 40,
+  SkipDays = 1,
   k = 4,
   Windowsize = 15
 )
@@ -26,17 +27,26 @@ movement(
 
 \item{col.z}{Name of the column with z positions}
 
-\item{NumberRecordBeforeEmergence}{Number of records in quiet period}
+\item{DaysQuiet}{Number of days in quiet period}
+
+\item{SkipDays}{Number of days to skip before being in quiet mode}
 
 \item{k}{Factor to multiply SD to prevent false positive detection}
 
 \item{Windowsize}{Number of records used for moving average}
 }
 \value{
-The function will return a list
+The function will return a data.frame
 }
 \description{
-This function is used to evaluate significant movement within a nest.
+This function is used to evaluate significant movement within a nest.\cr
+The "quiet" period is the period without any expected move. It is used as a reference
+to detect the period with significant movements.\cr
+It returns a data.frame with the columns:\cr
+"Time", "x", "y", "z", \cr
+"mvt", "mvt_standardized", "peakmvt", "running", "mvt_MA_standardized", \cr
+"mvt_2", "mvt_2_standardized", "peakmvt_2", "running_2", "mvt_2_MA_standardized".\cr
+mvt and mvt_2 are two different methods. Often mvt_2 is better to descrobe movments.\cr
 }
 \details{
 movement is a function that permits to analyze movement datalogger

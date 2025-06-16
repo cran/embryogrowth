@@ -22,7 +22,9 @@
     }
     #      print(pr)
     #      print(-sum(pr))
-    return(-sum(pr))
+    L <- -sum(pr)
+    attributes(L) <- list(WAIC=pr)
+    return(L)
   }
   
 }

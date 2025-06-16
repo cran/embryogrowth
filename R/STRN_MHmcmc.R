@@ -19,6 +19,7 @@
 #' @param parallel Should parallel computing for info.nests() be used
 #' @param previous Previous result to be continued. Can be the filename in which intermediate results are saved.
 #' @param fill Parameters to be sent to STRN().
+#' @param WAIC Prepare the output for loo() and waic().
 #' @description Run the Metropolis-Hastings algorithm for Sexualisation Thermal Reaction Norm.\cr
 #' The number of iterations is n.iter+n.adapt+1 because the initial likelihood is also displayed.\cr
 #' I recommend that thin=1 because the method to estimate SE uses resampling.\cr
@@ -76,9 +77,11 @@
 STRN_MHmcmc <- function(result=NULL, n.iter=10000, 
                         parametersMCMC=NULL, n.chains = 1, n.adapt = 0, 
                         thin=1, trace=NULL, traceML=FALSE, batchSize=sqrt(n.iter), 
-                        adaptive=FALSE, adaptive.lag=500, adaptive.fun=function(x) {ifelse(x>0.234, 1.3, 0.7)},
-                        parallel=TRUE, 
-                        intermediate=NULL, filename="intermediate.Rdata", previous=NULL, fill = NA) {
+                        adaptive=FALSE, adaptive.lag=500, 
+                        adaptive.fun=function(x) {ifelse(x>0.234, 1.3, 0.7)},
+                        parallel=TRUE, WAIC=TRUE, 
+                        intermediate=NULL, filename="intermediate.Rdata", 
+                        previous=NULL, fill = NA) {
   
   # result=NULL; n.iter=10000; parametersMCMC=NULL; n.chains = 1; n.adapt = 0; thin=1; trace=NULL; batchSize=sqrt(n.iter); adaptive=FALSE; adaptive.lag=500; adaptive.fun=function(x) {ifelse(x>0.234, 1.3, 0.7)}; intermediate=NULL; filename="intermediate.Rdata"; previous=NULL
   
@@ -120,10 +123,16 @@ STRN_MHmcmc <- function(result=NULL, n.iter=10000,
                    TSP.begin = result$TSP.begin                              ,
                    TSP.end = result$TSP.end                                  ,
                    fill = fill                                               , 
-                   
+                   WAIC = WAIC                                               ,
+                   WAIC.out = WAIC                                           ,
+                   n.datapoints = length(result$Sexed)                       ,
                    parallel=parallel,
-                   adaptive=adaptive, adaptive.lag=adaptive.lag, adaptive.fun=adaptive.fun,
-                   intermediate=intermediate, filename=filename, previous=previous)
+                   adaptive=adaptive, 
+                   adaptive.lag=adaptive.lag, 
+                   adaptive.fun=adaptive.fun,
+                   intermediate=intermediate, 
+                   filename=filename, 
+                   previous=previous)
   
   fin <- try(summary(out), silent=TRUE)
   
